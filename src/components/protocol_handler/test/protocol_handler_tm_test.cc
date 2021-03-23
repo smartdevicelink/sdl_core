@@ -321,11 +321,15 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         // Return sessions start success
         WillOnce(DoAll(
             NotifyTestAsyncWaiter(waiter),
-            InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                     &ProtocolHandler::NotifySessionStarted,
-                                     ByRef(context),
-                                     ByRef(empty_rejected_param_),
-                                     std::string())));
+            InvokeMemberFuncWithArg3(
+                protocol_handler_impl.get(),
+                static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                      std::vector<std::string>&,
+                                                      const std::string)>(
+                    &ProtocolHandler::NotifySessionStarted),
+                ByRef(context),
+                ByRef(empty_rejected_param_),
+                std::string())));
     times++;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -589,14 +593,18 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times += call_times;
 
   // Expect send NAck
@@ -684,14 +692,18 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times += call_times;
 
   // Expect send NAck with encryption OFF
@@ -763,13 +775,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -946,18 +962,26 @@ TEST_F(ProtocolHandlerImplTest,
                                        start_service,
                                        PROTECTION_OFF,
                                        An<const BsonObject*>()))
-      .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(rejected_context),
-                                         ByRef(rejected_param_list),
-                                         std::string()),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      .WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(rejected_context),
+              ByRef(rejected_param_list),
+              std::string()),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   BsonObject bson_ack_params;
@@ -1237,13 +1261,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1311,13 +1339,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1378,13 +1410,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1454,13 +1490,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1540,13 +1580,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   std::vector<int> services;
@@ -1644,13 +1688,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -1759,13 +1807,17 @@ TEST_F(
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -1872,13 +1924,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         ByRef(context),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -5312,15 +5368,19 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg3(
-                    protocol_handler_impl.get(),
-                    &protocol_handler::ProtocolHandler::NotifySessionStarted,
-                    ByRef(context),
-                    ByRef(empty_rejected_param_),
-                    err_reason)));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (protocol_handler::ProtocolHandler::*)(
+                  protocol_handler::SessionContext&,
+                  std::vector<std::string>&,
+                  const std::string)>(
+                  &protocol_handler::ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              err_reason)));
   times += call_times;
 
   // Expect send NAck
