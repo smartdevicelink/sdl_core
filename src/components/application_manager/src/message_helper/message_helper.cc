@@ -53,6 +53,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -418,6 +419,39 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
 
   return ui_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  namespace rc = rc_rpc_plugin;
+
+  smart_objects::SmartObjectSPtr rc_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.user_location) {
+    smart_objects::SmartObject user_location =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    user_location[rc::strings::kGrid] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& grid = user_location[rc::strings::kGrid];
+    grid[rc::strings::kRow] = 0;
+    grid[rc::strings::kCol] = 0;
+    grid[rc::strings::kLevel] = 0;
+    grid[rc::strings::kRowspan] = 1;
+    grid[rc::strings::kColspan] = 1;
+    grid[rc::strings::kLevelspan] = 1;
+
+    (*rc_reset_global_prop_request)[strings::user_location] = user_location;
+    application->set_user_location(user_location);
+  }
+
+  (*rc_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return rc_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr

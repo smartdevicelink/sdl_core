@@ -810,6 +810,21 @@ void ResumptionDataProcessorImpl::DeleteGlobalProperties(
     (*msg)[strings::msg_params] = *msg_params;
     ProcessMessageToHMI(msg, false);
   }
+
+  if (result.HasRCPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::RC_SetGlobalProperties)) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(result,
+                                                            application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::RC_SetGlobalProperties;
+
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessMessageToHMI(msg, false);
+  }
 }
 
 void ResumptionDataProcessorImpl::AddSubscriptions(
