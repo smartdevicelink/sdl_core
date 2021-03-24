@@ -481,18 +481,21 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   }
 }
 
-void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
-                                               uint8_t session_id,
-                                               uint8_t protocol_version,
-                                               uint8_t service_type,
-                                               const std::string& reason) {
+void ProtocolHandlerImpl::SendStartSessionNAck(
+    ConnectionID connection_id,
+    uint8_t session_id,
+    uint8_t protocol_version,
+    uint8_t service_type,
+    const std::string& reason,
+    utils::SemanticVersion& full_version) {
   std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
                        protocol_version,
                        service_type,
                        rejectedParams,
-                       reason);
+                       reason,
+                       full_version);
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
@@ -501,8 +504,17 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     uint8_t protocol_version,
     uint8_t service_type,
     std::vector<std::string>& rejectedParams,
-    const std::string& reason) {
+    const std::string& reason,
+    utils::SemanticVersion& full_version) {
   SDL_LOG_AUTO_TRACE();
+
+  if (!full_version.isValid()) {
+    if (!session_observer_.ProtocolVersionUsed(
+            connection_id, session_id, full_version)) {
+      SDL_LOG_WARN("Connection: " << connection_id << " and/or session: "
+                                  << session_id << "no longer exist(s).");
+    }
+  }
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
@@ -516,14 +528,6 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
                                            message_counters_[session_id]++));
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
-
-  utils::SemanticVersion full_version;
-  if (!session_observer_.ProtocolVersionUsed(
-          connection_id, session_id, full_version)) {
-    SDL_LOG_WARN("Connection: " << connection_id << " and/or session: "
-                                << session_id << "no longer exist(s).");
-    return;
-  }
 
   if (protocol_version >= PROTOCOL_VERSION_5 &&
       maxProtocolVersion >= PROTOCOL_VERSION_5) {
@@ -1778,8 +1782,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       reason += " Allowed only in unprotected mode";
     }
 
-    SendStartSessionNAck(
-        connection_id, session_id, protocol_version, service_type, reason);
+    utils::SemanticVersion version;
+    if (packet->service_type() == kRpc && packet->data() != NULL) {
+      ParseFullVersion(version, packet);
+    }
+
+    SendStartSessionNAck(connection_id,
+                         session_id,
+                         protocol_version,
+                         service_type,
+                         reason,
+                         version);
     return RESULT_OK;
   }
 
@@ -1855,8 +1868,34 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
   return RESULT_OK;
 }
 
+bool ProtocolHandlerImpl::ParseFullVersion(
+    utils::SemanticVersion& full_version,
+    const ProtocolFramePtr& packet) const {
+  SDL_LOG_AUTO_TRACE();
+
+  BsonObject request_params;
+  size_t request_params_size = bson_object_from_bytes_len(
+      &request_params, packet->data(), packet->total_data_bytes());
+  if (request_params_size > 0) {
+    char* version_param =
+        bson_object_get_string(&request_params, strings::protocol_version);
+    std::string version_string(version_param == NULL ? "" : version_param);
+    full_version = version_string;
+
+    // Constructed payloads added in Protocol v5
+    if (full_version.major_version_ < PROTOCOL_VERSION_5) {
+      return false;
+    }
+    bson_object_deinitialize(&request_params);
+  } else {
+    SDL_LOG_WARN("Failed to parse start service packet for version string");
+  }
+
+  return true;
+}
+
 void ProtocolHandlerImpl::NotifySessionStarted(
-    const SessionContext& context,
+    SessionContext& context,
     std::vector<std::string>& rejected_params,
     const std::string err_reason) {
   SDL_LOG_AUTO_TRACE();
@@ -1876,8 +1915,23 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
+  utils::SemanticVersion full_version;
 
-  if (0 == context.new_session_id_) {
+  // Can't check protocol_version because the first packet is v1, but there
+  // could still be a payload, in which case we can get the real protocol
+  // version
+  if (packet->service_type() == kRpc && packet->data() != NULL) {
+    if (ParseFullVersion(full_version, packet)) {
+      const auto connection_key = session_observer_.KeyFromPair(
+          packet->connection_id(), context.new_session_id_);
+      connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                         full_version);
+    } else {
+      rejected_params.push_back(std::string(strings::protocol_version));
+    }
+  }
+
+  if (context.is_start_session_failed_ || !context.new_session_id_) {
     SDL_LOG_WARN("Refused by session_observer to create service "
                  << static_cast<int32_t>(service_type) << " type.");
     const auto session_id = packet->session_id();
@@ -1892,7 +1946,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                          protocol_version,
                          packet->service_type(),
                          rejected_params,
-                         err_reason);
+                         err_reason,
+                         full_version);
     return;
   }
 
@@ -1942,38 +1997,6 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     }
   }
 
-  std::shared_ptr<utils::SemanticVersion> fullVersion;
-
-  // Can't check protocol_version because the first packet is v1, but there
-  // could still be a payload, in which case we can get the real protocol
-  // version
-  if (packet->service_type() == kRpc && packet->data() != NULL) {
-    BsonObject request_params;
-    size_t request_params_size = bson_object_from_bytes_len(
-        &request_params, packet->data(), packet->total_data_bytes());
-    if (request_params_size > 0) {
-      char* version_param =
-          bson_object_get_string(&request_params, strings::protocol_version);
-      std::string version_string(version_param == NULL ? "" : version_param);
-      fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
-
-      const auto connection_key = session_observer_.KeyFromPair(
-          packet->connection_id(), context.new_session_id_);
-      connection_handler_.BindProtocolVersionWithSession(connection_key,
-                                                         *fullVersion);
-      // Constructed payloads added in Protocol v5
-      if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
-        rejected_params.push_back(std::string(strings::protocol_version));
-      }
-      bson_object_deinitialize(&request_params);
-    } else {
-      SDL_LOG_WARN("Failed to parse start service packet for version string");
-      fullVersion = std::make_shared<utils::SemanticVersion>();
-    }
-  } else {
-    fullVersion = std::make_shared<utils::SemanticVersion>();
-  }
-
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
   if (context.is_protected_ && security_manager_) {
@@ -1984,7 +2007,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         std::make_shared<HandshakeHandler>(
             *this,
             session_observer_,
-            *fullVersion,
+            full_version,
             context,
             packet->protocol_version(),
             start_session_ack_params,
@@ -2010,12 +2033,20 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     }
 
     if (!rejected_params.empty()) {
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_START_FAILED);
       SendStartSessionNAck(context.connection_id_,
                            packet->session_id(),
                            protocol_version,
                            packet->service_type(),
                            rejected_params,
-                           "SSL Handshake failed due to rejected parameters");
+                           "SSL Handshake failed due to rejected parameters",
+                           full_version);
+      if (packet->service_type() != kRpc) {
+        context.is_start_session_failed_ = true;
+      }
     } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
@@ -2030,7 +2061,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                           context.hash_id_,
                           packet->service_type(),
                           PROTECTION_ON,
-                          *fullVersion,
+                          full_version,
                           *start_session_ack_params);
     } else {
       SDL_LOG_DEBUG("Adding Handshake handler to listeners: " << handler.get());
@@ -2044,12 +2075,20 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 
         if (!security_manager_->IsSystemTimeProviderReady()) {
           security_manager_->RemoveListener(listener);
+          service_status_update_handler_->OnServiceUpdate(
+              connection_key,
+              context.service_type_,
+              ServiceStatus::SERVICE_START_FAILED);
           SendStartSessionNAck(context.connection_id_,
                                packet->session_id(),
                                protocol_version,
                                packet->service_type(),
                                rejected_params,
-                               "System time provider is not ready");
+                               "System time provider is not ready",
+                               full_version);
+          if (packet->service_type() != kRpc) {
+            context.is_start_session_failed_ = true;
+          }
         }
       }
     }
@@ -2070,7 +2109,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         context.hash_id_,
                         packet->service_type(),
                         PROTECTION_OFF,
-                        *fullVersion,
+                        full_version,
                         *start_session_ack_params);
   } else {
     service_status_update_handler_->OnServiceUpdate(
@@ -2083,8 +2122,18 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         protocol_version,
         packet->service_type(),
         rejected_params,
-        "Certain parameters in the StartService request were rejected");
+        "Certain parameters in the StartService request were rejected",
+        full_version);
+    context.is_start_session_failed_ = true;
   }
+}
+
+void ProtocolHandlerImpl::NotifySessionStarted(
+    const SessionContext& context,
+    std::vector<std::string>& rejected_params,
+    const std::string err_reason) {
+  SessionContext context_copy = context;
+  NotifySessionStarted(context_copy, rejected_params, err_reason);
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
