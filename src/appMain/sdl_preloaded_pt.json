@@ -1661,6 +1661,7 @@
                 "rpcs": {
                     "CreateWindow": {
                         "hmi_levels": [
+                          "NONE",
                           "BACKGROUND",
                           "FULL",
                           "LIMITED"
@@ -1668,6 +1669,7 @@
                     },
                     "DeleteWindow": {
                         "hmi_levels": [
+                          "NONE",
                           "BACKGROUND",
                           "FULL",
                           "LIMITED"
