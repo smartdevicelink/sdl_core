@@ -89,6 +89,10 @@ void ResetGlobalPropertiesRequest::Run() {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   }
 
+  if (reset_global_props_result.HasRCPropertiesReset()) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_RC);
+  }
+
   app->set_reset_global_properties_active(true);
 
   if (reset_global_props_result.HasUIPropertiesReset()) {
@@ -109,6 +113,15 @@ void ResetGlobalPropertiesRequest::Run() {
 
     SendHMIRequest(
         hmi_apis::FunctionID::TTS_SetGlobalProperties, msg_params.get(), true);
+  }
+
+  if (reset_global_props_result.HasRCPropertiesReset()) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(
+            reset_global_props_result, app);
+
+    SendHMIRequest(
+        hmi_apis::FunctionID::RC_SetGlobalProperties, msg_params.get(), true);
   }
 }
 

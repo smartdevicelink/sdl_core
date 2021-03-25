@@ -182,6 +182,12 @@ class MockMessageHelper {
                smart_objects::SmartObjectSPtr(
                    const ResetGlobalPropertiesResult& reset_result,
                    ApplicationSharedPtr application));
+
+  MOCK_METHOD2(CreateRCResetGlobalPropertiesRequest,
+               smart_objects::SmartObjectSPtr(
+                   const ResetGlobalPropertiesResult& reset_result,
+                   ApplicationSharedPtr application));
+
   MOCK_METHOD2(CreateGlobalPropertiesRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));
