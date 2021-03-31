@@ -54,6 +54,10 @@
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
+// Can be configured to have stricter requirements for SSL connections depending
+// on your system's requirements
+#define SECURITY_LEVEL 1
+
 namespace security_manager {
 
 SDL_CREATE_LOG_VARIABLE("SecurityManager")
@@ -233,6 +237,7 @@ bool CryptoManagerImpl::Init() {
   // Disable SSL2 as deprecated
   // TLS 1.2 is the max supported TLS version for SDL
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+  SSL_CTX_set_security_level(context_, SECURITY_LEVEL);
 
   SaveCertificateData(get_settings().certificate_data());
 
