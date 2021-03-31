@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppInterfaceUnregisteredNotification::OnAppInterfaceUnregisteredNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,9 +57,17 @@ OnAppInterfaceUnregisteredNotification::
     ~OnAppInterfaceUnregisteredNotification() {}
 
 void OnAppInterfaceUnregisteredNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  SendNotification();
+  const bool final_message = IsFinalMessage();
+  SendNotification(final_message);
+}
+
+bool OnAppInterfaceUnregisteredNotification::IsFinalMessage() const {
+  using Reason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  const auto reason = static_cast<Reason>(
+      (*message_)[strings::msg_params][strings::reason].asInt());
+  return Reason::RESOURCE_CONSTRAINT == reason;
 }
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

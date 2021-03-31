@@ -314,6 +314,23 @@ const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `_internal_data`( "
     "   `db_version_hash` INTEGER "
     "  ); "
+    "CREATE TABLE IF NOT EXISTS `applicationUserLocation`( "
+    "  `idLocation` INTEGER PRIMARY KEY NOT NULL, "
+    "  `idApplication` INTEGER, "
+    "  `col` INTEGER, "
+    "  `colspan` INTEGER, "
+    "  `level` INTEGER, "
+    "  `levelspan` INTEGER, "
+    "  `row` INTEGER, "
+    "  `rowspan` INTEGER, "
+    "  CONSTRAINT `fk_Application` "
+    "    FOREIGN KEY(`idApplication`) "
+    "    REFERENCES `application`(`idApplication`) "
+    "  ); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`applicationUserLocation.fk_Application_idx` "
+    "  ON `applicationUserLocation`(`idApplication`); "
+
     "COMMIT;";
 
 const std::string kDropSchema =
@@ -369,6 +386,8 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `applicationSubscriptionsArray`; "
     "DROP INDEX IF EXISTS `applicationSubscriptionsArray.fk_Application_idx`; "
     "DROP TABLE IF EXISTS `_internal_data`; "
+    "DROP TABLE IF EXISTS `applicationUserLocation`; "
+    "DROP INDEX IF EXISTS `applicationUserLocation.fk_Application_idx`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -493,6 +512,12 @@ const std::string kDeleteApplicationSubMenuArray =
 
 const std::string kDeleteApplicationSubscriptionsArray =
     "DELETE FROM `applicationSubscriptionsArray` "
+    "WHERE `idApplication` = (SELECT `idApplication` "
+    "FROM `application` "
+    "WHERE `appID` = ? AND `deviceID` = ?)";
+
+const std::string kDeleteApplicationUserLocation =
+    "DELETE FROM `applicationUserLocation` "
     "WHERE `idApplication` = (SELECT `idApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?)";
@@ -732,6 +757,13 @@ const std::string kInsertSubscriptions =
     "VALUES "
     "(?, ?, ?);";
 
+const std::string kInsertUserLocation =
+    "INSERT INTO `applicationUserLocation` "
+    "(`idApplication`, `col`, `colspan`, `level`, `levelspan`, `row`, "
+    "`rowspan`) "
+    "VALUES "
+    "(?, ?, ?, ?, ?, ?, ?);";
+
 const std::string kInsertChoice =
     "INSERT INTO `choice` "
     "(`choiceID`, `menuName`, `secondaryText`, "
@@ -876,6 +908,18 @@ const std::string kSelectSubscriptions =
     "WHERE `idApplication` = (SELECT `idApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?);";
+
+const std::string kSelectCountUserLocation =
+    "SELECT COUNT (*) "
+    "FROM `applicationUserLocation` INNER JOIN `application` ON "
+    "`applicationUserLocation`.`idApplication` = `application`.`idApplication` "
+    "WHERE `appID` = ? AND `deviceID` = ?";
+
+const std::string kSelectUserLocation =
+    "SELECT `col`, `colspan`, `level`, `levelspan`, `row`, `rowspan` "
+    "FROM `applicationUserLocation` INNER JOIN `application` ON "
+    "`applicationUserLocation`.`idApplication` = `application`.`idApplication` "
+    "WHERE `appID` = ? AND `deviceID` = ?";
 
 const std::string kSelectCountChoiceSet =
     "SELECT COUNT (`idApplication`) "

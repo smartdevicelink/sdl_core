@@ -28,7 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
+include_directories(
+  include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/sdl_rpc_plugin
+)
 
 set (COMMANDS_SOURCE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commands
@@ -54,7 +57,6 @@ set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
-  MessageHelper
   connectionHandler
   v4_protocol_v1_2_no_extra
   SmartObjects
@@ -72,6 +74,7 @@ target_link_libraries("sdl_rpc_plugin_static" ${LIBRARIES})
 
 add_library("sdl_rpc_plugin" SHARED "src/sdl_rpc_plugin.cc")
 target_link_libraries("sdl_rpc_plugin" sdl_rpc_plugin_static)
+target_link_libraries("sdl_rpc_plugin" MessageHelper)
 
 set(INSTALL_DESTINATION bin)
 

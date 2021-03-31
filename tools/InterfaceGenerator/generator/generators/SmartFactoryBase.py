@@ -564,6 +564,7 @@ class CodeGenerator(object):
             struct_name=struct.name,
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
+                    struct_name=struct.name,
                     schema_loc_decl=self._gen_schema_loc_decls(
                         struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
@@ -738,19 +739,18 @@ class CodeGenerator(object):
                     item.name += "_history_v" + str(len(history_list)-count)
                     result_array.append(self._gen_schema_item_decl(item))
                     count += 1
-                result_array.append(self._gen_history_vector_decl(history_list, x.name))
+                result_array.append(self._gen_history_vector_decl(x.name))
 
         result = u"\n\n".join(result_array)
         return result
 
-    def _gen_history_vector_decl(self, history_list, name):
+    def _gen_history_vector_decl(self, name):
         """Generate History Vector Declaration.
 
             Generates the declaration and initialization
             of a vector of schema items
 
             Arguments:
-            history_list -> list of history items
             name -> name of parent parameter name
 
             Returns:
@@ -759,9 +759,40 @@ class CodeGenerator(object):
         result_array = []
         result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
         result = u"\n".join(result_array)
+        if result != "":
+            result += u"\n\n"
         return result
 
+    def _gen_function_history_decl(self, member):
+        """Generate History Vector Declaration for function.
 
+            Generates the declaration and initialization
+            of a function
+
+            Arguments:
+            member -> function member
+
+            Returns:
+            String with history array code.
+        """
+        result_array = []
+        count = 0
+        if member.history is not None:
+            history_list = member.history
+            result_array.append(self._gen_history_vector_decl(member.name))
+            for item in history_list:
+                item.name += "_history_v" + str(len(history_list)-count)
+                result_array.append(self._impl_code_item_decl_template.substitute(
+                    comment="",
+                    var_name=self._gen_schema_item_var_name(item),
+                    item_decl=self._impl_function_schema))
+                result_array.append(self._gen_function_history_vector_item_fill(item, member.name))
+                count += 1
+
+        result = u"\n\n".join(result_array)
+        if result != "":
+            result += u"\n\n"
+        return result
 
     def _gen_schema_item_decl(self, member):
         """Generate schema item declaration.
@@ -777,7 +808,7 @@ class CodeGenerator(object):
 
         """
 
-        return self._impl_code_item_decl_temlate.substitute(
+        return self._impl_code_item_decl_template.substitute(
             comment=self._gen_comment(member, False),
             var_name=self._gen_schema_item_var_name(member),
             item_decl=self._gen_schema_item_decl_code(
@@ -960,6 +991,40 @@ class CodeGenerator(object):
 
         raise GenerateError("Unexpected call to the unimplemented function.")
 
+    def _gen_function_member(self, member):
+        """Generate function member fill code.
+
+        Generates source code that fills new schema with items.
+
+        Keyword arguments:
+        members -- list of struct members/function parameters to process.
+
+        Returns:
+        String with function member definition fill code.
+
+        """
+        self._check_member_history(member)
+
+        if (member.since is not None):
+            if member.history is not None:
+                return self._impl_function_member_fill_template_with_version_and_history_vector.substitute(
+                    schema=self._impl_function_schema,
+                    since=member.since if member.since is not None else "", 
+                    until=member.until if member.until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else u"false",
+                    vector_name=member.name)
+            else:
+                return self._impl_function_member_fill_template_with_version.substitute(
+                    schema=self._impl_function_schema,
+                    since=member.since if member.since is not None else "", 
+                    until=member.until if member.until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else u"false")
+        else:
+            return self._impl_function_member_fill_template.substitute(
+                schema=self._impl_function_schema)
+
     def _check_member_history(self, member):
         """
             Checks set of rules that history items are valid
@@ -1049,6 +1114,34 @@ class CodeGenerator(object):
                 vector_name=vector_name,
                 name=member.name,
                 mandatory=u"true" if member.is_mandatory is True else u"false",
+                since=member.since if member.since is not None else "", 
+                until=member.until if member.until is not None else "", 
+                deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                removed=member.removed if member.removed is not None else u"false")
+        else:
+            print("Warning! History item does not have any version history. Omitting " + member.name)
+
+    def _gen_function_history_vector_item_fill(self, member, vector_name):
+        """Generate schema item fill code for function.
+
+        Generates source code that fills history vector with item.
+
+        Keyword arguments:
+        member -- struct member/function parameter to process.
+
+        Returns:
+        String with schema item fill code.
+
+        """
+
+        if (member.since is not None or 
+            member.until is not None or 
+            member.deprecated is not None or
+            member.removed is not None):
+            return self._impl_code_append_history_vector_template.substitute(
+                vector_name=vector_name,
+                name=member.name,
+                mandatory=u"true",
                 since=member.since if member.since is not None else "", 
                 until=member.until if member.until is not None else "", 
                 deprecated=member.deprecated if member.deprecated is not None else u"false", 
@@ -1158,7 +1251,11 @@ class CodeGenerator(object):
                     schema_item_fill=self._gen_schema_items_fill(
                         function.params.values(), function.since, function.until, function.deprecated, function.removed),
                     schema_params_fill=self._gen_schema_params_fill(
-                        function.message_type.name)),
+                        function.message_type.name),
+                    function_history_fill=self._gen_function_history_decl(
+                        function),
+                    function_member=self._gen_function_member(
+                        function)),
                 1))
 
     def _gen_enums(self, enums, structs):
@@ -1319,7 +1416,7 @@ class CodeGenerator(object):
                                 is True else u"// {0}\n").format(x)
                                 for x in self._normalize_multiline_comments(
                                     interface_item_base.description)])
-        if description is not u"":
+        if description != u"":
             description = u"".join([u" *\n" if use_doxygen
                                     is True else u"//\n", description])
 
@@ -1329,7 +1426,7 @@ class CodeGenerator(object):
                                        self._normalize_multiline_comments(
                                            interface_item_base.
                                            design_description)])
-        if design_description is not u"":
+        if design_description != u"":
             design_description = u"".join([u" *\n" if use_doxygen is
                                            True else "//\n",
                                            design_description])
@@ -1338,7 +1435,7 @@ class CodeGenerator(object):
                            True else u"// Note: {0}\n").format(x)
                            for x in self._normalize_multiline_comments(
                                [x.value for x in interface_item_base.issues])])
-        if issues is not u"":
+        if issues != u"":
             issues = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", issues])
 
@@ -1346,7 +1443,7 @@ class CodeGenerator(object):
                           True else u"// ToDo: {0}\n").format(x)
                           for x in self._normalize_multiline_comments(
                               interface_item_base.todos)])
-        if todos is not u"":
+        if todos != u"":
             todos = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", todos])
 
@@ -1383,7 +1480,7 @@ class CodeGenerator(object):
         return u"".join(
             [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x) if x is not u"" else u"\n" for x in code_lines])
+                x) if x != u"" else u"\n" for x in code_lines])
 
     @staticmethod
     def _normalize_multiline_comments(initial_strings):
@@ -1783,11 +1880,9 @@ class CodeGenerator(object):
     _struct_schema_item_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
-        u'''struct_schema_items.insert(std::make_pair('''
-        u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
         u'''structs_schemes_.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, CSmartSchema('''
-        u'''struct_schema_item_${name})));''')
+        u'''struct_schema_item_${name})));\n''')
 
     _function_schema_template = string.Template(
         u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
@@ -1800,17 +1895,21 @@ class CodeGenerator(object):
     _struct_impl_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
+        u'''    TStructsSchemaItems &struct_schema_items) {\n'''
         u'''$code'''
         u'''}\n''')
 
     _struct_impl_code_tempate = string.Template(
+        u'''Members '''
+        u'''schema_members;\n'''
+        u'''std::shared_ptr<ISchemaItem> struct_schema = CObjectSchemaItem::create(schema_members);\n'''
+        u'''struct_schema_items.insert(std::make_pair(StructIdentifiers::${struct_name}, CObjectSchemaItem::create(schema_members)));\n'''
+        u'''struct_schema_items[StructIdentifiers::${struct_name}] = struct_schema;\n\n'''
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''Members '''
-        u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
-        u'''return CObjectSchemaItem::create(schema_members);''')
+        u'''for(auto& member : schema_members) {struct_schema->AddMemberSchemaItem(member.first, member.second);}\n'''
+        u'''return struct_schema;''')
 
     _impl_code_loc_decl_enum_template = string.Template(
         u'''std::set<${type}::eType> ${var_name};''')
@@ -1831,7 +1930,7 @@ class CodeGenerator(object):
     _impl_gen_schema_enum_history_map_template = string.Template(
         u'''${name}_element_signatures''')
 
-    _impl_code_item_decl_temlate = string.Template(
+    _impl_code_item_decl_template = string.Template(
         u'''${comment}'''
         u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
 
@@ -1874,6 +1973,17 @@ class CodeGenerator(object):
 
     _impl_code_item_fill_template_with_version_and_history_vector = string.Template(
         u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
+    
+    _impl_function_schema = u'''CObjectSchemaItem::create(schema_members)'''
+
+    _impl_function_member_fill_template = string.Template(
+        u'''SMember(${schema}, true)''')
+
+    _impl_function_member_fill_template_with_version = string.Template(
+        u'''SMember(${schema}, true, "${since}", "${until}", ${deprecated}, ${removed})''')
+
+    _impl_function_member_fill_template_with_version_and_history_vector = string.Template(
+        u'''SMember(${schema}, true, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector)''')
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
@@ -1894,12 +2004,12 @@ class CodeGenerator(object):
         u'''params_members;\n'''
         u'''${schema_params_fill}'''
         u'''\n'''
+        u'''${function_history_fill}'''
         u'''Members '''
         u'''root_members_map;\n'''
         u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MSG_PARAMS] = '''
-        u'''SMember(CObjectSchemaItem::'''
-        u'''create(schema_members), true);\n'''
+        u'''${function_member};\n'''
         u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PARAMS] = '''
         u'''SMember(CObjectSchemaItem::'''
@@ -2006,7 +2116,7 @@ class CodeGenerator(object):
         u'''static '''
         u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items);''')
+        u'''    TStructsSchemaItems &struct_schema_items);''')
 
     _class_comment_template = string.Template(
         u'''/**\n'''

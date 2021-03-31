@@ -128,15 +128,13 @@ class PerformInteractionRequest
    * @return true if send response to mobile application otherwise
    * return false.
    */
-  bool ProcessVRResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  bool ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /**
    * @brief Sends PerformInteraction response to mobile side
    * @param message which should send to mobile side
    */
-  void ProcessUIResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  void ProcessUIResponse(const smart_objects::SmartObject& message);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -162,16 +160,6 @@ class PerformInteractionRequest
    * @param app_id Application ID
    */
   void SendUIShowVRHelpRequest(app_mngr::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
-   *
-   * @param app_id Application ID
-   *
-   * return Return TRUE if there are no similar menu names in choice set,
-   * otherwise FALSE
-   */
-  bool CheckChoiceSetMenuNames(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -279,6 +267,7 @@ class PerformInteractionRequest
   mobile_apis::InteractionMode::eType interaction_mode_;
   std::int32_t ui_choice_id_received_;
   std::int32_t vr_choice_id_received_;
+  std::string ui_text_entry_received_;
 
   bool ui_response_received_;
   bool vr_response_received_;

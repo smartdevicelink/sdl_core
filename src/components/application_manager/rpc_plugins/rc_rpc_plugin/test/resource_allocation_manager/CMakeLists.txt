@@ -45,6 +45,7 @@ ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/interior_dat
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/resource_allocation_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_rpc_plugin.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_app_extension.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_pending_resumption_handler.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_consent_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_capabilities_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_command_factory.cc

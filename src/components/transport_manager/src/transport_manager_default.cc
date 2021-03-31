@@ -57,7 +57,7 @@
 #endif  // ENABLE_IAP2EMULATION
 
 namespace transport_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 TransportAdapterFactory::TransportAdapterFactory() {
 #ifdef BLUETOOTH_SUPPORT
@@ -104,11 +104,11 @@ TransportManagerDefault::TransportManagerDefault(
 
 int TransportManagerDefault::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
-  LOG4CXX_TRACE(logger_, "enter");
+  SDL_LOG_TRACE("enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state_wrapper)) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
-                  "TransportManagerImpl::Init()");
+    SDL_LOG_TRACE(
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+        "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -186,7 +186,7 @@ int TransportManagerDefault::Init(
   AddTransportAdapter(iap2_usb_emu_adapter);
 #endif  // ENABLE_IAP2EMULATION
 
-  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  SDL_LOG_TRACE("exit with E_SUCCESS");
   return E_SUCCESS;
 }
 

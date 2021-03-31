@@ -47,6 +47,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -129,8 +130,8 @@ if (ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(
@@ -158,7 +159,7 @@ set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
-file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_old_apt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

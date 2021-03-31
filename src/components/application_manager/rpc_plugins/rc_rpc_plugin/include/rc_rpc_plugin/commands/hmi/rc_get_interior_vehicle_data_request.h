@@ -51,6 +51,8 @@ class RCGetInteriorVehicleDataRequest
       const RCCommandParams& params);
 
   void Run() OVERRIDE;
+  void onTimeOut() OVERRIDE;
+
   ~RCGetInteriorVehicleDataRequest();
 };
 

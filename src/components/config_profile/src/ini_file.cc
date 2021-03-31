@@ -55,7 +55,7 @@
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 char* ini_write_inst(const char* fname, uint8_t flag) {
   FILE* fp = 0;
@@ -152,13 +152,15 @@ char* ini_read_value(const char* fname,
   return NULL;
 }
 
+#ifdef BUILD_TESTS
+// cppcheck-suppress unusedFunction //Used in unit tests
 char ini_write_value(const char* fname,
                      const char* chapter,
                      const char* item,
                      const char* value,
                      uint8_t flag) {
   FILE *rd_fp, *wr_fp = 0;
-  uint16_t i, cr_count;
+  uint16_t cr_count;
   int32_t wr_result;
   bool chapter_found = false;
   bool value_written = false;
@@ -186,11 +188,9 @@ char ini_write_value(const char* fname,
 #if USE_MKSTEMP
   {
     const char* temp_str = "./";
-    int32_t fd = -1;
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
-
-      fd = mkstemp(temp_fname);
+      int32_t fd = mkstemp(temp_fname);
       if (-1 == fd) {
         fclose(rd_fp);
         return FALSE;
@@ -244,7 +244,7 @@ char ini_write_value(const char* fname,
              first chapter is significant */
           value_written = true;
         } else if (result == INI_RIGHT_ITEM) {
-          for (i = 0; i < cr_count; i++)
+          for (uint16_t i = 0; i < cr_count; i++)
             fprintf(wr_fp, "\n");
           cr_count = 0;
           wr_result = fprintf(wr_fp, "%s=%s\n", item, value);
@@ -278,18 +278,18 @@ char ini_write_value(const char* fname,
 
   if (0 != rename(temp_fname, fname)) {
     if (0 != remove(temp_fname)) {
-      LOG4CXX_WARN_WITH_ERRNO(
-          logger_, "Unable to remove temp file: " << std::string(temp_fname));
+      SDL_LOG_WARN_WITH_ERRNO(
+          "Unable to remove temp file: " << std::string(temp_fname));
     }
     return FALSE;
   }
 
   return (value_written);
 }
+#endif  // BUILD_TESTS
 
 Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   const char* line_ptr;
-  char* temp_ptr;
   char temp_str[INI_LINE_LEN] = "";
   *temp_str = '\0';
 
@@ -332,7 +332,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       return INI_NOTHING;
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
-    temp_ptr = strrchr(temp_str, ']');
+    char* temp_ptr = strrchr(temp_str, ']');
     if (NULL == temp_ptr) {
       return INI_NOTHING;
     } else {

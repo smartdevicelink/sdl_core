@@ -42,8 +42,7 @@ void Fail(char const* tag, boost::system::error_code ec) {
 namespace sample {
 namespace websocket {
 
-WSSession::WSServer::WSServer(tcp::socket&& socket)
-    : ws_(std::move(socket)), strand_(ws_.get_executor()) {}
+WSSession::WSServer::WSServer(tcp::socket&& socket) : ws_(std::move(socket)) {}
 
 void WSSession::WSServer::AddURLRoute(const std::string& target) {
   url_routes_.insert(ParseRouteFromTarget(target));
@@ -76,10 +75,8 @@ void WSSession::WSServer::OnWebsocketHandshake(
     // Accept the websocket handshake
     ws_.async_accept(
         req_,
-        boost::asio::bind_executor(strand_,
-                                   std::bind(&WSServer::OnAccept,
-                                             shared_from_this(),
-                                             std::placeholders::_1)));
+        std::bind(
+            &WSServer::OnAccept, shared_from_this(), std::placeholders::_1));
   }
 }
 

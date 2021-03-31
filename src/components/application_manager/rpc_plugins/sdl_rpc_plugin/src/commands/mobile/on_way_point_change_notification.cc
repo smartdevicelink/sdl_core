@@ -38,6 +38,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnWayPointChangeNotification::OnWayPointChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ OnWayPointChangeNotification::OnWayPointChangeNotification(
 OnWayPointChangeNotification::~OnWayPointChangeNotification() {}
 
 void OnWayPointChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::set<uint32_t> subscribed_for_way_points =
       application_manager_.GetAppsSubscribedForWayPoints();
@@ -65,7 +67,6 @@ void OnWayPointChangeNotification::Run() {
     (*message_)[strings::params][strings::connection_key] = *app_id;
     SendNotification();
   }
-  application_manager_.SaveWayPointsMessage(message_);
 }
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

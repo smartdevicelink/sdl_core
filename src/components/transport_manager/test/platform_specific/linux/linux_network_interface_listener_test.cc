@@ -119,19 +119,19 @@ TEST_F(NetworkInterfaceListenerTest, Start_success) {
 
   // after stated, it is expected that the listener notifies current IP address
   // (if it's available)
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(mock_tcp_client_listener_,
               OnIPAddressUpdated(entries[0].ipv4_address, ""))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   EXPECT_TRUE(interface_listener_impl_->Start());
 
   // the "isThreadRunning_" flag of the thread will be update slightly later
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_TRUE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_TRUE(interface_listener_impl_->GetThread()->IsRunning());
 
-  EXPECT_TRUE(waiter.WaitFor(1, kStartNotificationTimeoutMsec));
+  EXPECT_TRUE(waiter->WaitFor(1, kStartNotificationTimeoutMsec));
 
   Deinit();
 }
@@ -166,7 +166,7 @@ TEST_F(NetworkInterfaceListenerTest, Stop_success) {
   EXPECT_TRUE(interface_listener_impl_->Stop());
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_FALSE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_FALSE(interface_listener_impl_->GetThread()->IsRunning());
 
   Deinit();
 }

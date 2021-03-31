@@ -4,7 +4,7 @@
 namespace vehicle_info_plugin {
 
 #ifdef ENABLE_LOG
-CREATE_LOGGERPTR_LOCAL(vehicle_data_logger, "VehicleDataItemSchema");
+SDL_CREATE_LOG_VARIABLE("VehicleDataItemSchema");
 #endif  // ENABLE_LOG
 
 VehicleDataItemSchema::VehicleDataItemSchema(PolicyDataItem& policy_item,
@@ -117,16 +117,21 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
   using FloatItemParam = smart_objects::TSchemaItemParameter<double>;
   using StringSchemaItem = smart_objects::CStringSchemaItem;
   using StringItemParam = smart_objects::TSchemaItemParameter<size_t>;
+  using StringItemValueParam = smart_objects::TSchemaItemParameter<std::string>;
   using BoolSchemaItem = smart_objects::CBoolSchemaItem;
   using BoolItemParam = smart_objects::TSchemaItemParameter<bool>;
 
   if (policy_item.type == policy_table::VehicleDataItem::kInteger) {
-    return IntSchemaItem::create(policy_item.minvalue.is_initialized()
-                                     ? IntItemParam(*policy_item.minvalue)
-                                     : IntItemParam(),
-                                 policy_item.maxvalue.is_initialized()
-                                     ? IntItemParam(*policy_item.maxvalue)
-                                     : IntItemParam());
+    return IntSchemaItem::create(
+        policy_item.minvalue.is_initialized()
+            ? IntItemParam(*policy_item.minvalue)
+            : IntItemParam(),
+        policy_item.maxvalue.is_initialized()
+            ? IntItemParam(*policy_item.maxvalue)
+            : IntItemParam(),
+        policy_item.defvalue.is_initialized()
+            ? IntItemParam(std::stol(*policy_item.defvalue))
+            : IntItemParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kFloat ||
       policy_item.type == policy_table::VehicleDataItem::kDouble) {
@@ -136,6 +141,9 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
             : FloatItemParam(),
         policy_item.maxvalue.is_initialized()
             ? FloatItemParam(double(*policy_item.maxvalue))
+            : FloatItemParam(),
+        policy_item.defvalue.is_initialized()
+            ? FloatItemParam(std::stod(*policy_item.defvalue))
             : FloatItemParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kString) {
@@ -145,15 +153,21 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
                             : 0),
         policy_item.maxlength.is_initialized()
             ? StringItemParam(*policy_item.maxlength)
-            : StringItemParam());
+            : StringItemParam(),
+        policy_item.defvalue.is_initialized()
+            ? StringItemValueParam(std::string(*policy_item.defvalue))
+            : StringItemValueParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kBoolean) {
-    return BoolSchemaItem::create(BoolItemParam(true));
+    return BoolSchemaItem::create(
+        policy_item.defvalue.is_initialized()
+            ? BoolItemParam(*policy_item.defvalue == "true")
+            : BoolItemParam());
   }
 
   std::string error_msg = std::string("Invalid POD type provided: ") +
                           std::string(policy_item.type);
-  LOG4CXX_ERROR(vehicle_data_logger, error_msg.c_str());
+  SDL_LOG_ERROR(error_msg.c_str());
   return nullptr;
 }
 
@@ -168,7 +182,7 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::getEnumSchema(
     const std::string& type_name) const {
   auto enum_schema = policy_table::EnumSchemaItemFactory::Get(type_name);
   if (!enum_schema) {
-    LOG4CXX_ERROR(vehicle_data_logger, "NULL pointer: " << type_name);
+    SDL_LOG_ERROR("NULL pointer: " << type_name);
   }
   return enum_schema;
 }

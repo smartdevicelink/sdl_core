@@ -35,8 +35,11 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/postponed_activation_controller.h"
 #include "application_manager/request_controller_settings.h"
 #include "stdint.h"
+
+class PostponedActivationController;
 
 namespace application_manager {
 class StateController {
@@ -223,6 +226,31 @@ class StateController {
    * @param app pointer to application to be exited
    */
   virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Sets BACKGROUND or LIMITED hmi level to application
+   * depends on application type
+   * @param window_id ID of app window to deactivate
+   * @param app Application to deactivate
+   */
+  virtual void DeactivateApp(ApplicationSharedPtr app,
+                             const WindowID window_id) = 0;
+
+  /**
+   * @brief ResumePostponedWindows resumes adding of all postponed windows for a
+   * specified application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void ResumePostponedWindows(const uint32_t app_id) = 0;
+
+  /**
+   * @brief DropPostponedWindows drops all postponed windows for a specified
+   * application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void DropPostponedWindows(const uint32_t app_id) = 0;
+
+  virtual PostponedActivationController& GetPostponedActivationController() = 0;
 };
 
 }  // namespace application_manager

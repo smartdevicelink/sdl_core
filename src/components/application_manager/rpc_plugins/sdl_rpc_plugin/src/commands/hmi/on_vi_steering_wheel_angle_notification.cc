@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnVISteeringWheelAngleNotification::OnVISteeringWheelAngleNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ OnVISteeringWheelAngleNotification::OnVISteeringWheelAngleNotification(
 OnVISteeringWheelAngleNotification::~OnVISteeringWheelAngleNotification() {}
 
 void OnVISteeringWheelAngleNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
