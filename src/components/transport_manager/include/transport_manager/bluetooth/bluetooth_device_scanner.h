@@ -181,7 +181,6 @@ class BluetoothDeviceScanner : public DeviceScanner {
   std::vector<bdaddr_t> paired_devices_;
 
   DeviceVector paired_devices_with_sdl_;
-  DeviceVector found_devices_with_sdl_;
 
   /**
    * @brief UUID of SmartDeviceLink service.

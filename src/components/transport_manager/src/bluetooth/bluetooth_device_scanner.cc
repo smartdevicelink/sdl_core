@@ -95,13 +95,8 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     delete[] buffer;
     buffer = new char[1028];
   }
-<<<<<<< HEAD
   int status = pclose(pipe);
-  LOG4CXX_TRACE(logger_, "exit with " << status);
-=======
-  pclose(pipe);
   SDL_LOG_TRACE("exit with 0");
->>>>>>> release/7.1.0-RC1
   delete[] buffer;
   return status;
 }
@@ -178,9 +173,6 @@ void BluetoothDeviceScanner::UpdateTotalDeviceList() {
   devices.insert(devices.end(),
                  paired_devices_with_sdl_.begin(),
                  paired_devices_with_sdl_.end());
-  devices.insert(devices.end(),
-                 found_devices_with_sdl_.begin(),
-                 found_devices_with_sdl_.end());
   controller_->SearchDeviceDone(devices);
 }
 
@@ -217,42 +209,10 @@ void BluetoothDeviceScanner::DoInquiry() {
       paired_devices_, device_handle, &paired_devices_with_sdl_);
   UpdateTotalDeviceList();
 
-<<<<<<< HEAD
-  close(device_handle);
-=======
-  SDL_LOG_INFO("Starting hci_inquiry on device " << device_id);
-  const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
-  const size_t max_devices = 256u;
-  inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
-
-  const int number_of_devices = hci_inquiry(device_id,
-                                            inquiry_time,
-                                            max_devices,
-                                            0,
-                                            &inquiry_info_list,
-                                            IREQ_CACHE_FLUSH);
-
-  if (number_of_devices >= 0) {
-    SDL_LOG_INFO("hci_inquiry: found " << number_of_devices << " devices");
-    std::vector<bdaddr_t> found_devices(number_of_devices);
-    for (int i = 0; i < number_of_devices; ++i) {
-      found_devices[i] = inquiry_info_list[i].bdaddr;
-    }
-    found_devices_with_sdl_.clear();
-    CheckSDLServiceOnDevices(
-        found_devices, device_handle, &found_devices_with_sdl_);
-  }
-  UpdateTotalDeviceList();
   controller_->FindNewApplicationsRequest();
 
   close(device_handle);
-  delete[] inquiry_info_list;
 
-  if (number_of_devices < 0) {
-    SDL_LOG_DEBUG("number_of_devices < 0");
-    controller_->SearchDeviceFailed(SearchDeviceError());
-  }
->>>>>>> release/7.1.0-RC1
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
