@@ -261,7 +261,7 @@ bool CryptoManagerImpl::Init() {
 #endif
   }
 
-#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
+#if OPENSSL_VERSION_NUMBER >= OPENSSL1_1_VERSION
   SSL_CTX_set_security_level(context_, get_settings().security_level());
 #endif
 
