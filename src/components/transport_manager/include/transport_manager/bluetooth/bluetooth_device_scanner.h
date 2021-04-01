@@ -172,7 +172,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   TransportAdapterController* controller_;
   threads::Thread* thread_;
 
-  bool shutdown_requested_;
+  std::atomic<bool> shutdown_requested_;
   bool ready_;
   bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;

@@ -393,7 +393,10 @@ void BluetoothDeviceScanner::Thread() {
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
       DoInquiry();
-      device_scan_requested_ = false;
+      {
+        sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
+        device_scan_requested_ = false;
+      }
       TimedWaitForDeviceScanRequest();
     }
   } else {  // search only on demand
@@ -418,6 +421,11 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
 
   if (auto_repeat_pause_sec_ == 0) {
     SDL_LOG_TRACE("exit. Condition: auto_repeat_pause_sec_ == 0");
+    return;
+  }
+
+  if (shutdown_requested_) {
+    SDL_LOG_INFO("Bluetooth scanner Condition: shutdown_requested_ == true");
     return;
   }
 
