@@ -83,6 +83,10 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     return profile_.force_unprotected_service();
   }
 
+  uint32_t security_level() const OVERRIDE {
+    return profile_.security_level();
+  }
+
  private:
   const profile::Profile& profile_;
   const std::string certificate_data_;
