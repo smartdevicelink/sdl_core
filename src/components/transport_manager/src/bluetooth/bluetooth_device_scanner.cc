@@ -212,7 +212,6 @@ void BluetoothDeviceScanner::DoInquiry() {
   controller_->FindNewApplicationsRequest();
 
   close(device_handle);
-
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
