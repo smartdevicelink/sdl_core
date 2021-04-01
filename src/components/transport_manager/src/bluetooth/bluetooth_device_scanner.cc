@@ -455,7 +455,6 @@ TransportAdapter::Error BluetoothDeviceScanner::Init() {
 void BluetoothDeviceScanner::Terminate() {
   SDL_LOG_AUTO_TRACE();
   shutdown_requested_ = true;
-
   if (thread_) {
     {
       sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
