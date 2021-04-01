@@ -112,6 +112,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     , ready_(true)
     , device_scan_requested_(false)
     , device_scan_requested_lock_()
+    , cv_exit_lock_()
     , device_scan_requested_cv_()
     , auto_repeat_search_(auto_repeat_search)
     , auto_repeat_pause_sec_(auto_repeat_pause_sec) {
@@ -148,6 +149,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     , ready_(true)
     , device_scan_requested_(false)
     , device_scan_requested_lock_()
+    , cv_exit_lock_()
     , device_scan_requested_cv_()
     , auto_repeat_search_(auto_repeat_search)
     , auto_repeat_pause_sec_(auto_repeat_pause_sec) {
@@ -431,6 +433,7 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   {
     sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
     while (!(device_scan_requested_ || shutdown_requested_)) {
+      sync_primitives::AutoLock auto_lock(cv_exit_lock_);
       const sync_primitives::ConditionalVariable::WaitStatus wait_status =
           device_scan_requested_cv_.WaitFor(auto_lock,
                                             auto_repeat_pause_sec_ * 1000);
@@ -454,13 +457,16 @@ TransportAdapter::Error BluetoothDeviceScanner::Init() {
 
 void BluetoothDeviceScanner::Terminate() {
   SDL_LOG_AUTO_TRACE();
+  if (shutdown_requested_)
+    return;
   shutdown_requested_ = true;
   if (thread_) {
+    device_scan_requested_cv_.NotifyOne();
     {
       sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
       device_scan_requested_ = false;
-      device_scan_requested_cv_.NotifyOne();
     }
+    sync_primitives::AutoLock auto_lock(cv_exit_lock_);
     SDL_LOG_INFO("Waiting for bluetooth device scanner thread termination");
     thread_->Stop(threads::Thread::kThreadStopDelegate);
     SDL_LOG_INFO("Bluetooth device scanner thread stopped");
