@@ -433,8 +433,8 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   {
     sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
     while (!(device_scan_requested_ || shutdown_requested_)) {
-      if(!terminate_lock_.Try()) {
-        //Lock is taken by terminate thread, return
+      if (!terminate_lock_.Try()) {
+        // Lock is taken by terminate thread, return
         return;
       }
       const sync_primitives::ConditionalVariable::WaitStatus wait_status =
