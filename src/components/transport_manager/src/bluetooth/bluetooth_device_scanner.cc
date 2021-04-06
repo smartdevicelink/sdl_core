@@ -433,10 +433,14 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
   {
     sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
     while (!(device_scan_requested_ || shutdown_requested_)) {
-      sync_primitives::AutoLock auto_lock(cv_exit_lock_);
+      if(!cv_exit_lock_.Try()) {
+        //Lock is taken by terminate thread, return
+        return;
+      }
       const sync_primitives::ConditionalVariable::WaitStatus wait_status =
           device_scan_requested_cv_.WaitFor(auto_lock,
                                             auto_repeat_pause_sec_ * 1000);
+      cv_exit_lock_.Release();
       if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
         SDL_LOG_INFO("Bluetooth scanner timeout, performing scan");
         device_scan_requested_ = true;
