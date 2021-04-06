@@ -175,7 +175,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
   bool ready_;
   bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;
-  sync_primitives::Lock cv_exit_lock_;
+  sync_primitives::Lock terminate_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
   std::vector<bdaddr_t> paired_devices_;
