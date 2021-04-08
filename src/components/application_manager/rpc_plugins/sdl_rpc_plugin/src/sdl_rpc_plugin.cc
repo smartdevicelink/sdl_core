@@ -131,14 +131,19 @@ void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
   pending_resumption_handler_->OnResumptionRevert();
 
   if (application_manager_->IsAppSubscribedForWayPoints(app)) {
-    application_manager_->UnsubscribeAppFromWayPoints(app.app_id());
-    if (!application_manager_->IsAnyAppSubscribedForWayPoints()) {
+    std::set<uint32_t> subscribed_apps =
+        application_manager_->GetAppsSubscribedForWayPoints();
+    bool send_unsubscribe = subscribed_apps.size() <= 1 &&
+                            application_manager_->IsSubscribedToHMIWayPoints();
+    if (send_unsubscribe) {
       SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
       auto request =
           application_manager::MessageHelper::CreateUnsubscribeWayPointsRequest(
               application_manager_->GetNextHMICorrelationID());
       application_manager_->GetRPCService().ManageHMICommand(request);
     }
+    application_manager_->UnsubscribeAppFromWayPoints(app.app_id(),
+                                                      send_unsubscribe);
   }
 }
 
