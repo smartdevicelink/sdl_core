@@ -47,8 +47,8 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-StringArray MergeStringsToArray(const std::string& first,
-                                const std::string& second) {
+StringArray MergeStringsToArray(const std::string first,
+                                const std::string second) {
   StringArray array_of_strings;
   array_of_strings.reserve(2);
 
