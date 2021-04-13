@@ -614,7 +614,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   HmiStatePtr initial_state =
-      CreateRegularState(std::shared_ptr<Application>(application),
+      CreateRegularState(ApplicationSharedPtr(application),
                          mobile_apis::WindowType::MAIN,
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
