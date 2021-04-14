@@ -45,6 +45,9 @@ include_directories(
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -55,6 +58,7 @@ set(testSources
   ${AM_TEST_DIR}/request_info_test.cc
   ${AM_TEST_DIR}/resumption_sql_queries_test.cc
   ${AM_TEST_DIR}/event_engine_test.cc
+  ${AM_TEST_DIR}/mobile_event_engine_test.cc
   ${AM_TEST_DIR}/policy_event_observer_test.cc
   ${AM_TEST_DIR}/application_impl_test.cc
   ${AM_TEST_DIR}/hmi_capabilities_test.cc
@@ -62,29 +66,35 @@ set(testSources
   ${AM_TEST_DIR}/application_state_test.cc
   ${AM_TEST_DIR}/usage_statistics_test.cc
   ${AM_TEST_DIR}/policy_handler_test.cc
+  ${AM_TEST_DIR}/app_service_manager_test.cc
+  ${AM_TEST_DIR}/rpc_passing_handler_test.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
 )
 
 set(testSourcesMockHmi
   ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
   ${AM_TEST_DIR}/application_manager_impl_mock_hmi_test.cc
-  ${AM_TEST_DIR}/mock_hmi_command_factory.cc
 )
 
-if(REMOTE_CONTROL)
-  list(APPEND testSources ${AM_TEST_DIR}/rc_policy_handler_test.cc)
-endif(REMOTE_CONTROL)
-
+set(testSourcesHelpPromptManager
+  ${AM_TEST_DIR}/help_prompt_manager_test.cc
+  ${AM_TEST_DIR}/mock_message_helper.cc
+)
 set (RequestController_SOURCES
   ${AM_TEST_DIR}/request_controller/request_controller_test.cc
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
+set (RPCHandlerImplTest_SOURCES ${AM_TEST_DIR}/rpc_handler_impl_test.cc 
+                                ${AM_TEST_DIR}/mock_message_helper.cc)
+
 set(LIBRARIES
   Utils
   ApplicationManager
+  sdl_rpc_plugin_static
   jsoncpp
   Policy
   connectionHandler
@@ -120,8 +130,8 @@ if (ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(
@@ -134,9 +144,12 @@ set(CMAKE_EXE_LINKER_FLAGS
 )
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
-add_dependencies("application_manager_test" libbson)
+
+create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
 
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
+
+create_test("rpc_handler_impl_test" "${RPCHandlerImplTest_SOURCES}" "${LIBRARIES}")
 
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
@@ -146,9 +159,10 @@ set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
-file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_old_apt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)

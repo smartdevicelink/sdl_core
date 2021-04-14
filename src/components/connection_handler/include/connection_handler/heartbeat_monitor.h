@@ -35,11 +35,11 @@
 #include <stdint.h>
 #include <map>
 
+#include "utils/date_time.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/date_time.h"
-#include "utils/macro.h"
-#include "utils/lock.h"
 
 namespace connection_handler {
 
@@ -64,9 +64,17 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   void RemoveSession(uint8_t session_id);
 
   /**
-  * \brief Resets timer preventing session from being killed
+   * \brief Resets timer preventing session from being killed
    */
   void KeepAlive(uint8_t session_id);
+
+  /**
+   * @brief Check is heartbeat monitoring started for specified session
+   * @param  session_id session id
+   * @return returns true if heartbeat monitoring started for specified session
+   * otherwise returns false
+   */
+  bool IsSessionHeartbeatTracked(const uint8_t session_id) const;
 
   /**
    * \brief Thread exit procedure.
@@ -102,7 +110,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
     void RefreshExpiration();
 
     uint32_t heartbeat_timeout_mseconds_;
-    TimevalStruct heartbeat_expiration_;
+    date_time::TimeDuration heartbeat_expiration_;
     bool is_heartbeat_sent_;
   };
 
@@ -111,7 +119,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   typedef std::map<uint8_t, SessionState> SessionMap;
   SessionMap sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;  // recurcive
+  mutable sync_primitives::RecursiveLock sessions_list_lock_;  // recursive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
   sync_primitives::ConditionalVariable heartbeat_monitor_;

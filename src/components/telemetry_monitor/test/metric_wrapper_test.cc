@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "telemetry_monitor/metric_wrapper.h"
-#include "telemetry_monitor/json_keys.h"
+#include "gtest/gtest.h"
 #include "json/json.h"
+#include "telemetry_monitor/json_keys.h"
 #include "utils/resource_usage.h"
 
 namespace test {

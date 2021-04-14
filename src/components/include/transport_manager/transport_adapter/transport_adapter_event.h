@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "protocol/common.h"
 
 namespace transport_manager {
 
@@ -57,7 +57,10 @@ enum class EventTypeEnum {
   ON_RECEIVED_FAIL,
   ON_COMMUNICATION_ERROR,
   ON_UNEXPECTED_DISCONNECT,
-  ON_TRANSPORT_SWITCH_REQUESTED
+  ON_TRANSPORT_SWITCH_REQUESTED,
+  ON_TRANSPORT_CONFIG_UPDATED,
+  ON_CONNECT_PENDING,
+  ON_CONNECTION_STATUS_UPDATED
 };
 
 class TransportAdapterEvent {
@@ -80,30 +83,6 @@ class TransportAdapterEvent {
                         ::protocol_handler::RawMessagePtr data,
                         BaseErrorPtr error)
       : event_type(type)
-      , application_id(application_id)
-      , device_uid(device_handle)
-      , transport_adapter(adapter)
-      , event_data(data)
-      , event_error(error) {}
-
-  /**
-   * DEPRECATED
-   * @brief Constructor.
-   *
-   * @param type Event type.
-   * @param transport_adapter Transport adapter
-   * @param device_handle Handle of device.
-   * @param application_id Handle of application.
-   * @param data Smart pointer to the raw message.
-   * @param error Error class that contains details of this error situation.
-   */
-  TransportAdapterEvent(int type,
-                        transport_adapter::TransportAdapter* adapter,
-                        const DeviceUID& device_handle,
-                        const ApplicationHandle& application_id,
-                        ::protocol_handler::RawMessagePtr data,
-                        BaseErrorPtr error)
-      : event_type(static_cast<EventTypeEnum>(type))
       , application_id(application_id)
       , device_uid(device_handle)
       , transport_adapter(adapter)

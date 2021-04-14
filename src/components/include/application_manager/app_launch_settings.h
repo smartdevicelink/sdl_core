@@ -17,6 +17,6 @@ class AppLaunchSettings {
   virtual const std::string& app_storage_folder() const = 0;
 };
 
-}  // namespace application_manager
+}  // namespace app_launch
 
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_SETTINGS_H_

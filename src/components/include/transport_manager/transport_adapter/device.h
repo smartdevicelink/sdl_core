@@ -33,11 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "transport_manager/common.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/macro.h"
 
 namespace transport_manager {
@@ -57,7 +58,9 @@ class Device {
   Device(const std::string& name, const DeviceUID& unique_device_id)
       : name_(name)
       , unique_device_id_(unique_device_id)
-      , keep_on_disconnect_(false) {}
+      , keep_on_disconnect_(false)
+      , status_(ConnectionStatus::PENDING)
+      , retry_count_(0) {}
 
   /**
    * Constructor for creating device supporting transport switch
@@ -72,7 +75,9 @@ class Device {
       : name_(name)
       , unique_device_id_(unique_device_id)
       , transport_switch_id_(transport_switch_id)
-      , keep_on_disconnect_(false) {}
+      , keep_on_disconnect_(false)
+      , status_(ConnectionStatus::PENDING)
+      , retry_count_(0) {}
 
   /**
    * @brief Destructor.
@@ -131,6 +136,44 @@ class Device {
   }
 
   /**
+   * @brief Get @link status_ @endlink value
+   * @return current value
+   */
+  inline ConnectionStatus connection_status() const {
+    return status_;
+  }
+
+  /**
+   * @brief Set @link status_ @endlink value
+   * @param status new value
+   */
+  inline void set_connection_status(ConnectionStatus status) {
+    status_ = status;
+  }
+
+  /**
+   * @brief Get @link retry_count_ @endlink value
+   * @return current value
+   */
+  inline uint16_t retry_count() const {
+    return retry_count_;
+  }
+
+  /**
+   * @brief Increment @link retry_count_ @endlink value
+   */
+  inline void next_retry() {
+    retry_count_++;
+  }
+
+  /**
+   * @brief Reset @link retry_count_ @endlink value to 0
+   */
+  inline void reset_retry_count() {
+    retry_count_ = 0;
+  }
+
+  /**
    * @brief transport_switch_id Returns id used for transport switching
    * flow of device. Filled if applicable, otherwise - empty.
    */
@@ -159,8 +202,12 @@ class Device {
    *finished.
    **/
   bool keep_on_disconnect_;
+
+  ConnectionStatus status_;
+
+  uint16_t retry_count_;
 };
-typedef utils::SharedPtr<Device> DeviceSptr;
+typedef std::shared_ptr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;
 }  // namespace transport_adapter
 }  // namespace transport_manager

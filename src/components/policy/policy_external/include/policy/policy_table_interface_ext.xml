@@ -25,33 +25,43 @@
         <element name="gps" />
         <element name="speed" />
         <element name="engineTorque" />
+        <element name="climateData" />
         <element name="externalTemperature" />
+        <element name="turnSignal" />
         <element name="fuelLevel" />
         <element name="fuelLevel_State" />
         <element name="headLampStatus" />
         <element name="instantFuelConsumption" />
+        <element name="fuelRange" />
         <element name="odometer" />
         <element name="tirePressure" />
         <element name="wiperStatus" />
         <element name="vin" />
         <element name="accPedalPosition" />
         <element name="beltStatus" />
+        <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
+        <element name="gearStatus" />
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
+        <element name="engineOilLife" />
         <element name="myKey" />
         <element name="airbagStatus" />
         <element name="bodyInformation" />
         <element name="clusterModeStatus" />
         <element name="deviceStatus" />
         <element name="emergencyEvent" />
+        <element name="stabilityControlsStatus" />
         <element name="eCallInfo" />
         <element name="abs_State" />
         <element name="turnSignal" />
         <element name="fuelRange" />
         <element name="tirePressureValue" />
         <element name="tpms" />
+        <element name="cloudAppVehicleID" />
+        <element name="handsOffSteering" />
+        <element name="seatOccupancy" />
     </enum>
 
     <enum name="AppHMIType">
@@ -65,6 +75,12 @@
         <element name="BACKGROUND_PROCESS" />
         <element name="TESTING" />
         <element name="SYSTEM" />
+    </enum>
+
+    <enum name="HybridAppPreference">
+        <element name="MOBILE" />
+        <element name="CLOUD" />
+        <element name="BOTH" />
     </enum>
     <!-- Common parameters end -->
 
@@ -88,14 +104,27 @@
         <param name="memory_kb" type="Integer" minvalue="1" maxvalue="65225" mandatory="false"/>
         <param name="watchdog_timer_ms" type="Integer" minvalue="1"
             maxvalue="65225" mandatory="false"/>
-        <param name="certificate" type="String" minlength="0" maxlength="255"
+        <param name="certificate" type="String" minlength="0" maxlength="65535"
             mandatory="false" />
+        <param name="endpoint" type="String" minlength="0" maxlength="255" mandatory="false" />
+        <param name="enabled" type="Boolean" mandatory="false" />
+        <param name="auth_token" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="cloud_transport_type" type="String" minlength="0" maxlength="255"
+            mandatory="false" />
+        <param name="hybrid_app_preference" type="HybridAppPreference" mandatory="false" />
+        <param name="icon_url" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="service_name" type="String" mandatory="false" />
+        <param name="service_type" type="String" mandatory="false" />
+        <param name="handled_rpcs" array="true"  mandatory="false" />
+        <param name="allow_unknown_rpc_passthrough" type="Boolean" mandatory="false" />
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"
         maxsize="4" />
-    <typedef name="Parameters" type="Parameter" array="true"
-        maxsize="24" />
+    <typedef name="Parameters" type="Parameter" array="true"/>
 
     <struct name="RpcParameters">
         <!-- maxsizes are equal to number of currently known elements of
@@ -112,6 +141,7 @@
         <param name="user_consent_prompt" type="String" minlegth="1"
             maxlength="255" mandatory="false"/>
         <param name="rpcs" type="Rpc" null_values_allowed="true"/>
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
     <!-- app_policies section end -->
 
@@ -128,7 +158,7 @@
         minsize="1" maxsize="255" />
 
     <typedef name="NumberOfNotificationsPerMinute" type="Integer"
-        map="true" maxsize="6" minvalue="0" maxvalue="255" />
+        map="true" maxsize="7" minvalue="0" maxvalue="255" />
 
     <typedef name="SecondsBetweenRetries" type="Integer" array="true"
         maxsize="10" minvalue="1" maxvalue="1000" />
@@ -136,6 +166,7 @@
     <struct name="ModuleConfig">
         <param name="device_certificates" type="String" minlength="1" maxlength="100" mandatory="false" map="true" minsize="1" maxsize="255" />
         <param name="preloaded_pt" type="Boolean" mandatory="false" />
+        <param name="full_app_id_supported" type="Boolean" mandatory="false" />
         <param name="exchange_after_x_ignition_cycles" type="Integer"
             maxvalue="255" />
         <param name="exchange_after_x_kilometers" type="Integer"
@@ -147,6 +178,8 @@
         <param name="seconds_between_retries" type="SecondsBetweenRetries" />
         <param name="endpoints" type="ServiceEndpoints" />
         <param name="notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
+        <param name="subtle_notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute"
+            mandatory="false" />
         <param name="vehicle_make" type="String" maxlength="100"
             mandatory="false" />
         <param name="vehicle_model" type="String" maxlength="100"
@@ -190,6 +223,7 @@
         <param name="ccpu_version" type="String" maxlength="250" mandatory="false"/>
         <param name="language" type="String" maxlength="250" mandatory="false"/>
         <param name="wers_country_code" type="String" maxlength="250" mandatory="false"/>
+        <param name="hardware_version" type="String" maxlength="500" mandatory="false"/>
         <param name="pt_exchanged_at_odometer_x" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
         <param name="pt_exchanged_x_days_after_epoch" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
         <param name="ignition_cycles_since_last_exchange" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>

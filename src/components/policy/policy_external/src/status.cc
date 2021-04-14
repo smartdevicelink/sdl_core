@@ -32,7 +32,6 @@
 
 #include "policy/status.h"
 #include "policy/update_status_manager.h"
-#include "utils/make_shared.h"
 
 policy::UpToDateStatus::UpToDateStatus()
     : Status(kUpToDate, policy::PolicyTableStatus::StatusUpToDate) {}
@@ -45,7 +44,7 @@ void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
     case kScheduleUpdate:
     case kScheduleManualUpdate:
     case kOnResetRetrySequence:
-      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;
@@ -59,14 +58,17 @@ void policy::UpdateNeededStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
   switch (event) {
     case kOnUpdateSentOut:
-      manager->SetNextStatus(utils::MakeShared<UpdatingStatus>());
+      manager->SetNextStatus(std::make_shared<UpdatingStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableNoUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      break;
+    case kPendingUpdate:
+      manager->SetNextStatus(std::make_shared<UpdatePendingStatus>());
       break;
     default:
       break;
@@ -74,6 +76,36 @@ void policy::UpdateNeededStatus::ProcessEvent(
 }
 
 bool policy::UpdateNeededStatus::IsUpdateRequired() const {
+  return true;
+}
+
+policy::UpdatePendingStatus::UpdatePendingStatus()
+    : Status(kUpdateNeeded,
+             policy::PolicyTableStatus::StatusProcessingSnapshot) {}
+
+void policy::UpdatePendingStatus::ProcessEvent(
+    policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
+  switch (event) {
+    case kOnUpdateSentOut:
+      manager->SetNextStatus(std::make_shared<UpdatingStatus>());
+      break;
+    case kOnResetPolicyTableRequireUpdate:
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
+      break;
+    case kOnResetPolicyTableNoUpdate:
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      break;
+    default:
+      break;
+  }
+}
+
+bool policy::UpdatePendingStatus::IsUpdatePending() const {
+  return true;
+}
+
+bool policy::UpdatePendingStatus::IsUpdateRequired() const {
   return true;
 }
 
@@ -85,23 +117,22 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
   switch (event) {
     case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      break;
-    case kOnNewAppRegistered:
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:
-      manager->SetNextStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnResetPolicyTableRequireUpdate:
-      manager->SetNextStatus(utils::MakeShared<UpToDateStatus>());
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kScheduleUpdate:
     case kScheduleManualUpdate:
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
+      break;
     case kOnResetRetrySequence:
-      manager->SetPostponedStatus(utils::MakeShared<UpdateNeededStatus>());
+      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;

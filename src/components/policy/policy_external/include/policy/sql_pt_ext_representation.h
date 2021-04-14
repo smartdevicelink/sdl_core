@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
 
 #include <string>
-#include "policy/sql_pt_representation.h"
 #include "policy/pt_ext_representation.h"
+#include "policy/sql_pt_representation.h"
 
 namespace policy {
 
@@ -94,7 +94,9 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
 
   bool SetMetaInfo(const std::string& ccpu_version,
                    const std::string& wers_country_code,
-                   const std::string& language);
+                   const std::string& language) OVERRIDE;
+
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
 
   bool IsMetaInfoPresent();
 

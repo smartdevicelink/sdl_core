@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
+#include <time.h>
 #include "application_manager/policies/policy_handler_observer.h"
 #include "security_manager/security_manager_settings.h"
 
@@ -44,7 +45,7 @@
  **security_manager::CryptoManager::CreateSSLContext()
  * \brief Creates an instance of \ref SSLContext class
  *
-  * \fn void
+ * \fn void
  *security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext
  **context)
  * \brief Frees \ref SSLContext instance
@@ -65,12 +66,20 @@ class CryptoManager : public policy::PolicyHandlerObserver {
   virtual bool OnCertificateUpdated(const std::string& data) = 0;
   virtual void ReleaseSSLContext(SSLContext* context) = 0;
   virtual std::string LastError() const = 0;
-
-  virtual bool IsCertificateUpdateRequired() const = 0;
   /**
-  * \brief Crypto manager settings getter
-  * \return pointer to crypto manager settings class
-  */
+   * @brief IsCertificateUpdateRequired checks if certificate update is needed
+   * @param system_time - time with which certificate expiration time
+   * should be compared
+   * @param certificates_time - certificate expiration time
+   * @return True if certificate expired and need to be updated
+   * otherwise False
+   */
+  virtual bool IsCertificateUpdateRequired(
+      const time_t system_time, const time_t certificates_time) const = 0;
+  /**
+   * \brief Crypto manager settings getter
+   * \return pointer to crypto manager settings class
+   */
   virtual const CryptoManagerSettings& get_settings() const = 0;
   virtual ~CryptoManager() {}
 };

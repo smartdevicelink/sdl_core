@@ -39,9 +39,9 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
@@ -70,6 +70,11 @@ class BluetoothDeviceScanner : public DeviceScanner {
   BluetoothDeviceScanner(TransportAdapterController* controller,
                          bool auto_repeat_search,
                          int repeat_search_pause_sec);
+
+  BluetoothDeviceScanner(TransportAdapterController* controller,
+                         bool auto_repeat_search,
+                         int repeat_search_pause_sec,
+                         const uint8_t* smart_device_link_service_uuid_data);
   /**
    * @brief Destructor.
    */
@@ -166,16 +171,16 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   TransportAdapterController* controller_;
   threads::Thread* thread_;
-  bool shutdown_requested_;
+  std::atomic<bool> shutdown_requested_;
   bool ready_;
   bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;
+  sync_primitives::Lock terminate_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
   std::vector<bdaddr_t> paired_devices_;
 
   DeviceVector paired_devices_with_sdl_;
-  DeviceVector found_devices_with_sdl_;
 
   /**
    * @brief UUID of SmartDeviceLink service.

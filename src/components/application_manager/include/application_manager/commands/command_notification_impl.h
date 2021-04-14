@@ -43,12 +43,22 @@ namespace commands {
 class CommandNotificationImpl : public CommandImpl {
  public:
   CommandNotificationImpl(const MessageSharedPtr& message,
-                          ApplicationManager& application_manager);
+                          ApplicationManager& application_manager,
+                          rpc_service::RPCService& rpc_service,
+                          HMICapabilities& hmi_capabilities,
+                          policy::PolicyHandlerInterface& policy_handler);
   virtual ~CommandNotificationImpl();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  void SendNotification();
+
+  /**
+   * @brief SendNotification Constructs the message with Message Type
+   * Notification and send it to mobile.
+   * @param final_message if true - connection to mobile will be closed
+   * after processing this message
+   */
+  void SendNotification(const bool final_message = false);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationImpl);

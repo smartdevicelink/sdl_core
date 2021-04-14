@@ -35,8 +35,8 @@
 
 #include <vector>
 
-#include "transport_manager/transport_manager_listener.h"
 #include "protocol/common.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
 
@@ -58,6 +58,8 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnDeviceListUpdated(const std::vector<DeviceInfo>&) OVERRIDE {}
 
   void OnFindNewApplicationsRequest() OVERRIDE {}
+
+  void OnConnectionStatusUpdated() OVERRIDE {}
 
   /**
    * @brief Reaction to the event, when the device is found.
@@ -97,6 +99,15 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    *failure.
    */
   void OnScanDevicesFailed(const SearchDeviceError& error) OVERRIDE {}
+
+  /**
+   * @brief Reaction to the event, when connection is pending.
+   *
+   * @param devcie_info Variable that hold information about device.
+   * @param connection_id connection unique identifier.
+   */
+  void OnConnectionPending(const DeviceInfo& device_info,
+                           const ConnectionUID connection_id) OVERRIDE {}
 
   /**
    * @brief Reaction to the event, when connection is established.
@@ -187,6 +198,14 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) OVERRIDE {}
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) OVERRIDE {}
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_

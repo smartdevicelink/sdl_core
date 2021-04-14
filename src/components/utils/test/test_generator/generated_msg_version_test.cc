@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
+#include "generated_msg_version.h"
 #include <fstream>
+#include <iostream>
 #include <string>
 #include "gtest/gtest.h"
-#include "generated_msg_version.h"
 #include "utils/file_system.h"
 
 using namespace std;

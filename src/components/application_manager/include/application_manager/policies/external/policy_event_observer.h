@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 
 namespace policy {
@@ -48,6 +48,7 @@ class PolicyEventObserver
       application_manager::event_engine::EventDispatcher& event_dispatcher);
   void set_policy_handler(policy::PolicyHandlerInterface* const policy_handler);
   void on_event(const application_manager::event_engine::Event& event);
+  void on_event(const application_manager::event_engine::MobileEvent& event);
   void subscribe_on_event(
       const application_manager::event_engine::Event::EventID& event_id,
       int32_t hmi_correlation_id = 0);

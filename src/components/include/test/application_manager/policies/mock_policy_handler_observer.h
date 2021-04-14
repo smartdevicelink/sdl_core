@@ -37,8 +37,8 @@
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -49,6 +49,9 @@ class MockPolicyHandlerObserver : public ::policy::PolicyHandlerObserver {
   MOCK_METHOD1(OnUpdateHMIAppType,
                void(std::map<std::string, std::vector<std::string> >));
   MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
+  MOCK_METHOD2(OnAuthTokenUpdated,
+               void(const std::string& policy_app_id,
+                    const std::string& auth_token));
   MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
 };
 }  //  namespace application_manager_test

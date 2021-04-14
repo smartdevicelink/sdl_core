@@ -31,7 +31,10 @@
  */
 
 #include "application_manager/application_state.h"
+
 #include <algorithm>
+#include <string>
+
 #include "utils/logger.h"
 #include "utils/macro.h"
 
@@ -39,211 +42,280 @@ namespace {
 
 struct StateIDComparator {
   application_manager::HmiState::StateID state_id_;
-  StateIDComparator(application_manager::HmiState::StateID state_id)
+  explicit StateIDComparator(application_manager::HmiState::StateID state_id)
       : state_id_(state_id) {}
   bool operator()(const application_manager::HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
   }
 };
-}
+}  // namespace
 
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 ApplicationState::ApplicationState() {}
 
-void ApplicationState::InitState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void ApplicationState::InitState(const WindowID window_id,
+                                 const std::string& window_name,
+                                 HmiStatePtr state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  hmi_states_.clear();
-  hmi_states_.push_back(state);
+  SDL_LOG_DEBUG("Initing state " << state << " for window " << window_id
+                                 << " with name " << window_name);
+  {
+    sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+    HmiStates& states = hmi_states_map_[window_id];
+    states.push_back(state);
+  }
 }
 
-void ApplicationState::AddState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void ApplicationState::AddState(const WindowID window_id, HmiStatePtr state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   switch (state->state_id()) {
     case HmiState::StateID::STATE_ID_REGULAR:
-      SetRegularState(state);
+      SetRegularState(window_id, state);
       return;
     case HmiState::StateID::STATE_ID_POSTPONED:
-      SetPostponedState(state);
+      SetPostponedState(window_id, state);
       return;
     case HmiState::StateID::STATE_ID_CURRENT:
-      LOG4CXX_ERROR(logger_, "State of type '" << state << "' can't be added.");
+      SDL_LOG_ERROR("State of type '" << state << "' can't be added for window "
+                                      << window_id);
       return;
     default:
-      AddHMIState(state);
+      AddHMIState(window_id, state);
       break;
   }
 
   return;
 }
 
-void ApplicationState::RemoveState(HmiState::StateID state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void ApplicationState::RemoveState(const WindowID window_id,
+                                   HmiState::StateID state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   switch (state) {
     case HmiState::StateID::STATE_ID_CURRENT:
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOG4CXX_ERROR(logger_,
-                    "State of type '" << state << "'can't be removed.");
+      if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id) {
+        SDL_LOG_ERROR("State of type '" << state
+                                        << "' can't be removed for window "
+                                        << window_id);
+        return;
+      }
+
+      RemoveWindowHMIStates(window_id);
       break;
     case HmiState::StateID::STATE_ID_POSTPONED:
-      RemovePostponedState();
+      RemovePostponedState(window_id);
       break;
     default:
-      RemoveHMIState(state);
+      RemoveHMIState(window_id, state);
       break;
   }
 }
 
-HmiStatePtr ApplicationState::GetState(HmiState::StateID state_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+HmiStatePtr ApplicationState::GetState(const WindowID window_id,
+                                       HmiState::StateID state_id) const {
   switch (state_id) {
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOG4CXX_DEBUG(logger_, "Getting regular state.");
-      return RegularHmiState();
+      SDL_LOG_DEBUG("Getting regular state for window " << window_id);
+      return RegularHmiState(window_id);
     case HmiState::StateID::STATE_ID_POSTPONED:
-      LOG4CXX_DEBUG(logger_, "Getting postponed state.");
-      return PostponedHmiState();
+      SDL_LOG_DEBUG("Getting postponed state for window " << window_id);
+      return PostponedHmiState(window_id);
     default:
-      LOG4CXX_TRACE(logger_, "Getting current state.");
-      return CurrentHmiState();
+      SDL_LOG_TRACE("Getting current state for window " << window_id);
+      return CurrentHmiState(window_id);
   }
 }
 
-void ApplicationState::AddHMIState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+HmiStates ApplicationState::GetStates(const HmiState::StateID state_id) const {
+  SDL_LOG_DEBUG("Collecting all states of type " << state_id);
+
+  HmiStates hmi_states;
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  for (const auto& hmi_state_pair : hmi_states_map_) {
+    hmi_states.push_back(GetState(hmi_state_pair.first, state_id));
+  }
+
+  return hmi_states;
+}
+
+WindowIds ApplicationState::GetWindowIds() const {
+  SDL_LOG_DEBUG("Collecting available window ID's");
+
+  WindowIds window_ids;
+  std::string stringified_window_ids;
+
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  for (const auto& hmi_state_pair : hmi_states_map_) {
+    window_ids.push_back(hmi_state_pair.first);
+    stringified_window_ids += (stringified_window_ids.empty() ? "" : ", ") +
+                              std::to_string(hmi_state_pair.first);
+  }
+
+  SDL_LOG_DEBUG("Existing window IDs: [" + stringified_window_ids + "]");
+  return window_ids;
+}
+
+void ApplicationState::AddHMIState(const WindowID window_id,
+                                   HmiStatePtr state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStates::iterator it = std::find_if(hmi_states_.begin(),
-                                        hmi_states_.end(),
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  HmiStates& hmi_states = hmi_states_map_[window_id];
+  HmiStates::iterator it = std::find_if(hmi_states.begin(),
+                                        hmi_states.end(),
                                         StateIDComparator(state->state_id()));
-  if (hmi_states_.end() != it) {
-    LOG4CXX_WARN(
-        logger_,
-        "Hmi state with ID "
-            << state->state_id()
-            << "has been already applied to this application. Ignoring");
-    return;
+  if (hmi_states.end() != it) {
+    SDL_LOG_WARN("Hmi state with ID "
+                 << state->state_id() << "has been already applied for window "
+                 << window_id << " of this application. Overwriting");
+    EraseHMIState(hmi_states, it);
   }
 
-  hmi_states_.push_back(state);
+  if (!hmi_states.empty()) {
+    HmiStatePtr back_state = hmi_states.back();
+    state->set_parent(back_state);
+  }
+  hmi_states.push_back(state);
 }
 
-void ApplicationState::RemoveHMIState(HmiState::StateID state_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStates::iterator it = std::find_if(
-      hmi_states_.begin(), hmi_states_.end(), StateIDComparator(state_id));
-  if (it == hmi_states_.end()) {
-    LOG4CXX_ERROR(logger_, "Unsuccesful remove HmiState: " << state_id);
-    return;
-  }
-
+void ApplicationState::RemoveHMIState(const WindowID window_id,
+                                      HmiState::StateID state_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  HmiStates& hmi_states = hmi_states_map_[window_id];
   // unable to remove regular state
-  DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
-  HmiStates::iterator next = it;
-  HmiStates::iterator prev = it;
-  next++;
-  prev--;
-  if (next != hmi_states_.end()) {
-    HmiStatePtr next_state = *next;
-    HmiStatePtr prev_state = *prev;
-    next_state->set_parent(prev_state);
-  }
-  hmi_states_.erase(it);
-}
-
-void ApplicationState::RemovePostponedState() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-
-  StateIDComparator finder(HmiState::StateID::STATE_ID_POSTPONED);
-
-  HmiStates::iterator postponed_state =
-      std::find_if(hmi_states_.begin(), hmi_states_.end(), finder);
-
-  if (hmi_states_.end() == postponed_state) {
-    LOG4CXX_ERROR(logger_, "No postponed state is set for app.");
+  DCHECK_OR_RETURN_VOID(state_id != HmiState::StateID::STATE_ID_REGULAR);
+  HmiStates::iterator it = std::find_if(
+      hmi_states.begin(), hmi_states.end(), StateIDComparator(state_id));
+  if (hmi_states.end() == it) {
+    SDL_LOG_ERROR("Unsuccesful remove HmiState: " << state_id << " for window "
+                                                  << window_id);
     return;
   }
-  hmi_states_.erase(postponed_state);
+
+  EraseHMIState(hmi_states, it);
 }
 
-void ApplicationState::SetRegularState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void ApplicationState::EraseHMIState(HmiStates& hmi_states,
+                                     HmiStates::iterator it) {
+  if (hmi_states.begin() == it) {
+    (*it)->set_parent(nullptr);
+  } else {
+    HmiStates::iterator next = it;
+    HmiStates::iterator prev = it;
+    ++next;
+    --prev;
+
+    if (hmi_states.end() != next) {
+      HmiStatePtr next_state = *next;
+      HmiStatePtr prev_state = *prev;
+      next_state->set_parent(prev_state);
+    }
+  }
+
+  hmi_states.erase(it);
+}
+
+void ApplicationState::RemoveWindowHMIStates(const WindowID window_id) {
+  SDL_LOG_AUTO_TRACE();
+  DCHECK_OR_RETURN_VOID(mobile_apis::PredefinedWindows::DEFAULT_WINDOW !=
+                        window_id);
+
+  SDL_LOG_DEBUG("Removing HMI states for window with id #" << window_id);
+  {
+    sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+    hmi_states_map_.erase(window_id);
+  }
+}
+
+void ApplicationState::RemovePostponedState(const WindowID window_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
+  size_t deleted_elements = postponed_states_map_.erase(window_id);
+  if (0 == deleted_elements) {
+    SDL_LOG_ERROR("No postponed state is set for window " << window_id);
+  }
+}
+
+void ApplicationState::SetRegularState(const WindowID window_id,
+                                       HmiStatePtr state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_REGULAR);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-
-  HmiStatePtr front_state = hmi_states_.front();
-  HmiState::StateID front_state_id = front_state->state_id();
-  if (HmiState::StateID::STATE_ID_POSTPONED == front_state_id) {
-    // Drop postponed state
-    hmi_states_.erase(hmi_states_.begin());
-  }
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  HmiStates& hmi_states = hmi_states_map_[window_id];
+  DCHECK_OR_RETURN_VOID(!hmi_states.empty());
 
   // Drop regular state
-  hmi_states_.erase(hmi_states_.begin());
+  HmiStates::iterator it =
+      std::find_if(hmi_states.begin(),
+                   hmi_states.end(),
+                   StateIDComparator(HmiState::StateID::STATE_ID_REGULAR));
+  DCHECK_OR_RETURN_VOID(hmi_states.end() != it);
+  EraseHMIState(hmi_states, it);
 
-  if (!hmi_states_.empty()) {
-    HmiStatePtr front_state = hmi_states_.front();
-    front_state->set_parent(state);
+  if (!hmi_states.empty()) {
+    HmiStatePtr back_state = hmi_states.back();
+    state->set_parent(back_state);
   }
-  hmi_states_.insert(hmi_states_.begin(), state);
-  if (HmiState::StateID::STATE_ID_POSTPONED == front_state_id) {
-    hmi_states_.insert(hmi_states_.begin(), front_state);
-  }
+
+  // Insert new regular state
+  hmi_states.push_back(state);
 }
 
-void ApplicationState::SetPostponedState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void ApplicationState::SetPostponedState(const WindowID window_id,
+                                         HmiStatePtr state) {
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_POSTPONED);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-  HmiStatePtr front_state = hmi_states_.front();
-  if (front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
-    hmi_states_.erase(hmi_states_.begin());
-  }
-  hmi_states_.insert(hmi_states_.begin(), state);
+
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
+  postponed_states_map_[window_id] = state;
 }
 
-HmiStatePtr ApplicationState::CurrentHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStatePtr back_state = hmi_states_.back();
-  DCHECK_OR_RETURN(
-      back_state->state_id() != HmiState::StateID::STATE_ID_POSTPONED,
-      HmiStatePtr());
+HmiStatePtr ApplicationState::CurrentHmiState(const WindowID window_id) const {
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  auto it_states = hmi_states_map_.find(window_id);
+  DCHECK_OR_RETURN(it_states != hmi_states_map_.end(), HmiStatePtr());
+
+  const HmiStates& hmi_states = it_states->second;
+  DCHECK_OR_RETURN(!hmi_states.empty(), HmiStatePtr());
+
+  HmiStatePtr back_state = hmi_states.back();
+
   return back_state;
 }
 
-HmiStatePtr ApplicationState::RegularHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStates::const_iterator front_itr = hmi_states_.begin();
-  if ((*front_itr)->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
-    ++front_itr;
-  }
-  return *front_itr;
+HmiStatePtr ApplicationState::RegularHmiState(const WindowID window_id) const {
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  auto it_states = hmi_states_map_.find(window_id);
+  DCHECK_OR_RETURN(it_states != hmi_states_map_.end(), HmiStatePtr());
+
+  const HmiStates& hmi_states = it_states->second;
+  DCHECK_OR_RETURN(!hmi_states.empty(), HmiStatePtr());
+  auto it =
+      std::find_if(hmi_states.begin(),
+                   hmi_states.end(),
+                   StateIDComparator(HmiState::StateID::STATE_ID_REGULAR));
+  DCHECK_OR_RETURN(hmi_states.end() != it, HmiStatePtr());
+
+  return *it;
 }
 
-HmiStatePtr ApplicationState::PostponedHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStatePtr front_state = hmi_states_.front();
-  return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED
-             ? front_state
-             : HmiStatePtr();
+HmiStatePtr ApplicationState::PostponedHmiState(
+    const WindowID window_id) const {
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
+
+  auto it = postponed_states_map_.find(window_id);
+  return it != postponed_states_map_.end() ? it->second : HmiStatePtr();
 }
 
 }  // namespace application_manager

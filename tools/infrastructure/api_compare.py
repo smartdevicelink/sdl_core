@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import json
 import sys
@@ -6,11 +7,6 @@ import errno
 import argparse
 import xml.etree.ElementTree as ElementTree
 from collections import namedtuple
-
-reload(sys)
-# Enable Utf-8 support. Needed if script will be run under Windows
-sys.setdefaultencoding('utf-8')
-
 
 class colors:
     """Class defining colorful output.
@@ -206,53 +202,53 @@ def print_parameters(common_params, hmi_params, mob_params):
     """Function which prints parameters in mobile, hmi api
     and common parameters
     """
-    print "Parameters to check: ", common_params, "\n"
+    print("Parameters to check: ", common_params, "\n")
     for param in common_params:
         mob_items = sorted(mob_params[param].items())
         hmi_items = sorted(hmi_params[param].items())
-        print colors.UNDERLINE + colors.BOLD + param + colors.ENDC, ":"
-        print "In Mobile API :\t", dict(mob_items)
-        print "In HMI API :\t", dict(hmi_items)
+        print(colors.UNDERLINE + colors.BOLD + param + colors.ENDC, ":")
+        print("In Mobile API :\t", dict(mob_items))
+        print("In HMI API :\t", dict(hmi_items))
 
 
 def print_full_info(hmi_absent_params, hmi_params,
                     mob_absent_params, mob_params, rpc_name):
     """Function prints full detailed info about every rpc"""
-    print "\n" + "---" * 60 + "\n"
+    print("\n" + "---" * 60 + "\n")
     rpc_color = colors.BOLD + colors.HEADER
-    print rpc_color + rpc_name + colors.ENDC
-    print colors.BOLD + "\nMobile API: " + colors.ENDC
-    print "Parameters quantity: ", len(mob_params)
-    print "Parameters list: ", sorted(mob_params.keys())
-    print colors.BOLD + "HMI API: " + colors.ENDC
-    print "Parameters quantity: ", len(hmi_params)
-    print "Parameters list: ", sorted(hmi_params.keys())
-    print "\n"
+    print(rpc_color + rpc_name + colors.ENDC)
+    print(colors.BOLD + "\nMobile API: " + colors.ENDC)
+    print("Parameters quantity: ", len(mob_params))
+    print("Parameters list: ", sorted(mob_params.keys()))
+    print(colors.BOLD + "HMI API: " + colors.ENDC)
+    print("Parameters quantity: ", len(hmi_params))
+    print("Parameters list: ", sorted(hmi_params.keys()))
+    print("\n")
     print("{}Parameters absent in Mobile APIs: {}{}".
           format(colors.WARN, mob_absent_params, colors.ENDC))
     print("{}Parameters absent in HMI APIs: {}{}".
           format(colors.WARN, hmi_absent_params, colors.ENDC))
-    print "\n"
+    print("\n")
 
 
 def console_print(summary_result):
     """Function which prints summary result to console"""
     for rpc_name in sorted(summary_result.keys()):
-        print "\n" + "---" * 60
-        print colors.HEADER + rpc_name + colors.ENDC
+        print("\n" + "---" * 60)
+        print(colors.HEADER + rpc_name + colors.ENDC)
         for problematic_item in summary_result[rpc_name]:
             item = summary_result[rpc_name][problematic_item]
             if len(item) > 0:
-                print colors.UNDERLINE + problematic_item + colors.ENDC
+                print(colors.UNDERLINE + problematic_item + colors.ENDC)
             if type(item) is not dict:
                 print("{}{}{}".format(colors.WARN, item, colors.ENDC))
             elif type(item) is dict:
                 for param in item.keys():
                     item_print = colors.UNDERLINE + param + colors.ENDC
-                    print "{} {}".format("Parameter name: ", item_print)
+                    print("{} {}".format("Parameter name: ", item_print))
                     res_val = item[param]
                     for key in res_val:
-                        print key, ":", colors.FAIL, res_val[key], colors.ENDC
+                        print(key, ":", colors.FAIL, res_val[key], colors.ENDC)
 
 
 def print_summary_info(summary_result, args):
@@ -260,21 +256,21 @@ def print_summary_info(summary_result, args):
     Output type depends on command line args
     """
     summary_color = colors.UNDERLINE + colors.BOLD + colors.BLUE
-    print "\n"
-    print summary_color, "SUMMARY COMPARISON RESULT:\n", colors.ENDC
+    print("\n")
+    print(summary_color, "SUMMARY COMPARISON RESULT:\n", colors.ENDC)
     if len(summary_result) == 0:
-        print colors.BOLD + " === NO PROBLEMS FOUND ===" + colors.ENDC
+        print(colors.BOLD + " === NO PROBLEMS FOUND ===" + colors.ENDC)
         return
     if args.output == "console":
         console_print(summary_result)
     if args.output == "json":
         json_summary_result = dict_to_json(summary_result)
-        print json_summary_result
+        print(json_summary_result)
     if args.output == "xml":
         json_summary_result = dict_to_json(summary_result)
         temp = json.loads(json_summary_result)
         xml_summary_result = json_to_xml(temp)
-        print xml_summary_result
+        print(xml_summary_result)
 
 
 def handle_absent_params(area, absent_params, rpc_name, summary_result):
@@ -365,7 +361,7 @@ def all_compare_rule(mob_param_attributes, hmi_param_attributes):
     """Function used for all common arrtibutes comparison"""
     mobile_result = {}
     hmi_result = {}
-    attr_names = mob_param_attributes.keys() + hmi_param_attributes.keys()
+    attr_names = [*mob_param_attributes] + [*hmi_param_attributes]
     attr_names = set(attr_names)
     for attr_name in attr_names:
         mobile_attribute_value = None
@@ -393,8 +389,8 @@ global_compare_rules = [
      mob_param_attributes["type"] == "String", string_compare_rule),
     # Comparison rule when attribute "array" = "true"
     (lambda mob_param_attributes, hmi_param_attributes:
-     'array' in mob_param_attributes.keys() +
-     hmi_param_attributes.keys(), array_compare_rule),
+     'array' in [*mob_param_attributes] +
+     [*hmi_param_attributes], array_compare_rule),
     # Common comparison function for all attributes
     (lambda mob_param_attributes, hmi_param_attributes:
      True, all_compare_rule)

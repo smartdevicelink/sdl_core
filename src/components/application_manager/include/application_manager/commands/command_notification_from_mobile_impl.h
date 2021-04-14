@@ -42,13 +42,23 @@ namespace commands {
 
 class CommandNotificationFromMobileImpl : public CommandImpl {
  public:
-  CommandNotificationFromMobileImpl(const MessageSharedPtr& message,
-                                    ApplicationManager& application_manager);
+  CommandNotificationFromMobileImpl(
+      const MessageSharedPtr& message,
+      ApplicationManager& application_manager,
+      rpc_service::RPCService& rpc_service,
+      HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
   virtual ~CommandNotificationFromMobileImpl();
   virtual bool Init();
+  bool CheckPermissions() OVERRIDE;
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();
+  void SendNotificationToMobile();
+  void SendNotificationToHMI(
+      const hmi_apis::FunctionID::eType& hmi_function_id);
+  void SendNotificationToConsumers(
+      const hmi_apis::FunctionID::eType& hmi_function_id);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationFromMobileImpl);

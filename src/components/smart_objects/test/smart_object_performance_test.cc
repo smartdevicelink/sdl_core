@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <set>
+#include <string>
 
 #include "gmock/gmock.h"
 
 #include "smart_objects/smart_object.h"
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 namespace test {
 namespace components {
@@ -58,7 +58,7 @@ void MakeMapObject(SmartObject& obj, const int size) {
     obj[i_key] = array;
   }
 }
-}
+}  // namespace
 
 TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
   SmartObject object;
