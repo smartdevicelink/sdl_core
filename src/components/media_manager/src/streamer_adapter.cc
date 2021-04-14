@@ -150,7 +150,7 @@ void StreamerAdapter::Streamer::threadMain() {
       static int32_t messages_for_session = 0;
       ++messages_for_session;
 
-      SDL_LOG_DEBUG("Handling map streaming message. This is "
+      SDL_LOG_TRACE("Handling map streaming message. This is "
                     << messages_for_session << " message for "
                     << adapter_->current_application_);
       std::set<MediaListenerPtr>::iterator it =
