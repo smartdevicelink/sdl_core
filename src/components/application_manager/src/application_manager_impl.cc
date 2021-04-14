@@ -4323,6 +4323,10 @@ ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
         result.keyboard_properties = true;
         break;
       }
+      case mobile_apis::GlobalProperty::USER_LOCATION: {
+        result.user_location = true;
+        break;
+      }
       default: {
         SDL_LOG_TRACE("Unknown global property: " << global_property);
         break;
@@ -4373,7 +4377,9 @@ ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
   if (application->keyboard_props()) {
     (*global_properties)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
   }
-
+  if (!application->get_user_location().empty()) {
+    (*global_properties)[i++] = GlobalProperty::USER_LOCATION;
+  }
   return global_properties;
 }
 
