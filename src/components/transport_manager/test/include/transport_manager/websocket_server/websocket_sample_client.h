@@ -39,7 +39,6 @@
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>

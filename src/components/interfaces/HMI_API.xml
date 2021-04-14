@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="2.1.0" date="2019-03-18">
+<interface name="Common" version="2.2.0" date="2021-04-14">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -634,6 +634,12 @@
   <element name="phoneNumber">
     <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
+  <element name="timeToDestination">
+    <description>Optional time to destination field for ShowConstantTBT</description>
+  </element>
+  <element name="turnText">
+    <description>Turn text for turnList parameter of UpdateTurnList</description>
+  </element>
   <element name="subtleAlertText1">
     <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
   </element>
@@ -643,14 +649,17 @@
   <element name="subtleAlertSoftButtonText">
     <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
-  <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-  <element name="turnText"/>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
+  <element name="menuCommandSecondaryText">
+      <description>Secondary text for AddCommand</description>
   </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
+  <element name="menuCommandTertiaryText">
+      <description>Tertiary text for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryText">
+      <description>Secondary text for AddSubMenu</description>
+  </element>
+  <element name="menuSubMenuTertiaryText">
+      <description>Tertiary text for AddSubMenu</description>
   </element>
 </enum>
 
@@ -742,6 +751,12 @@
   <element name="subtleAlertIcon">
     <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
   </element>
+  <element name="menuCommandSecondaryImage">
+    <description>The secondary image field for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryImage">
+    <description>The secondary image field for AddSubMenu</description>
+  </element>
 </enum>
 
 <enum name="TextAlignment">
@@ -830,6 +845,11 @@
   <element name="Command">
     <description>Type that expound that current AddCommand should be pocessed as common command for current application on HMI.</description>
   </element>
+</enum>
+
+<enum name="AppCapabilityType">
+  <description>Enumerations of all available app capability types</description>
+  <element name="VIDEO_STREAMING"/>
 </enum>
 
 <!--IVI part-->
@@ -1208,6 +1228,7 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_CLIMATEDATA"/>
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
@@ -1327,6 +1348,7 @@
   <element name="QWERTY" />
   <element name="QWERTZ" />
   <element name="AZERTY" />
+  <element name="NUMERIC"/>
 </enum>
 
 <enum name="KeyboardEvent">
@@ -1336,6 +1358,15 @@
   <element name="ENTRY_VOICE" />
   <element name="ENTRY_CANCELLED" />
   <element name="ENTRY_ABORTED" />
+  <element name="INPUT_KEY_MASK_ENABLED"/>
+  <element name="INPUT_KEY_MASK_DISABLED"/>
+</enum>
+
+<enum name="KeyboardInputMask">
+  <description>Enumeration listing possible input character masking.</description>
+  <element name="ENABLE_INPUT_KEY_MASK" />
+  <element name="DISABLE_INPUT_KEY_MASK" />
+  <element name="USER_CHOICE_INPUT_KEY_MASK" />
 </enum>
 
 <enum name="KeypressMode">
@@ -2241,7 +2272,7 @@
  </enum>
 
  <struct name="Temperature">
-    <param name="unit" type="TemperatureUnit" mandatory="true" >
+    <param name="unit" type="Common.TemperatureUnit" mandatory="true" >
       <description>Temperature Unit</description>
     </param>
     <param name="value" type="Float" mandatory="true" >
@@ -2948,6 +2979,12 @@
   <param name="menuName" type="String" maxlength="500" mandatory="true">
     <description>The name of the sub menu/command.</description>
   </param>
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional secondary text to display</description>
+  </param>
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional tertiary text to display</description>
+  </param>
 </struct>
 
 <enum name="MenuLayout">
@@ -3184,11 +3221,20 @@
       If empty, the auto-complete list will be removed from the screen.
     </description>
   </param>
+  <param name="maskInputCharacters" type="Common.KeyboardInputMask" mandatory="false">
+    <description>Allows an app to mask entered characters on HMI</description>
+  </param>
+  <param name="customKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
+    <description>
+      Array of special characters to show in customizable keys.
+      If omitted, keyboard will show default special characters
+    </description>
+  </param>
 </struct>
 
 <struct name="Turn">
   <param name="navigationText" type="Common.TextFieldStruct" mandatory="false">
-    <description>Uses navigationText from TextFieldStruct.</description>
+    <description>Describes the `Turn` using `TextFieldName` `turnText`</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
@@ -3662,6 +3708,20 @@
     <param name="preferredFPS" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
       <description>The preferred frame rate per second of the head unit. The mobile application / app library may take other factors into account that constrain the frame rate lower than this value, but it should not perform streaming at a higher frame rate than this value.</description>
     </param>
+    <param name="additionalVideoStreamingCapabilities" type="VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
+    </param>
+  </struct>
+
+  <struct name="AppCapability">
+    <param name="appCapabilityType" type="AppCapabilityType" mandatory="true">
+        <description>
+            Used as a descriptor of what data to expect in this struct.
+            The corresponding param to this enum should be included and the only other param included.
+        </description>
+    </param>
+    <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+        <description>Describes supported capabilities for video streaming </description>
+    </param>
   </struct>
 
   <struct name="DynamicUpdateCapabilities">
@@ -3677,6 +3737,25 @@
   <struct name="WindowTypeCapabilities">
     <param name="type" type="Common.WindowType" mandatory="true" />
     <param name="maximumNumberOfWindows" type="Integer" mandatory="true" />
+  </struct>
+
+  <struct name="KeyboardLayoutCapability">
+    <description>
+      Describes the capabilities of a single keyboard layout.
+    </description>
+    <param name="keyboardLayout" type="KeyboardLayout" mandatory="true"/>
+    <param name="numConfigurableKeys" type="Integer" minvalue="0" maxvalue="10" mandatory="true">
+      <description>Number of keys available for special characters, App can customize as per their needs.</description>
+    </param>
+  </struct>
+
+  <struct name="KeyboardCapabilities">
+    <param name="maskInputCharactersSupported" type="Boolean" mandatory="false">
+      <description>Availability of capability to mask input characters using keyboard. True: Available, False: Not Available</description>
+    </param>
+    <param name="supportedKeyboards" type="KeyboardLayoutCapability" minsize="1" maxsize="1000" array="true" mandatory="false">
+      <description>Capabilities of supported keyboard layouts by HMI.</description>
+    </param>
   </struct>
 
   <struct name="WindowCapability">
@@ -3712,6 +3791,9 @@
     </param>
     <param name="dynamicUpdateCapabilities" type="DynamicUpdateCapabilities" mandatory="false">
       <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
+    </param>
+    <param name="keyboardCapabilities" type="KeyboardCapabilities" mandatory="false">
+      <description>See KeyboardCapabilities</description>
     </param>
   </struct>
 
@@ -3756,7 +3838,7 @@
       </param>
       <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
         <description>Describes capabilities when the driver is distracted</description>
-    </param>
+      </param>
   </struct>
 
   <struct name="RemoteControlCapabilities">
@@ -4356,6 +4438,18 @@
       </param>
     </struct>
 
+    <struct name="ClimateData">
+      <param name="externalTemperature" type="Common.Temperature" mandatory="false">
+        <description>The external temperature in degrees celsius</description>
+      </param>
+      <param name="cabinTemperature" type="Common.Temperature" mandatory="false">
+        <description>Internal ambient cabin temperature in degrees celsius</description>
+      </param>
+      <param name="atmosphericPressure" type="Float" minvalue="0" maxvalue="2000" mandatory="false">
+        <description>Current atmospheric pressure in mBar</description>
+      </param>
+    </struct>
+
     <struct name="GearStatus">
       <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
         <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
@@ -4472,27 +4566,27 @@
     </function>
 </interface>
 
-<interface name="BasicCommunication" version="2.1.0" date="2019-03-18">
-<function name="OnServiceUpdate" messagetype="notification">
-  <description>
-    Must be sent by SDL to HMI when there is an update on status of certain services.
-    Services supported with current version: Video
-  </description>
-  <param name="serviceType" type="Common.ServiceType" mandatory="true">
-    <description>Specifies the service which has been updated.</description>
-  </param>
-  <param name="serviceEvent" type="Common.ServiceEvent" mandatory="false">
-    <description>Specifies service update event.</description>
-  </param>
-  <param name="reason" type="Common.ServiceStatusUpdateReason" mandatory="false">
-    <description>
-      The reason for a service event. Certain events may not have a reason, such as when a service is ACCEPTED (which is the normal expected behavior).
-    </description>
-  </param>
-   <param name="appID" type="Integer" mandatory="false">
-       <description>ID of the application which triggered the update.</description>
-   </param>
-</function>
+<interface name="BasicCommunication" version="2.2.0" date="2021-04-14">
+    <function name="OnServiceUpdate" messagetype="notification">
+      <description>
+        Must be sent by SDL to HMI when there is an update on status of certain services.
+        Services supported with current version: Video
+      </description>
+      <param name="serviceType" type="Common.ServiceType" mandatory="true">
+        <description>Specifies the service which has been updated.</description>
+      </param>
+      <param name="serviceEvent" type="Common.ServiceEvent" mandatory="false">
+        <description>Specifies service update event.</description>
+      </param>
+      <param name="reason" type="Common.ServiceStatusUpdateReason" mandatory="false">
+        <description>
+          The reason for a service event. Certain events may not have a reason, such as when a service is ACCEPTED (which is the normal expected behavior).
+        </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="false">
+          <description>ID of the application which triggered the update.</description>
+      </param>
+    </function>
     <function name="GetSystemTime" messagetype="request">
       <description>Request from SDL to HMI to obtain current UTC time.</description>
     </function>
@@ -4862,6 +4956,9 @@
     <param name="wersCountryCode" type="String" maxlength="500" mandatory="true">
       <description>Country code from the Ford system WERS (i.e.WAEGB).</description>
     </param>
+    <param name="systemHardwareVersion" type="String" maxlength="500" mandatory="false">
+      <description>The hardware version of the system</description>
+    </param>
   </function>
   <function name="OnSystemInfoChanged" messagetype="notification">
     <description>Issued by system to SDL to notify that some system param has changed. Currently applied for Sync Language.</description>
@@ -4943,9 +5040,18 @@
       <description>The new application properties</description>
     </param>
   </function>
+
+  <function name="OnAppCapabilityUpdated" messagetype="notification">
+    <description>A notification to inform HMI that a specific app capability has changed.</description>
+    <param name="appCapability" type="Common.AppCapability" mandatory="true">
+        <description>The app capability that has been updated</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+    </param>
+  </function>
 </interface>
 
-<interface name="VR" version="1.1.0" date="2017-04-27">
+<interface name="VR" version="1.2.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
@@ -5225,7 +5331,7 @@
   </function>
 </interface>
 
-<interface name="UI" version="1.4.0" date="2019-07-24">
+<interface name="UI" version="1.5.0" date="2021-04-14">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -5482,6 +5588,9 @@
       <description>Image to be displayed for representing the command. See Image.</description>
       <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
     </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+      <description>Optional secondary image struct for menu cell</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
@@ -5513,6 +5622,9 @@
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
       <description>The image field for AddSubMenu</description>
+    </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+        <description>Optional secondary image struct for menu cell</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
@@ -5976,7 +6088,7 @@
 
 </interface>
 
-<interface name="Navigation" version="1.5.0" date="2017-08-15">
+<interface name="Navigation" version="1.6.0" date="2021-04-14">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -6200,7 +6312,7 @@
 
 </interface>
 
-<interface name="VehicleInfo" version="2.1.0" date="2019-03-18">
+<interface name="VehicleInfo" version="2.2.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
   </function>
@@ -6314,6 +6426,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6424,6 +6539,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6539,6 +6657,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6649,6 +6770,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6761,6 +6885,9 @@
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
@@ -6875,6 +7002,9 @@
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
@@ -6991,6 +7121,9 @@
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -7080,7 +7213,7 @@
 </interface>
 
  <!-- Policies -->
-<interface name="SDL" version="1.2.0" date="2018-09-05">
+<interface name="SDL" version="1.3.0" date="2021-04-14">
 <function name="ActivateApp" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
     </param>
@@ -7261,7 +7394,7 @@
     </function>
 </interface>
 
-<interface name="RC" version="2.0.0" date="2018-09-05">
+<interface name="RC" version="2.1.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of remote controllable module and its readiness to cooperate with SDL.</description>
   </function>
@@ -7384,7 +7517,7 @@
 
 </interface>
 
-<interface name="AppService" version="1.0.0" date="2019-03-18">
+<interface name="AppService" version="1.1.0" date="2021-04-14">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
         <description>

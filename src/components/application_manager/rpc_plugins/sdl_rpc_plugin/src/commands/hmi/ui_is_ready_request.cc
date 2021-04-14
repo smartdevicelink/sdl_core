@@ -72,6 +72,8 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_UI);
       HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_ui_cooperating(is_available);
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::UI_IsReady);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_UI)) {
         UpdateRequiredInterfaceCapabilitiesRequests(hmi_interface::ui);
@@ -91,6 +93,8 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void UIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_IsReady);
   RequestInterfaceCapabilities(hmi_interface::ui);
 }
 

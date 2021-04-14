@@ -88,8 +88,9 @@ class MockApplication : public ::application_manager::Application {
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
                void(protocol_handler::ServiceType service_type));
-  MOCK_METHOD1(WakeUpStreaming,
-               void(protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(WakeUpStreaming,
+               void(protocol_handler::ServiceType service_type,
+                    uint32_t timer_len));
   MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
   MOCK_METHOD1(set_voice_communication_supported,
                void(bool is_voice_communication_supported));

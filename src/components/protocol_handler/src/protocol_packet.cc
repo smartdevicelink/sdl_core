@@ -262,7 +262,7 @@ ProtocolPacket::ProtocolHeaderValidator::max_payload_size_by_service_type(
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
-  SDL_LOG_DEBUG("Validating header - " << header);
+  SDL_LOG_TRACE("Validating header - " << header);
   // expected payload size will be calculated depending
   // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
@@ -390,7 +390,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       return RESULT_FAIL;
     }
   }
-  SDL_LOG_DEBUG("Message header is completely correct.");
+  SDL_LOG_TRACE("Message header is completely correct.");
   return RESULT_OK;
 }
 

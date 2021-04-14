@@ -75,6 +75,7 @@ struct ResetGlobalPropertiesResult {
   bool menu_name;
   bool menu_icon;
   bool keyboard_properties;
+  bool user_location;
   bool vr_has_been_reset;
 
   ResetGlobalPropertiesResult()
@@ -84,6 +85,7 @@ struct ResetGlobalPropertiesResult {
       , menu_name(false)
       , menu_icon(false)
       , keyboard_properties(false)
+      , user_location(false)
       , vr_has_been_reset(false) {}
 
   bool HasUIPropertiesReset() const {
@@ -92,6 +94,10 @@ struct ResetGlobalPropertiesResult {
 
   bool HasTTSPropertiesReset() const {
     return timeout_prompt || help_prompt;
+  }
+
+  bool HasRCPropertiesReset() const {
+    return user_location;
   }
 };
 
@@ -1059,6 +1065,18 @@ class MessageHelper {
    * @return filled smart object with relevant request data
    */
   static smart_objects::SmartObjectSPtr CreateTTSResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
+
+  /**
+   * @brief CreateRCResetGlobalPropertiesRequest Creates request
+   * to reset global properties for RC
+   * @param reset_result struct containing result of global properties reset
+   * procedure
+   * @param application application for which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateRCResetGlobalPropertiesRequest(
       const ResetGlobalPropertiesResult& reset_result,
       const ApplicationSharedPtr application);
 

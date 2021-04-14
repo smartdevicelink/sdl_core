@@ -472,10 +472,11 @@ void SQLPTRepresentation::GatherModuleMeta(
   SDL_LOG_INFO("Gather Module Meta Info");
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectModuleMeta) && query.Next()) {
-    *meta->pt_exchanged_at_odometer_x = query.GetInteger(0);
-    *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(1);
-    *meta->ignition_cycles_since_last_exchange = query.GetInteger(2);
-    *meta->ccpu_version = query.GetString(4);
+    *meta->ccpu_version = query.GetString(0);
+    *meta->hardware_version = query.GetString(1);
+    *meta->pt_exchanged_at_odometer_x = query.GetInteger(2);
+    *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(3);
+    *meta->ignition_cycles_since_last_exchange = query.GetInteger(4);
   }
 }
 
@@ -714,6 +715,22 @@ bool SQLPTRepresentation::SetMetaInfo(const std::string& ccpu_version) {
     return false;
   }
   return true;
+}
+
+void SQLPTRepresentation::SetHardwareVersion(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateMetaHardwareVersion)) {
+    SDL_LOG_WARN("Incorrect statement for insert to module meta.");
+    return;
+  }
+
+  query.Bind(0, hardware_version);
+
+  if (!query.Exec()) {
+    SDL_LOG_WARN("Incorrect insert to module meta.");
+  }
 }
 
 bool SQLPTRepresentation::GatherApplicationPoliciesSection(

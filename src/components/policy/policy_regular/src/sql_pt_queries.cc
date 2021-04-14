@@ -60,7 +60,8 @@ const std::string kCreateSchema =
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
     "  `flag_update_required` BOOL NOT NULL, "
-    "  `ccpu_version` VARCHAR(45) "
+    "  `ccpu_version` VARCHAR(45), "
+    "  `hardware_version` VARCHAR(45) "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_config`( "
     "  `preloaded_pt` BOOL NOT NULL, "
@@ -1076,10 +1077,16 @@ const std::string kSaveModuleMeta =
     "`pt_exchanged_x_days_after_epoch` = ?, "
     "`ignition_cycles_since_last_exchange` = ? ";
 
-const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
+const std::string kSelectModuleMeta =
+    "SELECT `ccpu_version`, `hardware_version`, `pt_exchanged_at_odometer_x`, "
+    "`pt_exchanged_x_days_after_epoch`, `ignition_cycles_since_last_exchange` "
+    "FROM `module_meta`";
 
 const std::string kUpdateMetaParams =
     "UPDATE `module_meta` SET "
     "`ccpu_version` = ? ";
+
+const std::string kUpdateMetaHardwareVersion =
+    "UPDATE `module_meta` SET `hardware_version` = ? ";
 }  // namespace sql_pt
 }  // namespace policy

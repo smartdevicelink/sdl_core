@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SESSION_H_
 
 #include <boost/asio/bind_executor.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <functional>
@@ -99,7 +98,6 @@ class WebSocketSession
  protected:
   tcp::socket socket_;
   websocket::stream<ExecutorType> ws_;
-  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::flat_buffer buffer_;
   DataReceiveCallback data_receive_;
   DataSendDoneCallback data_send_done_;

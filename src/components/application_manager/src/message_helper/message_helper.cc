@@ -53,6 +53,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -183,6 +184,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::cloud_app_vehicle_id,
             mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
+        std::make_pair(strings::climate_data,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_CLIMATEDATA),
         std::make_pair(strings::external_temp,
                        mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
         std::make_pair(strings::turn_signal,
@@ -394,23 +397,61 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
   }
 
   if (reset_result.keyboard_properties) {
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
-    key_board_properties[hmi_request::auto_complete_list] =
+    keyboard_properties[hmi_request::auto_complete_list] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
+    keyboard_properties[strings::auto_complete_text] = "";
+    keyboard_properties[hmi_request::mask_input_characters] =
+        static_cast<int32_t>(
+            hmi_apis::Common_KeyboardInputMask::DISABLE_INPUT_KEY_MASK);
 
-    key_board_properties[strings::auto_complete_text] = "";
     (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
-        key_board_properties;
+        keyboard_properties;
+    application->set_keyboard_props(
+        smart_objects::SmartObject(smart_objects::SmartType_Null));
   }
 
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
 
   return ui_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  namespace rc = rc_rpc_plugin;
+
+  smart_objects::SmartObjectSPtr rc_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.user_location) {
+    smart_objects::SmartObject user_location =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    user_location[rc::strings::kGrid] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& grid = user_location[rc::strings::kGrid];
+    grid[rc::strings::kRow] = 0;
+    grid[rc::strings::kCol] = 0;
+    grid[rc::strings::kLevel] = 0;
+    grid[rc::strings::kRowspan] = 1;
+    grid[rc::strings::kColspan] = 1;
+    grid[rc::strings::kLevelspan] = 1;
+
+    (*rc_reset_global_prop_request)[strings::user_location] = user_location;
+    application->set_user_location(user_location);
+  }
+
+  (*rc_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return rc_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr

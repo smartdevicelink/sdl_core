@@ -127,7 +127,7 @@ HmiStatePtr ApplicationState::GetState(const WindowID window_id,
       SDL_LOG_DEBUG("Getting postponed state for window " << window_id);
       return PostponedHmiState(window_id);
     default:
-      SDL_LOG_DEBUG("Getting current state for window " << window_id);
+      SDL_LOG_TRACE("Getting current state for window " << window_id);
       return CurrentHmiState(window_id);
   }
 }

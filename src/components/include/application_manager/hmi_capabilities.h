@@ -97,9 +97,24 @@ class HMICapabilities {
 
   /**
    * @brief Returns software version of the target
-   * @return TRUE if it supported, otherwise FALSE
+   * @return string representation of software version if supported, otherwise
+   * empty string
    */
   virtual const std::string& ccpu_version() const = 0;
+
+  /**
+   * @brief Interface used to store information about hardware version of the
+   * target
+   * @param hardware_version Received system/hmi hardware version
+   */
+  virtual void set_hardware_version(const std::string& hardware_version) = 0;
+
+  /**
+   * @brief Returns hardware version of the target
+   * @return string representation of hardware version if supported, otherwise
+   * empty string
+   */
+  virtual const std::string& hardware_version() const = 0;
 
   /**
    * @brief Retrieves if mixing audio is supported by HMI

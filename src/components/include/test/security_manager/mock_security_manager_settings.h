@@ -56,6 +56,7 @@ class MockCryptoManagerSettings
   MOCK_CONST_METHOD0(maximum_payload_size, size_t());
   MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
   MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
+  MOCK_CONST_METHOD0(security_level, uint32_t());
 };
 
 }  // namespace security_manager_test

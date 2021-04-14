@@ -131,6 +131,8 @@ CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
   rc.insert(std::make_pair("AES128-SHA", seed_sha_max_block_size));
   rc.insert(
       std::make_pair("AES256-GCM-SHA384", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("ECDHE-RSA-AES256-GCM-SHA384",
+                           aes128_gcm_sha256_max_block_size));
   rc.insert(std::make_pair("AES256-SHA256", aes128_sha256_max_block_size));
   rc.insert(std::make_pair("AES256-SHA", seed_sha_max_block_size));
   rc.insert(std::make_pair("CAMELLIA128-SHA", seed_sha_max_block_size));
@@ -522,15 +524,14 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
 
 size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
   SDL_LOG_AUTO_TRACE();
+  const auto max_allowed_block_size =
+      mtu > SSL3_RT_MAX_PLAIN_LENGTH ? SSL3_RT_MAX_PLAIN_LENGTH : mtu;
   if (!max_block_size_) {
     // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
     // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
-    assert(mtu > 90);
-    return mtu - 90;
+    assert(max_allowed_block_size > 90);
+    return max_allowed_block_size - 90;
   }
-
-  const auto max_allowed_block_size =
-      mtu > SSL3_RT_MAX_PLAIN_LENGTH ? SSL3_RT_MAX_PLAIN_LENGTH : mtu;
 
   return max_block_size_(max_allowed_block_size);
 }

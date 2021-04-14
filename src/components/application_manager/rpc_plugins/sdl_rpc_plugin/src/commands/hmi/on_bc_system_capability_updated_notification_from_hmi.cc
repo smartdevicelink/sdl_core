@@ -34,6 +34,7 @@
 
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/message_helper.h"
+#include "extensions/system_capability_app_extension.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -84,11 +85,7 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   SDL_LOG_DEBUG("Updating display capabilities for app " << app_id);
   app->set_display_capabilities(display_capabilities);
 
-  // Remove app_id from notification to mobile
-  (*message_)[strings::params][strings::connection_key] =
-      (*message_)[strings::msg_params][strings::app_id];
-  (*message_)[strings::msg_params].erase(strings::app_id);
-
+  RemoveAppIdFromNotification();
   auto& builder = app->display_capabilities_builder();
   if (builder.IsWaitingForWindowCapabilities(display_capabilities)) {
     SDL_LOG_DEBUG("Application is waiting for capabilities");
@@ -97,6 +94,54 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   }
 
   return ProcessSystemDisplayCapabilitiesResult::SUCCESS;
+}
+
+void OnBCSystemCapabilityUpdatedNotificationFromHMI::
+    RemoveAppIdFromNotification() {
+  (*message_)[strings::params][strings::connection_key] =
+      (*message_)[strings::msg_params][strings::app_id];
+  (*message_)[strings::msg_params].erase(strings::app_id);
+}
+
+bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
+    ProcessVideoStreamingCapability(
+        const smart_objects::SmartObject& system_capability) {
+  if (!system_capability.keyExists(strings::video_streaming_capability)) {
+    SDL_LOG_WARN(
+        "VideoStreamingCapability is absent in the notification. "
+        "Notification Will be ignored");
+    return false;
+  }
+  if (!(*message_)[strings::msg_params].keyExists(strings::app_id)) {
+    SDL_LOG_WARN(
+        "Notification doesn't contain an application id. Will "
+        "be ignored");
+    return false;
+  }
+
+  const auto app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
+
+  auto app = application_manager_.application(app_id);
+  if (!app) {
+    SDL_LOG_WARN("Application with app_id: "
+                 << app_id
+                 << " isn't registered. Notification will be ignored");
+    return false;
+  }
+
+  auto& system_capability_extension =
+      SystemCapabilityAppExtension::ExtractExtension(*app);
+
+  if (!system_capability_extension.IsSubscribedTo(
+          mobile_apis::SystemCapabilityType::VIDEO_STREAMING)) {
+    SDL_LOG_WARN("The Application with app_id: "
+                 << app_id
+                 << " isn't subscribed to the VIDEO_STREAMING system "
+                    "capability type. Notification will be ignored");
+    return false;
+  }
+  return true;
 }
 
 void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
@@ -109,7 +154,11 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
   const auto& system_capability =
       (*message_)[strings::msg_params][strings::system_capability];
 
-  switch (system_capability[strings::system_capability_type].asInt()) {
+  const auto system_capability_type =
+      static_cast<mobile_apis::SystemCapabilityType::eType>(
+          system_capability[strings::system_capability_type].asInt());
+
+  switch (system_capability_type) {
     case mobile_apis::SystemCapabilityType::DISPLAYS: {
       if (system_capability.keyExists(strings::display_capabilities)) {
         const auto result = ProcessSystemDisplayCapabilities(
@@ -135,6 +184,14 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
       }
       break;
     }
+    case mobile_apis::SystemCapabilityType::VIDEO_STREAMING: {
+      if (!ProcessVideoStreamingCapability(system_capability)) {
+        return;
+      }
+      RemoveAppIdFromNotification();
+      break;
+    }
+    default: { SDL_LOG_ERROR("Unknown system capability type received"); }
   }
 
   SendNotificationToMobile(message_);
