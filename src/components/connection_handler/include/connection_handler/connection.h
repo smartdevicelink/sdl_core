@@ -76,8 +76,10 @@ struct Service {
   Service()
       : service_type(protocol_handler::kInvalidServiceType)
       , is_protected_(false) {}
+
   explicit Service(protocol_handler::ServiceType service_type)
       : service_type(service_type), is_protected_(false) {}
+
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
   }
@@ -209,12 +211,23 @@ class Connection {
    */
   void SetProtectionFlag(const uint8_t session_id,
                          const protocol_handler::ServiceType& service_type);
+
 #endif  // ENABLE_SECURITY
         /**
          * @brief Returns map of sessions which have been opened in
          *  current connection.
          */
   const SessionMap session_map() const;
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param session_id id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint8_t session_id,
+      const protocol_handler::ServiceType& service_type) const;
 
   /**
    * @brief Close session

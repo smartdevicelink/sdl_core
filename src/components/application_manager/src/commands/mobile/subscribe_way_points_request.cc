@@ -25,17 +25,18 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (application_manager_.IsAppSubscribedForWayPoints(app->app_id())) {
+  if (application_manager_.IsAppSubscribedForWayPoints(app)) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
-    application_manager_.SubscribeAppForWayPoints(app->app_id());
+    application_manager_.SubscribeAppForWayPoints(app);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_SubscribeWayPoints, NULL, true);
 }
@@ -47,6 +48,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_SubscribeWayPoints event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
@@ -55,7 +57,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       const bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
-        application_manager_.SubscribeAppForWayPoints(app->app_id());
+        application_manager_.SubscribeAppForWayPoints(app);
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),

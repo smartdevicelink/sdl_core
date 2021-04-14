@@ -72,6 +72,7 @@ void GetDTCsRequest::Run() {
 
   msg_params[strings::app_id] = app->app_id();
 
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs, &msg_params, true);
 }
 
@@ -81,6 +82,7 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

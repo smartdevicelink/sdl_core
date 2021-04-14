@@ -1344,7 +1344,7 @@ TEST_F(PolicyManagerImplTest2,
   // Add app
   policy_manager_->AddApplication(section_name,
                                   HmiTypes(policy_table::AHT_DEFAULT));
-  EXPECT_CALL(listener_, OnPendingPermissionChange(section_name)).Times(2);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(section_name));
 
   // PTU has single invalid RequestTypes, which must be dropped and replaced
   // with default RT

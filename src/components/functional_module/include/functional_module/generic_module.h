@@ -143,10 +143,11 @@ class GenericModule {
   /**
    * @brief OnApplicationEvent Processes application related events
    * @param event Event
-   * @param application_id Application id
+   * @param application Pointer to application struct
    */
-  virtual void OnApplicationEvent(ApplicationEvent event,
-                                  const uint32_t application_id) = 0;
+  virtual void OnApplicationEvent(
+      ApplicationEvent event,
+      application_manager::ApplicationSharedPtr application) = 0;
 
   /**
    * @brief OnPolicyEvent Processes policy related events

@@ -60,7 +60,7 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
 
  private:
   /**

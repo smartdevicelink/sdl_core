@@ -95,7 +95,7 @@ void SetIconRequest::Run() {
   // for further use in on_event function
   (*message_)[strings::msg_params][strings::sync_file_name] =
       msg_params[strings::sync_file_name];
-
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, &msg_params, true);
 }
 
@@ -105,6 +105,7 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());

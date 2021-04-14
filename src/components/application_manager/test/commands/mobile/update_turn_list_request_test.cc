@@ -79,8 +79,7 @@ class UpdateTurnListRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   UpdateTurnListRequestTest()
-      : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , command_msg_(CreateMessage(smart_objects::SmartType_Map))
+      : command_msg_(CreateMessage(smart_objects::SmartType_Map))
       , command_(CreateCommand<UpdateTurnListRequest>(command_msg_)) {
     (*command_msg_)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
@@ -88,7 +87,6 @@ class UpdateTurnListRequestTest
         kFunctionId;
   }
 
-  am::MockMessageHelper& mock_message_helper_;
   MessageSharedPtr command_msg_;
   ::utils::SharedPtr<UpdateTurnListRequest> command_;
   TypeIf<kMocksAreNice,
@@ -275,9 +273,6 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
-
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
@@ -296,9 +291,6 @@ TEST_F(UpdateTurnListRequestTest,
 
   Event event(hmi_apis::FunctionID::Navigation_UpdateTurnList);
   event.set_smart_object(*event_msg);
-
-  EXPECT_CALL(mock_message_helper_, HMIToMobileResult(hmi_response_code))
-      .WillOnce(Return(mobile_response_code));
 
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));

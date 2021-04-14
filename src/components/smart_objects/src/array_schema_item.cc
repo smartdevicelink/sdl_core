@@ -42,22 +42,45 @@ utils::SharedPtr<CArraySchemaItem> CArraySchemaItem::create(
 }
 
 Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
+}
+
+Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
+                                         rpc::ValidationReport* report__) {
   if (SmartType_Array != Object.getType()) {
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(SmartType_Array) +
+                                  ", got: " +
+                                  SmartObject::typeToString(Object.getType());
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
   size_t sizeLimit;
   const size_t array_len = Object.length();
 
   if (mMinSize.getValue(sizeLimit) && (array_len < sizeLimit)) {
+    std::stringstream stream;
+    stream << "Got array of size: " << array_len
+           << ", minimum allowed: " << sizeLimit;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
+    std::stringstream stream;
+    stream << "Got array of size: " << array_len
+           << ", maximum allowed: " << sizeLimit;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
 
   for (size_t i = 0u; i < array_len; ++i) {
-    const Errors::eType result =
-        mElementSchemaItem->validate(Object.getElement(i));
+    std::stringstream strVal;
+    strVal << i;
+    const Errors::eType result = mElementSchemaItem->validate(
+        Object.getElement(i), &report__->ReportSubobject(strVal.str()));
     if (Errors::OK != result) {
       return result;
     }

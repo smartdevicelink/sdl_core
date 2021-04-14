@@ -35,7 +35,6 @@
 
 #include <string>
 
-#include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -46,6 +45,11 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "protocol_handler_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
+
+namespace utils {
+template <typename T>
+class SharedPtr;
+}
 
 namespace telemetry_monitor {
 
@@ -88,7 +92,8 @@ class TelemetryMonitor {
   virtual void Stop();
   virtual void Start();
   virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
-  void set_streamer(Streamer* streamer);
+  DEPRECATED void set_streamer(Streamer* streamer);
+  void set_streamer(utils::SharedPtr<Streamer> streamer);
   const std::string& ip() const;
   int16_t port() const;
 
@@ -96,7 +101,7 @@ class TelemetryMonitor {
   std::string server_address_;
   int16_t port_;
   threads::Thread* thread_;
-  Streamer* streamer_;
+  utils::SharedPtr<Streamer> streamer_;
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;
   ProtocolHandlerObserver ph_observer;

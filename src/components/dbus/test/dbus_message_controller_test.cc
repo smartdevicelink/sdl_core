@@ -36,14 +36,14 @@
 #include <pthread.h>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "hmi_message_handler/mock_dbus_message_controller.h"
-#include "hmi_message_handler/mock_subscriber.h"
+#include "dbus/mock_dbus_message_controller.h"
+#include "dbus/mock_subscriber.h"
 
 using ::testing::_;
 
 namespace test {
 namespace components {
-namespace hmi_message_handler {
+namespace dbus {
 
 ACTION_P(SignalTest, test) {
   if (test->thread_id != pthread_self()) {
@@ -111,6 +111,6 @@ TEST_F(DBusMessageControllerTest, DISABLED_Send) {
   controller_->Send(kText);
 }
 
-}  // namespace hmi_message_handler
+}  // namespace dbus
 }  // namespace components
 }  // namespace test

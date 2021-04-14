@@ -42,6 +42,8 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"
+#include "utils/make_shared.h"
+#include "utils/shared_ptr.h"
 #include "telemetry_monitor/telemetry_observable.h"
 
 namespace telemetry_monitor {
@@ -53,24 +55,22 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
     : server_address_(server_address)
     , port_(port)
     , thread_(NULL)
-    , streamer_(NULL)
     , app_observer(this)
     , tm_observer(this)
     , ph_observer(this) {}
 
 void TelemetryMonitor::Start() {
-  streamer_ = streamer_ ? streamer_ : new Streamer(this);
-  thread_ = threads::CreateThread("TelemetryMonitor", streamer_);
+  streamer_ = streamer_ ? streamer_ : utils::MakeShared<Streamer>(this);
+  thread_ = threads::CreateThread("TelemetryMonitor", streamer_.get());
 }
 
-void TelemetryMonitor::set_streamer(Streamer* streamer) {
+void TelemetryMonitor::set_streamer(Streamer* streamer) {}
+
+void TelemetryMonitor::set_streamer(utils::SharedPtr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_ && !thread_->is_running()) {
-    thread_->set_delegate(streamer);
-    if (streamer_) {
-      delete streamer_;
-    }
     streamer_ = streamer;
+    thread_->set_delegate(streamer_.get());
   } else {
     LOG4CXX_ERROR(logger_, "Unable to replace streamer if it is active");
   }
@@ -86,7 +86,6 @@ int16_t TelemetryMonitor::port() const {
 
 TelemetryMonitor::~TelemetryMonitor() {
   Stop();
-  delete streamer_;
 }
 
 void TelemetryMonitor::Init(
@@ -117,7 +116,7 @@ void TelemetryMonitor::Stop() {
 }
 
 void TelemetryMonitor::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
-  if ((NULL != streamer_) && streamer_->is_client_connected_) {
+  if (streamer_ && streamer_->is_client_connected_) {
     streamer_->PushMessage(metric);
   }
 }

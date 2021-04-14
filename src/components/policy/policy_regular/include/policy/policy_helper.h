@@ -114,7 +114,8 @@ struct CheckAppPolicy {
       const std::vector<FunctionalGroupPermission>& revoked_groups) const;
   bool IsKnownAppication(const std::string& application_id) const;
   void NotifySystem(const AppPoliciesValueType& app_policy) const;
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy) const;
+  void SendPermissionsToApp(const std::string& app_id,
+                            const policy_table::Strings& groups) const;
   bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
   bool NicknamesMatch(const AppPoliciesValueType& app_policy) const;
   /**

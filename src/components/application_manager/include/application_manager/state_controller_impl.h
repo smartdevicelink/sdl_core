@@ -289,7 +289,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   void HMIStateStarted(ApplicationSharedPtr app) {
     DCHECK_OR_RETURN_VOID(app);
     HmiStatePtr old_hmi_state = app->CurrentHmiState();
-    HmiStatePtr new_hmi_state = CreateHmiState(app->app_id(), ID);
+    HmiStatePtr new_hmi_state = CreateHmiState(app, ID);
     DCHECK_OR_RETURN_VOID(new_hmi_state);
     DCHECK_OR_RETURN_VOID(new_hmi_state->state_id() !=
                           HmiState::STATE_ID_REGULAR);
@@ -326,7 +326,7 @@ class StateControllerImpl : public event_engine::EventObserver,
     DCHECK_OR_RETURN_VOID(app);
     HmiStatePtr cur = app->CurrentHmiState();
     HmiStatePtr old_hmi_state =
-        CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
+        CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
     DCHECK_OR_RETURN_VOID(old_hmi_state);
     old_hmi_state->set_hmi_level(cur->hmi_level());
     old_hmi_state->set_audio_streaming_state(cur->audio_streaming_state());
@@ -431,7 +431,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param state_id state id
    * @return
    */
-  HmiStatePtr CreateHmiState(uint32_t app_id, HmiState::StateID state_id) const;
+  HmiStatePtr CreateHmiState(utils::SharedPtr<Application> app,
+                             HmiState::StateID state_id) const;
 
   mobile_apis::AudioStreamingState::eType CalcAudioState(
       ApplicationSharedPtr app,

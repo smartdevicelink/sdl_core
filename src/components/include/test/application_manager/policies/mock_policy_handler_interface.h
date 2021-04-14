@@ -255,6 +255,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(SetDefaultHmiTypes,
                void(const std::string& application_id,
                     const smart_objects::SmartObject* app_types));
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
 #endif  // SDL_REMOTE_CONTROL
 
  private:

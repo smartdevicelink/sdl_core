@@ -199,6 +199,23 @@ struct CheckAppPolicy {
   CheckAppPolicyResults& out_results_;
 };
 
+/**
+ * @brief Helper struct for filling actions to be done for processed application
+ * using CheckAppPolicyResults data as a source
+ */
+struct FillActionsForAppPolicies {
+  FillActionsForAppPolicies(
+      ApplicationsPoliciesActions& actions,
+      const policy_table::ApplicationPolicies& app_policies)
+      : actions_(actions), app_policies_(app_policies) {}
+
+  void operator()(const policy::CheckAppPolicyResults::value_type& value);
+
+ private:
+  ApplicationsPoliciesActions& actions_;
+  const policy_table::ApplicationPolicies& app_policies_;
+};
+
 /*
  * @brief Fill permissions data with merged rpc permissions for hmi levels and
  * parameters

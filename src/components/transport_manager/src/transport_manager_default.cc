@@ -44,6 +44,10 @@
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
 
+#if defined(BUILD_TESTS)
+#include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
+#endif  // BUILD_TEST
+
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
@@ -96,6 +100,23 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   AddTransportAdapter(ta_usb);
   ta_usb = NULL;
 #endif  // USB_SUPPORT
+
+#if defined BUILD_TESTS
+  const uint16_t iap2_bt_emu_port = 23456;
+  transport_adapter::IAP2BluetoothEmulationTransportAdapter*
+      iap2_bt_emu_adapter =
+          new transport_adapter::IAP2BluetoothEmulationTransportAdapter(
+              iap2_bt_emu_port, last_state, get_settings());
+
+  AddTransportAdapter(iap2_bt_emu_adapter);
+
+  const uint16_t iap2_usb_emu_port = 34567;
+  transport_adapter::IAP2USBEmulationTransportAdapter* iap2_usb_emu_adapter =
+      new transport_adapter::IAP2USBEmulationTransportAdapter(
+          iap2_usb_emu_port, last_state, get_settings());
+
+  AddTransportAdapter(iap2_usb_emu_adapter);
+#endif  // BUILD_TEST
 
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;

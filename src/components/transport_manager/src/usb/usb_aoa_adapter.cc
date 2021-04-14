@@ -60,7 +60,7 @@ UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
 UsbAoaAdapter::~UsbAoaAdapter() {}
 
 DeviceType UsbAoaAdapter::GetDeviceType() const {
-  return PASA_AOA;
+  return AOA;
 }
 
 bool UsbAoaAdapter::IsInitialised() const {

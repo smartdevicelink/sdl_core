@@ -30,7 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_UTILS_TEST_ASYNC_WAITER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_UTILS_TEST_ASYNC_WAITER_H_
 
 #include <stdint.h>
 
@@ -102,3 +103,4 @@ ACTION_P(NotifyTestAsyncWaiter, test_async_waiter) {
 }
 
 }  // namespace test
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_UTILS_TEST_ASYNC_WAITER_H_

@@ -487,6 +487,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
 
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
+
   /**
    * @brief RetrieveCertificate Allows to obtain certificate in order
    * to start secure connection.

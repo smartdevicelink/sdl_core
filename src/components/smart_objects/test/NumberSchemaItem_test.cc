@@ -61,20 +61,21 @@ TEST(test_int_no_default_value, test_NumberSchemaItemTest) {
   obj = 5;
   ASSERT_EQ(5, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Obj bool
   obj = true;
   ASSERT_TRUE(obj.asBool());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_TRUE(obj.asBool());
 
@@ -82,11 +83,11 @@ TEST(test_int_no_default_value, test_NumberSchemaItemTest) {
   obj = "Test";
   ASSERT_EQ(std::string("Test"), obj.asString());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
@@ -105,21 +106,22 @@ TEST(test_int_min_value, test_NumberSchemaItemTest) {
   obj = 15;
   ASSERT_EQ(15, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 9;
   ASSERT_EQ(9, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object int correct
   obj = 10;
   ASSERT_EQ(10, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 
@@ -139,21 +141,22 @@ TEST(test_int_max_value, test_NumberSchemaItemTest) {
   obj = 749;
   ASSERT_EQ(749, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 750;
   ASSERT_EQ(750, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object int correct
   obj = -750;
   ASSERT_EQ(-750, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 
@@ -173,28 +176,29 @@ TEST(test_int_min_max_value, test_NumberSchemaItemTest) {
   obj = 749;
   ASSERT_EQ(749, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 750;
   ASSERT_EQ(750, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object int correct
   obj = -949;
   ASSERT_EQ(-949, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = -950;
   ASSERT_EQ(-950, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 }
 
@@ -215,44 +219,45 @@ TEST(test_int_correct_default_value, test_NumberSchemaItemTest) {
   obj = -12000;
   ASSERT_EQ(-12000, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = -12001;
   ASSERT_EQ(-12001, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object int correct
   obj = 100;
   ASSERT_EQ(100, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 101;
   ASSERT_EQ(101, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(-38, obj.asInt());
 
   // Object string
   obj = "string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(-38, obj.asInt());
 }
@@ -274,44 +279,45 @@ TEST(test_int_default_value_out_of_range, test_NumberSchemaItemTest) {
   obj = 90;
   ASSERT_EQ(90, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 89;
   ASSERT_EQ(89, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object int correct
   obj = 100;
   ASSERT_EQ(100, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object int incorrect
   obj = 101;
   ASSERT_EQ(101, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
   EXPECT_EQ(50, obj.asInt());
 
   // Object string
   obj = "string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
   EXPECT_EQ(50, obj.asInt());
 }
@@ -331,15 +337,16 @@ TEST(test_int_map_validate, test_NumberSchemaItemTest) {
   obj["max"] = 100;
   obj["out_of_max"] = 101;
 
-  int resultType = item->validate(obj["min"]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj["min"], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj["max"]);
+  resultType = item->validate(obj["max"], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj["out_of_min"]);
+  resultType = item->validate(obj["out_of_min"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj["out_of_max"]);
+  resultType = item->validate(obj["out_of_max"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   // Set default value
@@ -351,13 +358,13 @@ TEST(test_int_map_validate, test_NumberSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(-38, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj["min"]);
+  resultType = item->validate(obj["min"], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
@@ -376,21 +383,22 @@ TEST(test_int_array_validate, test_NumberSchemaItemTest) {
   obj[2] = 100;
   obj[3] = 101;
 
-  int resultType = item->validate(obj[0]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj[0], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
             resultType);
 
-  resultType = item->validate(obj[1]);
+  resultType = item->validate(obj[1], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[2]);
+  resultType = item->validate(obj[2], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[3]);
+  resultType = item->validate(obj[3], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
             resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 
@@ -402,14 +410,14 @@ TEST(test_int_array_validate, test_NumberSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(-38, obj.asInt());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[0]);
+  resultType = item->validate(obj[0], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 }
@@ -433,20 +441,21 @@ TEST(test_double_no_default_value, test_NumberSchemaItemTest) {
   obj = 5.79;
   ASSERT_EQ(5.79, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Obj bool
   obj = true;
   ASSERT_TRUE(obj.asBool());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_TRUE(obj.asBool());
 
@@ -454,13 +463,13 @@ TEST(test_double_no_default_value, test_NumberSchemaItemTest) {
   obj = "Test";
   ASSERT_EQ(std::string("Test"), obj.asString());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   // Set default value
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
@@ -479,21 +488,22 @@ TEST(test_double_min_value, test_NumberSchemaItemTest) {
   obj = 10.000001;
   ASSERT_EQ(10.000001, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 9.999999;
   ASSERT_EQ(9.999999, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
   /*
    //Object int
    obj = 10;
    ASSERT_EQ(10, obj.asInt());
 
-   resultType = item->validate(obj);
+   resultType = item->validate(obj, &report);
    EXPECT_EQ(Errors::INVALID_VALUE, resultType);*/
 }
 
@@ -513,21 +523,22 @@ TEST(test_double_max_value, test_NumberSchemaItemTest) {
   obj = 749.0;
   ASSERT_EQ(749.0, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 749.0001;
   ASSERT_EQ(749.0001, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object double correct
   obj = -750.0;
   ASSERT_EQ(-750.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 
@@ -547,28 +558,29 @@ TEST(test_double_min_max_value, test_NumberSchemaItemTest) {
   obj = 749.0;
   ASSERT_EQ(749.0, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 749.001;
   ASSERT_EQ(749.001, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object double correct
   obj = -949.0;
   ASSERT_EQ(-949.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = -949.00001;
   ASSERT_EQ(-949.00001, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 }
 
@@ -589,44 +601,45 @@ TEST(test_double_correct_default_value, test_NumberSchemaItemTest) {
   obj = -12000.0;
   ASSERT_EQ(-12000.0, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = -12000.01;
   ASSERT_EQ(-12000.01, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object double correct
   obj = 100.0;
   ASSERT_EQ(100.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 100.001;
   ASSERT_EQ(100.001, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(-38.0, obj.asDouble());
 
   // Object string
   obj = "string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(-38.0, obj.asDouble());
 }
@@ -648,44 +661,45 @@ TEST(test_double_default_value_out_of_range, test_NumberSchemaItemTest) {
   obj = 90.0;
   ASSERT_EQ(90.0, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 89.999;
   ASSERT_EQ(89.999, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Object double correct
   obj = 100.0;
   ASSERT_EQ(100.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object double incorrect
   obj = 100.001;
   ASSERT_EQ(100.001, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
   // Set default value
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
   EXPECT_EQ(50.0, obj.asDouble());
 
   // Object string
   obj = "string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
   EXPECT_EQ(50.0, obj.asDouble());
 }
@@ -705,15 +719,16 @@ TEST(test_double_map_validate, test_NumberSchemaItemTest) {
   obj["max"] = 100.0;
   obj["out_of_max"] = 100.001;
 
-  int resultType = item->validate(obj["min"]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj["min"], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj["max"]);
+  resultType = item->validate(obj["max"], &report);
   EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj["out_of_min"]);
+  resultType = item->validate(obj["out_of_min"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj["out_of_max"]);
+  resultType = item->validate(obj["out_of_max"], &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   bool resDefault = item->setDefaultValue(obj["aa"]);
@@ -724,13 +739,13 @@ TEST(test_double_map_validate, test_NumberSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(-38.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
-  resultType = item->validate(obj["min"]);
+  resultType = item->validate(obj["min"], &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
@@ -749,21 +764,22 @@ TEST(test_double_array_validate, test_NumberSchemaItemTest) {
   obj[2] = 100.0;
   obj[3] = 100.000001;
 
-  int resultType = item->validate(obj[0]);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj[0], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
             resultType);
 
-  resultType = item->validate(obj[1]);
+  resultType = item->validate(obj[1], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[2]);
+  resultType = item->validate(obj[2], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[3]);
+  resultType = item->validate(obj[3], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OUT_OF_RANGE,
             resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 
@@ -775,14 +791,14 @@ TEST(test_double_array_validate, test_NumberSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(-38.0, obj.asDouble());
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, resultType);
 
-  resultType = item->validate(obj[0]);
+  resultType = item->validate(obj[0], &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 }
@@ -799,7 +815,8 @@ TEST(test_int_double_value, test_NumberSchemaItemTest) {
   obj = value;
   ASSERT_EQ(value, obj.asDouble());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
@@ -815,7 +832,8 @@ TEST(test_double_int_value, test_NumberSchemaItemTest) {
   obj = value;
   ASSERT_EQ(value, obj.asInt());
 
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 }
 

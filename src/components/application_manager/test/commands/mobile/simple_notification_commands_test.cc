@@ -58,28 +58,12 @@ namespace commands = am::commands;
 using ::testing::_;
 using ::testing::Types;
 using ::testing::Return;
-using ::testing::Mock;
-
-using am::MockMessageHelper;
 
 template <class Command>
 class MobileNotificationCommandsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   typedef Command CommandType;
-
- public:
-  MobileNotificationCommandsTest()
-      : message_helper_(*MockMessageHelper::message_helper_mock()) {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
-  ~MobileNotificationCommandsTest() {
-    Mock::VerifyAndClearExpectations(&message_helper_);
-  }
-
- protected:
-  MockMessageHelper& message_helper_;
 };
 
 typedef Types<commands::OnAppInterfaceUnregisteredNotification,

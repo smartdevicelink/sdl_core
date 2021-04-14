@@ -37,12 +37,13 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
                           const uint32_t app_id) FINAL;
 
   /**
-   * @brief OnApplicationEvent Processes application related events
+   * @brief OnApplicationEvent Notifies modules on certain application events
    * @param event Event
-   * @param application_id Application id
+   * @param application Pointer to application struct
    */
-  void OnApplicationEvent(functional_modules::ApplicationEvent event,
-                          const uint32_t application_id) FINAL;
+  void OnApplicationEvent(
+      functional_modules::ApplicationEvent event,
+      application_manager::ApplicationSharedPtr application) FINAL;
 
   /**
    * @brief OnPolicyEvent Processes policy related events

@@ -234,6 +234,7 @@ const char* hmi_capabilities = "hmiCapabilities";
 const char* navigation = "navigation";
 const char* phone_call = "phoneCall";
 const char* video_streaming = "videoStreaming";
+const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";

@@ -1,0 +1,14 @@
+{
+  "UI": {
+    "systemCapabilities": {
+      "navigationCapability": {
+        "sendLocationEnabled": true,
+        "getWayPointsEnabled": false
+      },
+      "phoneCapability": {
+      },
+      "videoStreamingCapability": {
+      }
+    }
+  }
+}

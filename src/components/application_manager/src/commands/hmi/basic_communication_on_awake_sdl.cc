@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,3 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include "application_manager/commands/hmi/basic_communication_on_awake_sdl.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
+
+namespace application_manager {
+
+namespace commands {
+
+OnAwakeSDLNotification::OnAwakeSDLNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
+
+OnAwakeSDLNotification::~OnAwakeSDLNotification() {}
+
+void OnAwakeSDLNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!application_manager_.resume_controller().is_suspended()) {
+    return;
+  }
+
+  {
+    DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+    ApplicationSetIt itBegin = accessor.GetData().begin();
+    ApplicationSetIt itEnd = accessor.GetData().end();
+    for (; itBegin != itEnd; ++itBegin) {
+      const ApplicationSharedPtr app = *itBegin;
+      if (app && app->IsHashChangedDuringSuspend()) {
+        MessageHelper::SendHashUpdateNotification(app->app_id(),
+                                                  application_manager_);
+        app->SetHashChangedDuringSuspend(false);
+      }
+    }
+  }
+
+  application_manager_.resume_controller().OnAwake();
+}
+
+}  // namespace commands
+
+}  // namespace application_manager

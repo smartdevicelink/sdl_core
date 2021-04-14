@@ -36,7 +36,7 @@ namespace app_launch {
 const std::string kCreateSchema =
     "CREATE TABLE IF NOT EXISTS `app_launch`( "
     "  `deviceMac` TEXT, "
-    "  `appID` TEXT,"
+    "  `appID` TEXT collate nocase,"
     "  `bundleID` TEXT,"
     "  `last_session` DATETIME, "
     " PRIMARY KEY(`deviceMac`, `appID`, `bundleID`)"

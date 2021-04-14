@@ -63,7 +63,7 @@ class MockGenericModule : public GenericModule {
   MOCK_METHOD1(OnUnregisterApplication, void(const uint32_t app_id));
   MOCK_METHOD2(OnApplicationEvent,
                void(functional_modules::ApplicationEvent event,
-                    const uint32_t application_id));
+                    application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(OnPolicyEvent, void(functional_modules::PolicyEvent event));
   MOCK_METHOD0(RemoveAppExtensions, void());
 };

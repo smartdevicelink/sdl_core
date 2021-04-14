@@ -33,11 +33,12 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/dbus/include/
+  ${COMPONENTS_DIR}/dbus/test/include/
 )
 
 #FIXME: exclude some tests
 set (EXCLUDE_PATHS
-	test_dbus_message_controller.cc
+	dbus_message_controller_test.cc
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" ${EXCLUDE_PATHS})

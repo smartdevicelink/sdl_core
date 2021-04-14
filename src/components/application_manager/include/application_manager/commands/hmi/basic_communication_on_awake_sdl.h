@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,3 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_ON_AWAKE_SDL_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_ON_AWAKE_SDL_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
+
+namespace application_manager {
+
+namespace commands {
+
+/**
+ * @brief OnAwakeSDLNotification command class
+ **/
+class OnAwakeSDLNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnAwakeSDLNotification class constructor
+   * @param message Incoming SmartObject message
+   * @param application_manager reference to ApplicationManager instance
+   **/
+  OnAwakeSDLNotification(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
+
+  /**
+   * @brief OnAwakeSDLNotification class destructor
+   **/
+  virtual ~OnAwakeSDLNotification();
+
+  /**
+   * @brief Execute command
+   **/
+  void Run() FINAL;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAwakeSDLNotification);
+};
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_ON_AWAKE_SDL_H_

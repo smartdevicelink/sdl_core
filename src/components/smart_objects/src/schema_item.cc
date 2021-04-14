@@ -35,7 +35,12 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-Errors::eType ISchemaItem::validate(const SmartObject& object) {
+Errors::eType ISchemaItem::validate(const SmartObject& Object) {
+  return Errors::ERROR;
+}
+
+Errors::eType ISchemaItem::validate(const SmartObject& object,
+                                    rpc::ValidationReport* report__) {
   return Errors::ERROR;
 }
 

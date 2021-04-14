@@ -57,7 +57,18 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
 }
 
 Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
+  rpc::ValidationReport report("RPC");
+  return validate(object, &report);
+}
+
+Errors::eType CObjectSchemaItem::validate(const SmartObject& object,
+                                          rpc::ValidationReport* report__) {
   if (SmartType_Map != object.getType()) {
+    std::string validation_info = "Incorrect type, expected: " +
+                                  SmartObject::typeToString(SmartType_Map) +
+                                  ", got: " +
+                                  SmartObject::typeToString(object.getType());
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
 
@@ -71,12 +82,15 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
       if (member.mIsMandatory) {
+        std::string validation_info = "Missing mandatory parameter: " + key;
+        report__->set_validation_info(validation_info);
         return Errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
     }
     const SmartObject& field = object.getElement(key);
-    const Errors::eType result = member.mSchemaItem->validate(field);
+    const Errors::eType result =
+        member.mSchemaItem->validate(field, &report__->ReportSubobject(key));
     if (Errors::OK != result) {
       return result;
     }

@@ -65,6 +65,9 @@ class MockSecurityManager : public ::security_manager::SecurityManager {
                void(const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(OnMobileMessageSent,
                void(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD0(IsCertificateUpdateRequired, bool());
+  MOCK_METHOD0(NotifyOnCertificateUpdateRequired, void());
+  MOCK_METHOD0(IsPolicyCertificateDataEmpty, bool());
 };
 
 /*

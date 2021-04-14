@@ -36,7 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
 
-#include <libusb/libusb.h>
+#include <libusb-1.0/libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/usb_control_transfer.h"

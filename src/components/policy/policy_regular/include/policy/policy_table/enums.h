@@ -87,6 +87,7 @@ enum Parameter {
   P_DEVICESTATUS,
   P_EMERGENCYEVENT,
   P_ECALLINFO,
+  P_EMPTY  // Added to allow empty parameters handling
 };
 
 bool IsValidEnum(Parameter val);

@@ -34,6 +34,7 @@
 #include "gtest/gtest.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "resumption/last_state.h"
 #include "application_manager/policies/policy_handler.h"
@@ -64,12 +65,17 @@ std::vector<StateID> GenerateCurrentStates() {
 }
 
 class ApplicationStateTest : public ::testing::Test {
+ public:
+  void SetUp() OVERRIDE {
+    mock_app_.reset(new MockApplication);
+  }
+
  protected:
   static std::vector<StateID> added_states_;
   ApplicationState app_state;
   const StateID current_id = StateID::STATE_ID_CURRENT;
   const StateID postponed_id = StateID::STATE_ID_POSTPONED;
-  const uint32_t app_id = 10;
+  utils::SharedPtr<MockApplication> mock_app_;
   MockApplicationManager app_mngr_;
 };
 
@@ -79,8 +85,10 @@ std::vector<StateID> ApplicationStateTest::added_states_ =
 TEST_F(ApplicationStateTest, AddStates_GetCurrentStates) {
   std::vector<StateID>::iterator new_state = added_states_.begin();
   for (; new_state != added_states_.end(); ++new_state) {
-    HmiStatePtr state =
-        utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+    HmiStatePtr state = utils::MakeShared<HmiState>(
+        static_cast<utils::SharedPtr<Application> >(mock_app_),
+        app_mngr_,
+        *new_state);
     app_state.AddState(state);
     EXPECT_EQ(state, app_state.GetState(current_id));
   }
@@ -89,8 +97,10 @@ TEST_F(ApplicationStateTest, AddStates_GetCurrentStates) {
 TEST_F(ApplicationStateTest, AddStates_RemoveStates_GetCurrentState) {
   std::vector<StateID>::iterator new_state = added_states_.begin();
   for (; new_state != added_states_.end(); ++new_state) {
-    HmiStatePtr state =
-        utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+    HmiStatePtr state = utils::MakeShared<HmiState>(
+        static_cast<utils::SharedPtr<Application> >(mock_app_),
+        app_mngr_,
+        *new_state);
     app_state.AddState(state);
 
     HmiStatePtr curr_state = app_state.GetState(current_id);
@@ -110,16 +120,20 @@ TEST_F(ApplicationStateTest, AddStatesAddPostponedState_GetPostponedState) {
   // Added some states
   std::vector<StateID>::iterator new_state = added_states_.begin();
   for (; new_state != added_states_.end(); ++new_state) {
-    HmiStatePtr state =
-        utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+    HmiStatePtr state = utils::MakeShared<HmiState>(
+        static_cast<utils::SharedPtr<Application> >(mock_app_),
+        app_mngr_,
+        *new_state);
     app_state.AddState(state);
   }
   // Postponed state wasn't added
   HmiStatePtr get_postponed_id = app_state.GetState(postponed_id);
   EXPECT_EQ(NULL, get_postponed_id);
   // Add posponed state
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, postponed_id);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      postponed_id);
   app_state.AddState(state);
   // Postponed state exists
   get_postponed_id = app_state.GetState(postponed_id);
@@ -129,14 +143,19 @@ TEST_F(ApplicationStateTest, AddStatesAddPostponedState_GetPostponedState) {
 TEST_F(ApplicationStateTest, AddStates_GetRegularState) {
   // Add state
   std::vector<StateID>::iterator new_state = added_states_.begin();
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      *new_state);
   state->set_hmi_level(HMILevel::HMI_FULL);
   app_state.AddState(state);
   ++new_state;
   // Add some other
   for (; new_state != added_states_.end(); ++new_state) {
-    state = utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+    state = utils::MakeShared<HmiState>(
+        static_cast<utils::SharedPtr<Application> >(mock_app_),
+        app_mngr_,
+        *new_state);
     app_state.AddState(state);
     state->set_hmi_level(HMILevel::HMI_LIMITED);
   }
@@ -150,13 +169,18 @@ TEST_F(ApplicationStateTest, AddStates_GetRegularState) {
 
 TEST_F(ApplicationStateTest, AddRegularState_RemoveFirstState_GetRegularState) {
   std::vector<StateID>::iterator new_state = added_states_.begin();
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      *new_state);
   app_state.AddState(state);
   ++new_state;
 
   // Add postponed state
-  state = utils::MakeShared<HmiState>(app_id, app_mngr_, postponed_id);
+  state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      postponed_id);
   app_state.AddState(state);
 
   // Make sure that the state was added
@@ -164,7 +188,10 @@ TEST_F(ApplicationStateTest, AddRegularState_RemoveFirstState_GetRegularState) {
   ASSERT_EQ(state, post_state);
 
   for (; new_state != added_states_.end(); ++new_state) {
-    state = utils::MakeShared<HmiState>(app_id, app_mngr_, *new_state);
+    state = utils::MakeShared<HmiState>(
+        static_cast<utils::SharedPtr<Application> >(mock_app_),
+        app_mngr_,
+        *new_state);
     app_state.AddState(state);
   }
 
@@ -184,22 +211,32 @@ TEST_F(ApplicationStateTest, AddRegularState_RemoveFirstState_GetRegularState) {
 TEST_F(ApplicationStateTest, AddRegularState_PreviousStatePostponed) {
   // Add some state
   StateID first_state = StateID::STATE_ID_PHONE_CALL;
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, first_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      first_state);
   app_state.AddState(state);
 
   // Add postponed state
-  state = utils::MakeShared<HmiState>(app_id, app_mngr_, postponed_id);
+  state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      postponed_id);
   app_state.AddState(state);
 
   // Add new postponed state
-  const uint32_t app_id2 = 10;
-  state = utils::MakeShared<HmiState>(app_id2, app_mngr_, postponed_id);
+  utils::SharedPtr<MockApplication> mock_app_2(new MockApplication);
+  state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      postponed_id);
   app_state.AddState(state);
 
   // Add regular state
-  state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, StateID::STATE_ID_REGULAR);
+  state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      StateID::STATE_ID_REGULAR);
   app_state.AddState(state);
 
   // Postponed state is the first
@@ -213,8 +250,10 @@ TEST_F(ApplicationStateTest, AddRegularState_PreviousStatePostponed) {
 
 TEST_F(ApplicationStateTest, InitState_GetRegularState) {
   StateID init_state = StateID::STATE_ID_REGULAR;
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, init_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      init_state);
 
   app_state.InitState(state);
 
@@ -228,14 +267,19 @@ TEST_F(ApplicationStateTest, InitState_GetRegularState) {
 TEST_F(ApplicationStateTest, AddPosponedState_DeletePosponedState) {
   // Precondition
   StateID init_state = StateID::STATE_ID_REGULAR;
-  HmiStatePtr state =
-      utils::MakeShared<HmiState>(app_id, app_mngr_, init_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      init_state);
   state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
 
   app_state.InitState(state);
 
   // Add postponed state
-  state = utils::MakeShared<HmiState>(app_id, app_mngr_, postponed_id);
+  state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      postponed_id);
   app_state.AddState(state);
 
   // Make sure that state was added
@@ -252,7 +296,10 @@ TEST_F(ApplicationStateTest, AddPosponedState_DeletePosponedState) {
 TEST_F(ApplicationStateTest,
        AddRegularState_RemoveRegularState_RegularStateNotDeleted) {
   StateID reg_state = StateID::STATE_ID_REGULAR;
-  HmiStatePtr state = utils::MakeShared<HmiState>(app_id, app_mngr_, reg_state);
+  HmiStatePtr state = utils::MakeShared<HmiState>(
+      static_cast<utils::SharedPtr<Application> >(mock_app_),
+      app_mngr_,
+      reg_state);
   app_state.InitState(state);
 
   // Try deleting regular state

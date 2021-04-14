@@ -36,6 +36,7 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 class ApplicationManagerSettings;
@@ -91,7 +92,23 @@ class ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend() = 0;
+  virtual void IncrementIgnOffCount() = 0;
+
+  /**
+   * @brief Increments ignition counter for all registered applications
+   * and remember ign_off time stamp
+   */
+  DEPRECATED virtual void OnSuspend() = 0;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  virtual void DecrementIgnOffCount() = 0;
+
+  /**
+   * @brief Decrements ignition counter for all registered applications
+   */
+  DEPRECATED virtual void OnAwake() = 0;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -106,12 +123,6 @@ class ResumptionData {
   virtual bool GetHashId(const std::string& policy_app_id,
                          const std::string& device_id,
                          std::string& hash_id) const = 0;
-
-  /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  virtual void OnAwake() = 0;
 
   /**
    * @brief Retrieves data of saved application for the given mobile app ID

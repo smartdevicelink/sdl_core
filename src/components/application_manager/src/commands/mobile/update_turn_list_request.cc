@@ -138,6 +138,7 @@ void UpdateTurnListRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list) ||
       (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
     SendHMIRequest(
         hmi_apis::FunctionID::Navigation_UpdateTurnList, &msg_params, true);
   } else {
@@ -154,7 +155,7 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
       LOG4CXX_INFO(logger_, "Received Navigation_UpdateTurnList event");
-
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

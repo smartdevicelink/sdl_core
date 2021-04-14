@@ -67,6 +67,7 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
                                       this, &ResumeCtrlImpl::SaveDataOnTimer))
     , is_resumption_active_(false)
     , is_data_saved_(false)
+    , is_suspended_(false)
     , launch_time_(time(NULL))
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
@@ -263,16 +264,25 @@ bool ResumeCtrlImpl::RemoveApplicationFromSaved(
 
 void ResumeCtrlImpl::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
-  StopSavePersistentDataTimer();
-  SaveAllApplications();
-  resumption_storage_->OnSuspend();
-  resumption_storage_->Persist();
+  is_suspended_ = true;
+  FinalPersistData();
+}
+
+void ResumeCtrlImpl::OnIgnitionOff() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resumption_storage_->IncrementIgnOffCount();
+  FinalPersistData();
 }
 
 void ResumeCtrlImpl::OnAwake() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  is_suspended_ = false;
   ResetLaunchTime();
   StartSavePersistentDataTimer();
-  return resumption_storage_->OnAwake();
+}
+
+bool ResumeCtrlImpl::is_suspended() const {
+  return is_suspended_;
 }
 
 void ResumeCtrlImpl::StartSavePersistentDataTimer() {
@@ -433,6 +443,13 @@ void ResumeCtrlImpl::SaveDataOnTimer() {
   }
 }
 
+void ResumeCtrlImpl::FinalPersistData() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  StopSavePersistentDataTimer();
+  SaveAllApplications();
+  resumption_storage_->Persist();
+}
+
 bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
     ApplicationSharedPtr application, const std::string& saved_device_mac) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -580,7 +597,7 @@ void ResumeCtrlImpl::AddWayPointsSubscription(
     const smart_objects::SmartObject& subscribed_for_way_points_so =
         saved_app[strings::subscribed_for_way_points];
     if (true == subscribed_for_way_points_so.asBool()) {
-      application_manager_.SubscribeAppForWayPoints(application->app_id());
+      application_manager_.SubscribeAppForWayPoints(application);
     }
   }
 }
@@ -609,9 +626,10 @@ void ResumeCtrlImpl::AddSubscriptions(
     if (subscribtions.keyExists(strings::application_vehicle_info)) {
       const smart_objects::SmartObject& subscribtions_ivi =
           subscribtions[strings::application_vehicle_info];
-      VehicleDataType ivi;
+      mobile_apis::VehicleDataType::eType ivi;
       for (size_t i = 0; i < subscribtions_ivi.length(); ++i) {
-        ivi = static_cast<VehicleDataType>((subscribtions_ivi[i]).asInt());
+        ivi = static_cast<mobile_apis::VehicleDataType::eType>(
+            (subscribtions_ivi[i]).asInt());
         application->SubscribeToIVI(ivi);
       }
       ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(
@@ -773,7 +791,7 @@ void ResumeCtrlImpl::LoadResumeData() {
                     "Resumption data for application "
                         << app_id << " and device id " << device_id
                         << " will be dropped.");
-      resumption_storage_->DropAppDataResumption(device_id, app_id);
+      resumption_storage_->RemoveApplicationFromSaved(app_id, device_id);
       continue;
     }
   }

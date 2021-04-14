@@ -59,7 +59,7 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND LIBRARIES Libusb-1.0.16)
+  list(APPEND LIBRARIES libusb-1.0.so)
 endif()
 
 if (BUILD_BT_SUPPORT)

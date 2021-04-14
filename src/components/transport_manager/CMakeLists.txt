@@ -40,7 +40,6 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -73,9 +72,7 @@ if(BUILD_USB_SUPPORT)
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
-    list(APPEND LIBRARIES
-      Libusb-1.0.16
-    )
+
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
     set(EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
@@ -89,6 +86,13 @@ else()
   list(APPEND EXCLUDE_PATHS
     ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb
     ${COMPONENTS_DIR}/transport_manager/src/usb
+  )
+endif()
+
+if(NOT BUILD_TESTS)
+  list (APPEND EXCLUDE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
   )
 endif()
 

@@ -108,13 +108,21 @@ bool SocketStreamerAdapter::SocketStreamer::Connect() {
   return true;
 }
 
+void SocketStreamerAdapter::SocketStreamer::Close() {
+  Disconnect();
+}
+
 void SocketStreamerAdapter::SocketStreamer::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger);
   if (0 < send_socket_fd_) {
+    shutdown(send_socket_fd_, SHUT_RDWR);
     close(send_socket_fd_);
+    send_socket_fd_ = 0;
   }
   if (0 < socket_fd_) {
+    shutdown(socket_fd_, SHUT_RDWR);
     close(socket_fd_);
+    socket_fd_ = 0;
   }
 }
 

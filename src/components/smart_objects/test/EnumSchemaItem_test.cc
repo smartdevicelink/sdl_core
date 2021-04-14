@@ -92,7 +92,8 @@ TEST_F(EnumSchemaItemTest, test_item_with_default_value) {
 
   // Object - valid enum
   obj = TestType::BLUETOOTH_OFF;
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
@@ -101,7 +102,7 @@ TEST_F(EnumSchemaItemTest, test_item_with_default_value) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
@@ -110,7 +111,7 @@ TEST_F(EnumSchemaItemTest, test_item_with_default_value) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
@@ -119,7 +120,7 @@ TEST_F(EnumSchemaItemTest, test_item_with_default_value) {
 
   // Object - string
   obj = "Some string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
@@ -142,7 +143,8 @@ TEST_F(EnumSchemaItemTest, test_item_without_default_value) {
 
   // Object - valid enum
   obj = TestType::BLUETOOTH_OFF;
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
@@ -151,7 +153,7 @@ TEST_F(EnumSchemaItemTest, test_item_without_default_value) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
@@ -160,7 +162,7 @@ TEST_F(EnumSchemaItemTest, test_item_without_default_value) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
@@ -169,7 +171,7 @@ TEST_F(EnumSchemaItemTest, test_item_without_default_value) {
 
   // Object - string
   obj = "Some string";
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
@@ -178,12 +180,12 @@ TEST_F(EnumSchemaItemTest, test_item_without_default_value) {
 
   // Object - int in range of enum
   obj = 6;
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
 
   // Object - int out of enum range
   obj = 15;
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 }
 
@@ -199,31 +201,32 @@ TEST_F(EnumSchemaItemTest, test_apply_unapply_schema) {
 
   // Object - valid enum
   obj = TestType::BLUETOOTH_OFF;
-  int resultType = item->validate(obj);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
   item->unapplySchema(obj);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_EQ(std::string("FACTORY_DEFAULTS"), obj.asString());
 
   item->applySchema(obj, false);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
   obj = "TOO_MANY_REQUESTS";
   item->applySchema(obj, false);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(TestType::TOO_MANY_REQUESTS, obj.asInt());
 
   obj = "ENOUGH_REQUESTS";
   item->applySchema(obj, false);
-  resultType = item->validate(obj);
+  resultType = item->validate(obj, &report);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_EQ(std::string("ENOUGH_REQUESTS"), obj.asString());
 }

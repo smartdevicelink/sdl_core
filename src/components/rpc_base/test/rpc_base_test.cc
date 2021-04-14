@@ -320,7 +320,7 @@ TEST(ValidatedTypes, ReportUninitializedIntType) {
   ASSERT_FALSE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: value is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("val: value is not initialized", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectInitializedIntType) {
@@ -328,7 +328,7 @@ TEST(ValidatedTypes, ReportIncorrectInitializedIntType) {
   ASSERT_FALSE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("val: value initialized incorrectly", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportUninitializedOptionalType) {
@@ -344,7 +344,7 @@ TEST(ValidatedTypes, ReportIncorrectInitializedOptionalType) {
   ASSERT_FALSE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("val: value initialized incorrectly", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportUninitializedNullableIntType) {
@@ -352,7 +352,7 @@ TEST(ValidatedTypes, ReportUninitializedNullableIntType) {
   ASSERT_FALSE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: value is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("val: value is not initialized", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportNullInitializedNullableIntType) {
@@ -369,7 +369,7 @@ TEST(ValidatedTypes, ReportNoninitializedIntArray) {
   ASSERT_FALSE(array.is_valid());
   ValidationReport report("array");
   array.ReportErrors(&report);
-  ASSERT_EQ("array: object is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("array: object is not initialized", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray1) {
@@ -378,7 +378,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray1) {
   ASSERT_FALSE(array.is_valid());
   ValidationReport report("array");
   array.ReportErrors(&report);
-  ASSERT_EQ("array[0]: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("array[0]: value initialized incorrectly", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray2) {
@@ -390,7 +390,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray2) {
   ASSERT_FALSE(array.is_valid());
   ValidationReport report("array");
   array.ReportErrors(&report);
-  ASSERT_EQ("array: array has invalid size\n", PrettyFormat(report));
+  ASSERT_EQ("array: array has invalid size", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedArray3) {
@@ -403,7 +403,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedArray3) {
   array.ReportErrors(&report);
   ASSERT_EQ(
       "array: array has invalid size\n"
-      "array[2]: value initialized incorrectly\n",
+      "array[2]: value initialized incorrectly",
       PrettyFormat(report));
 }
 
@@ -411,7 +411,7 @@ TEST(ValidatedTypes, ReportUninitializedMap) {
   Map<Integer<int8_t, 1, 10>, 1, 3> map;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map: object is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("map: object is not initialized", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedMap1) {
@@ -419,7 +419,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap1) {
   map["aha"] = 42;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map[\"aha\"]: value initialized incorrectly\n",
+  ASSERT_EQ("map[\"aha\"]: value initialized incorrectly",
             PrettyFormat(report));
 }
 
@@ -433,7 +433,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
   map.ReportErrors(&report);
   ASSERT_EQ(
       "map[\"haha\"]: value initialized incorrectly\n"
-      "map[\"muhahaha\"]: value initialized incorrectly\n",
+      "map[\"muhahaha\"]: value initialized incorrectly",
       PrettyFormat(report));
 }
 

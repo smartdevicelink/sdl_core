@@ -211,6 +211,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD2(AppHasHMIType,
                      bool(const std::string& application_id,
                           policy_table::AppHMIType hmi_type));
+  MOCK_METHOD2(OnDeviceSwitching,
+               void(const std::string& device_id_from,
+                    const std::string& device_id_to));
 };
 
 }  // namespace policy_test

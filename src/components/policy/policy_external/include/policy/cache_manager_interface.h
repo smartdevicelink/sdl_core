@@ -778,6 +778,15 @@ class CacheManagerInterface {
   virtual void SetExternalConsentForApp(
       const PermissionConsent& permissions) = 0;
 
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
+
 #ifdef BUILD_TESTS
   /**
    * @brief GetPT allows to obtain SharedPtr to PT.

@@ -44,6 +44,12 @@ OnAppUnregisteredNotification::OnAppUnregisteredNotification(
 
 OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {}
 
+bool OnAppUnregisteredNotification::Init() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Replacement of hmi id is skipped.");
+  return true;
+}
+
 void OnAppUnregisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 

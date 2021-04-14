@@ -55,12 +55,22 @@ class OnAppUnregisteredNotification : public NotificationToHMI {
   /**
    * @brief OnAppUnregisteredNotification class destructor
    **/
-  virtual ~OnAppUnregisteredNotification();
+  ~OnAppUnregisteredNotification() FINAL;
+
+  /**
+    * @brief Init overrides and skips replacement of app id with hmi id since
+    * 1) at the moment this notification is being sent there is no application
+    * registered in application manager
+    * 2) hmi id is already used whenever this message is being constructed, so
+    * its already there
+    * @return True in any case
+    */
+  bool Init() FINAL;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  virtual void Run() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnAppUnregisteredNotification);

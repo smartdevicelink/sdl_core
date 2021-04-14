@@ -33,7 +33,6 @@
 #include "application_manager/resumption/resumption_data.h"
 #include "utils/logger.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/application_manager_settings.h"
 
 namespace resumption {

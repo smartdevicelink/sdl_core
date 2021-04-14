@@ -641,6 +641,15 @@ class CacheManagerInterface {
    *
    */
   virtual utils::SharedPtr<policy_table::Table> pt() const = 0;
+
+  /**
+   * @brief OnDeviceSwitching Processes existing policy permissions for devices
+   * switching transport
+   * @param device_id_from Device ID original
+   * @param device_id_to Device ID new
+   */
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

@@ -49,7 +49,22 @@ void SendHapticDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
-  SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData, &msg_params, true);
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  if (app->is_navi() || app->mobile_projection_enabled()) {
+    SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData, &msg_params, true);
+  } else {
+    SendResponse(false,
+                 mobile_apis::Result::DISALLOWED,
+                 "Application is not of type Navigation or Mobile Projection");
+  }
 }
 
 void SendHapticDataRequest::on_event(const event_engine::Event& event) {

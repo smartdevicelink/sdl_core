@@ -425,6 +425,20 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool video_streaming_supported() const OVERRIDE;
 
   /*
+   * @brief Interface to store whether HMI supports remote control
+   *
+   * @param supported Indicates whether video streaming is supported by HMI
+   */
+  void set_rc_supported(const bool supported) OVERRIDE;
+
+  /*
+   * @brief Retrieves whether HMI supports remote control
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  bool rc_supported() const OVERRIDE;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *
@@ -557,6 +571,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_navigation_supported_;
   bool is_phone_call_supported_;
   bool is_video_streaming_supported_;
+  bool is_rc_supported_;
   std::string ccpu_version_;
   smart_objects::SmartObject* navigation_capability_;
   smart_objects::SmartObject* phone_capability_;

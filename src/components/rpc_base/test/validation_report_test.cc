@@ -75,7 +75,7 @@ class ValidationReportTest : public testing::Test {
     } else {
       temp = "";
     }
-    result = parent_name + temp + obj_name + ":" + " " + val_info + "\n";
+    result = parent_name + temp + obj_name + ":" + " " + val_info;
   }
 
   void ClearValidationInfo() {

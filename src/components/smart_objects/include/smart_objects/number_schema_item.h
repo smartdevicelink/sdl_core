@@ -65,11 +65,20 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
           TSchemaItemParameter<NumberType>());
 
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
+   * @return Errors::ERROR
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @return Errors::ERROR
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__) OVERRIDE;
 
  private:
   /**
@@ -128,7 +137,21 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
+}
+
+template <typename NumberType>
+Errors::eType TNumberSchemaItem<NumberType>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__) {
   if (!isValidNumberType(Object.getType())) {
+    SmartType expectedType = (typeid(double) == typeid(Object.getType()))
+                                 ? SmartType_Double
+                                 : SmartType_Integer;
+    std::string validation_info =
+        "Incorrect type, expected: " + SmartObject::typeToString(expectedType) +
+        ", got: " + SmartObject::typeToString(Object.getType());
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
   NumberType value(0);
@@ -148,10 +171,20 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
   NumberType rangeLimit;
   if (mMinValue.getValue(rangeLimit) && (value < rangeLimit)) {
+    std::stringstream stream;
+    stream << "Value too small, got: " << value
+           << ", minimum allowed: " << rangeLimit;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
 
   if (mMaxValue.getValue(rangeLimit) && (value > rangeLimit)) {
+    std::stringstream stream;
+    stream << "Value too large, got: " << value
+           << ", maximum allowed: " << rangeLimit;
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;

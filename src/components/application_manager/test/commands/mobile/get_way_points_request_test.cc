@@ -53,7 +53,6 @@ namespace get_way_points_request {
 
 using namespace mobile_apis::Result;
 using ::testing::Return;
-using ::testing::Mock;
 using ::testing::_;
 using application_manager::commands::GetWayPointsRequest;
 using application_manager::MockMessageHelper;
@@ -61,6 +60,7 @@ using application_manager::MockHmiInterfaces;
 
 typedef SharedPtr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
+typedef hmi_apis::Common_Result::eType HmiResult;
 
 namespace {
 const uint32_t kCorrelationId = 2u;
@@ -72,14 +72,7 @@ const std::string kMethodName = "Navigation.GetWayPoints";
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetWayPointsRequestTest()
-      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock()) {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
-
-  ~GetWayPointsRequestTest() {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
+  GetWayPointsRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
@@ -89,14 +82,9 @@ class GetWayPointsRequestTest
     command_sptr_ =
         CreateCommand<application_manager::commands::GetWayPointsRequest>(
             message_);
-    mock_app_ = CreateMockApp();
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
-
-    ON_CALL(message_helper_mock_, HMIToMobileResult(_))
-        .WillByDefault(Return(mobile_apis::Result::SUCCESS));
   }
 
-  MockMessageHelper& message_helper_mock_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
   utils::SharedPtr<application_manager::commands::GetWayPointsRequest>
@@ -106,17 +94,10 @@ class GetWayPointsRequestTest
 class GetWayPointsRequestOnEventTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetWayPointsRequestOnEventTest()
-      : message_helper_mock_(*am::MockMessageHelper::message_helper_mock())
-      , app_(CreateMockApp()) {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
-  ~GetWayPointsRequestOnEventTest() {
-    Mock::VerifyAndClearExpectations(&message_helper_mock_);
-  }
+  GetWayPointsRequestOnEventTest() : app_(CreateMockApp()) {}
 
   void CheckOnEventResponse(const std::string& wayPointsParam,
-                            const MobileResult ResultCode,
+                            const HmiResult ResultCode,
                             const bool success) {
     Event event(Event::EventID::Navigation_GetWayPoints);
     CommandPtr command(CreateCommand<GetWayPointsRequest>());
@@ -131,17 +112,13 @@ class GetWayPointsRequestOnEventTest
 
     event.set_smart_object(*event_msg);
 
-    EXPECT_CALL(message_helper_mock_, HMIToMobileResult(_))
-        .WillOnce(Return(ResultCode));
-
-    MockAppPtr app(CreateMockApp());
-    EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
+    const MobileResult mobile_result = static_cast<MobileResult>(ResultCode);
 
     MessageSharedPtr result_msg(
         CatchMobileCommandResult(CallOnEvent(*command, event)));
     EXPECT_EQ(
-        ResultCode,
-        static_cast<mobile_apis::Result::eType>(
+        mobile_result,
+        static_cast<MobileResult>(
             (*result_msg)[am::strings::msg_params][am::strings::result_code]
                 .asInt()));
     EXPECT_EQ(
@@ -150,7 +127,6 @@ class GetWayPointsRequestOnEventTest
   }
 
  protected:
-  MockMessageHelper& message_helper_mock_;
   MockAppPtr app_;
   MockHmiInterfaces hmi_interfaces_;
 };
@@ -246,15 +222,15 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_WrongEventId_UNSUCCESS) {
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case1) {
-  CheckOnEventResponse("0", SUCCESS, true);
+  CheckOnEventResponse("0", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case2) {
-  CheckOnEventResponse("", SUCCESS, true);
+  CheckOnEventResponse("", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_SUCCESS_Case3) {
-  CheckOnEventResponse("test", SUCCESS, true);
+  CheckOnEventResponse("test", HmiResult::SUCCESS, true);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
@@ -265,7 +241,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case1) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("    ", GENERIC_ERROR, false);
+  CheckOnEventResponse("    ", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
@@ -276,7 +252,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case2) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\t", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\t", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
@@ -287,7 +263,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case3) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\n", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\n", HmiResult::GENERIC_ERROR, false);
 }
 
 TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
@@ -298,7 +274,7 @@ TEST_F(GetWayPointsRequestOnEventTest, OnEvent_Expect_GENERIC_ERROR_Case4) {
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_Navigation))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
 
-  CheckOnEventResponse("test\t\n", GENERIC_ERROR, false);
+  CheckOnEventResponse("test\t\n", HmiResult::GENERIC_ERROR, false);
 }
 
 }  // namespace get_way_points_request

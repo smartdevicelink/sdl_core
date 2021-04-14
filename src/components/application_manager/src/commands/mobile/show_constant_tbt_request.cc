@@ -172,6 +172,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   app->set_tbt_show_command(msg_params);
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params, true);
 }
@@ -184,6 +185,7 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       const Common_Result::eType result_code =
           static_cast<Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());

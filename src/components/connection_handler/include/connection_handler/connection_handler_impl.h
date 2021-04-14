@@ -137,6 +137,24 @@ class ConnectionHandlerImpl
   void OnDeviceRemoved(
       const transport_manager::DeviceInfo& device_info) OVERRIDE;
 
+  /**
+   * @brief OnDeviceSwitchingStart notifies listeners on device transport
+   * switching start
+   * @param device_uid_from the id of the device which has to switch its
+   * transport
+   * @param device_uid_to the id of the device on new transport
+   */
+  void OnDeviceSwitchingStart(const std::string& device_uid_from,
+                              const std::string& device_uid_to) FINAL;
+
+  /**
+   * @brief OnDeviceSwitchingFinish notifies listeners on device transport
+   * switching completion
+   * @param device_uid the id for the device which is fails to reconnect.
+   */
+  void OnDeviceSwitchingFinish(
+      const transport_manager::DeviceUID& device_uid) FINAL;
+
   void OnScanDevicesFinished() OVERRIDE;
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
@@ -182,8 +200,8 @@ class ConnectionHandlerImpl
    * \param is_protected would be service protected
    * \param hash_id pointer for session hash identifier
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
+   * \deprecated
    */
-  // DEPRECATED
   virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
@@ -194,7 +212,7 @@ class ConnectionHandlerImpl
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * Result must be notified through NotifySessionStartedResult().
+   * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
    * \param sessionId Identifier of the session to be start
@@ -209,8 +227,17 @@ class ConnectionHandlerImpl
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
       const BsonObject* params);
-
-  // DEPRECATED
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application initiates session ending.
+   * \param connection_handle Connection identifier within which session exists
+   * \param sessionId Identifier of the session to be ended
+   * \param hashCode Hash used only in second version of SmartDeviceLink
+   * protocol.
+   * If not equal to hash assigned to session on start then operation fails.
+   * \return uint32_t 0 if operation fails, session key otherwise
+   * \deprecated
+   */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
@@ -326,6 +353,16 @@ class ConnectionHandlerImpl
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
+
+  /**
+   * @brief Check if session contains service with specified service type
+   * @param connection_key unique id of session to check
+   * @param service_type type of service to check
+   * @return true if session contains service with specified service type
+   */
+  bool SessionServiceExists(
+      const uint32_t connection_key,
+      const protocol_handler::ServiceType& service_type) const OVERRIDE;
 
   /**
    * \brief Get device handle by mac address
@@ -452,6 +489,29 @@ class ConnectionHandlerImpl
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
 
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  int32_t GetDataOnSessionKey(
+      uint32_t key,
+      uint32_t* app_id,
+      std::list<int32_t>* sessions_list,
+      connection_handler::DeviceHandle* device_id) const OVERRIDE;
+
+  /**
+   * DEPRECATED
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
   int32_t GetDataOnSessionKey(uint32_t key,
                               uint32_t* app_id,
                               std::list<int32_t>* sessions_list,
@@ -480,54 +540,6 @@ class ConnectionHandlerImpl
 
  private:
   /**
-   * \brief Struct to keep variables between OnSessionStartedCallback() and
-   * NotifyServiceStartedResult()
-   **/
-  struct ServiceStartedContext {
-    transport_manager::ConnectionUID connection_handle_;
-    uint8_t session_id_;
-    uint32_t new_session_id_;
-    protocol_handler::ServiceType service_type_;
-    uint32_t hash_id_;
-    bool is_protected_;
-
-    /**
-     * \brief Constructor
-     */
-    ServiceStartedContext()
-        : connection_handle_(0)
-        , session_id_(0)
-        , new_session_id_(0)
-        , service_type_(protocol_handler::kInvalidServiceType)
-        , hash_id_(0)
-        , is_protected_(0) {}
-
-    /**
-     * \brief Constructor
-     * \param connection_handle Connection identifier within which session is
-     * started.
-     * \param session_id Session ID specified to OnSessionStartedCallback()
-     * \param new_session_id Session ID generated
-     * \param service_type Type of service
-     * \param hash_id Hash ID generated from connection_handle and
-     * new_session_id
-     * \param is_protected Whether service will be protected
-     **/
-    ServiceStartedContext(transport_manager::ConnectionUID connection_handle,
-                          uint8_t session_id,
-                          uint32_t new_session_id,
-                          protocol_handler::ServiceType service_type,
-                          uint32_t hash_id,
-                          bool is_protected)
-        : connection_handle_(connection_handle)
-        , session_id_(session_id)
-        , new_session_id_(new_session_id)
-        , service_type_(service_type)
-        , hash_id_(hash_id)
-        , is_protected_(is_protected) {}
-  };
-
-  /**
    * \brief Disconnect application.
    *
    * \param device_handle DeviceHandle of disconnected device.
@@ -536,19 +548,6 @@ class ConnectionHandlerImpl
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
-
-  /**
-   * \brief Convenient method to call NotifySessionStartedResult() with
-   * negative result.
-   * \param connection_handle Identifier of connection within which session
-   * exists
-   * \param session_id session ID passed to OnSessionStartedCallback()
-   * \param is_protected whether the service would be protected
-   **/
-  void NotifySessionStartedFailure(
-      const transport_manager::ConnectionUID connection_handle,
-      const uint8_t session_id,
-      bool is_protected);
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -585,7 +584,8 @@ class ConnectionHandlerImpl
   utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
   sync_primitives::Lock start_service_context_map_lock_;
-  std::map<uint32_t, ServiceStartedContext> start_service_context_map_;
+  std::map<uint32_t, protocol_handler::SessionContext>
+      start_service_context_map_;
 
 #ifdef BUILD_TESTS
   // Methods for test usage

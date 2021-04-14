@@ -37,7 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_PLATFORM_USB_DEVICE_H_
 
 #include <string>
-#include <libusb/libusb.h>
+#include <libusb-1.0/libusb.h>
 
 namespace transport_manager {
 

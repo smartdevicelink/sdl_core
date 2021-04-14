@@ -41,6 +41,8 @@
 #include <utility>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
+#include "transport_manager/common.h"
+
 namespace policy {
 
 // TODO(PV): specify errors
@@ -190,7 +192,7 @@ struct DeviceParams {
   std::string device_name;
   std::string device_mac_address;
   std::string device_connection_type;
-  uint32_t device_handle;
+  transport_manager::DeviceHandle device_handle;
 };
 
 /**
@@ -430,6 +432,28 @@ struct ExternalConsentStatusItemSorter {
            (lhs.entity_id_ < rhs.entity_id_);
   }
 };
+
+/**
+ * @brief The ApplicationPolicyActions struct contains actions which should be
+ * done for some application
+ */
+struct ApplicationPolicyActions {
+  ApplicationPolicyActions()
+      : is_notify_system(false)
+      , is_send_permissions_to_app(false)
+      , is_consent_needed(false) {}
+
+  bool is_notify_system;
+  bool is_send_permissions_to_app;
+  bool is_consent_needed;
+};
+
+/**
+ * @brief ApplicationsPoliciesActions map of actions to be done for every
+ * application
+ */
+typedef std::map<std::string, ApplicationPolicyActions>
+    ApplicationsPoliciesActions;
 
 /**
  * @brief Customer connectivity settings status

@@ -65,11 +65,20 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const TSchemaItemParameter<EnumType>& DefaultValue =
           TSchemaItemParameter<EnumType>());
   /**
+   * @deprecated
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  /**
+   * @brief Validate smart object.
+   * @param Object Object to validate.
+   * @param report__ object for reporting errors during validation
+   * @return NsSmartObjects::Errors::eType
+   **/
+  Errors::eType validate(const SmartObject& Object,
+                         rpc::ValidationReport* report__) OVERRIDE;
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -207,11 +216,32 @@ utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
 
 template <typename EnumType>
 Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
+  rpc::ValidationReport report("RPC");
+  return validate(Object, &report);
+}
+
+template <typename EnumType>
+Errors::eType TEnumSchemaItem<EnumType>::validate(
+    const SmartObject& Object, rpc::ValidationReport* report__) {
   if (SmartType_Integer != Object.getType()) {
+    std::string validation_info;
+    if (SmartType_String == Object.getType()) {
+      validation_info = "Invalid enum value: " + Object.asString();
+    } else {
+      validation_info = "Incorrect type, expected: " +
+                        SmartObject::typeToString(SmartType_Integer) +
+                        " (enum), got: " +
+                        SmartObject::typeToString(Object.getType());
+    }
+    report__->set_validation_info(validation_info);
     return Errors::INVALID_VALUE;
   }
   if (mAllowedElements.find(static_cast<EnumType>(Object.asInt())) ==
       mAllowedElements.end()) {
+    std::stringstream stream;
+    stream << "Invalid enum value: " << Object.asInt();
+    std::string validation_info = stream.str();
+    report__->set_validation_info(validation_info);
     return Errors::OUT_OF_RANGE;
   }
   return Errors::OK;

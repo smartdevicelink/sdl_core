@@ -55,6 +55,8 @@ class SocketStreamerAdapter : public StreamerAdapter {
                    const std::string& header);
     virtual ~SocketStreamer();
 
+    virtual void Close();
+
    protected:
     virtual bool Connect();
     virtual void Disconnect();

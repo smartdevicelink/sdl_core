@@ -235,16 +235,12 @@ TEST_F(OnHMIStatusNotificationFromMobileTest,
 
   EXPECT_CALL(*mock_app, is_foreground()).WillOnce(Return(true));
 
-  application_manager::MockMessageHelper& mock_message_helper =
-      *application_manager::MockMessageHelper::message_helper_mock();
-  Mock::VerifyAndClearExpectations(&mock_message_helper);
-  EXPECT_CALL(mock_message_helper, SendQueryApps(kConnectionKey, _));
+  EXPECT_CALL(mock_message_helper_, SendQueryApps(kConnectionKey, _));
 
   command->Run();
 
   ASSERT_EQ(application_manager::MessageType::kNotification,
             (*msg)[strings::params][strings::message_type].asInt());
-  Mock::VerifyAndClearExpectations(&mock_message_helper);
 }
 
 TEST_F(OnHMIStatusNotificationFromMobileTest,

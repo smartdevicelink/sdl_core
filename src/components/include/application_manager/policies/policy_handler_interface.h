@@ -427,6 +427,15 @@ class PolicyHandlerInterface {
   virtual const PolicySettings& get_settings() const = 0;
   virtual const std::string RemoteAppsUrl() const = 0;
 
+  /**
+   * @brief OnDeviceSwitching Notifies policy manager on device switch event so
+   * policy permissions should be processed accordingly
+   * @param device_id_from Id of device being switched
+   * @param device_id_to Id of device on the new transport
+   */
+  virtual void OnDeviceSwitching(const std::string& device_id_from,
+                                 const std::string& device_id_to) = 0;
+
 #ifdef SDL_REMOTE_CONTROL
   /**
    * @brief Sets HMI default type for specified application

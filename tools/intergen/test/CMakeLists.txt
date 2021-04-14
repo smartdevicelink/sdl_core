@@ -76,7 +76,7 @@ if (${HMI_DBUS_API})
       ${CMAKE_SOURCE_DIR}/src/components/dbus/include
       ${DBUS_INCLUDE_DIRS}
   )
-  set (LIBRARIES ${LIBRARIES} dbus)
+  set (LIBRARIES ${LIBRARIES} DBus)
   set (SOURCES ${SOURCES} generated_interface_dbus_tests.cc)
 endif ()
 

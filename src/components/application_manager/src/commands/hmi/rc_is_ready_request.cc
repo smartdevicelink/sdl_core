@@ -62,10 +62,14 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
       HMICapabilities& hmi_capabilities =
           application_manager_.hmi_capabilities();
       hmi_capabilities.set_is_rc_cooperating(is_available);
+      if (!is_available) {
+        hmi_capabilities.set_rc_supported(false);
+      }
+
       if (!CheckAvailabilityHMIInterfaces(application_manager_,
                                           HmiInterfaces::HMI_INTERFACE_RC)) {
         LOG4CXX_INFO(logger_,
-                     "HmiInterfaces::HMI_INTERFACE_VR isn't available");
+                     "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
       SendMessageToHMI();

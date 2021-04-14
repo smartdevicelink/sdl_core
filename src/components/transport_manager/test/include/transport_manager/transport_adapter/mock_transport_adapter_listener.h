@@ -120,6 +120,8 @@ class MockTransportAdapterListener : public TransportAdapterListener {
                void(const TransportAdapter*,
                     const DeviceUID&,
                     const ApplicationHandle&));
+  MOCK_METHOD1(OnTransportSwitchRequested,
+               void(const TransportAdapter* transport_adapter));
 };
 
 }  // namespace transport_manager_test

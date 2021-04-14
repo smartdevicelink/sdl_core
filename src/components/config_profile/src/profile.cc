@@ -211,6 +211,9 @@ const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
 const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
 const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
 const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
+const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
+const char* kAppTransportChangeTimerAdditionKey =
+    "AppTransportChangeTimerAddition";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -304,6 +307,8 @@ const uint16_t kDefaultRemoveBundleIDattempts = 3;
 const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
 const uint16_t kDefaultWaitTimeBetweenApps = 4000;
 const bool kDefaultEnableAppLaunchIOS = true;
+const uint32_t kDefaultAppTransportChangeTimer = 500u;
+const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
 }  // namespace
@@ -405,6 +410,9 @@ Profile::Profile()
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
     , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
+    , app_tranport_change_timer_addition_(
+          kDefaultAppTransportChangeTimerAddition)
     , error_occured_(false)
     , error_description_() {
   // SDL version
@@ -905,6 +913,14 @@ const uint16_t Profile::app_launch_wait_time() const {
 
 const bool Profile::enable_app_launch_ios() const {
   return enable_app_launch_ios_;
+}
+
+uint32_t Profile::app_transport_change_timer() const {
+  return app_tranport_change_timer_;
+}
+
+uint32_t Profile::app_transport_change_timer_addition() const {
+  return app_tranport_change_timer_addition_;
 }
 
 const uint16_t Profile::max_number_of_ios_device() const {
@@ -1884,6 +1900,23 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_BOOL_VALUE(
       enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
+
+  ReadUIntValue(&app_tranport_change_timer_,
+                kDefaultAppTransportChangeTimer,
+                kMainSection,
+                kAppTransportChangeTimerKey);
+
+  LOG_UPDATED_VALUE(
+      app_tranport_change_timer_, kAppTransportChangeTimerKey, kMainSection);
+
+  ReadUIntValue(&app_tranport_change_timer_addition_,
+                kDefaultAppTransportChangeTimerAddition,
+                kMainSection,
+                kAppTransportChangeTimerAdditionKey);
+
+  LOG_UPDATED_VALUE(app_tranport_change_timer_addition_,
+                    kAppTransportChangeTimerAdditionKey,
+                    kMainSection);
 }
 
 bool Profile::ReadValue(bool* value,

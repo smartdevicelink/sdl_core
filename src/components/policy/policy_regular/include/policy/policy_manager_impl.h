@@ -553,6 +553,9 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
 
+  void OnDeviceSwitching(const std::string& device_id_from,
+                         const std::string& device_id_to) OVERRIDE;
+
   /**
    * @brief RetrieveCertificate Allows to obtain certificate in order
    * to start secure connection.

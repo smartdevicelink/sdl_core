@@ -427,6 +427,20 @@ class HMICapabilities {
   virtual bool video_streaming_supported() const = 0;
 
   /*
+   * @brief Interface to store whether HMI supports remote control
+   *
+   * @param supported Indicates whether remote control is supported by HMI
+   */
+  virtual void set_rc_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves whether HMI supports remote control
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool rc_supported() const = 0;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *

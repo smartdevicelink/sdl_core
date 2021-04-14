@@ -63,7 +63,6 @@ using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
 using ::testing::_;
-using ::testing::Mock;
 using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -82,18 +81,12 @@ const uint32_t kConnectionKey = 2u;
 class PerformInteractionRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  PerformInteractionRequestTest()
-      : mock_message_helper_(*MockMessageHelper::message_helper_mock())
-      , mock_app_(CreateMockApp()) {}
+  PerformInteractionRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
-  }
-
-  void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -108,7 +101,6 @@ class PerformInteractionRequestTest
   }
 
   sync_primitives::Lock lock_;
-  MockMessageHelper& mock_message_helper_;
   MockAppPtr mock_app_;
 };
 
@@ -191,10 +183,10 @@ TEST_F(PerformInteractionRequestTest,
 
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillRepeatedly(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr response_to_mobile;
 
@@ -222,10 +214,10 @@ TEST_F(PerformInteractionRequestTest,
 
   ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   ON_CALL(mock_hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
 
   MessageSharedPtr response_msg_vr =
       CreateMessage(smart_objects::SmartType_Map);

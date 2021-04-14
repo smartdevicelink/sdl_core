@@ -35,6 +35,7 @@
 #include <string>
 #include "smart_objects/smart_object.h"
 #include "dbus/schema.h"
+#include "dbus/message_descriptions.h"
 
 struct DBusConnection;
 struct DBusMessage;

@@ -10,6 +10,7 @@
 using application_manager::Message;
 using protocol_handler::MajorProtocolVersion;
 using application_manager::MockService;
+using test::components::application_manager_test::MockApplication;
 using ::testing::NiceMock;
 using ::testing::Expectation;
 using ::testing::ReturnRef;
@@ -76,11 +77,12 @@ TEST_F(PluginManagerTest, SDL_events_triggers_module) {
   app_events.push_back(ApplicationEvent::kApplicationExit);
   app_events.push_back(ApplicationEvent::kApplicationUnregistered);
 
+  application_manager::ApplicationSharedPtr dummy_ptr =
+      utils::MakeShared<MockApplication>();
   std::vector<ApplicationEvent>::const_iterator ev = app_events.begin();
-  const uint32_t kDummyAppId = 1;
   for (; app_events.end() != ev; ++ev) {
-    EXPECT_CALL(*module, OnApplicationEvent(*ev, kDummyAppId));
-    manager->OnApplicationEvent(*ev, kDummyAppId);
+    EXPECT_CALL(*module, OnApplicationEvent(*ev, dummy_ptr));
+    manager->OnApplicationEvent(*ev, dummy_ptr);
   }
 
   std::vector<PolicyEvent> policy_events;

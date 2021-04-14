@@ -1,0 +1,9 @@
+{
+  "UI": {
+    "systemCapabilities": {
+      "phoneCapability": {
+        "dialNumberEnabled": true
+      }
+    }
+  }
+}

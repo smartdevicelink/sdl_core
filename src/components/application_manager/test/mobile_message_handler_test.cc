@@ -169,7 +169,7 @@ class MobileMessageHandlerTest : public testing::Test {
       uint32_t correlation_id,
       uint32_t connection_key,
       const std::string& json_msg,
-      application_manager::BinaryData* data = NULL) {
+      const application_manager::BinaryData* data = NULL) {
     MobileMessage message = utils::MakeShared<Message>(
         MessagePriority::FromServiceType(ServiceType::kRpc));
     message->set_function_id(function_id);
@@ -256,10 +256,10 @@ TEST(mobile_message_test, basic_test) {
   MobileMessage message =
       utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
   EXPECT_FALSE(message->has_binary_data());
-  application_manager::BinaryData* binary_data =
-      new application_manager::BinaryData;
-  binary_data->push_back('X');
-  message->set_binary_data(binary_data);
+  application_manager::BinaryData binary_data;
+  binary_data.push_back('X');
+  message->set_binary_data(
+      (const application_manager::BinaryData*)&binary_data);
   EXPECT_TRUE(message->has_binary_data());
 }
 

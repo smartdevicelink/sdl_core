@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "application_manager/vehicle_info_data.h"
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
@@ -255,6 +254,7 @@ class ApplicationManager {
       const utils::SharedPtr<Application> app) = 0;
 
   /**
+   * DEPRECATED
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
    * @return true if Application is subscribed for way points
@@ -263,16 +263,38 @@ class ApplicationManager {
   virtual bool IsAppSubscribedForWayPoints(const uint32_t app_id) const = 0;
 
   /**
+   * DEPRECATED
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
   virtual void SubscribeAppForWayPoints(const uint32_t app_id) = 0;
 
   /**
+   * DEPRECATED
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
   virtual void UnsubscribeAppFromWayPoints(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application pointer
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application pointer
+   */
+  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application pointer
+   */
+  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) = 0;
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -314,6 +336,17 @@ class ApplicationManager {
   virtual void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
                                const uint32_t connection_key) = 0;
 
+  /**
+   * @brief ProcessReconnection handles reconnection flow for application on
+   * transport switch
+   * @param application Pointer to switched application, must be validated
+   * before passing
+   * @param connection_key Connection key from registration request of switched
+   * application
+   */
+  virtual void ProcessReconnection(ApplicationSharedPtr application,
+                                   const uint32_t connection_key) = 0;
+
   virtual bool is_attenuated_supported() const = 0;
 
   /**
@@ -334,6 +367,13 @@ class ApplicationManager {
    * @param app Application
    */
   virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief OnApplicationSwitched starts activies postponed during application
+   * transport switching
+   * @param app Application
+   */
+  virtual void OnApplicationSwitched(ApplicationSharedPtr app) = 0;
 
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
@@ -374,8 +414,8 @@ class ApplicationManager {
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  virtual AppSharedPtrs IviInfoUpdated(VehicleDataType vehicle_info,
-                                       int value) = 0;
+  virtual AppSharedPtrs IviInfoUpdated(
+      mobile_apis::VehicleDataType::eType vehicle_info, int value) = 0;
 
   virtual ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
       smart_objects::SmartObject>& request_for_registration) = 0;
@@ -425,7 +465,8 @@ class ApplicationManager {
    *
    * @param state New state to be set
    */
-  virtual void set_driver_distraction(bool is_distracting) = 0;
+  virtual void set_driver_distraction_state(
+      const hmi_apis::Common_DriverDistractionState::eType state) = 0;
 
   /*
    * @brief Starts audio pass thru thread
@@ -535,6 +576,15 @@ class ApplicationManager {
   virtual bool IsApplicationForbidden(
       uint32_t connection_key, const std::string& policy_app_id) const = 0;
 
+  /**
+   * @brief IsAppInReconnectMode check if application belongs to session
+   * affected by transport switching at the moment
+   * @param policy_app_id Application id
+   * @return True if application is registered within session being switched,
+   * otherwise - false
+   */
+  virtual bool IsAppInReconnectMode(const std::string& policy_app_id) const = 0;
+
   virtual resumption::ResumeCtrl& resume_controller() = 0;
 
   /**
@@ -595,7 +645,22 @@ class ApplicationManager {
 
   /**
    * @brief CreateRegularState create regular HMI state for application
-   * @param app_id
+   * @param app Application
+   * @param hmi_level of returned state
+   * @param audio_state of returned state
+   * @param system_context of returned state
+   * @return new regular HMI state
+   */
+  virtual HmiStatePtr CreateRegularState(
+      utils::SharedPtr<Application> app,
+      mobile_apis::HMILevel::eType hmi_level,
+      mobile_apis::AudioStreamingState::eType audio_state,
+      mobile_apis::SystemContext::eType system_context) const = 0;
+
+  /**
+   * DEPRECATED
+   * @brief CreateRegularState create regular HMI state for application
+   * @param app_id Application id
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state

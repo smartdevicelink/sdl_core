@@ -270,6 +270,7 @@ extern const char* hmi_capabilities;
 extern const char* navigation;
 extern const char* phone_call;
 extern const char* video_streaming;
+extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;

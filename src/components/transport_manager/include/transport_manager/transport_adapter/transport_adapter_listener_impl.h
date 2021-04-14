@@ -49,26 +49,6 @@ class TransportAdapterListenerImpl
     : public transport_adapter::TransportAdapterListener {
  public:
   /**
-   * @enum Available types of events.
-   */
-  enum EventTypeEnum {
-    ON_SEARCH_DONE = 0,
-    ON_SEARCH_FAIL,
-    ON_DEVICE_LIST_UPDATED,
-    ON_FIND_NEW_APPLICATIONS_REQUEST,
-    ON_CONNECT_DONE,
-    ON_CONNECT_FAIL,
-    ON_DISCONNECT_DONE,
-    ON_DISCONNECT_FAIL,
-    ON_SEND_DONE,
-    ON_SEND_FAIL,
-    ON_RECEIVED_DONE,
-    ON_RECEIVED_FAIL,
-    ON_COMMUNICATION_ERROR,
-    ON_UNEXPECTED_DISCONNECT
-  };
-
-  /**
    * @brief Constructor.
    *
    * @param manager Pointer to the transport manager class.
@@ -283,7 +263,14 @@ class TransportAdapterListenerImpl
    */
   virtual void OnCommunicationError(const TransportAdapter* adapter,
                                     const DeviceUID& device,
-                                    const ApplicationHandle& app_id);
+                                    const ApplicationHandle& app_id) OVERRIDE;
+
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  void OnTransportSwitchRequested(const TransportAdapter* adapter) OVERRIDE;
 
  private:
   TransportManager* transport_manager_;

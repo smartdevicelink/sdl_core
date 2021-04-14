@@ -44,9 +44,12 @@ StreamerAdapter::StreamerAdapter(Streamer* const streamer)
 }
 
 StreamerAdapter::~StreamerAdapter() {
-  delete streamer_;
+  if (streamer_) {
+    streamer_->Close();
+  }
   thread_->join();
   threads::DeleteThread(thread_);
+  delete streamer_;
 }
 
 void StreamerAdapter::StartActivity(int32_t application_key) {

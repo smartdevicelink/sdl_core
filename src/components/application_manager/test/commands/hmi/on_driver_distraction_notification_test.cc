@@ -43,6 +43,7 @@
 #include "commands/commands_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "hmi/on_driver_distraction_notification.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -68,6 +69,7 @@ class HMIOnDriverDistractionNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   ::sync_primitives::Lock app_set_lock_;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
 MATCHER_P2(CheckNotificationParams, function_id, state, "") {
@@ -83,16 +85,52 @@ MATCHER_P2(CheckNotificationParams, function_id, state, "") {
   return is_function_id_matched && is_state_matched;
 }
 
-TEST_F(HMIOnDriverDistractionNotificationTest,
-       Run_SendNotificationToMobile_SUCCESS) {
-  MessageSharedPtr msg = CreateMessage();
+ACTION_P(GetArg3, result) {
+  arg3 = *result;
+}
+
+TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
   const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
-  (*msg)[am::strings::msg_params][am::hmi_notification::state] = state;
+  MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
 
-  NotificationPtr command(CreateCommand<OnDriverDistractionNotification>(msg));
+  NotificationPtr command(
+      CreateCommand<OnDriverDistractionNotification>(commands_msg));
 
-  EXPECT_CALL(app_mngr_, set_driver_distraction(state));
+  EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
+
+  MockAppPtr mock_app = CreateMockApp();
+  am::ApplicationSet app_set;
+  app_set.insert(mock_app);
+
+  DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
+  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
+  policy::CheckPermissionResult result;
+  result.hmi_level_permitted = policy::kRpcDisallowed;
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_interface_));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
+      .WillOnce(GetArg3(&result));
+
+  EXPECT_CALL(*mock_app,
+              PushMobileMessage(CheckNotificationParams(
+                  am::mobile_api::FunctionID::OnDriverDistractionID, state)));
+
+  command->Run();
+}
+
+TEST_F(HMIOnDriverDistractionNotificationTest,
+       Run_SendNotificationToMobile_SUCCESS) {
+  const hmi_apis::Common_DriverDistractionState::eType state =
+      hmi_apis::Common_DriverDistractionState::DD_ON;
+  MessageSharedPtr commands_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*commands_msg)[am::strings::msg_params][am::hmi_notification::state] = state;
+
+  NotificationPtr command(
+      CreateCommand<OnDriverDistractionNotification>(commands_msg));
+
+  EXPECT_CALL(app_mngr_, set_driver_distraction_state(Eq(state)));
 
   MockAppPtr mock_app = CreateMockApp();
   am::ApplicationSet app_set;
@@ -101,9 +139,12 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   DataAccessor<am::ApplicationSet> accessor(app_set, app_set_lock_);
   EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(accessor));
 
-  const uint32_t app_id = 1u;
-  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(app_id));
-
+  policy::CheckPermissionResult result;
+  result.hmi_level_permitted = policy::kRpcAllowed;
+  EXPECT_CALL(app_mngr_, GetPolicyHandler())
+      .WillOnce(ReturnRef(mock_policy_handler_interface_));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
+      .WillOnce(GetArg3(&result));
   EXPECT_CALL(app_mngr_,
               ManageMobileCommand(
                   CheckNotificationParams(

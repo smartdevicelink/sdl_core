@@ -545,7 +545,7 @@ TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap1) {
   ASSERT_FALSE(smim.is_valid());
   rpc::ValidationReport report("smim");
   smim.ReportErrors(&report);
-  ASSERT_EQ("smim.mandatoryIntMap: object is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("smim.mandatoryIntMap: object is not initialized", PrettyFormat(report));
 }
 
 TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap2) {
@@ -556,7 +556,7 @@ TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap2) {
   ASSERT_EQ("c: object is not initialized\n"
             "c.choiceID: value is not initialized\n"
             "c.menuName: value is not initialized\n"
-            "c.vrCommands: object is not initialized\n", PrettyFormat(report));
+            "c.vrCommands: object is not initialized", PrettyFormat(report));
 }
 
 TEST_F(GeneratedInterfaceTests, TestFrankenstructCreation) {
@@ -621,7 +621,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromInvalidJson) {
   ASSERT_EQ(2, fbmi.mandatoryInt);
   rpc::ValidationReport report("fbmi");
   fbmi.ReportErrors(&report);
-  ASSERT_EQ("fbmi[\"hello\"]: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("fbmi[\"hello\"]: value initialized incorrectly", PrettyFormat(report));
 }
 
 }  // namespace test

@@ -44,7 +44,7 @@ include_directories (
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/introspection_xml.cc
   ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
 )
 collect_sources(SOURCES "${PATHS}")
@@ -52,7 +52,7 @@ collect_sources(SOURCES "${PATHS}")
 set(LIBRARIES
   HMI_API
   Utils
-  dbus-1 -L${DBUS_LIBS_DIRECTORY}
+  dbus-1
 )
 
 add_custom_command(
@@ -74,7 +74,6 @@ add_custom_command(
 )
 
 add_library("DBus" ${SOURCES})
-add_dependecnies("DBus" Utils install-3rd_party_dbus)
 
 target_link_libraries("DBus" "${LIBRARIES}")
 

@@ -131,12 +131,6 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
 
-  bool is_ui_send_;
-  bool is_tts_send_;
-
-  bool is_ui_received_;
-  bool is_tts_received_;
-
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
   std::string ui_response_info_;
