@@ -64,7 +64,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     return ProtocolFramePtrList();
   }
   SDL_LOG_TRACE("Processing incoming data of size "
-               << tm_message_size << " for connection " << connection_id);
+                << tm_message_size << " for connection " << connection_id);
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
     SDL_LOG_WARN("ProcessData requested for unknown connection");

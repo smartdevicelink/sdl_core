@@ -276,7 +276,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     return RESULT_FAIL;
   }
   SDL_LOG_TRACE("Assembled frame with payload size: "
-               << assembling_frame->payload_size());
+                << assembling_frame->payload_size());
   frame_data.append_time = date_time::getCurrentTime();
   return RESULT_OK;
 }
