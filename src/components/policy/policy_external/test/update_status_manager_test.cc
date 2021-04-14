@@ -37,6 +37,7 @@
 #include "policy/policy_manager_impl.h"
 
 #include "utils/conditional_variable.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -78,44 +79,6 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void TearDown() OVERRIDE {}
 };
 
-namespace {
-/**
- * @brief The WaitAsync class
- * can wait for a certain amount of function calls from different
- * threads, or a timeout expires.
- */
-class WaitAsync {
- public:
-  WaitAsync(const uint32_t count, const uint32_t timeout)
-      : count_(count), timeout_(timeout) {}
-
-  void Notify() {
-    count_--;
-    cond_var_.NotifyOne();
-  }
-
-  bool Wait(sync_primitives::AutoLock& auto_lock) {
-    while (count_ > 0) {
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          cond_var_.WaitFor(auto_lock, timeout_);
-      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        return false;
-      }
-    }
-    return true;
-  }
-
- private:
-  int count_;
-  const uint32_t timeout_;
-  sync_primitives::ConditionalVariable cond_var_;
-};
-}  // namespace
-
-ACTION_P(NotifyAsync, waiter) {
-  waiter->Notify();
-}
-
 ACTION_P2(RetryFailed, manager, listener) {
   manager->OnResetRetrySequence();
   listener->OnPTUFinished(false);
@@ -124,18 +87,17 @@ ACTION_P2(RetryFailed, manager, listener) {
 TEST_F(UpdateStatusManagerTest,
        OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded) {
   // Arrange
-  sync_primitives::Lock lock;
-  sync_primitives::AutoLock auto_lock(lock);
   const uint32_t count = 3u;
   const uint32_t timeout = 2u * k_timeout_;
-  WaitAsync waiter(count, timeout);
+  auto waiter = TestAsyncWaiter::createInstance();
+
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
-      .WillRepeatedly(NotifyAsync(&waiter));
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(count, timeout));
   status_ = manager_->GetLastUpdateStatus();
   // Check
   EXPECT_EQ(StatusUpdateRequired, status_);
@@ -148,9 +110,9 @@ TEST_F(
   sync_primitives::AutoLock auto_lock(lock);
   const uint32_t count = 3u;
   const uint32_t timeout = 2u * k_timeout_;
-  WaitAsync waiter(count, timeout);
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
-      .WillRepeatedly(NotifyAsync(&waiter));
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   EXPECT_CALL(mock_ptu_retry_handler_, RetrySequenceFailed())
       .WillOnce(RetryFailed(manager_, &listener_));
   manager_->ScheduleUpdate();
@@ -167,7 +129,7 @@ TEST_F(
     EXPECT_CALL(listener_, OnPTUFinished(false));
   }
   EXPECT_EQ(StatusUpdatePending, status_);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(count, timeout));
   status_ = manager_->GetLastUpdateStatus();
   // Check
   EXPECT_EQ(StatusUpdateRequired, status_);

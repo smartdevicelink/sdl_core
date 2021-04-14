@@ -29,6 +29,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
@@ -151,6 +152,8 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   if (IsResponseSuccessful(response)) {
     status.successful_requests.push_back(found_request);
   } else {
+    SDL_LOG_DEBUG("Resumption request failed");
+    MessageHelper::PrintSmartObject(response);
     status.error_requests.push_back(found_request);
   }
 
@@ -534,9 +537,9 @@ void ResumptionDataProcessorImpl::DeleteSubmenus(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
-  for (const auto& smenu : sub_menu_map) {
+  for (const auto smenu : sub_menu_map) {
     auto failed_submenu_request =
         FindResumptionSubmenuRequest(smenu.first, failed_requests);
     if (!failed_submenu_request) {
@@ -627,9 +630,9 @@ void ResumptionDataProcessorImpl::DeleteCommands(
   };
 
   auto accessor = application->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
-  for (const auto& cmd : commands_map) {
+  for (const auto cmd : commands_map) {
     const auto cmd_id = extract_cmd_id(cmd.second);
     if (0 == cmd_id) {
       SDL_LOG_ERROR("Can't extract cmd_id for command with internal number: "
@@ -719,8 +722,8 @@ void ResumptionDataProcessorImpl::DeleteChoicesets(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->choice_set_map();
-  const auto& choices = accessor.GetData();
-  for (const auto& choice : choices) {
+  const auto choices = accessor.GetData();
+  for (const auto choice : choices) {
     auto failed_choice_set =
         FindResumptionChoiceSetRequest(choice.first, failed_requests);
     if (!failed_choice_set) {
@@ -743,6 +746,10 @@ void ResumptionDataProcessorImpl::SetGlobalProperties(
   const smart_objects::SmartObject& properties_so =
       saved_app[strings::application_global_properties];
   application->load_global_properties(properties_so);
+
+  if (saved_app.keyExists(strings::user_location)) {
+    application->set_user_location(saved_app[strings::user_location]);
+  }
 
   ProcessMessagesToHMI(MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       application, application_manager_));
@@ -799,6 +806,21 @@ void ResumptionDataProcessorImpl::DeleteGlobalProperties(
         application_manager_.GetNextHMICorrelationID());
     (*msg)[strings::params][strings::function_id] =
         hmi_apis::FunctionID::TTS_SetGlobalProperties;
+
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessMessageToHMI(msg, false);
+  }
+
+  if (result.HasRCPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::RC_SetGlobalProperties)) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(result,
+                                                            application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::RC_SetGlobalProperties;
 
     (*msg)[strings::msg_params] = *msg_params;
     ProcessMessageToHMI(msg, false);
@@ -881,7 +903,7 @@ void ResumptionDataProcessorImpl::DeleteButtonsSubscriptions(
   SDL_LOG_AUTO_TRACE();
   const ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
-  for (auto& btn : button_subscriptions) {
+  for (auto btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
       continue;
@@ -973,7 +995,12 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 }
 
 bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
-  return !response[strings::params].keyExists(strings::error_msg);
+  auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response[strings::params][application_manager::hmi_response::code]
+          .asInt());
+
+  return commands::CommandRequestImpl::IsHMIResultSuccess(result_code) ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
 void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
@@ -1079,8 +1106,6 @@ void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response) const {
   SDL_LOG_AUTO_TRACE();
-  const auto correlation_id =
-      response[strings::params][strings::correlation_id].asInt();
 
   const auto& msg_params = request[strings::msg_params];
   const auto app_id = msg_params[strings::app_id].asInt();
@@ -1093,8 +1118,9 @@ void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
 
   const auto window_id = msg_params[strings::window_id].asInt();
   if (!IsResponseSuccessful(response)) {
-    SDL_LOG_ERROR("UI_CreateWindow for correlation id: " << correlation_id
-                                                         << " has failed");
+    SDL_LOG_ERROR("UI_CreateWindow for correlation id: "
+                  << response[strings::params][strings::correlation_id].asInt()
+                  << " has failed");
     auto& builder = application->display_capabilities_builder();
     builder.ResetDisplayCapabilities();
     return;

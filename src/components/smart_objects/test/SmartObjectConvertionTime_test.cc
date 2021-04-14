@@ -543,6 +543,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
 };
 }  // namespace smart_object_test
 }  // namespace components
+}  // namespace test
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

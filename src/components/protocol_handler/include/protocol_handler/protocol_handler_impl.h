@@ -43,6 +43,7 @@
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
+#include "utils/convert_utils.h"
 #include "utils/custom_string.h"
 #include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
@@ -213,7 +214,7 @@ class ProtocolHandlerImpl
 
   void ProcessFailedPTU() OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow
@@ -374,12 +375,15 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            const std::string& reason);
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -389,13 +393,16 @@ class ProtocolHandlerImpl
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
    * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
                             std::vector<std::string>& rejectedParams,
-                            const std::string& reason);
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -455,7 +462,12 @@ class ProtocolHandlerImpl
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
+  DEPRECATED
   void NotifySessionStarted(const SessionContext& context,
+                            std::vector<std::string>& rejected_params,
+                            const std::string err_reason) OVERRIDE;
+
+  void NotifySessionStarted(SessionContext& context,
                             std::vector<std::string>& rejected_params,
                             const std::string err_reason) OVERRIDE;
 
@@ -674,7 +686,7 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
-  void PopValideAndExpirateMultiframes();
+  void PopValidAndExpiredMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
@@ -731,6 +743,24 @@ class ProtocolHandlerImpl
       const ConnectionID connection_id,
       const uint8_t session_id,
       const bool protection) const;
+
+  /**
+   * @brief Writes available protocol vehicle data into structured bson
+   * @param params bson params to write into
+   * @param data data to write
+   */
+  void WriteProtocolVehicleData(
+      BsonObject& params, const connection_handler::ProtocolVehicleData& data);
+
+  /**
+   * \brief Parces full protocol version from start service message headers bson
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
+   * \param packet Sart service message
+   * \return true if version successfully parsed, otherwise false
+   */
+  bool ParseFullVersion(utils::SemanticVersion& full_version,
+                        const ProtocolFramePtr& packet) const;
 
   const ProtocolHandlerSettings& settings_;
 

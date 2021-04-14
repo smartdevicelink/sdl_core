@@ -9,19 +9,23 @@ namespace {
 using namespace application_manager;
 void DeleteWayPoints(ApplicationSharedPtr app,
                      ApplicationManager& app_manager) {
-  app_manager.UnsubscribeAppFromWayPoints(app);
-  if (!app_manager.IsAnyAppSubscribedForWayPoints()) {
+  std::set<uint32_t> subscribed_apps =
+      app_manager.GetAppsSubscribedForWayPoints();
+  bool send_unsubscribe =
+      subscribed_apps.size() <= 1 && app_manager.IsSubscribedToHMIWayPoints();
+  if (send_unsubscribe) {
     auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
         app_manager.GetNextHMICorrelationID());
     app_manager.GetRPCService().ManageHMICommand(request);
   }
+  app_manager.UnsubscribeAppFromWayPoints(app, send_unsubscribe);
 }
 
 void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
-  for (const auto& cmd : commands_map) {
+  for (const auto cmd : commands_map) {
     auto delete_UI_msg = MessageHelper::CreateDeleteUICommandRequest(
         cmd.second, app->app_id(), app_manager.GetNextHMICorrelationID());
     app_manager.GetRPCService().ManageHMICommand(delete_UI_msg);
@@ -37,9 +41,9 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 
 void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
-  for (const auto& smenu : sub_menu_map) {
+  for (const auto smenu : sub_menu_map) {
     MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, app_manager);
     app->RemoveSubMenu(smenu.first);
   }
@@ -48,9 +52,9 @@ void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 void DeleteChoiceSets(ApplicationSharedPtr app,
                       ApplicationManager& app_manager) {
   auto accessor = app->choice_set_map();
-  const auto& choices = accessor.GetData();
+  const auto choices = accessor.GetData();
 
-  for (const auto& choice : choices) {
+  for (const auto choice : choices) {
     MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, app_manager);
     app->RemoveChoiceSet(choice.first);
   }

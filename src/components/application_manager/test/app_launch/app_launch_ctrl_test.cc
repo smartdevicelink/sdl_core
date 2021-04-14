@@ -202,7 +202,7 @@ TEST_F(AppLaunchCtrlTest, StoredAppIsLaunchedAfterDeviceConnected) {
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   MockAppPtr app = GetTestApp(0);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   applications_on_device.push_back(app_to_launch);
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
@@ -212,11 +212,11 @@ TEST_F(AppLaunchCtrlTest, StoredAppIsLaunchedAfterDeviceConnected) {
       RunAppOnDevice(app_to_launch->device_mac_, app_to_launch->bundle_id_))
       .Times(AtLeast(1))
       .WillOnce(DoAll(InvokeOnAppRegistered(app_launch_ctrl_.get(), app.get()),
-                      NotifyTestAsyncWaiter(&waiter)));
+                      NotifyTestAsyncWaiter(waiter)));
   app_launch_ctrl_->OnDeviceConnected(app_to_launch->device_mac_);
   const uint32_t wait_time =
       MAX_TEST_DURATION + settings_.app_launch_wait_time();
-  EXPECT_TRUE(waiter.WaitFor(1, wait_time));
+  EXPECT_TRUE(waiter->WaitFor(1, wait_time));
 }
 
 TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
@@ -224,7 +224,7 @@ TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   applications_on_device.push_back(app_to_launch);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = settings_.app_launch_max_retry_attempt();
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
@@ -234,14 +234,14 @@ TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
       connection_handler_mock_,
       RunAppOnDevice(app_to_launch->device_mac_, app_to_launch->bundle_id_))
       .Times(times)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
 
   app_launch_ctrl_->OnDeviceConnected(app_to_launch->device_mac_);
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              settings_.app_launch_max_retry_attempt() *
                                  settings_.app_launch_retry_wait_time();
-  EXPECT_TRUE(waiter.WaitFor(times, wait_time));
+  EXPECT_TRUE(waiter->WaitFor(times, wait_time));
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
@@ -253,7 +253,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
     apps.push_back(it->second);
   }
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
@@ -267,13 +267,13 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
         .Times(AtLeast(1))
         .WillOnce(DoAll(
             InvokeOnAppRegistered(app_launch_ctrl_.get(), it->first.get()),
-            NotifyTestAsyncWaiter(&waiter)));
+            NotifyTestAsyncWaiter(waiter)));
   }
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  waiter.WaitFor(times, wait_time);
+  waiter->WaitFor(times, wait_time);
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
@@ -285,7 +285,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
     apps.push_back(it->second);
   }
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times =
       settings_.app_launch_max_retry_attempt() * apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
@@ -300,13 +300,13 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
                 RunAppOnDevice(app_data.second->device_mac_,
                                app_data.second->bundle_id_))
         .Times(settings_.app_launch_max_retry_attempt())
-        .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
+        .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   }
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  waiter.WaitFor(times, wait_time);
+  waiter->WaitFor(times, wait_time);
 }
 
 TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
@@ -343,7 +343,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
     apps.push_back(app_data);
   }
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
@@ -356,7 +356,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
         .Times(AtLeast(1))
         .WillRepeatedly(DoAll(
             InvokeOnAppRegistered(app_launch_ctrl_.get(), it->first.get()),
-            NotifyTestAsyncWaiter(&waiter)));
+            NotifyTestAsyncWaiter(waiter)));
   }
 
   app_launch_ctrl_->OnDeviceConnected(DeviceMac(1));
@@ -364,7 +364,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
   const uint32_t wait_time = MAX_TEST_DURATION +
                              settings_.app_launch_wait_time() +
                              apps.size() * settings_.wait_time_between_apps();
-  waiter.WaitFor(times, wait_time);
+  waiter->WaitFor(times, wait_time);
 }
 
 }  // namespace app_launch_test

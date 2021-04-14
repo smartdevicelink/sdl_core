@@ -212,6 +212,8 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
+  MOCK_CONST_METHOD0(hardware_version, const std::string&());
+  MOCK_METHOD1(set_hardware_version, void(const std::string& hardware_version));
   MOCK_METHOD1(OnSoftwareVersionReceived,
                void(const std::string& ccpu_version));
   MOCK_METHOD0(UpdateCachedCapabilities, void());

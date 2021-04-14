@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/smart_object_keys.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
@@ -326,6 +327,12 @@ bool ResumptionDataDB::GetSavedApplication(
     SDL_LOG_ERROR("Problem with restoring of global properties data");
     return false;
   }
+
+  if (!SelectUserLocationData(policy_app_id, device_id, saved_app)) {
+    SDL_LOG_ERROR("Problem with restoring of user location data");
+    return false;
+  }
+
   SDL_LOG_INFO("Application data were successfully fetched from data base");
   return true;
 }
@@ -762,6 +769,9 @@ bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
   if (!DeleteSavedGlobalProperties(app_id, device_id)) {
     return false;
   }
+  if (!DeleteUserLocation(app_id, device_id)) {
+    return false;
+  }
   if (!UpdateGrammarID(app_id, device_id, 0)) {
     return false;
   }
@@ -1003,6 +1013,58 @@ bool ResumptionDataDB::SelectSubscriptionsData(
              [strings::application_vehicle_info] = application_vehicle_info;
   }
   SDL_LOG_INFO("Subscriptions were restored from DB successfully");
+  return true;
+}
+
+bool ResumptionDataDB::SelectUserLocationData(
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    smart_objects::SmartObject& saved_app) const {
+  SDL_LOG_AUTO_TRACE();
+  using namespace app_mngr;
+  using namespace smart_objects;
+  uint32_t count_item = 0;
+  if (!SelectCountFromArray(
+          count_item, kSelectCountUserLocation, policy_app_id, device_id)) {
+    SDL_LOG_ERROR("Select query has been failed");
+    return false;
+  }
+
+  if (0 == count_item) {
+    SDL_LOG_DEBUG("Application does not contain user_location data");
+    return true;
+  }
+  utils::dbms::SQLQuery select_user_location(db());
+  if (!PrepareSelectQuery(select_user_location,
+                          policy_app_id,
+                          device_id,
+                          kSelectUserLocation)) {
+    SDL_LOG_ERROR("Failed to prepare user location select query");
+    return false;
+  }
+
+  if (!select_user_location.Exec()) {
+    SDL_LOG_ERROR("Failed to execute user location select query");
+    return false;
+  }
+  /* Position of data in "select_user_location" :
+     field "col"        from table "applicationUserLocation" = 0
+     field "colspan"    from table "applicationUserLocation" = 1
+     field "level"      from table "applicationUserLocation" = 2
+     field "levelspan"  from table "applicationUserLocation" = 3
+     field "row"        from table "applicationUserLocation" = 4
+     field "rowspan"    from table "applicationUserLocation" = 5*/
+  smart_objects::SmartObject grid =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  grid[rc_rpc_plugin::strings::kCol] = select_user_location.GetInteger(0);
+  grid[rc_rpc_plugin::strings::kColspan] = select_user_location.GetInteger(1);
+  grid[rc_rpc_plugin::strings::kLevel] = select_user_location.GetInteger(2);
+  grid[rc_rpc_plugin::strings::kLevelspan] = select_user_location.GetInteger(3);
+  grid[rc_rpc_plugin::strings::kRow] = select_user_location.GetInteger(4);
+  grid[rc_rpc_plugin::strings::kRowspan] = select_user_location.GetInteger(5);
+
+  saved_app[strings::user_location][rc_rpc_plugin::strings::kGrid] = grid;
+
   return true;
 }
 
@@ -1519,6 +1581,18 @@ bool ResumptionDataDB::DeleteSavedSubscriptions(
   return true;
 }
 
+bool ResumptionDataDB::DeleteUserLocation(const std::string& policy_app_id,
+                                          const std::string& device_id) {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!ExecQueryToDeleteData(
+          policy_app_id, device_id, kDeleteApplicationUserLocation)) {
+    SDL_LOG_WARN("Incorrect delete from applicationUserLocation.");
+    return false;
+  }
+  return true;
+}
+
 bool ResumptionDataDB::DeleteSavedCommands(const std::string& policy_app_id,
                                            const std::string& device_id) {
   SDL_LOG_AUTO_TRACE();
@@ -1914,6 +1988,12 @@ bool ResumptionDataDB::SaveApplicationToDB(
     db_->RollbackTransaction();
     return false;
   }
+  if (!InsertUserLocationData(application->get_user_location(),
+                              application_primary_key)) {
+    SDL_LOG_WARN("Incorrect insert user location to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
   db_->CommitTransaction();
   return true;
 }
@@ -1970,6 +2050,12 @@ bool ResumptionDataDB::SaveApplicationToDB(
   if (!InsertChoiceSetData(application["applicationChoiceSets"],
                            application_primary_key)) {
     SDL_LOG_WARN("Incorrect insert choiceset data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!InsertUserLocationData(application["userLocation"],
+                              application_primary_key)) {
+    SDL_LOG_WARN("Incorrect insert userLocation to DB.");
     db_->RollbackTransaction();
     return false;
   }
@@ -2219,6 +2305,58 @@ bool ResumptionDataDB::InsertChoiceSetData(
     }
   }
   SDL_LOG_INFO("Choice set data were saved to DB successfully");
+  return true;
+}
+
+bool ResumptionDataDB::InsertUserLocationData(
+    const smart_objects::SmartObject& user_location,
+    int64_t application_primary_key) const {
+  SDL_LOG_AUTO_TRACE();
+  using namespace app_mngr;
+  using namespace smart_objects;
+
+  if (user_location.empty()) {
+    SDL_LOG_DEBUG("Application doesn't contain user location");
+    return true;
+  }
+
+  const auto grid = user_location[rc_rpc_plugin::strings::kGrid];
+  const int32_t col = grid[rc_rpc_plugin::strings::kCol].asInt();
+  const int32_t row = grid[rc_rpc_plugin::strings::kRow].asInt();
+  const int32_t level = grid[rc_rpc_plugin::strings::kLevel].asInt();
+  const int32_t colspan = grid[rc_rpc_plugin::strings::kColspan].asInt();
+  const int32_t rowspan = grid[rc_rpc_plugin::strings::kRowspan].asInt();
+  const int32_t levelspan = grid[rc_rpc_plugin::strings::kLevelspan].asInt();
+
+  utils::dbms::SQLQuery insert_application_user_location(db());
+  if (!insert_application_user_location.Prepare(kInsertUserLocation)) {
+    SDL_LOG_WARN(
+        "Problem with preparation insert "
+        "application user location query");
+    return false;
+  }
+
+  /* Positions of binding data for "insert_application_user_location":
+    field "idApplication" from table "applicationUserLocation" = 0
+    field "col" from table "applicationUserLocation" = 1
+    field "colspan" from table "applicationUserLocation" = 2
+    field "level" from table "applicationUserLocation" = 3
+    field "levelspan" from table "applicationUserLocation" = 4
+    field "row" from table "applicationUserLocation" = 5
+    field "rowspan" from table "applicationUserLocation" = 6*/
+  insert_application_user_location.Bind(0, application_primary_key);
+  insert_application_user_location.Bind(1, col);
+  insert_application_user_location.Bind(2, colspan);
+  insert_application_user_location.Bind(3, level);
+  insert_application_user_location.Bind(4, levelspan);
+  insert_application_user_location.Bind(5, row);
+  insert_application_user_location.Bind(6, rowspan);
+
+  if (!insert_application_user_location.Exec()) {
+    SDL_LOG_WARN("Incorrect insertion of user location");
+    return false;
+  }
+
   return true;
 }
 

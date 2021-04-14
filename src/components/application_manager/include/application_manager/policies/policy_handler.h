@@ -386,9 +386,13 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  void OnHardwareVersionReceived(const std::string& hardware_version) OVERRIDE;
+
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -811,6 +815,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Link all currently registered applications
    */
   void LinkAppsToDevice();
+
+  void SetHeartBeatTimeout(const std::string& policy_app_id,
+                           const uint32_t app_id);
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
 

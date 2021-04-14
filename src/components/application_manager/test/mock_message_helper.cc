@@ -582,6 +582,14 @@ MessageHelper::CreateTTSResetGlobalPropertiesRequest(
       ->CreateTTSResetGlobalPropertiesRequest(reset_result, application);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateRCResetGlobalPropertiesRequest(reset_result, application);
+}
+
 smart_objects::SmartObjectList
 MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {

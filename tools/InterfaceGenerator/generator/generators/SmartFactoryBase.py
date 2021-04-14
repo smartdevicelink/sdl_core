@@ -564,6 +564,7 @@ class CodeGenerator(object):
             struct_name=struct.name,
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
+                    struct_name=struct.name,
                     schema_loc_decl=self._gen_schema_loc_decls(
                         struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
@@ -758,7 +759,7 @@ class CodeGenerator(object):
         result_array = []
         result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
         result = u"\n".join(result_array)
-        if result is not "":
+        if result != "":
             result += u"\n\n"
         return result
 
@@ -789,7 +790,7 @@ class CodeGenerator(object):
                 count += 1
 
         result = u"\n\n".join(result_array)
-        if result is not "":
+        if result != "":
             result += u"\n\n"
         return result
 
@@ -1415,7 +1416,7 @@ class CodeGenerator(object):
                                 is True else u"// {0}\n").format(x)
                                 for x in self._normalize_multiline_comments(
                                     interface_item_base.description)])
-        if description is not u"":
+        if description != u"":
             description = u"".join([u" *\n" if use_doxygen
                                     is True else u"//\n", description])
 
@@ -1425,7 +1426,7 @@ class CodeGenerator(object):
                                        self._normalize_multiline_comments(
                                            interface_item_base.
                                            design_description)])
-        if design_description is not u"":
+        if design_description != u"":
             design_description = u"".join([u" *\n" if use_doxygen is
                                            True else "//\n",
                                            design_description])
@@ -1434,7 +1435,7 @@ class CodeGenerator(object):
                            True else u"// Note: {0}\n").format(x)
                            for x in self._normalize_multiline_comments(
                                [x.value for x in interface_item_base.issues])])
-        if issues is not u"":
+        if issues != u"":
             issues = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", issues])
 
@@ -1442,7 +1443,7 @@ class CodeGenerator(object):
                           True else u"// ToDo: {0}\n").format(x)
                           for x in self._normalize_multiline_comments(
                               interface_item_base.todos)])
-        if todos is not u"":
+        if todos != u"":
             todos = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", todos])
 
@@ -1479,7 +1480,7 @@ class CodeGenerator(object):
         return u"".join(
             [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x) if x is not u"" else u"\n" for x in code_lines])
+                x) if x != u"" else u"\n" for x in code_lines])
 
     @staticmethod
     def _normalize_multiline_comments(initial_strings):
@@ -1879,11 +1880,9 @@ class CodeGenerator(object):
     _struct_schema_item_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
-        u'''struct_schema_items.insert(std::make_pair('''
-        u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
         u'''structs_schemes_.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, CSmartSchema('''
-        u'''struct_schema_item_${name})));''')
+        u'''struct_schema_item_${name})));\n''')
 
     _function_schema_template = string.Template(
         u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
@@ -1896,17 +1895,21 @@ class CodeGenerator(object):
     _struct_impl_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
+        u'''    TStructsSchemaItems &struct_schema_items) {\n'''
         u'''$code'''
         u'''}\n''')
 
     _struct_impl_code_tempate = string.Template(
+        u'''Members '''
+        u'''schema_members;\n'''
+        u'''std::shared_ptr<ISchemaItem> struct_schema = CObjectSchemaItem::create(schema_members);\n'''
+        u'''struct_schema_items.insert(std::make_pair(StructIdentifiers::${struct_name}, CObjectSchemaItem::create(schema_members)));\n'''
+        u'''struct_schema_items[StructIdentifiers::${struct_name}] = struct_schema;\n\n'''
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''Members '''
-        u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
-        u'''return CObjectSchemaItem::create(schema_members);''')
+        u'''for(auto& member : schema_members) {struct_schema->AddMemberSchemaItem(member.first, member.second);}\n'''
+        u'''return struct_schema;''')
 
     _impl_code_loc_decl_enum_template = string.Template(
         u'''std::set<${type}::eType> ${var_name};''')
@@ -2113,7 +2116,7 @@ class CodeGenerator(object):
         u'''static '''
         u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items);''')
+        u'''    TStructsSchemaItems &struct_schema_items);''')
 
     _class_comment_template = string.Template(
         u'''/**\n'''

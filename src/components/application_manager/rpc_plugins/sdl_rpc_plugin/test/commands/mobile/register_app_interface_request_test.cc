@@ -198,7 +198,7 @@ class RegisterAppInterfaceRequestTest
   void InitGetters() {
     ON_CALL(app_mngr_, GetCorrectMobileIDFromMessage(msg_))
         .WillByDefault(Return(kAppId1));
-    ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(true));
+    ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
     ON_CALL(app_mngr_, resume_controller())
         .WillByDefault(ReturnRef(mock_resume_crt_));
     ON_CALL(app_mngr_, connection_handler())
@@ -416,11 +416,7 @@ TEST_F(RegisterAppInterfaceRequestTest, DefaultTimeout_CheckIfZero_SUCCESS) {
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId1;
-  EXPECT_CALL(app_mngr_, IsStopping())
-      .WillOnce(Return(false))
-      .WillOnce(Return(true))
-      .WillOnce(Return(false));
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -504,11 +500,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
        Run_HmiInterfacesStateAvailable_SUCCESS) {
   InitBasicMessage();
 
-  EXPECT_CALL(app_mngr_, IsStopping())
-      .WillOnce(Return(false))
-      .WillOnce(Return(true))
-      .WillOnce(Return(false));
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+  ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -808,11 +800,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   InitBasicMessage();
   (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey2;
-  EXPECT_CALL(app_mngr_, IsStopping())
-      .WillOnce(Return(false))
-      .WillOnce(Return(true))
-      .WillOnce(Return(false));
-  ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+
+  ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 

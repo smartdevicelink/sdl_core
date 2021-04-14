@@ -140,6 +140,7 @@ const char* kSecurityKeyPathKey = "KeyPath";
 const char* kSecurityCipherListKey = "CipherList";
 const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
+const char* kSecurityLevel = "SecurityLevel";
 #endif
 
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
@@ -337,6 +338,7 @@ const char* kDefaultSecurityProtocol = "TLSv1.2";
 const char* kDefaultSSLMode = "CLIENT";
 const bool kDefaultVerifyPeer = false;
 const uint32_t kDefaultBeforeUpdateHours = 24;
+const uint32_t kDefaultSecurityLevel = 1;
 #endif  // ENABLE_SECURITY
 
 const uint32_t kDefaultHubProtocolIndex = 0;
@@ -1117,6 +1119,10 @@ const std::vector<int>& Profile::force_protected_service() const {
 const std::vector<int>& Profile::force_unprotected_service() const {
   return force_unprotected_service_;
 }
+
+uint32_t Profile::security_level() const {
+  return security_level_;
+}
 #endif  // ENABLE_SECURITY
 
 bool Profile::logs_enabled() const {
@@ -1307,6 +1313,11 @@ void Profile::UpdateValues() {
                 kDefaultBeforeUpdateHours,
                 kSecuritySection,
                 kBeforeUpdateHours);
+
+  ReadUIntValue(&security_level_,
+                kDefaultSecurityLevel,
+                kSecuritySection,
+                kSecurityLevel);
 
 #endif  // ENABLE_SECURITY
 

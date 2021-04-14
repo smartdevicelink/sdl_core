@@ -58,7 +58,7 @@ BluetoothTransportAdapter::BluetoothTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
-          new BluetoothDeviceScanner(this, true, 0, settings.bluetooth_uuid()),
+          new BluetoothDeviceScanner(this, true, 15, settings.bluetooth_uuid()),
           new BluetoothConnectionFactory(this),
           NULL,
           last_state_wrapper,

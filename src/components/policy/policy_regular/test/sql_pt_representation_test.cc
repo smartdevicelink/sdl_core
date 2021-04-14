@@ -72,6 +72,35 @@ namespace policy_test {
 
 using policy_handler_test::MockPolicySettings;
 
+namespace {
+const std::string kSdlPreloadedPtJson = "json/sdl_preloaded_pt.json";
+const std::string kSoftwareVersion = "4.1.3.B_EB355B";
+const std::string kHardwareVersion = "1.1.1.0";
+}  // namespace
+
+policy_table::Table LoadPreloadedPT(const std::string& filename) {
+  std::ifstream ifile(filename);
+  EXPECT_TRUE(ifile.good());
+  Json::CharReaderBuilder reader_builder;
+  Json::Value root(Json::objectValue);
+  Json::parseFromStream(reader_builder, ifile, &root, nullptr);
+  root["policy_table"]["module_config"].removeMember("preloaded_pt");
+  ifile.close();
+  policy_table::Table table(&root);
+  return table;
+}
+
+Json::Value GetDefaultSnapshotModuleMeta(policy_table::Table& policy_table) {
+  auto json_table = policy_table.ToJsonValue();
+
+  Json::Value default_module_meta = json_table["policy_table"]["module_meta"];
+  default_module_meta["pt_exchanged_at_odometer_x"] = Json::Value(0);
+  default_module_meta["pt_exchanged_x_days_after_epoch"] = Json::Value(0);
+  default_module_meta["ignition_cycles_since_last_exchange"] = Json::Value(0);
+
+  return default_module_meta;
+}
+
 class SQLPTRepresentationTest : protected SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
@@ -199,180 +228,6 @@ class SQLPTRepresentationTest : protected SQLPTRepresentation,
     policy_table::Strings app_groups;
     GatherAppGroup(app_id, &app_groups);
     StringsCompare(groups, app_groups);
-  }
-
-  void PolicyTableUpdatePrepare(Json::Value& table) {
-    // Root
-    table["policy_table"] = Json::Value(Json::objectValue);
-
-    // 1st level
-    Json::Value& policy_table = table["policy_table"];
-    policy_table["module_config"] = Json::Value(Json::objectValue);
-    policy_table["functional_groupings"] = Json::Value(Json::objectValue);
-    policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
-    policy_table["app_policies"] = Json::Value(Json::objectValue);
-    policy_table["usage_and_error_counts"] = Json::Value(Json::objectValue);
-    policy_table["device_data"] = Json::Value(Json::objectValue);
-
-    // 'module_config' section start
-    Json::Value& module_config = policy_table["module_config"];
-    module_config["preloaded_pt"] = Json::Value(false);
-    module_config["preloaded_date"] = Json::Value("");
-    module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
-    module_config["exchange_after_x_kilometers"] = Json::Value(100);
-    module_config["exchange_after_x_days"] = Json::Value(5);
-    module_config["timeout_after_x_seconds"] = Json::Value(500);
-    module_config["seconds_between_retries"] = Json::Value(Json::arrayValue);
-
-    Json::Value& seconds_between_retries =
-        module_config["seconds_between_retries"];
-    seconds_between_retries[0] = Json::Value(10);
-    seconds_between_retries[1] = Json::Value(20);
-    seconds_between_retries[2] = Json::Value(30);
-    module_config["endpoints"] = Json::Value(Json::objectValue);
-
-    Json::Value& endpoins = module_config["endpoints"];
-    endpoins["0x00"] = Json::Value(Json::objectValue);
-    endpoins["0x00"]["default"] = Json::Value(Json::arrayValue);
-    endpoins["0x00"]["default"][0] =
-        Json::Value("http://ford.com/cloud/default");
-    module_config["notifications_per_minute_by_priority"] =
-        Json::Value(Json::objectValue);
-    module_config["notifications_per_minute_by_priority"]["emergency"] =
-        Json::Value(1);
-    module_config["notifications_per_minute_by_priority"]["navigation"] =
-        Json::Value(2);
-    module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-        Json::Value(3);
-    module_config["notifications_per_minute_by_priority"]["communication"] =
-        Json::Value(4);
-    module_config["notifications_per_minute_by_priority"]["normal"] =
-        Json::Value(5);
-    module_config["notifications_per_minute_by_priority"]["none"] =
-        Json::Value(6);
-    module_config["subtle_notifications_per_minute_by_priority"] =
-        Json::Value(Json::objectValue);
-    module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
-        Json::Value(7);
-    module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
-        Json::Value(8);
-    module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
-        Json::Value(9);
-    module_config["subtle_notifications_per_minute_by_priority"]
-                 ["communication"] = Json::Value(10);
-    module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
-        Json::Value(11);
-    module_config["subtle_notifications_per_minute_by_priority"]["none"] =
-        Json::Value(12);
-    module_config["vehicle_make"] = Json::Value("");
-    module_config["vehicle_model"] = Json::Value("");
-    module_config["vehicle_year"] = Json::Value("");
-    module_config["certificate"] = Json::Value("encrypted_certificate_content");
-    // 'module_config' section end
-
-    // 'functional_groupings' section start
-    Json::Value& functional_groupings = policy_table["functional_groupings"];
-    functional_groupings["default"] = Json::Value(Json::objectValue);
-    Json::Value& default_group = functional_groupings["default"];
-    default_group["rpcs"] = Json::Value(Json::objectValue);
-    default_group["rpcs"]["Update"] = Json::Value(Json::objectValue);
-    default_group["rpcs"]["Update"]["hmi_levels"] =
-        Json::Value(Json::arrayValue);
-    default_group["rpcs"]["Update"]["hmi_levels"][0] = Json::Value("FULL");
-    default_group["rpcs"]["Update"]["parameters"] =
-        Json::Value(Json::arrayValue);
-    default_group["rpcs"]["Update"]["parameters"][0] = Json::Value("speed");
-
-    Json::Value& consumer_friendly_messages =
-        policy_table["consumer_friendly_messages"];
-    consumer_friendly_messages["version"] = Json::Value("some_msg_version");
-    consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-    consumer_friendly_messages["messages"]["MSG_CODE"] =
-        Json::Value(Json::objectValue);
-    Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG_CODE"];
-    msg1["languages"] = Json::Value(Json::objectValue);
-    msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
-    // 'functional_groupings' section end
-
-    // 'app_policies' section start
-    Json::Value& app_policies = policy_table["app_policies"];
-    app_policies["default"] = Json::Value(Json::objectValue);
-    app_policies["default"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["default"]["memory_kb"] = Json::Value(50);
-    app_policies["default"]["heart_beat_timeout_ms"] = Json::Value(100);
-    app_policies["default"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["default"]["groups"][0] = Json::Value("default");
-    app_policies["default"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["default"]["is_revoked"] = Json::Value(true);
-    app_policies["default"]["default_hmi"] = Json::Value("FULL");
-    app_policies["default"]["keep_context"] = Json::Value(true);
-    app_policies["default"]["steal_focus"] = Json::Value(true);
-    app_policies["default"]["RequestType"] = Json::Value(Json::arrayValue);
-
-    app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
-    app_policies["pre_DataConsent"]["memory_kb"] = Json::Value(40);
-    app_policies["pre_DataConsent"]["heart_beat_timeout_ms"] = Json::Value(90);
-    app_policies["pre_DataConsent"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["pre_DataConsent"]["groups"][0] = Json::Value("default");
-    app_policies["pre_DataConsent"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["pre_DataConsent"]["default_hmi"] = Json::Value("FULL");
-    app_policies["pre_DataConsent"]["is_revoked"] = Json::Value(false);
-    app_policies["pre_DataConsent"]["keep_context"] = Json::Value(true);
-    app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(true);
-    app_policies["pre_DataConsent"]["RequestType"] =
-        Json::Value(Json::arrayValue);
-
-    app_policies["1234"] = Json::Value(Json::objectValue);
-    app_policies["1234"]["memory_kb"] = Json::Value(150);
-    app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(200);
-    app_policies["1234"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["1234"]["groups"][0] = Json::Value("default");
-    app_policies["1234"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["1234"]["default_hmi"] = Json::Value("FULL");
-    app_policies["1234"]["is_revoked"] = Json::Value(true);
-    app_policies["1234"]["keep_context"] = Json::Value(false);
-    app_policies["1234"]["steal_focus"] = Json::Value(false);
-    app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
-    app_policies["1234"]["app_services"] = Json::Value(Json::objectValue);
-    app_policies["1234"]["icon_url"] =
-        Json::Value("http:://www.sdl.com/image.png");
-    app_policies["1234"]["app_services"]["MEDIA"] =
-        Json::Value(Json::objectValue);
-    app_policies["1234"]["app_services"]["MEDIA"]["service_names"] =
-        Json::Value(Json::arrayValue);
-    app_policies["1234"]["app_services"]["MEDIA"]["service_names"][0] =
-        Json::Value("SDL App");
-    app_policies["1234"]["app_services"]["MEDIA"]["service_names"][1] =
-        Json::Value("SDL Music");
-    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"] =
-        Json::Value(Json::arrayValue);
-    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"][0] =
-        Json::Value(Json::objectValue);
-    app_policies["1234"]["app_services"]["MEDIA"]["handled_rpcs"][0]
-                ["function_id"] = Json::Value(41);
-
-    app_policies["device"] = Json::Value(Json::objectValue);
-    app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["device"]["groups"][0] = Json::Value("default");
-    app_policies["device"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["device"]["is_revoked"] = Json::Value(true);
-    app_policies["device"]["default_hmi"] = Json::Value("FULL");
-    app_policies["device"]["keep_context"] = Json::Value(true);
-    app_policies["device"]["steal_focus"] = Json::Value(true);
-    // 'app_policies' section end
-
-    Json::Value& usage_and_error_counts =
-        policy_table["usage_and_error_counts"];
-    usage_and_error_counts["app_level"] = Json::Value(Json::objectValue);
-    usage_and_error_counts["app_level"]["some_app_id"] =
-        Json::Value(Json::objectValue);
-    usage_and_error_counts["app_level"]["some_app_id"]["count_of_tls_errors"] =
-        Json::Value(5);
-
-    Json::Value& device_data = policy_table["device_data"];
-    device_data["device_id_hash_1"] = Json::Value(Json::objectValue);
-    device_data["device_id_hash_2"] = Json::Value(Json::objectValue);
-    device_data["device_id_hash_3"] = Json::Value(Json::objectValue);
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
@@ -1812,252 +1667,77 @@ TEST_F(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   EXPECT_FALSE(file_system::FileExists(path));
 }
 
-// TODO {AKozoriz} : Snapshot must have module meta section, but test
-// generates snapshot without it.
 TEST_F(SQLPTRepresentationTest,
-       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepare(table);
+       GenerateSnapshot_DefaultContentOfModuleMeta_MetaInfoPresentInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
 
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+  ASSERT_TRUE(IsValid(update));
+  EXPECT_TRUE(reps->Save(update));
 
-  // Assert
-  // ASSERT_TRUE(IsValid(update));
-  ASSERT_TRUE(reps->Save(update));
-
-  // Act
   std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
-  snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
-  // Remove fields which must be absent in snapshot
-  table["policy_table"]["consumer_friendly_messages"].removeMember("messages");
-  table["policy_table"]["app_policies"]["1234"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["1234"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["1234"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["default"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["default"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["default"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "default_hmi");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "keep_context");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "steal_focus");
-  table["policy_table"]["app_policies"]["device"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["device"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["device"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["device"].removeMember("groups");
-  table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
-  table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
-  policy_table::Table expected(&table);
-  Json::StreamWriterBuilder writer_builder;
-  // Checks
-  EXPECT_EQ(Json::writeString(writer_builder, expected.ToJsonValue()),
-            Json::writeString(writer_builder, snapshot->ToJsonValue()));
-  EXPECT_EQ(expected.ToJsonValue().toStyledString(),
-            snapshot->ToJsonValue().toStyledString());
+
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
 }
 
-TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepare(table);
+TEST_F(SQLPTRepresentationTest,
+       GenerateSnapshot_SetMetaInfo_NoSoftwareVersionInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
 
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  // Checks PT before Save
-  policy_table::FunctionalGroupings func_groups;
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Check functional groupings section
-  EXPECT_EQ(0u, func_groups.size());
+  ASSERT_TRUE(IsValid(update));
+  EXPECT_TRUE(reps->Save(update));
+  EXPECT_TRUE(reps->SetMetaInfo(kSoftwareVersion));
 
-  policy_table::ApplicationPoliciesSection policies;
-  GatherApplicationPoliciesSection(&policies);
-  // Check ApplicationPoliciesSection
-  EXPECT_EQ(0u, policies.apps.size());
-  EXPECT_EQ(policy_table::Priority::P_EMERGENCY, policies.device.priority);
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
 
-  policy_table::ModuleConfig config;
-  GatherModuleConfig(&config);
-  // Check Module config section
-  EXPECT_TRUE(*config.preloaded_pt);
-  EXPECT_EQ(0, config.exchange_after_x_ignition_cycles);
-  EXPECT_EQ(0, config.exchange_after_x_kilometers);
-  EXPECT_EQ(0, config.exchange_after_x_days);
-  EXPECT_EQ(0, config.timeout_after_x_seconds);
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_make));
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_model));
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_year));
-  EXPECT_EQ("", static_cast<std::string>(*config.preloaded_date));
-  EXPECT_EQ("", static_cast<std::string>(*config.certificate));
-  EXPECT_EQ(0u, config.seconds_between_retries.size());
-  EXPECT_EQ(0u, config.endpoints.size());
-  EXPECT_EQ(0u, config.notifications_per_minute_by_priority.size());
-  EXPECT_EQ(0u, (*config.subtle_notifications_per_minute_by_priority).size());
-
-  policy_table::ConsumerFriendlyMessages messages;
-  GatherConsumerFriendlyMessages(&messages);
-  EXPECT_EQ("0", static_cast<std::string>(messages.version));
-
-  policy_table::DeviceData devices;
-  GatherDeviceData(&devices);
-  EXPECT_EQ(0u, devices.size());
-
-  policy_table::UsageAndErrorCounts counts;
-  GatherUsageAndErrorCounts(&counts);
-  EXPECT_TRUE(0u == counts.app_level->size());
-
-  // ASSERT_TRUE(IsValid(update));
-  // Act
-  ASSERT_TRUE(reps->Save(update));
-
-  // Check Functional Groupings
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Checks
-  EXPECT_EQ(1u, func_groups.size());
-  policy_table::FunctionalGroupings::iterator func_groups_iter =
-      func_groups.find("default");
-  ASSERT_TRUE(func_groups.end() != func_groups_iter);
-  policy_table::Rpcs& rpcs = func_groups_iter->second;
-  EXPECT_EQ("", static_cast<std::string>(*rpcs.user_consent_prompt));
-  policy_table::Rpc& rpc = rpcs.rpcs;
-  EXPECT_EQ(1u, rpc.size());
-  policy_table::Rpc::const_iterator rpc_iter = rpc.find("Update");
-  EXPECT_TRUE(rpc.end() != rpc_iter);
-  const policy_table::HmiLevels& hmi_levels = rpc_iter->second.hmi_levels;
-  EXPECT_EQ(1u, hmi_levels.size());
-  EXPECT_TRUE(hmi_levels.end() != std::find(hmi_levels.begin(),
-                                            hmi_levels.end(),
-                                            policy_table::HmiLevel::HL_FULL));
-
-  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
-  EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() !=
-              std::find(parameters.begin(),
-                        parameters.end(),
-                        policy_table::EnumToJsonString(
-                            policy_table::Parameter::P_SPEED)));
-  // Check Application Policies Section
-  GatherApplicationPoliciesSection(&policies);
-  const uint32_t apps_size = 3u;
-
-  rpc::String<1ul, 255ul> str("default");
-  policy_table::Strings groups;
-  groups.push_back(str);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "1234",
-                          150u,
-                          200u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "default",
-                          50u,
-                          100u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "pre_DataConsent",
-                          40u,
-                          90u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "device",
-                          0u,
-                          0u,
-                          groups);
-
-  CheckAppGroups("1234", groups);
-  CheckAppGroups("default", groups);
-  CheckAppGroups("pre_DataConsent", groups);
-
-  GatherModuleConfig(&config);
-  // Check Module Config section
-  ASSERT_FALSE(*config.preloaded_pt);
-  ASSERT_EQ("encrypted_certificate_content",
-            static_cast<std::string>(*config.certificate));
-  ASSERT_EQ("", static_cast<std::string>(*config.preloaded_date));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_year));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_model));
-  ASSERT_EQ("", static_cast<std::string>(*config.vehicle_make));
-  ASSERT_EQ(10, config.exchange_after_x_ignition_cycles);
-  ASSERT_EQ(100, config.exchange_after_x_kilometers);
-  ASSERT_EQ(5, config.exchange_after_x_days);
-  ASSERT_EQ(500, config.timeout_after_x_seconds);
-  ASSERT_EQ(3u, config.seconds_between_retries.size());
-  ASSERT_EQ(10, config.seconds_between_retries[0]);
-  ASSERT_EQ(20, config.seconds_between_retries[1]);
-  ASSERT_EQ(30, config.seconds_between_retries[2]);
-  ASSERT_EQ(6u, config.notifications_per_minute_by_priority.size());
-  ASSERT_EQ(1, config.notifications_per_minute_by_priority["emergency"]);
-  ASSERT_EQ(2, config.notifications_per_minute_by_priority["navigation"]);
-  ASSERT_EQ(3, config.notifications_per_minute_by_priority["VOICECOMM"]);
-  ASSERT_EQ(4, config.notifications_per_minute_by_priority["communication"]);
-  ASSERT_EQ(5, config.notifications_per_minute_by_priority["normal"]);
-  ASSERT_EQ(6, config.notifications_per_minute_by_priority["none"]);
-  ASSERT_EQ(6u, (*config.subtle_notifications_per_minute_by_priority).size());
-  ASSERT_EQ(7,
-            (*config.subtle_notifications_per_minute_by_priority)["emergency"]);
-  ASSERT_EQ(
-      8, (*config.subtle_notifications_per_minute_by_priority)["navigation"]);
-  ASSERT_EQ(9,
-            (*config.subtle_notifications_per_minute_by_priority)["VOICECOMM"]);
-  ASSERT_EQ(
-      10,
-      (*config.subtle_notifications_per_minute_by_priority)["communication"]);
-  ASSERT_EQ(11,
-            (*config.subtle_notifications_per_minute_by_priority)["normal"]);
-  ASSERT_EQ(12, (*config.subtle_notifications_per_minute_by_priority)["none"]);
-  EXPECT_EQ(1u, config.endpoints.size());
-  policy_table::ServiceEndpoints& service_endpoints = config.endpoints;
-  EXPECT_EQ("0x00", service_endpoints.begin()->first);
-  policy_table::URLList& url_list = service_endpoints.begin()->second;
-  EXPECT_EQ("default", url_list.begin()->first);
-  policy_table::URL& url = url_list.begin()->second;
-  EXPECT_EQ("http://ford.com/cloud/default", static_cast<std::string>(url[0]));
-
-  GatherConsumerFriendlyMessages(&messages);
-  EXPECT_EQ("some_msg_version", static_cast<std::string>(messages.version));
-  EXPECT_TRUE(0u != messages.messages->size());
-  EXPECT_TRUE(0u != (*messages.messages)["MSG_CODE"].languages.size());
-
-  GatherUsageAndErrorCounts(&counts);
-  EXPECT_FALSE(0u == counts.app_level->size());
-  EXPECT_EQ(5u, (*counts.app_level)["some_app_id"].count_of_tls_errors);
-
-  GatherDeviceData(&devices);
-  EXPECT_EQ(3u, devices.size());
-
-  const std::string kAppId = "1234";
-  const std::string kServiceType = "MEDIA";
-  policy_table::AppServiceParameters app_service_parameters;
-  GatherAppServiceParameters(kAppId, &app_service_parameters);
-  ASSERT_FALSE(app_service_parameters.find(kServiceType) ==
-               app_service_parameters.end());
-  auto service_names = *(app_service_parameters[kServiceType].service_names);
-  EXPECT_TRUE(service_names.is_initialized());
-  ASSERT_EQ(service_names.size(), 2u);
-  EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
-  EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
-
-  auto handled_rpcs = app_service_parameters[kServiceType].handled_rpcs;
-
-  EXPECT_TRUE(handled_rpcs.is_initialized());
-  EXPECT_EQ(handled_rpcs[0].function_id, 41);
-
-  policy_table::ApplicationPolicies& apps = policies.apps;
-  auto icon_url = *(apps[kAppId].icon_url);
-
-  EXPECT_EQ(std::string(icon_url), "http:://www.sdl.com/image.png");
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
 }
 
+TEST_F(SQLPTRepresentationTest,
+       GenerateSnapshot_SetHardwareVersion_NoHardwareVersionInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
+
+  ASSERT_TRUE(IsValid(update));
+  EXPECT_TRUE(reps->Save(update));
+  reps->SetHardwareVersion(kHardwareVersion);
+
+  std::shared_ptr<policy_table::Table> snapshot = reps->GenerateSnapshot();
+
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
+}
+
+TEST_F(SQLPTRepresentationTest,
+       SetMetaInfo_SetSoftwareVersion_ValueIsSetInModuleMeta) {
+  EXPECT_TRUE(reps->SetMetaInfo(kSoftwareVersion));
+
+  utils::dbms::SQLQuery query(reps->db());
+  const std::string query_select_ccpu =
+      "SELECT `ccpu_version` FROM `module_meta`";
+
+  query.Prepare(query_select_ccpu);
+  query.Next();
+  EXPECT_EQ(kSoftwareVersion, query.GetString(0));
+}
+
+TEST_F(SQLPTRepresentationTest, SetHardwareVersion_ValueIsSetInModuleMeta) {
+  reps->SetHardwareVersion(kHardwareVersion);
+
+  utils::dbms::SQLQuery query(reps->db());
+  const std::string query_select_hardware_version =
+      "SELECT `hardware_version` FROM `module_meta`";
+
+  query.Prepare(query_select_hardware_version);
+  query.Next();
+  EXPECT_EQ(kHardwareVersion, query.GetString(0));
+}
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test
