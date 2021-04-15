@@ -34,16 +34,15 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <limits>
 #include <stdlib.h>
 #include <algorithm>
-#include <sstream>
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <sstream>
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 /**
  * @brief Value that is used as invalid value for string type
@@ -491,7 +490,7 @@ std::string SmartObject::convert_string() const {
     default:
       break;
   }
-  return NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
+  return ns_smart_device_link::ns_smart_objects::invalid_cstr_value;
 }
 
 custom_str::CustomString SmartObject::convert_custom_string() const {
@@ -701,6 +700,9 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
     case SmartType_Integer:
       newData.int_value = OtherObject.m_data.int_value;
       break;
+    case SmartType_UInteger:
+      newData.int_value = OtherObject.m_data.int_value;
+      break;
     case SmartType_Double:
       newData.double_value = OtherObject.m_data.double_value;
       break;
@@ -732,16 +734,32 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
 void SmartObject::cleanup_data() {
   switch (m_type) {
     case SmartType_String:
-      delete m_data.str_value;
+      if (m_data.str_value) {
+        delete m_data.str_value;
+        m_data.str_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Map:
-      delete m_data.map_value;
+      if (m_data.map_value) {
+        delete m_data.map_value;
+        m_data.map_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Array:
-      delete m_data.array_value;
+      if (m_data.array_value) {
+        delete m_data.array_value;
+        m_data.array_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Binary:
-      delete m_data.binary_value;
+      if (m_data.binary_value) {
+        delete m_data.binary_value;
+        m_data.binary_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     default:
       break;
@@ -870,16 +888,14 @@ bool SmartObject::erase(const std::string& Key) {
 
 bool SmartObject::isValid() const {
   rpc::ValidationReport report("RPC");
-  return (Errors::OK == m_schema.validate(*this, &report));
+  return (errors::OK == m_schema.validate(*this, &report));
 }
 
-Errors::eType SmartObject::validate() {
-  rpc::ValidationReport report("RPC");
-  return validate(&report);
-}
-
-Errors::eType SmartObject::validate(rpc::ValidationReport* report__) {
-  return m_schema.validate(*this, report__);
+errors::eType SmartObject::validate(
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
+  return m_schema.validate(*this, report, MessageVersion, allow_unknown_enums);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {
@@ -890,5 +906,5 @@ CSmartSchema SmartObject::getSchema() {
   return m_schema;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

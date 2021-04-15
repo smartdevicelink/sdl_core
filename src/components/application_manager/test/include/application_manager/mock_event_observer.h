@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_EVENT_OBSERVER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_EVENT_OBSERVER_H_
 
-#include "application_manager/event_engine/event_observer.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "gmock/gmock.h"
 
 namespace test {
@@ -49,6 +49,9 @@ class MockEventObserver
       : application_manager::event_engine::EventObserver(event_dispatcher) {}
   MOCK_METHOD1(on_event,
                void(const application_manager::event_engine::Event& event));
+  MOCK_METHOD1(
+      on_event,
+      void(const application_manager::event_engine::MobileEvent& event));
 };
 
 }  // namespace event_engine_test

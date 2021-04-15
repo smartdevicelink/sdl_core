@@ -43,6 +43,8 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
+option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -51,7 +53,7 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(REMOTE_CONTROL "Enable Reverse functionality" ON)
+option(ENABLE_IAP2EMULATION "IAP2 emulation via tcp" OFF)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
@@ -113,9 +115,6 @@ if (HMI_ADAPTER_OPTION)
   if (${HMI_ADAPTER_OPTION} STREQUAL "MESSAGEBROKER")
     message(STATUS "Jenkins integration: selected HMI adapter MESSAGEBROKER")
     set (HMIADAPTER "messagebroker")
-  elseif (${HMI_ADAPTER_OPTION} STREQUAL "DBUS")
-    message(STATUS "Jenkins integration: selected HMI adapter DBUS")
-    set (HMIADAPTER "dbus")
   endif()
 endif()
 
@@ -156,11 +155,6 @@ if (OS_TYPE_OPTION)
   endif()
 endif()
 
-if (REMOTE_CONTROL)
-  add_definitions(-DSDL_REMOTE_CONTROL)
-  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
-endif()
-
 #Jenkins integration section end
 
 #Deliver Build Configuration
@@ -173,12 +167,6 @@ get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
 get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
-
-get_property(cHelpString CACHE REMOTE_CONTROL PROPERTY HELPSTRING)
-get_property(cType CACHE REMOTE_CONTROL PROPERTY TYPE)
-get_property(cValue CACHE REMOTE_CONTROL PROPERTY VALUE)
-file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "REMOTE_CONTROL:${cType}=${cValue}\n\n")
 
 get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
 get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)
@@ -222,6 +210,13 @@ get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
+get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_WEBSOCKET_SERVER_SUPPORT:${cType}=${cValue}\n")
+
+
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
   COMMAND tar -cz -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
@@ -250,7 +245,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
+set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -330,6 +326,16 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support enabled")
 endif()
 
+if (BUILD_CLOUD_APP_SUPPORT)
+  add_definitions(-DCLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  message(STATUS "Cloud app websocket support enabled")
+endif()
+
+if (BUILD_WEBSOCKET_SERVER_SUPPORT)
+  add_definitions(-DWEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  message(STATUS "Web engine app websocket support enabled")
+endif()
+
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
   message(STATUS "Backtrace support enabled")
@@ -351,7 +357,9 @@ endif()
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
     add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
-    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH
+      ${COMPONENTS_DIR}/include/policy/policy_external/
+      ${CMAKE_BINARY_DIR}/src/components/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
     message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
 else()
@@ -362,7 +370,9 @@ else()
      message(STATUS "HTTP policy enabled")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
-   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH
+    ${COMPONENTS_DIR}/include/policy/policy_regular/
+    ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
@@ -393,15 +403,6 @@ if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
 
-if (HMIADAPTER STREQUAL "dbus")
-    set(HMI_DBUS_API ON)
-    add_definitions(-DDBUS_HMIADAPTER)
-    add_definitions(-DHMI_DBUS_API)
-
-    find_package(DBus REQUIRED)
-    set(DBUS_LIBS_DIRECTORY ${DBUS_LIBRARY_DIRS} PARENT_SCOPE)
-    message(${DBUS_INCLUDE_DIRS})
-endif()
 if (HMIADAPTER STREQUAL "messagebroker")
     set(HMI_JSON_API ON)
     add_definitions(-DMESSAGEBROKER_HMIADAPTER)
@@ -433,6 +434,11 @@ endif()
 if(ENABLE_HMI_PTU_DECRYPTION)
   add_definitions(-DUSE_HMI_PTU_DECRYPTION)
   message(STATUS "HMI PTU decription enabled")
+endif()
+
+if(ENABLE_IAP2EMULATION)
+  add_definitions(-DENABLE_IAP2EMULATION)
+  message(STATUS "IAP2 emulation enabled")
 endif()
 
 set(RTLIB rt)

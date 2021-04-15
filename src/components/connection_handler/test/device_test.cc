@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "connection_handler/device.h"
 #include <gtest/gtest.h>
 #include "encryption/hashing.h"
-#include "connection_handler/device.h"
 
 namespace test {
 namespace components {
@@ -75,6 +75,6 @@ TEST(ConnectionDevice, MacAddressHash) {
   EXPECT_EQ(hashed_mac_address, test_device.mac_address());
 }
 
-}  // namespace connection_handlet_test
+}  // namespace connection_handler_test
 }  // namespace components
 }  // namespace test

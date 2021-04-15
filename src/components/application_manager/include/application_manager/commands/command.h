@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #include <stdint.h>
+#include "application_manager/hmi_state.h"
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
 
 namespace application_manager {
 
@@ -94,6 +94,23 @@ class Command {
   virtual int32_t function_id() const = 0;
 
   /*
+   * @brief Retrieves Window ID
+   */
+  virtual WindowID window_id() const = 0;
+
+  /**
+   * @brief Set warning info string, to be sent on a successful response
+   * @param info Warning info string
+   */
+  virtual void set_warning_info(const std::string info) = 0;
+
+  /**
+   * @brief Returns warning info string
+   * @return Warning info string
+   */
+  virtual std::string warning_info() const = 0;
+
+  /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
@@ -101,19 +118,24 @@ class Command {
   virtual void onTimeOut() = 0;
 
   /**
- * @brief AllowedToTerminate tells if request controller is allowed
- * to terminate this command
- * @return
- */
+   * @brief AllowedToTerminate tells if request controller is allowed
+   * to terminate this command
+   * @return
+   */
   virtual bool AllowedToTerminate() = 0;
 
   /**
- * @brief SetAllowedToTerminate set up allowed to terminate flag.
- * If true, request controller will terminate request on response
- */
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
-  enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
+  enum CommandSource {
+    SOURCE_SDL,
+    SOURCE_MOBILE,
+    SOURCE_HMI,
+    SOURCE_SDL_TO_HMI
+  };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;

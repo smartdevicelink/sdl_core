@@ -2,7 +2,7 @@
 <interfaces attr1="v1" attr2="v2">
     <interface name="interface1" attribute1="value1" attribute2="value2">
         <struct name="struct1">
-            <param name="member1" type="Integer">
+            <param name="member1" type="Integer" mandatory="true">
                 <description>Param1 description</description>
             </param>
             <issue creator="creator1">Issue1</issue>
@@ -10,7 +10,7 @@
             <param name="member3" type="Float" maxvalue="20.5" mandatory="false"/>
             <description>Struct description</description>
             <issue creator="creator2">Issue2</issue>
-            <param name="member4" type="Integer" minvalue="11" maxvalue="100" array="true"/>
+            <param name="member4" type="Integer" minvalue="11" maxvalue="100" array="true" mandatory="true"/>
         </struct>
         <issue creator="c">Issue1</issue>
         <function name="Function1" messagetype="request">
@@ -18,7 +18,7 @@
             <param name="param1" type="String" mandatory="false" defvalue="String default value">
                 <issue creator=""/>
             </param>
-            <param name="param2" type="Integer" platform="param2 platform">
+            <param name="param2" type="Integer" platform="param2 platform" mandatory="true">
                 <description>Param2 description</description>
                 <todo>Param2 todo</todo>
                 <description/>
@@ -36,29 +36,29 @@
         <designdescription>dd</designdescription>
         <issue creator="c">Issue2</issue>
         <function name="Function1" messagetype="response" platform="">
-            <param name="p1" type="enum1"/>
+            <param name="p1" type="enum1" mandatory="true"/>
             <issue creator="c1"/>
-            <issue creator="c2"></issue>
-            <param name="p2" type="enum1" defvalue="element2"/>
-            <param name="p3" type="Boolean" defvalue="false">
+            <issue creator="c2"/>
+            <param name="p2" type="enum1" defvalue="element2" mandatory="true"/>
+            <param name="p3" type="Boolean" defvalue="false" mandatory="true">
                 <designdescription/>
             </param>
         </function>
         <struct name="struct2" platform="struct2 platform">
             <description>Description of struct2</description>
-            <param name="m1" type="String"/>
-            <param name="m2" type="String" maxlength="100" array="true" minsize="1" maxsize="50"/>
-            <param name="m3" type="enum1"/>
-            <param name="m4" type="struct1" array="true" maxsize="10"/>
+            <param name="m1" type="String" mandatory="true"/>
+            <param name="m2" type="String" maxlength="100" array="true" minsize="1" maxsize="50" mandatory="true"/>
+            <param name="m3" type="enum1" mandatory="true"/>
+            <param name="m4" type="struct1" array="true" maxsize="10" mandatory="true"/>
         </struct>
         <function name="Function2" messagetype="notification" platform="function2 platform">
             <description>Function2 description</description>
-            <param name="n1" type="enum1">
+            <param name="n1" type="enum1" mandatory="true">
                 <element name="element2"/>
                 <element name="element3"/>
                 <todo>n1 todo</todo>
             </param>
-            <param name="n2" type="enum1" array="true" minsize="1" maxsize="100">
+            <param name="n2" type="enum1" array="true" minsize="1" maxsize="100" mandatory="true">
                 <element name="element3"/>
                 <todo>n2 todo</todo>
                 <element name="element1"/>
@@ -79,22 +79,22 @@
             <element name="element3"/>
         </enum>
         <struct name="struct1">
-            <param name="m_1" type="enum1" minsize="1" maxsize="10" array="true"/>
-            <param name="m_2" type="enum2"/>
-            <param name="m_3" type="String" maxlength="20"/>
+            <param name="m_1" type="enum1" minsize="1" maxsize="10" array="true" mandatory="true"/>
+            <param name="m_2" type="enum2" mandatory="true"/>
+            <param name="m_3" type="String" maxlength="20" mandatory="true"/>
         </struct>
         <function name="Function1" messagetype="request">
             <param name="param1" type="enum1" mandatory="false"/>
-            <param name="param2" type="struct1" array="true" minsize="5" maxsize="25"/>
+            <param name="param2" type="struct1" array="true" minsize="5" maxsize="25" mandatory="true"/>
         </function>
         <todo>i2 todo</todo>
         <function name="Function1" messagetype="notification" platform="platform">
             <issue creator="c">Issue text</issue>
-            <param name="param" type="enum2">
+            <param name="param" type="enum2" mandatory="true">
                 <element name="element2"/>
                 <element name="element3"/>
             </param>
-            <param name="i1" type="interface1.struct2"/>
+            <param name="i1" type="interface1.struct2" mandatory="true"/>
         </function>
     </interface>
 </interfaces>

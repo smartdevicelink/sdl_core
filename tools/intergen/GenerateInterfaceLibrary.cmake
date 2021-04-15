@@ -11,19 +11,13 @@ set(GENERATED_LIB_HEADER_DEPENDENCIES
 # |generated_interface_names| should contain list of generated interfaces
 # if |AUTO_FUNC_IDS| is added to argument list, intergen is called with "-a"
 #   flag telling intergen to generate function ids automatically
-# if |DBUS_SUPPORT| is added to argument list, intergen is called with "-d"
-#   flag that enables DBus serialization code generation
 # from xml_file (intergen creates separate directory for every interface).
 # Their names are written lowercase_underscored_style.
 function (GenerateInterfaceLibrary xml_file_name generated_interface_names)
-  set(options AUTO_FUNC_IDS DBUS_SUPPORT)
+  set(options AUTO_FUNC_IDS)
   cmake_parse_arguments(GenerateInterfaceLibrary "${options}" "" "" ${ARGN})
   if (GenerateInterfaceLibrary_AUTO_FUNC_IDS)
     set(AUTOID "-a")
-  endif()
-  if (GenerateInterfaceLibrary_DBUS_SUPPORT)
-    set(NEED_DBUS "-d")
-    list(APPEND GENERATED_LIB_HEADER_DEPENDENCIES ${DBUS_INCLUDE_DIRS})
   endif()
 
   foreach(interface_name ${generated_interface_names})
@@ -41,7 +35,7 @@ function (GenerateInterfaceLibrary xml_file_name generated_interface_names)
         ${interface_name}/interface.cc
     )
     add_custom_command( OUTPUT ${HEADERS} ${SOURCES}
-                        COMMAND ${INTERGEN_CMD} -f ${CMAKE_CURRENT_SOURCE_DIR}/${xml_file_name} -j ${AUTOID} ${NEED_DBUS} -i ${interface_name}
+                        COMMAND ${INTERGEN_CMD} -f ${CMAKE_CURRENT_SOURCE_DIR}/${xml_file_name} -j ${AUTOID} -i ${interface_name}
                         DEPENDS ${INTERGEN_CMD} ${xml_file_name}
                         COMMENT "Generating interface ${interface_name} from ${xml_file_name}"
                         VERBATIM

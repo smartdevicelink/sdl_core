@@ -30,32 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/transport_manager_impl.h"
 #include <string>
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/mock_transport_manager_listener.h"
-#include "transport_manager/mock_telemetry_observer.h"
-#include "transport_manager/transport_adapter/mock_transport_adapter.h"
-#include "transport_manager/mock_transport_manager_impl.h"
-#include "transport_manager/mock_transport_manager_settings.h"
 #include "resumption/last_state_impl.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "transport_manager/common.h"
+#include "transport_manager/mock_telemetry_observer.h"
+#include "transport_manager/mock_transport_manager_impl.h"
+#include "transport_manager/mock_transport_manager_listener.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
+
 #include "utils/test_async_waiter.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
 
-using utils::MakeShared;
+using std::make_shared;
 
 namespace test {
 namespace components {
@@ -65,7 +64,7 @@ namespace {
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kAppInfoFolder = "app_info_folder";
 const uint32_t kAsyncExpectationsTimeout = 10000u;
-}
+}  // namespace
 
 class TransportManagerImplTest : public ::testing::Test {
  protected:
@@ -81,11 +80,13 @@ class TransportManagerImplTest : public ::testing::Test {
             device_handle_, mac_address_, device_name_, connection_type_) {}
 
   void SetUp() OVERRIDE {
-    resumption::LastStateImpl last_state_("app_storage_folder",
-                                          "app_info_storage");
-    tm_.Init(last_state_);
+    std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+        std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage"));
+    tm_.Init(wrapper);
     mock_adapter_ = new MockTransportAdapter();
-    tm_listener_ = MakeShared<MockTransportManagerListener>();
+    tm_listener_ = std::make_shared<MockTransportManagerListener>();
 
 #ifdef TELEMETRY_MONITOR
     tm_.SetTelemetryObserver(&mock_metric_observer_);
@@ -96,14 +97,14 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_EQ(E_SUCCESS, tm_.AddTransportAdapter(mock_adapter_));
 
     connection_key_ = 1;
-    error_ = MakeShared<BaseError>();
+    error_ = std::make_shared<BaseError>();
 
     const unsigned int version_protocol_ = 1;
     const unsigned int kSize = 12;
     unsigned char data[kSize] = {
         0x20, 0x07, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    test_message_ =
-        MakeShared<RawMessage>(connection_key_, version_protocol_, data, kSize);
+    test_message_ = std::make_shared<RawMessage>(
+        connection_key_, version_protocol_, data, kSize, false);
   }
 
   DeviceInfo ConstructDeviceInfo(const std::string& mac_address,
@@ -190,6 +191,26 @@ class TransportManagerImplTest : public ::testing::Test {
 
     tm_.TestHandle(test_event);
   }
+
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  void HandlePending() {
+    TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_PENDING,
+                                     mock_adapter_,
+                                     dev_info_.mac_address(),
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+        .WillOnce(Return(dev_info_.name()));
+    EXPECT_CALL(*mock_adapter_, GetConnectionType())
+        .WillRepeatedly(Return(dev_info_.connection_type()));
+
+    EXPECT_CALL(*tm_listener_, OnConnectionPending(dev_info_, connection_key_));
+
+    tm_.TestHandle(test_event);
+  }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
   void HandleConnectionFailed() {
     TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_FAIL,
@@ -331,7 +352,7 @@ class TransportManagerImplTest : public ::testing::Test {
 #endif  // TELEMETRY_MONITOR
   MockTransportAdapter* mock_adapter_;
 
-  utils::SharedPtr<MockTransportManagerListener> tm_listener_;
+  std::shared_ptr<MockTransportManagerListener> tm_listener_;
   MockTransportManagerImpl tm_;
   const ApplicationHandle application_id_ = 1;
   ConnectionUID connection_key_;
@@ -405,6 +426,34 @@ TEST_F(TransportManagerImplTest, DisconnectDevice_DeviceNotConnected) {
   EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_)).Times(0);
   EXPECT_EQ(E_INVALID_HANDLE, tm_.DisconnectDevice(device_handle_));
 }
+
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+TEST_F(TransportManagerImplTest, Pending) {
+  // Calling HandlePending twice verifies the connection_id stays the same if
+  // the connection exists.
+  HandlePending();
+  HandlePending();
+
+  // Now create pending event for new app id and verify connection_id is
+  // incremented
+  TransportAdapterEvent test_event(EventTypeEnum::ON_CONNECT_PENDING,
+                                   mock_adapter_,
+                                   dev_info_.mac_address(),
+                                   application_id_ + 1,
+                                   test_message_,
+                                   error_);
+
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.connection_type()));
+
+  EXPECT_CALL(*tm_listener_,
+              OnConnectionPending(dev_info_, connection_key_ + 1));
+
+  tm_.TestHandle(test_event);
+}
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 TEST_F(TransportManagerImplTest, Disconnect) {
   // Arrange
@@ -506,11 +555,11 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -518,7 +567,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
@@ -529,30 +578,30 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
 #endif  // TELEMETRY_MONITOR
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
 
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StopRawMsg(_)).Times(0);
 #endif  // TELEMETRY_MONITOR
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
@@ -560,18 +609,18 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -581,18 +630,20 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
 
   HandleSendDone();
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
-TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
+TEST_F(
+    TransportManagerImplTest,
+    SendMessageToDevice_AdapterSendDataOkAndOnSendFailEvent_OnTMMessageSendFailed) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
-                      Return(TransportAdapter::FAIL)));
+      .WillOnce(
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -603,7 +654,7 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
 
   HandleSendFailed();
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
@@ -618,15 +669,23 @@ TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOn_StartClientListening) {
-  EXPECT_CALL(*mock_adapter_, StartClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(true));
+  EXPECT_EQ(::transport_manager::E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOn));
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOff_StopClientListening) {
-  EXPECT_CALL(*mock_adapter_, StopClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOff))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(false));
+  EXPECT_EQ(::transport_manager::E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOff));
 }
 
 TEST_F(TransportManagerImplTest, StopTransportManager) {
@@ -645,12 +704,14 @@ TEST_F(TransportManagerImplTest, StopTransportManager) {
 TEST_F(TransportManagerImplTest, Reinit) {
   EXPECT_CALL(*mock_adapter_, Terminate());
   EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::OK));
+  tm_.Deinit();
   EXPECT_EQ(E_SUCCESS, tm_.Reinit());
 }
 
 TEST_F(TransportManagerImplTest, Reinit_InitAdapterFailed) {
   EXPECT_CALL(*mock_adapter_, Terminate());
   EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::FAIL));
+  tm_.Deinit();
   EXPECT_EQ(E_ADAPTERS_FAIL, tm_.Reinit());
 }
 
@@ -688,7 +749,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
  * Tests which check correct handling and receiving events
  */
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_DONE,
                                    mock_adapter_,
                                    mac_address_,
@@ -697,15 +758,15 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
                                    error_);
 
   EXPECT_CALL(*tm_listener_, OnScanDevicesFinished())
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_FAIL,
                                    mock_adapter_,
                                    mac_address_,
@@ -714,11 +775,11 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
                                    error_);
 
   EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
@@ -732,7 +793,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
   std::vector<DeviceInfo> vector_dev_info;
   vector_dev_info.push_back(dev_info_);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_, GetDeviceList())
       .Times(AtLeast(1))
       .WillRepeatedly(Return(device_list_));
@@ -744,14 +805,14 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
       .WillRepeatedly(Return(dev_info_.connection_type()));
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();
 
-  EXPECT_TRUE(waiter.WaitFor(2, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(2, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, CheckEvents) {
@@ -894,25 +955,30 @@ TEST_F(TransportManagerImplTest, RemoveDevice_TMIsNotInitialized) {
 
 TEST_F(TransportManagerImplTest, Visibility_TMIsNotInitialized) {
   // Arrange
-  const bool visible = true;
+  const transport_manager::TransportAction action =
+      transport_manager::TransportAction::kVisibilityOn;
   // Check before Act
   UninitializeTM();
   // Act and Assert
-  EXPECT_CALL(*mock_adapter_, StartClientListening()).Times(0);
-  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.Visibility(visible));
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
+      .Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.PerformActionOnClients(action));
 }
 
 TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
   EXPECT_CALL(*mock_adapter_,
-              SendData(mac_address_, application_id_, test_message_)).Times(0);
+              SendData(mac_address_, application_id_, test_message_))
+      .Times(0);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.TestHandle(test_message_);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {
@@ -924,16 +990,24 @@ TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOn_TransportAdapterNotSupported) {
-  EXPECT_CALL(*mock_adapter_, StartClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
-  EXPECT_EQ(E_SUCCESS, tm_.Visibility(true));
+  EXPECT_EQ(E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOn));
 }
 
 TEST_F(TransportManagerImplTest,
        SetVisibilityOff_TransportAdapterNotSupported) {
-  EXPECT_CALL(*mock_adapter_, StopClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOff))
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
-  EXPECT_EQ(E_SUCCESS, tm_.Visibility(false));
+  EXPECT_EQ(E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOff));
 }
 
 TEST_F(TransportManagerImplTest,
@@ -1144,7 +1218,7 @@ TEST_F(TransportManagerImplTest,
                                        test_message_,
                                        error_));
 
-  auto second_mock_adapter = utils::MakeShared<MockTransportAdapter>();
+  auto second_mock_adapter = std::make_shared<MockTransportAdapter>();
 
   const auto usb_serial = "USB_serial";
   DeviceInfo second_device =
@@ -1185,7 +1259,8 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(mock_transport_manager_settings_, app_transport_change_timer())
       .WillOnce(Return(timeout));
   EXPECT_CALL(mock_transport_manager_settings_,
-              app_transport_change_timer_addition()).WillOnce(Return(0));
+              app_transport_change_timer_addition())
+      .WillOnce(Return(0));
 
   EXPECT_CALL(*tm_listener_, OnDeviceSwitchingStart(mac_address_, usb_serial));
 
@@ -1220,7 +1295,7 @@ TEST_F(TransportManagerImplTest,
                                        test_message_,
                                        error_));
 
-  auto second_mock_adapter = utils::MakeShared<MockTransportAdapter>();
+  auto second_mock_adapter = std::make_shared<MockTransportAdapter>();
 
   DeviceInfo second_device =
       ConstructDeviceInfo("MA:CA:DR:ES:S", "USB_IOS", "SecondDeviceName");
@@ -1321,6 +1396,29 @@ TEST_F(TransportManagerImplTest,
   EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
   EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(_));
   tm_.OnDeviceListUpdated(mock_adapter_);
+}
+
+TEST_F(TransportManagerImplTest, OnTransportConfigUpdated) {
+  TransportAdapterEvent test_event(EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED,
+                                   mock_adapter_,
+                                   "",
+                                   0,
+                                   test_message_,
+                                   error_);
+
+  transport_adapter::TransportConfig config;
+  config[transport_manager::transport_adapter::tc_enabled] =
+      std::string("true");
+  config[transport_manager::transport_adapter::tc_tcp_ip_address] =
+      std::string("192.168.1.1");
+  config[transport_manager::transport_adapter::tc_tcp_port] =
+      std::string("12345");
+
+  EXPECT_CALL(*mock_adapter_, GetTransportConfiguration())
+      .WillOnce(Return(config));
+
+  EXPECT_CALL(*tm_listener_, OnTransportConfigUpdated(config));
+  tm_.TestHandle(test_event);
 }
 
 }  // namespace transport_manager_test

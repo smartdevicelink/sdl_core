@@ -47,15 +47,15 @@ MessageFactoryFunction::MessageFactoryFunction(
     SerializationType serialization_type,
     FunctionMessage::MessageType factory_type)
     : CppFunction("",
-                  serialization_type == kJson ? "NewFromJson" : "NewFromDbus",
+                  "NewFromJson",
                   Capitalize(
                     FunctionMessage::MessageTypeToString(
                       factory_type)) + "*"),
       interface_(interface),
       factory_type_(factory_type) {
   Add(MessageFactoryFunction::Parameter(
-        serialization_type == kJson ? "json" : "reader",
-        serialization_type == kJson ? "const Json::Value*": "dbus::MessageReader*"));
+        "json",
+        "const Json::Value*"));
   Add(MessageFactoryFunction::Parameter("function_id", "FunctionID"));
 }
 

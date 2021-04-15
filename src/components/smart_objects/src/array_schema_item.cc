@@ -29,32 +29,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "smart_objects/array_schema_item.h"
+
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
-utils::SharedPtr<CArraySchemaItem> CArraySchemaItem::create(
+std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
     const ISchemaItemPtr ElementSchemaItem,
     const TSchemaItemParameter<size_t>& MinSize,
     const TSchemaItemParameter<size_t>& MaxSize) {
-  return new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize);
+  return std::shared_ptr<CArraySchemaItem>(
+      new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
-                                         rpc::ValidationReport* report__) {
+errors::eType CArraySchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Array) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Array) +
+        ", got: " + SmartObject::typeToString(Object.getType());
+    report->set_validation_info(validation_info);
+    return errors::INVALID_VALUE;
   }
   size_t sizeLimit;
   const size_t array_len = Object.length();
@@ -64,43 +65,78 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object,
     stream << "Got array of size: " << array_len
            << ", minimum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    report->set_validation_info(validation_info);
+    return errors::OUT_OF_RANGE;
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
     std::stringstream stream;
     stream << "Got array of size: " << array_len
            << ", maximum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    report->set_validation_info(validation_info);
+    return errors::OUT_OF_RANGE;
   }
 
   for (size_t i = 0u; i < array_len; ++i) {
-    std::stringstream strVal;
-    strVal << i;
-    const Errors::eType result = mElementSchemaItem->validate(
-        Object.getElement(i), &report__->ReportSubobject(strVal.str()));
-    if (Errors::OK != result) {
+    const errors::eType result = mElementSchemaItem->validate(
+        Object.getElement(i),
+        &report->ReportSubobject(std::to_string(i)),
+        MessageVersion,
+        allow_unknown_enums);
+    if (errors::OK != result) {
       return result;
     }
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
-void CArraySchemaItem::applySchema(SmartObject& Object,
-                                   const bool RemoveFakeParameters) {
+bool CArraySchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
+  if (SmartType_Array != Object.getType()) {
+    return false;
+  }
+
+  int index = 0;
+  auto array = Object.asArray();
+  size_t initial_size = array->size();
+  auto should_erase =
+      [this, MessageVersion, report, &index](SmartObject& element) {
+        // If filterInvalidEnums returns true, the checked element
+        // is now invalid and should be filtered
+        return mElementSchemaItem->filterInvalidEnums(
+            element,
+            MessageVersion,
+            &report->ReportSubobject(std::to_string(index++)));
+      };
+  array->erase(std::remove_if(array->begin(), array->end(), should_erase),
+               array->end());
+
+  // Mark this container as invalid if it is below the minimum size after
+  // filtering one or more elements
+  size_t min_size;
+  return array->size() < initial_size && mMinSize.getValue(min_size) &&
+         array->size() < min_size;
+}
+
+void CArraySchemaItem::applySchema(
+    SmartObject& Object,
+    const bool remove_unknown_parameters,
+    const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->applySchema(Object[i], RemoveFakeParameters);
+      mElementSchemaItem->applySchema(
+          Object[i], remove_unknown_parameters, MessageVersion);
     }
   }
 }
 
-void CArraySchemaItem::unapplySchema(SmartObject& Object) {
+void CArraySchemaItem::unapplySchema(SmartObject& Object,
+                                     const bool remove_unknown_parameters) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->unapplySchema(Object[i]);
+      mElementSchemaItem->unapplySchema(Object[i], remove_unknown_parameters);
     }
   }
 }
@@ -121,6 +157,10 @@ void CArraySchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
   result_object = SmartObject(SmartType_Array);
 }
 
+TypeID CArraySchemaItem::GetType() {
+  return TYPE_ARRAY;
+}
+
 CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
                                    const TSchemaItemParameter<size_t>& MinSize,
                                    const TSchemaItemParameter<size_t>& MaxSize)
@@ -128,5 +168,5 @@ CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
     , mMinSize(MinSize)
     , mMaxSize(MaxSize) {}
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

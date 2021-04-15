@@ -33,16 +33,16 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_CREATE_SMARTSCHEMA_H_
 #define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_CREATE_SMARTSCHEMA_H_
 
-#include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "SmartFactoryTestHelper.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 namespace FunctionIDTest {
 enum eType {

@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_HELPER_H_
 
 #include "policy/policy_table/functions.h"
-#include "utils/shared_ptr.h"
+
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -68,13 +68,6 @@ struct CompareGroupName {
   const StringsValueType& group_name_;
 };
 
-/*
- * @brief Used for compare of policies parameters mapped with specific
- * application ids
- */
-bool operator!=(const policy_table::ApplicationParams& first,
-                const policy_table::ApplicationParams& second);
-
 /**
  * @brief Helper struct for checking changes of application policies, which
  * come with update along with current data snapshot
@@ -85,8 +78,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
   CheckAppPolicy(PolicyManagerImpl* pm,
-                 const utils::SharedPtr<policy_table::Table> update,
-                 const utils::SharedPtr<policy_table::Table> snapshot,
+                 const std::shared_ptr<policy_table::Table> update,
+                 const std::shared_ptr<policy_table::Table> snapshot,
                  CheckAppPolicyResults& out_results);
 
   bool operator()(const AppPoliciesValueType& app_policy);
@@ -100,7 +93,8 @@ struct CheckAppPolicy {
    * @param result Result of check of updated policy
    */
   void SetPendingPermissions(const AppPoliciesValueType& app_policy,
-                             PermissionsCheckResult result) const;
+                             PermissionsCheckResult result,
+                             AppPermissions& permissions_diff) const;
   /**
    * @brief Analyzes updated application policy whether any changes received. If
    * yes - provides appropriate result code
@@ -127,6 +121,15 @@ struct CheckAppPolicy {
    */
   bool HasNewGroups(const AppPoliciesValueType& app_policy,
                     policy_table::Strings* new_groups = NULL) const;
+  /**
+   * @brief Checks whether updated application policy contains group content
+   * update in compare to current one
+   * @param app_policy Reference to updated application policy
+   * @param updated_groups List of updated groups if any
+   * @return True if updated groups found, otherwise - false
+   */
+  bool HasUpdatedGroups(const policy::AppPoliciesValueType& app_policy,
+                        policy_table::Strings* updated_groups = NULL) const;
   /**
    * @brief Checks whether updated policy has groups which require user consent
    * @param app_policy Reference to updated application policy
@@ -200,10 +203,35 @@ struct CheckAppPolicy {
    */
   bool IsRequestSubTypeChanged(const AppPoliciesValueType& app_policy) const;
 
+  /**
+   * @brief IsEncryptionRequiredFlagChanged check if encryption_needed flag was
+   * changed for application or application groups
+   * @param app_policy application policies
+   * @return true if encryption_needed state was changed otherwise - false
+   */
+  bool IsEncryptionRequiredFlagChanged(
+      const AppPoliciesValueType& app_policy) const;
+
+  /**
+   * @brief Helper function that inserts permissions into app_permissions_diff_
+   * map.
+   * udpated
+   * @param app_policy Reference to updated application policy
+   * @param permissions_diff Reference to app permissions to be inserted into
+   * map.
+   * @return void
+   */
+  void InsertPermission(const std::string& app_id,
+                        const AppPermissions& permissions_diff);
+
+  bool IsAppPropertiesChanged(const AppPoliciesValueType& app_policy) const;
+
+  bool IsAppPropertiesProvided(const AppPoliciesValueType& app_policy) const;
+
  private:
   PolicyManagerImpl* pm_;
-  const utils::SharedPtr<policy_table::Table> update_;
-  const utils::SharedPtr<policy_table::Table> snapshot_;
+  const std::shared_ptr<policy_table::Table> update_;
+  const std::shared_ptr<policy_table::Table> snapshot_;
   CheckAppPolicyResults& out_results_;
 };
 
@@ -230,13 +258,13 @@ struct FillActionsForAppPolicies {
  */
 struct FillNotificationData {
   /**
- * @brief Constructor
- * @param data Output structure with filled data
- * @param group_state Consent of the group processed by instance
- * @param undefined_group_consent Defines how to treat 'undefined' consent
- * @param does_require_user_consent Specifies whether processed group requires
- * user consent
- */
+   * @brief Constructor
+   * @param data Output structure with filled data
+   * @param group_state Consent of the group processed by instance
+   * @param undefined_group_consent Defines how to treat 'undefined' consent
+   * @param does_require_user_consent Specifies whether processed group requires
+   * user consent
+   */
   FillNotificationData(Permissions& data,
                        GroupConsent group_state,
                        GroupConsent undefined_group_consent,
@@ -255,8 +283,26 @@ struct FillNotificationData {
                              const std::set<Parameter>& target);
   void InitRpcKeys(const std::string& rpc_name);
   bool RpcParametersEmpty(RpcPermissions& rpc);
-  bool IsSectionEmpty(ParameterPermissions& permissions,
-                      const std::string& section);
+
+  /**
+   * @brief Checks if specific section in specified permissions is empty
+   * @param permissions reference to the permissions structure
+   * @param section reference to the section name
+   * @return true if specified section in permissions is empty otherwise returns
+   * false
+   */
+  bool IsSectionEmpty(const ParameterPermissions& permissions,
+                      const std::string& section) const;
+
+  /**
+   * @brief Checks if at least one parameter is allowed for the specified
+   * permissions
+   * @param permissions reference to the permissions structure
+   * @return true if at least one parameter is allowed for the specified
+   * permissions otherwise returns false
+   */
+  bool IsSomeParameterAllowed(const ParameterPermissions& permissions) const;
+
   std::string current_key_;
   Permissions& data_;
   const bool does_require_user_consent_;
@@ -276,6 +322,14 @@ struct ProcessFunctionalGroup {
 
  private:
   GroupConsent GetGroupState(const std::string& group_name);
+  /*
+   * @brief Fills encryption required flags for all rpcs in functional group
+   * @param encryption_required Optional object containing encryption required
+   * flag
+   */
+  void FillEncryptionFlagForRpcs(
+      const policy_table::Rpc& rpcs,
+      const policy::EncryptionRequired encryption_required);
   const policy_table::FunctionalGroupings& fg_;
   const std::vector<FunctionalGroupPermission>& group_permissions_;
   Permissions& data_;
@@ -330,15 +384,6 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
  */
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second);
-
-/**
- * @brief Finds same values
- * @param first First source of values
- * @param second Second source of values
- * @return Same values set, if any found
- */
-FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
-                            const FunctionalGroupIDs& second);
 
 /**
  * @brief Unwrap application policies from predefined values to specific policy

@@ -1,18 +1,48 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_DEVICE_APPS_LAUNCHER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_DEVICE_APPS_LAUNCHER_H_
 #include <stdint.h>
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 #include "application_manager/app_launch/app_launch_data.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/app_launch_settings.h"
+#include "application_manager/application_manager.h"
 
 namespace app_launch {
 class AppLaunchCtrlImpl;
-class DeviceAppsLauncherImpl;
+class DeviceAppsLauncher;
 class AppsLauncher;
 class AppLaunchSettings;
+class Launcher;
+class LauncherGenerator;
+
+// impl class must be defined for unique_ptr in DeviceAppsLauncher
+class DeviceAppsLauncherImpl {
+ public:
+  DeviceAppsLauncherImpl(DeviceAppsLauncher& interface,
+                         AppsLauncher& apps_launcher);
+
+  bool LaunchAppsOnDevice(
+      const std::string& device_mac,
+      const std::vector<ApplicationDataPtr>& applications_to_launch);
+
+  struct LauncherFinder {
+    LauncherFinder(const std::string& device_mac) : device_mac_(device_mac) {}
+
+    bool operator()(const std::shared_ptr<Launcher>& launcher) const;
+
+    std::string device_mac_;
+  };
+
+  bool StopLaunchingAppsOnDevice(const std::string& device_mac);
+
+ private:
+  sync_primitives::Lock launchers_lock_;
+  std::vector<std::shared_ptr<Launcher> > free_launchers_;
+  std::vector<std::shared_ptr<Launcher> > works_launchers_;
+  DeviceAppsLauncher& interface_;
+};
+
 /**
  * @brief The MultipleAppsLauncher struct
  * should manage launching applications and gaps between launching application
@@ -36,7 +66,7 @@ class DeviceAppsLauncher {
  private:
   application_manager::ApplicationManager& app_mngr_;
   const AppLaunchSettings& settings_;
-  std::auto_ptr<DeviceAppsLauncherImpl> impl_;
+  std::unique_ptr<DeviceAppsLauncherImpl> impl_;
   friend class DeviceAppsLauncherImpl;
   DISALLOW_COPY_AND_ASSIGN(DeviceAppsLauncher);
 };

@@ -32,9 +32,9 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_ACCESS_REMOTE_H_
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
-#include <vector>
 #include <ostream>
 #include <string>
+#include <vector>
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
 

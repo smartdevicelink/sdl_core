@@ -40,6 +40,8 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
 # dbms
@@ -56,7 +58,10 @@ set(EXCLUDE_PATHS
   ${DBMS_PATHS}
 )
 
-set(LIBRARIES)
+set(LIBRARIES
+  encryption
+  jsoncpp
+)
 
 if(NOT BUILD_BACKTRACE_SUPPORT)
   list(APPEND EXCLUDE_PATHS
@@ -73,11 +78,8 @@ if(ENABLE_LOG)
   )
 else()
   list(APPEND EXCLUDE_PATHS
-    push_log.cc
-    log_message_loop_thread.cc
-    logger_status.cc
     auto_trace.cc
-    logger.cc
+    logger/log4cxxlogger.cc
   )
 endif()
 
@@ -102,7 +104,7 @@ set(PATHS
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    # --- QDB Wrapper 
+    # --- QDB Wrapper
     add_subdirectory(./src/qdb_wrapper)
 else ()
     # --- SQLite Wrapper
@@ -110,14 +112,21 @@ else ()
 endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
- list(APPEND LIBRARIES dl pthread ${RTLIB}) 
+ list(APPEND LIBRARIES dl pthread ${RTLIB})
 endif()
 
 add_library("Utils" ${SOURCES})
+GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_thread -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_date_time -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_filesystem -L${BOOST_LIBS_DIRECTORY})
 target_link_libraries("Utils" ${LIBRARIES})
+add_dependencies("Utils" Boost)
+
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" install-3rd_party_logger)
+  add_dependencies("Utils" install-3rd_party_logger Boost)
 endif()
 
 if(BUILD_TESTS)

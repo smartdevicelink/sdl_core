@@ -33,18 +33,18 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_APP_PERMISSION_DELEGATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_DELEGATES_APP_PERMISSION_DELEGATE_H_
 
+#include "utils/conditional_variable.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/conditional_variable.h"
 
-#include "policy/policy_types.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "policy/policy_types.h"
 
 namespace policy {
 /**
-*@brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
-*in async way.
-*/
+ *@brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
+ *in async way.
+ */
 class AppPermissionDelegate : public threads::ThreadDelegate {
  public:
   /**
