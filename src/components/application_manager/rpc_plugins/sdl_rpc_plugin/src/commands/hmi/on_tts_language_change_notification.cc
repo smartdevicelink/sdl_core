@@ -88,11 +88,9 @@ void OnTTSLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const ApplicationSet& accessor =
+  const ApplicationSet& applications =
       application_manager_.applications().GetData();
-  ApplicationSetIt it = accessor.begin();
-  for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it++;
+  for (auto app : applications) {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 

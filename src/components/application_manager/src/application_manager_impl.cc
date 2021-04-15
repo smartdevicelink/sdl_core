@@ -1119,7 +1119,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
     // Delete the cloud device
     connection_handler().RemoveCloudAppDevice(app->device());
-    removed_app_count++;
+    ++removed_app_count;
   }
 
   // Update app list if disabled apps were removed
@@ -1364,7 +1364,7 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
   if (mobile_correlation_id_ < max_correlation_id_) {
-    mobile_correlation_id_++;
+    ++mobile_correlation_id_;
   } else {
     mobile_correlation_id_ = 0;
   }
@@ -1374,7 +1374,7 @@ uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   if (correlation_id_ < max_correlation_id_) {
-    correlation_id_++;
+    ++correlation_id_;
   } else {
     correlation_id_ = 0;
   }
@@ -1848,7 +1848,7 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
     return false;
   } else {
     // check all AppHMITypes that the app has
-    for (size_t i = 0; i < app_types_array->length(); i++) {
+    for (size_t i = 0; i < app_types_array->length(); ++i) {
       std::string app_type_string =
           EnumToString(static_cast<mobile_apis::AppHMIType::eType>(
               app_types_array->getElement(i).asUInt()));

@@ -91,7 +91,7 @@ CryptoManagerImpl::CryptoManagerImpl(
     : settings_(set), context_(NULL) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(instance_lock_);
-  instance_count_++;
+  ++instance_count_;
   if (instance_count_ == 1) {
     SDL_LOG_DEBUG("Openssl engine initialization");
     SSL_load_error_strings();
@@ -251,7 +251,7 @@ bool CryptoManagerImpl::Init() {
 #if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
     auto sk = SSL_CTX_get_ciphers(context_);
     const char* p;
-    for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+    for (int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
       const SSL_CIPHER* c = sk_SSL_CIPHER_value(sk, i);
       p = SSL_CIPHER_get_name(c);
       if (p == NULL)

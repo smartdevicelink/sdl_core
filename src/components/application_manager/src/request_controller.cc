@@ -80,7 +80,7 @@ void RequestController::InitializeThreadpool() {
   // TODO(DK): Consider lazy loading threads instead of creating all at once
   pool_state_ = TPoolState::STARTED;
   char name[50];
-  for (uint32_t i = 0; i < pool_size_; i++) {
+  for (uint32_t i = 0; i < pool_size_; ++i) {
     snprintf(name, sizeof(name) / sizeof(name[0]), "AM Pool %u", i);
     pool_.push_back(threads::CreateThread(name, new Worker(this)));
     pool_[i]->Start();
@@ -96,7 +96,7 @@ void RequestController::DestroyThreadpool() {
     SDL_LOG_DEBUG("Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
   }
-  for (size_t i = 0; i < pool_.size(); i++) {
+  for (size_t i = 0; i < pool_.size(); ++i) {
     threads::Thread* thread = pool_[i];
     thread->Stop(threads::Thread::kThreadSoftStop);
     delete thread->GetDelegate();
