@@ -120,7 +120,7 @@ void RecursiveLock::AssertTakenAndMarkFree() {
     SDL_LOG_FATAL("Unlocking a recursive mutex that is not taken");
     NOTREACHED();
   }
-  lock_taken_--;
+  --lock_taken_;
 }
 
 }  // namespace sync_primitives

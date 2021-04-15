@@ -340,7 +340,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     }
 
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; --i) {
       if ((temp_str[i] == ' ') || (temp_str[i] == 9) ||  // TAB
           (temp_str[i] == 10) ||                         // LF
           (temp_str[i] == 13)) {                         // CR
@@ -363,7 +363,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   if (NULL != strchr(line_ptr, '=')) {
     strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; --i) {
       if ((temp_str[i] == '=') || (temp_str[i] == ' ') ||
           (temp_str[i] == 9) ||   // TAB
           (temp_str[i] == 10) ||  // LF
@@ -396,7 +396,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
       if (value[0] != '\0') {
         /* cut trailing stuff */
-        for (int32_t i = strlen(value) - 1; i > 0; i--) {
+        for (int32_t i = strlen(value) - 1; i > 0; --i) {
           if ((value[i] == ' ') || (value[i] == ';') ||
               (value[i] == 9) ||   // TAB
               (value[i] == 10) ||  // LF

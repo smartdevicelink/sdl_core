@@ -110,7 +110,7 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   } else {
     SSL_CTX_free(context_);
   }
-  instance_count_--;
+  --instance_count_;
   if (instance_count_ == 0) {
     SDL_LOG_DEBUG("Openssl engine deinitialization");
     EVP_cleanup();

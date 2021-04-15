@@ -246,7 +246,7 @@ void RequestController::TerminateRequest(const uint32_t correlation_id,
     AutoLock auto_lock(duplicate_message_count_lock_);
     auto dup_it = duplicate_message_count_.find(correlation_id);
     if (duplicate_message_count_.end() != dup_it) {
-      duplicate_message_count_[correlation_id]--;
+      --duplicate_message_count_[correlation_id];
       if (0 == duplicate_message_count_[correlation_id]) {
         duplicate_message_count_.erase(dup_it);
       }
