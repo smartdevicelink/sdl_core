@@ -54,18 +54,17 @@ LastStateImpl::~LastStateImpl() {
 
 void LastStateImpl::SaveStateToFileSystem() {
   SDL_LOG_AUTO_TRACE();
-  const std::string full_path =
-      !app_storage_folder_.empty()
-          ? app_storage_folder_ + "/" + app_info_storage_
-          : app_info_storage_;
-  const std::string& str = dictionary_.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
   std::string styled_string;
   {
     sync_primitives::AutoLock lock(dictionary_lock_);
     styled_string = dictionary_.toStyledString();
   }
+
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
 
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
