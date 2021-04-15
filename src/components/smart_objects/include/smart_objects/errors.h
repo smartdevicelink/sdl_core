@@ -31,9 +31,9 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-namespace Errors {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+namespace errors {
 /**
  * @brief Enumeration that provides information about SmartObject validation
  *errors
@@ -64,8 +64,8 @@ enum eType {
    **/
   ERROR
 };
-}  // namespace Errors
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace errors
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_

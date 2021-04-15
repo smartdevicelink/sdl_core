@@ -34,20 +34,19 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_H_
 
 #include <stdint.h>
-#include "utils/shared_ptr.h"
+#include <time.h>
 #include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {
 class ApplicationManager;
 class Application;
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
-}
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
+}  // namespace application_manager
 namespace app_mngr = application_manager;
 
 namespace resumption {
-
-class LastState;
+class ResumptionDataProcessor;
 
 /**
  * @brief Contains logic for storage/restore data of applications.
@@ -59,6 +58,16 @@ class ResumeCtrl {
    * @brief allows to destroy ResumeCtrl object
    */
   virtual ~ResumeCtrl() {}
+
+  /**
+   * @brief ResumptionCallBack Function signature to be called when
+   * data resumption will be finished
+   * @param result_code result code for sending to mobile
+   * @param info additional info for sending to mobile
+   */
+  typedef std::function<void(mobile_apis::Result::eType result_code,
+                             const std::string& info)>
+      ResumptionCallBack;
 
   /**
    * @brief Save all applications info to the file system
@@ -75,9 +84,8 @@ class ResumeCtrl {
   /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
-   * @return true if success, otherwise return false
    */
-  virtual bool RestoreAppHMIState(
+  virtual void RestoreAppHMIState(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
@@ -125,6 +133,16 @@ class ResumeCtrl {
   virtual void OnAwake() = 0;
 
   /**
+   * @brief Saves Low Voltage signal timestamp
+   */
+  virtual void SaveLowVoltageTime() = 0;
+
+  /**
+   * @brief Saves Wake Up signal timestamp
+   */
+  virtual void SaveWakeUpTime() = 0;
+
+  /**
    * @brief Checks if SDL has already received OnExitAllApplication notification
    * with "SUSPEND" reason
    *
@@ -134,20 +152,29 @@ class ResumeCtrl {
   virtual bool is_suspended() const = 0;
 
   /**
-   * @brief Method stops timer "RsmCtrlPercist" when SDL
+   * @brief Method stops timer "RsmCtrlPersist" when SDL
    * receives OnExitAllApplication notification
    * with reason "SUSPEND"
    */
   virtual void StopSavePersistentDataTimer() = 0;
 
   /**
+   * @brief Method starts timer "RsmCtrlPersist" when
+   * SDL receives onAwakeSDL notification
+   */
+  virtual void StartSavePersistentDataTimer() = 0;
+
+  /**
    * @brief Start timer for resumption applications
    *        Restore D1-D5 data
    * @param application that is need to be restored
+   * @param hash stored hash value for this app
+   * @param callback Function to be called when data resumption will be finished
    * @return true if it was saved, otherwise return false
    */
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                               const std::string& hash) = 0;
+                               const std::string& hash,
+                               ResumptionCallBack callback) = 0;
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data
@@ -156,6 +183,22 @@ class ResumeCtrl {
    */
   virtual bool StartResumptionOnlyHMILevel(
       app_mngr::ApplicationSharedPtr application) = 0;
+
+  /**
+   * @brief Retry resumption of an app if it has been disabled or limited
+   *        due to absence of high-bandwidth transport.
+   * @param app_id ID of the app to resume
+   */
+  virtual void RetryResumption(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Handle restored data when timeout appeared
+   * @param correlation_id - const int32_t
+   * @param function id hmi_apis::FunctionID::eType
+   */
+
+  virtual void HandleOnTimeOut(const uint32_t correlation_id,
+                               const hmi_apis::FunctionID::eType) = 0;
 
   /**
    * @brief Check if there are all files need for resumption
@@ -168,6 +211,7 @@ class ResumeCtrl {
   /**
    * @brief Check application hash
    * @param application that is need to be restored
+   * @param hash stored hash value to be checked for restoring application
    * @return true if it was saved, otherwise return false
    */
   virtual bool CheckApplicationHash(app_mngr::ApplicationSharedPtr application,
@@ -232,12 +276,15 @@ class ResumeCtrl {
    */
   virtual void RemoveFromResumption(uint32_t app_id) = 0;
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState& last_state) = 0;
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise
    * returns false
    */
-  virtual bool Init(LastState& last_state) = 0;
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Notify resume controller about new application
@@ -259,11 +306,24 @@ class ResumeCtrl {
   virtual int32_t GetSavedAppHmiLevel(const std::string& app_id,
                                       const std::string& device_id) const = 0;
 
+  /**
+   * @brief StartWaitingForDisplayCapabilitiesUpdate add application to
+   * capabilities builder waitlist
+   * @param application application to add
+   * @param is_resume_app flag to check whether app data should be resumed or
+   * not
+   */
+  virtual void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application, const bool is_resume_app) = 0;
+
   virtual time_t LaunchTime() const = 0;
 
+  virtual ResumptionDataProcessor& resumption_data_processor() = 0;
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
-      utils::SharedPtr<ResumptionData> mock_storage) = 0;
+      std::shared_ptr<ResumptionData> mock_storage) = 0;
+
+  virtual bool get_resumption_active() const = 0;
 #endif  // BUILD_TESTS
 };
 

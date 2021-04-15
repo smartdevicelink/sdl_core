@@ -1,11 +1,11 @@
 /** @page components_transportmanager_client_connection_management Connection Management
  *
- * As all requests to TransportManager are asynchronous, client must implement NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
- * interface and add itself as a device listener with NsSmartDeviceLink::NsTransportManager::ITransportManager::addDeviceListener()
+ * As all requests to TransportManager are asynchronous, client must implement ns_smart_device_link::ns_transport_manager::ITransportManagerDeviceListener
+ * interface and add itself as a device listener with ns_smart_device_link::ns_transport_manager::ITransportManager::addDeviceListener()
  * in order to receive notifications.
- * To connect remote device client must use NsSmartDeviceLink::NsTransportManager::ITransportManager::connectDevice(). It will initiate connections to all
+ * To connect remote device client must use ns_smart_device_link::ns_transport_manager::ITransportManager::connectDevice(). It will initiate connections to all
  * applications running on remove device. For TCP device this call has no effect as TCP connections are initiated by remote devices.
- * Client will be notified about each connected application with NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationConnected().
- * To disconnect all applications running on remote device client must use NsSmartDeviceLink::NsTransportManager::ITransportManager::disconnectDevice().
- * Client will be notified about each disconnected application with NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationDisconnected().
+ * Client will be notified about each connected application with ns_smart_device_link::ns_transport_manager::ITransportManagerDeviceListener::onApplicationConnected().
+ * To disconnect all applications running on remote device client must use ns_smart_device_link::ns_transport_manager::ITransportManager::disconnectDevice().
+ * Client will be notified about each disconnected application with ns_smart_device_link::ns_transport_manager::ITransportManagerDeviceListener::onApplicationDisconnected().
  */

@@ -42,47 +42,93 @@ def http_header(data):
     return json.dumps(header)
 
 
-def crypt(data):
+def encrypt(data):
     return data
 
 
 def decrypt(data):
     return data
 
-def pack(file_path, encryption, add_http_header):
 
-    file = open(file_path, "r+")
-    data = file.read()
-    file.seek(0)
-    file.truncate()    
+def pack(data, encryption, add_http_header):
+    file_path = data['fileName']
+    file_ptr = open(file_path, "r+")
+
+    request_type = data['requestType']
+    pack_handler = get_handler(request_type, 'pack')
+
+    new_data = pack_handler(data, file_ptr)
+    if new_data is not None:
+        if encryption:
+            new_data = encrypt(new_data)
+        if add_http_header:
+            new_data = http_header(new_data)
+
+        file_ptr.write(new_data)
+
+    file_ptr.close()
+    return file_path
+
+
+def unpack(data, encryption):
+    file_path = data['fileName']
+    file_ptr = open(file_path, 'r+')
+
+    request_type = data['requestType']
+    unpack_handler = get_handler(request_type, 'unpack')
+
+    new_data = unpack_handler(data, file_ptr)
+    if new_data is not None:
+        if encryption:
+            new_data = decrypt(new_data)
+
+        file_ptr.write(new_data)
+    file_ptr.close()
+
+    return file_path
+
+
+def get_handler(request_type, handler_type):
+    handlers_map = {
+        "PROPRIETARY": get_proprietary_handler
+    }
+    if request_type not in handlers_map:
+        print('\033[33;1mUnhandled request type: %s. Using default request handler\033[0m' % request_type)
+        default_handler = lambda data, file_ptr: None
+        return default_handler
+
+    return handlers_map[request_type](handler_type)
+
+# Handler getter template
+# def get_<request_type>_handler(handler_type):
+#   def pack(data, file_ptr):
+#       ...
+#   def unpack(data, file_ptr):
+#       ...
+# return pack if handler_type == 'pack' else unpack
+
+def get_proprietary_handler(handler_type):    
+    def pack(data, file_ptr):
+        read_data = file_ptr.read()
+        file_ptr.seek(0)
+        file_ptr.truncate()        
+        return read_data
+
+    def unpack(data, file_ptr):
+        read_data = file_ptr.read()
+        file_ptr.seek(0)
+        file_ptr.truncate()
+
+        try:
+            json_data = json.loads(read_data)
+        except ValueError:
+            print('\033[31;1mInvalid JSON data: %s\033[0m' % read_data)
+            return None
+
+        policy_data = json.dumps(json_data['data'][0])
+        return policy_data
     
-    if encryption:
-        data = crypt(data)
-    if add_http_header:
-        data = http_header(data)
-
-    file.write(data)
-    file.close()
-    return file_path
-
-
-def unpack(file_path, encryption):
-
-    file = open(file_path, 'r+')
-    read_data = file.read()
-    file.seek(0)
-    file.truncate()
-
-    json_data = json.loads(read_data)
-    policy_data = json.dumps(json_data['data'][0])
-
-    if encryption:
-        policy_data = decrypt(policy_data)
-
-    file.write(policy_data)
-    file.close()
-
-    return file_path
+    return pack if handler_type == 'pack' else unpack
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -96,7 +142,19 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         print ("Socket Connected\n")
 
     def on_message(self, data):
-        self.write_message(self.handle_func(data, self.encryption, self.add_http_header))
+        try:
+            json_data = json.loads(data)
+        except ValueError:
+            print('\033[31;1mInvalid JSON message: %s\033[0m' % data)
+            return
+        if 'requestType' not in json_data:
+            print('\033[31;1mMissing requestType parameter: %s\033[0m' % str(json_data))
+            return
+        if 'fileName' not in json_data:
+            print('\033[31;1mMissing fileName parameter: %s\033[0m' % str(json_data))
+            return
+
+        self.write_message(self.handle_func(json_data, self.encryption, self.add_http_header))
 
     def on_close(self):
         print ("Connection Closed\n")

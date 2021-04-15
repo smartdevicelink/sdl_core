@@ -33,28 +33,30 @@
 #include "security_manager/crypto_manager_impl.h"
 
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
+#include <openssl/ssl.h>
+#include <stdio.h>
 
+#include <algorithm>
+#include <ctime>
 #include <fstream>
 #include <iostream>
-#include <stdio.h>
-#include <ctime>
-#include "security_manager/security_manager.h"
 
-#include "utils/logger.h"
+#include "security_manager/security_manager.h"
 #include "utils/atomic.h"
+#include "utils/date_time.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
-#include "utils/date_time.h"
 
+#define OPENSSL1_1_VERSION 0x1010000fL
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
 namespace security_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
+SDL_CREATE_LOG_VARIABLE("SecurityManager")
 
 uint32_t CryptoManagerImpl::instance_count_ = 0;
 sync_primitives::Lock CryptoManagerImpl::instance_lock_;
@@ -63,11 +65,15 @@ namespace {
 int debug_callback(int preverify_ok, X509_STORE_CTX* ctx) {
   if (!preverify_ok) {
     const int error = X509_STORE_CTX_get_error(ctx);
-    UNUSED(error);
-    LOG4CXX_WARN(logger_,
-                 "Certificate verification failed with error "
-                     << error << " \"" << X509_verify_cert_error_string(error)
-                     << '"');
+    if (error == X509_V_ERR_CERT_NOT_YET_VALID ||
+        error == X509_V_ERR_CERT_HAS_EXPIRED) {
+      // return success result code instead of error because start
+      // and expiration cert dates will be checked by SDL
+      return 1;
+    }
+    SDL_LOG_WARN("Certificate verification failed with error "
+                 << error << " \"" << X509_verify_cert_error_string(error)
+                 << '"');
   }
   return preverify_ok;
 }
@@ -78,99 +84,143 @@ void free_ctx(SSL_CTX** ctx) {
     *ctx = NULL;
   }
 }
-}
+}  // namespace
 
 CryptoManagerImpl::CryptoManagerImpl(
-    const utils::SharedPtr<const CryptoManagerSettings> set)
+    const std::shared_ptr<const CryptoManagerSettings> set)
     : settings_(set), context_(NULL) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(instance_lock_);
   instance_count_++;
   if (instance_count_ == 1) {
-    LOG4CXX_DEBUG(logger_, "Openssl engine initialization");
+    SDL_LOG_DEBUG("Openssl engine initialization");
     SSL_load_error_strings();
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  InitCertExpTime();
 }
 
 CryptoManagerImpl::~CryptoManagerImpl() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(instance_lock_);
-  LOG4CXX_DEBUG(logger_, "Deinitilization");
+  SDL_LOG_DEBUG("Deinitialization");
   if (!context_) {
-    LOG4CXX_WARN(logger_, "Manager is not initialized");
+    SDL_LOG_WARN("Manager is not initialized");
   } else {
     SSL_CTX_free(context_);
   }
   instance_count_--;
   if (instance_count_ == 0) {
-    LOG4CXX_DEBUG(logger_, "Openssl engine deinitialization");
+    SDL_LOG_DEBUG("Openssl engine deinitialization");
     EVP_cleanup();
     ERR_free_strings();
   }
 }
 
+bool CryptoManagerImpl::AreForceProtectionSettingsCorrect() const {
+  SDL_LOG_AUTO_TRACE();
+  const std::vector<int>& forced_unprotected_services =
+      get_settings().force_unprotected_service();
+  const std::vector<int>& forced_protected_services =
+      get_settings().force_protected_service();
+
+  for (auto& item : forced_protected_services) {
+    if (0 == item) {
+      continue;
+    }
+
+    if (std::find(forced_unprotected_services.begin(),
+                  forced_unprotected_services.end(),
+                  item) != forced_unprotected_services.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CryptoManagerImpl::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const Mode mode = get_settings().security_manager_mode();
+  if (!AreForceProtectionSettingsCorrect()) {
+    SDL_LOG_DEBUG("Force protection settings of ini file are wrong!");
+    return false;
+  }
   const bool is_server = (mode == SERVER);
   if (is_server) {
-    LOG4CXX_DEBUG(logger_, "Server mode");
+    SDL_LOG_DEBUG("Server mode");
   } else {
-    LOG4CXX_DEBUG(logger_, "Client mode");
+    SDL_LOG_DEBUG("Client mode");
   }
-  LOG4CXX_DEBUG(logger_,
-                "Peer verification "
-                    << (get_settings().verify_peer() ? "enabled" : "disabled"));
-  LOG4CXX_DEBUG(logger_,
-                "CA certificate file is \"" << get_settings().ca_cert_path()
+  SDL_LOG_DEBUG("Peer verification "
+                << (get_settings().verify_peer() ? "enabled" : "disabled"));
+  SDL_LOG_DEBUG("CA certificate file is \"" << get_settings().ca_cert_path()
                                             << '"');
 
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
 #else
-  const SSL_METHOD* method;
+  const SSL_METHOD* method = NULL;
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
 #ifdef OPENSSL_NO_SSL3
-      LOG4CXX_WARN(logger_, "OpenSSL does not support SSL3 protocol");
+      SDL_LOG_WARN("OpenSSL does not support SSL3 protocol");
       return false;
 #else
+      SDL_LOG_DEBUG("SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
+      SSL_CTX_set_max_proto_version(context_, SSL3_VERSION);
       break;
 #endif
     case TLSv1:
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-      break;
-    case TLSv1_1:
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      LOG4CXX_WARN(
-          logger_,
-          "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
+      SDL_LOG_DEBUG("TLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
 #else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_VERSION);
+#endif
+      break;
+    case TLSv1_1:
+      SDL_LOG_DEBUG("TLSv1_1 is used");
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
+      SDL_LOG_WARN(
+          "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
+      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_1_VERSION);
 #endif
       break;
     case TLSv1_2:
+      SDL_LOG_DEBUG("TLSv1_2 is used");
 #if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      LOG4CXX_WARN(
-          logger_,
+      SDL_LOG_WARN(
           "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
+#endif
+      break;
+    case DTLSv1:
+      SDL_LOG_DEBUG("DTLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
+      method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
+#else
+      method = is_server ? DTLS_server_method() : DTLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, DTLS1_VERSION);
 #endif
       break;
     default:
-      LOG4CXX_ERROR(logger_,
-                    "Unknown protocol: "
-                        << get_settings().security_manager_protocol_name());
+      SDL_LOG_ERROR("Unknown protocol: "
+                    << get_settings().security_manager_protocol_name());
       return false;
   }
   if (context_) {
@@ -181,39 +231,69 @@ bool CryptoManagerImpl::Init() {
   utils::ScopeGuard guard = utils::MakeGuard(free_ctx, &context_);
 
   // Disable SSL2 as deprecated
+  // TLS 1.2 is the max supported TLS version for SDL
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
-  set_certificate(get_settings().certificate_data());
+  SaveCertificateData(get_settings().certificate_data());
 
   if (get_settings().ciphers_list().empty()) {
-    LOG4CXX_WARN(logger_, "Empty ciphers list");
+    SDL_LOG_WARN("Empty ciphers list");
   } else {
-    LOG4CXX_DEBUG(logger_, "Cipher list: " << get_settings().ciphers_list());
+    SDL_LOG_DEBUG("Cipher list: " << get_settings().ciphers_list());
+    // If using openssl 1.1.1, this method may always return true
+    // https://github.com/openssl/openssl/issues/7196#issue-359287519
     if (!SSL_CTX_set_cipher_list(context_,
                                  get_settings().ciphers_list().c_str())) {
-      LOG4CXX_ERROR(
-          logger_,
+      SDL_LOG_ERROR(
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
+#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
+    auto sk = SSL_CTX_get_ciphers(context_);
+    const char* p;
+    for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+      const SSL_CIPHER* c = sk_SSL_CIPHER_value(sk, i);
+      p = SSL_CIPHER_get_name(c);
+      if (p == NULL)
+        break;
+      SDL_LOG_DEBUG("Using Cipher: " << p);
+    }
+#endif
   }
+
+#if OPENSSL_VERSION_NUMBER >= OPENSSL1_1_VERSION
+  SSL_CTX_set_security_level(context_, get_settings().security_level());
+#endif
 
   if (get_settings().ca_cert_path().empty()) {
-    LOG4CXX_WARN(logger_, "Setting up empty CA certificate location");
+    SDL_LOG_WARN("Setting up empty CA certificate location");
   }
 
-  LOG4CXX_DEBUG(logger_, "Setting up CA certificate location");
+  SDL_LOG_DEBUG("Setting up CA certificate location");
   const int result = SSL_CTX_load_verify_locations(
       context_, NULL, get_settings().ca_cert_path().c_str());
 
   if (!result) {
     const unsigned long error = ERR_get_error();
     UNUSED(error);
-    LOG4CXX_WARN(logger_,
-                 "Wrong certificate file '"
-                     << get_settings().ca_cert_path() << "', err 0x" << std::hex
-                     << error << " \"" << ERR_reason_error_string(error)
-                     << '"');
+    SDL_LOG_WARN("Wrong certificate file '"
+                 << get_settings().ca_cert_path() << "', err 0x" << std::hex
+                 << error << " \"" << ERR_reason_error_string(error) << '"');
+  }
+
+  SDL_LOG_DEBUG("Setting up module certificate and private key");
+
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
+
+  if (!UpdateModuleCertificateData(module_certificate, module_key)) {
+    SDL_LOG_WARN("Failed to update module key and certificate");
   }
 
   guard.Dismiss();
@@ -222,30 +302,48 @@ bool CryptoManagerImpl::Init() {
       get_settings().verify_peer()
           ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
           : SSL_VERIFY_NONE;
-  LOG4CXX_DEBUG(logger_,
-                "Setting up peer verification in mode: " << verify_mode);
+  SDL_LOG_DEBUG("Setting up peer verification in mode: " << verify_mode);
   SSL_CTX_set_verify(context_, verify_mode, &debug_callback);
   return true;
 }
 
 bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(crypto_manager_lock_);
   if (!context_) {
-    LOG4CXX_WARN(logger_, "Not initialized");
+    SDL_LOG_WARN("Not initialized");
     return false;
   }
 
-  return set_certificate(data);
+  if (!SaveCertificateData(data)) {
+    SDL_LOG_ERROR("Failed to save certificate data");
+    return false;
+  }
+
+  X509* module_certificate = LoadModuleCertificateFromFile();
+  EVP_PKEY* module_key = LoadModulePrivateKeyFromFile();
+
+  utils::ScopeGuard certificate_guard =
+      utils::MakeGuard(X509_free, module_certificate);
+  UNUSED(certificate_guard);
+
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, module_key);
+  UNUSED(key_guard);
+
+  return UpdateModuleCertificateData(module_certificate, module_key);
 }
 
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
-  if (context_ == NULL) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(crypto_manager_lock_);
+  if (NULL == context_) {
     return NULL;
   }
 
   SSL* conn = SSL_new(context_);
-  if (conn == NULL)
+  if (NULL == conn) {
     return NULL;
+  }
 
   if (get_settings().security_manager_mode() == SERVER) {
     SSL_set_accept_state(conn);
@@ -269,42 +367,42 @@ std::string CryptoManagerImpl::LastError() const {
   return std::string(reason ? reason : "");
 }
 
-bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+bool CryptoManagerImpl::IsCertificateUpdateRequired(
+    const time_t system_time, const time_t certificates_time) const {
+  SDL_LOG_AUTO_TRACE();
 
-  const time_t cert_date = mktime(&expiration_time_);
+  const double seconds = difftime(certificates_time, system_time);
 
-  if (cert_date == -1) {
-    LOG4CXX_WARN(logger_,
-                 "The certifiacte expiration time cannot be represented.");
-    return false;
-  }
-  const time_t now = time(NULL);
-  const double seconds = difftime(cert_date, now);
+  const size_t maxsize = 40;
+  char certificate_utc_time[maxsize];
+  std::strftime(
+      certificate_utc_time, maxsize, "%c", gmtime(&certificates_time));
+  SDL_LOG_DEBUG("Certificate UTC time: " << certificate_utc_time);
 
-  LOG4CXX_DEBUG(logger_,
-                "Certificate expiration time: " << asctime(&expiration_time_));
-  LOG4CXX_DEBUG(logger_,
-                "Host time: " << asctime(localtime(&now))
-                              << ". Seconds before expiration: " << seconds);
+  char host_utc_time[maxsize];
+  std::strftime(host_utc_time, maxsize, "%c", gmtime(&system_time));
+  SDL_LOG_DEBUG("Host UTC time: " << host_utc_time);
+
+  SDL_LOG_DEBUG("Seconds before expiration: " << seconds);
   if (seconds < 0) {
-    LOG4CXX_WARN(logger_, "Certificate is already expired.");
+    SDL_LOG_WARN("Certificate is already expired.");
     return true;
   }
 
-  return seconds <= (get_settings().update_before_hours() *
-                     date_time::DateTime::SECONDS_IN_HOUR);
+  return seconds <=
+         (get_settings().update_before_hours() * date_time::SECONDS_IN_HOUR);
 }
 
 const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
   return *settings_;
 }
 
-bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+bool CryptoManagerImpl::SaveCertificateData(
+    const std::string& cert_data) const {
+  SDL_LOG_AUTO_TRACE();
 
   if (cert_data.empty()) {
-    LOG4CXX_WARN(logger_, "Empty certificate");
+    SDL_LOG_WARN("Empty certificate");
     return false;
   }
 
@@ -315,100 +413,153 @@ bool CryptoManagerImpl::set_certificate(const std::string& cert_data) {
   UNUSED(bio_guard)
 
   X509* cert = NULL;
-  PEM_read_bio_X509(bio_cert, &cert, 0, 0);
+  if (!PEM_read_bio_X509(bio_cert, &cert, 0, 0)) {
+    SDL_LOG_WARN("Could not read certificate data: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard cert_guard = utils::MakeGuard(X509_free, cert);
+  UNUSED(cert_guard);
+
+  if (1 != BIO_reset(bio_cert)) {
+    SDL_LOG_WARN("Unabled to reset BIO in order to read private key, "
+                 << LastError());
+  }
 
   EVP_PKEY* pkey = NULL;
-  if (1 == BIO_reset(bio_cert)) {
-    PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "Unabled to reset BIO in order to read private key, "
-                     << LastError());
-  }
-
-  if (NULL == cert || NULL == pkey) {
-    LOG4CXX_WARN(logger_, "Either certificate or key not valid.");
+  if (!PEM_read_bio_PrivateKey(bio_cert, &pkey, 0, 0)) {
+    SDL_LOG_WARN("Could not read private key data: " << LastError());
     return false;
   }
 
-  if (!SSL_CTX_use_certificate(context_, cert)) {
-    LOG4CXX_WARN(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
+  utils::ScopeGuard key_guard = utils::MakeGuard(EVP_PKEY_free, pkey);
+  UNUSED(key_guard);
 
-  asn1_time_to_tm(X509_get_notAfter(cert));
+  return SaveModuleCertificateToFile(cert) && SaveModuleKeyToFile(pkey);
+}
 
-  if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
-    LOG4CXX_ERROR(logger_, "Could not use key: " << LastError());
-    return false;
-  }
-
-  if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate: " << LastError());
-    return false;
-  }
-
-  X509_STORE* store = SSL_CTX_get_cert_store(context_);
-  if (store) {
-    X509* extra_cert = NULL;
-    while ((extra_cert = PEM_read_bio_X509(bio_cert, NULL, 0, 0))) {
-      if (extra_cert != cert) {
-        LOG4CXX_DEBUG(logger_,
-                      "Added new certificate to store: " << extra_cert);
-        X509_STORE_add_cert(store, extra_cert);
-      }
+bool CryptoManagerImpl::UpdateModuleCertificateData(X509* certificate,
+                                                    EVP_PKEY* key) {
+  SDL_LOG_AUTO_TRACE();
+  if (certificate) {
+    if (!SSL_CTX_use_certificate(context_, certificate)) {
+      SDL_LOG_WARN("Could not use certificate: " << LastError());
+      return false;
     }
   }
 
-  LOG4CXX_DEBUG(logger_, "Certificate and key successfully updated");
+  if (key) {
+    if (!SSL_CTX_use_PrivateKey(context_, key)) {
+      SDL_LOG_ERROR("Could not use key: " << LastError());
+      return false;
+    }
+
+    if (!SSL_CTX_check_private_key(context_)) {
+      SDL_LOG_ERROR("Private key is invalid: " << LastError());
+      return false;
+    }
+  }
+
+  SDL_LOG_DEBUG("Certificate and key are successfully updated");
   return true;
 }
 
-int CryptoManagerImpl::pull_number_from_buf(char* buf, int* idx) {
-  if (!idx) {
-    return 0;
+X509* CryptoManagerImpl::LoadModuleCertificateFromFile() {
+  SDL_LOG_AUTO_TRACE();
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "r");
+  if (!bio_cert) {
+    SDL_LOG_WARN("Failed to open " << cert_path << " file: " << LastError());
+    return NULL;
   }
-  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
-  *idx = *idx + 2;
-  return val;
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  X509* module_certificate = NULL;
+  if (!PEM_read_bio_X509(bio_cert, &module_certificate, NULL, NULL)) {
+    SDL_LOG_ERROR("Failed to read certificate data from file: " << LastError());
+    return NULL;
+  }
+  SDL_LOG_DEBUG("Module certificate was loaded: " << module_certificate);
+
+  return module_certificate;
 }
 
-void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME* time) {
-  char* buf = (char*)time->data;
-  int index = 0;
-  const int year = pull_number_from_buf(buf, &index);
-  if (V_ASN1_GENERALIZEDTIME == time->type) {
-    expiration_time_.tm_year =
-        (year * 100 - 1900) + pull_number_from_buf(buf, &index);
-  } else {
-    expiration_time_.tm_year = year < 50 ? year + 100 : year;
+EVP_PKEY* CryptoManagerImpl::LoadModulePrivateKeyFromFile() {
+  SDL_LOG_AUTO_TRACE();
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "r");
+  if (!bio_key) {
+    SDL_LOG_WARN("Failed to open " << key_path << " file: " << LastError());
+    return NULL;
   }
 
-  const int mon = pull_number_from_buf(buf, &index);
-  const int day = pull_number_from_buf(buf, &index);
-  const int hour = pull_number_from_buf(buf, &index);
-  const int mn = pull_number_from_buf(buf, &index);
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
 
-  expiration_time_.tm_mon = mon - 1;
-  expiration_time_.tm_mday = day;
-  expiration_time_.tm_hour = hour;
-  expiration_time_.tm_min = mn;
+  EVP_PKEY* module_key = NULL;
+  if (!PEM_read_bio_PrivateKey(bio_key, &module_key, NULL, NULL)) {
+    SDL_LOG_ERROR("Failed to read private key data from file: " << LastError());
+    return NULL;
+  }
+  SDL_LOG_DEBUG("Module private key was loaded: " << module_key);
 
-  if (buf[index] == 'Z') {
-    expiration_time_.tm_sec = 0;
-  }
-  if ((buf[index] == '+') || (buf[index] == '-')) {
-    const int mn = pull_number_from_buf(buf, &index);
-    const int mn1 = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
-  } else {
-    const int sec = pull_number_from_buf(buf, &index);
-    expiration_time_.tm_sec = sec;
-  }
+  return module_key;
 }
 
-void CryptoManagerImpl::InitCertExpTime() {
-  strptime("1 Jan 1970 00:00:00", "%d %b %Y %H:%M:%S", &expiration_time_);
+bool CryptoManagerImpl::SaveModuleCertificateToFile(X509* certificate) const {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!certificate) {
+    SDL_LOG_WARN("Empty certificate. Saving will be skipped");
+    return false;
+  }
+
+  const std::string cert_path = get_settings().module_cert_path();
+  BIO* bio_cert = BIO_new_file(cert_path.c_str(), "w");
+  if (!bio_cert) {
+    SDL_LOG_ERROR("Failed to open " << cert_path << " file: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_cert);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_X509(bio_cert, certificate)) {
+    SDL_LOG_ERROR("Failed to write certificate to file: " << LastError());
+    return false;
+  }
+
+  return true;
+}
+
+bool CryptoManagerImpl::SaveModuleKeyToFile(EVP_PKEY* key) const {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!key) {
+    SDL_LOG_WARN("Empty private key. Saving will be skipped");
+    return false;
+  }
+
+  const std::string key_path = get_settings().module_key_path();
+  BIO* bio_key = BIO_new_file(key_path.c_str(), "w");
+  if (!bio_key) {
+    SDL_LOG_ERROR("Failed to open " << key_path << " file: " << LastError());
+    return false;
+  }
+
+  utils::ScopeGuard bio_guard = utils::MakeGuard(BIO_free, bio_key);
+  UNUSED(bio_guard);
+
+  if (!PEM_write_bio_PrivateKey(bio_key, key, NULL, NULL, 0, NULL, NULL)) {
+    SDL_LOG_ERROR("Failed to write key to file: " << LastError());
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace security_manager

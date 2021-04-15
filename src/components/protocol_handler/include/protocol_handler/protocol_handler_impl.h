@@ -33,30 +33,35 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
+#include <stdint.h>
 #include <map>
 #include <memory>
 #include <set>
-#include <stdint.h>
 #include <utility>  // std::make_pair
 #include <vector>
-#include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
+#include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/shared_ptr.h"
-#include "utils/messagemeter.h"
 
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_packet.h"
-#include "protocol_handler/protocol_handler_settings.h"
-#include "protocol_handler/session_observer.h"
-#include "protocol_handler/protocol_observer.h"
+#include "utils/convert_utils.h"
+#include "utils/custom_string.h"
+#include "utils/messagemeter.h"
+#include "utils/semantic_version.h"
+
+#include "application_manager/policies/policy_handler_observer.h"
+#include "connection_handler/connection_handler.h"
 #include "protocol_handler/incoming_data_handler.h"
 #include "protocol_handler/multiframe_builder.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_settings.h"
+#include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/service_status_update_handler.h"
+#include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "connection_handler/connection_handler.h"
-#include "application_manager/policies/policy_handler_observer.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -64,8 +69,8 @@
 #endif  // TELEMETRY_MONITOR
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_manager.h"
 #include "protocol_handler/handshake_handler.h"
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 namespace connection_handler {
@@ -107,7 +112,8 @@ struct RawFordMessageFromMobile : public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-               ServiceTypeFromByte(get()->service_type())).OrderingValue();
+               ServiceTypeFromByte(get()->service_type()))
+        .OrderingValue();
   }
 };
 
@@ -119,7 +125,8 @@ struct RawFordMessageToMobile : public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-               ServiceTypeFromByte(get()->service_type())).OrderingValue();
+               ServiceTypeFromByte(get()->service_type()))
+        .OrderingValue();
   }
   // Signals whether connection to mobile must be closed after processing this
   // message
@@ -128,9 +135,36 @@ struct RawFordMessageToMobile : public ProtocolFramePtr {
 
 // Short type names for prioritized message queues
 typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
+    utils::PrioritizedQueue<RawFordMessageFromMobile> >
+    FromMobileQueue;
 typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
+    utils::PrioritizedQueue<RawFordMessageToMobile> >
+    ToMobileQueue;
+
+// Type to allow easy mapping between a device type and transport
+// characteristics
+typedef enum {
+  TT_NONE = -1,
+  TT_USB = 0,
+  TT_BLUETOOTH = 1,
+  TT_WIFI = 2,
+  TT_WEBSOCKET = 3
+} TransportType;
+
+struct TransportDescription {
+  TransportDescription(const TransportType transport_type,
+                       const bool ios_transport,
+                       const bool android_transport)
+      : transport_type_(transport_type)
+      , ios_transport_(ios_transport)
+      , android_transport_(android_transport) {}
+
+  TransportType transport_type_;
+  bool ios_transport_;
+  bool android_transport_;
+};
+
+typedef std::map<std::string, TransportDescription> TransportTypes;
 }  // namespace impl
 
 /**
@@ -148,10 +182,10 @@ class ProtocolHandlerImpl
       public impl::FromMobileQueue::Handler,
       public impl::ToMobileQueue::Handler
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<PHTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
  public:
   /**
    * @brief Constructor
@@ -178,6 +212,16 @@ class ProtocolHandlerImpl
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection
@@ -187,6 +231,9 @@ class ProtocolHandlerImpl
   void set_security_manager(
       security_manager::SecurityManager* security_manager);
 #endif  // ENABLE_SECURITY
+
+  void set_service_status_update_handler(
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -198,7 +245,10 @@ class ProtocolHandlerImpl
    * \param message Message with params to be sent to Mobile App
    */
   void SendMessageToMobileApp(const RawMessagePtr message,
+                              bool needs_encryption,
                               bool final_message) OVERRIDE;
+
+  bool IsRPCServiceSecure(const uint32_t connection_key) const OVERRIDE;
 
   /**
    * \brief Sends number of processed frames in case of binary nav streaming
@@ -224,16 +274,26 @@ class ProtocolHandlerImpl
   void SendHeartBeat(int32_t connection_id, uint8_t session_id);
 
   /**
-    * \brief Sends ending session to mobile application
-    * \param connection_id Identifier of connection within which
-    * session exists
-    * \param session_id ID of session to be ended
-    */
+   * \brief Sends ending session to mobile application
+   * \param connection_id Identifier of connection within which
+   * session exists
+   * \param session_id ID of session to be ended
+   */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
-  void SendEndService(int32_t connection_id,
+  /**
+   * \brief Sends ending session to mobile application
+   * \param primary_connection_id Identifier of connection within which
+   * service exists
+   * \param connection_id Identifier of the actual transport for the service
+   * \param session_id ID of session to be ended
+   */
+  void SendEndService(int32_t primary_connection_id,
+                      int32_t connection_id,
                       uint8_t session_id,
                       uint8_t service_type);
+
+  void NotifyOnGetSystemTimeFailed() OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -277,7 +337,7 @@ class ProtocolHandlerImpl
                            uint32_t hash_code,
                            uint8_t service_type,
                            bool protection,
-                           ProtocolPacket::ProtocolVersion& full_version);
+                           utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends acknowledgement of starting session to mobile application
@@ -301,7 +361,7 @@ class ProtocolHandlerImpl
                            uint32_t hash_code,
                            uint8_t service_type,
                            bool protection,
-                           ProtocolPacket::ProtocolVersion& full_version,
+                           utils::SemanticVersion& full_version,
                            BsonObject& params);
 
   const ProtocolHandlerSettings& get_settings() const OVERRIDE {
@@ -314,11 +374,16 @@ class ProtocolHandlerImpl
    * \param session_id ID of session to be sent to mobile application
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
-                            uint8_t service_type);
+                            uint8_t service_type,
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -327,12 +392,17 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
+   * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            std::vector<std::string>& rejectedParams);
+                            std::vector<std::string>& rejectedParams,
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -357,11 +427,13 @@ class ProtocolHandlerImpl
    * \param session_id ID of session ment to be ended
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param reason String stating the reason for the rejecting the end service
    */
   void SendEndSessionNAck(ConnectionID connection_id,
                           uint32_t session_id,
                           uint8_t protocol_version,
-                          uint8_t service_type);
+                          uint8_t service_type,
+                          const std::string reason);
   /**
    * \brief Sends fail of ending session to mobile application (variant for
    * Protocol v5)
@@ -371,35 +443,16 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
+   * \param reason String stating the reason for the rejecting the end service
    */
   void SendEndSessionNAck(ConnectionID connection_id,
                           uint32_t session_id,
                           uint8_t protocol_version,
                           uint8_t service_type,
-                          std::vector<std::string>& rejected_params);
+                          std::vector<std::string>& rejected_params,
+                          const std::string reason);
 
   SessionObserver& get_session_observer() OVERRIDE;
-
-  /**
-   * \brief Called by connection handler to notify the result of
-   * OnSessionStartedCallback().
-   * \param connection_id Identifier of connection within which session exists
-   * \param session_id session ID passed to OnSessionStartedCallback()
-   * \param generated_session_id Generated session ID, will be 0 if session is
-   * not started
-   * \param hash_id Generated Hash ID
-   * \param protection whether the service will be protected
-   * \param rejected_params list of parameters' name that are rejected.
-   * Only valid when generated_session_id is 0. Note, even if
-   * generated_session_id is 0, the list may be empty.
-   */
-  DEPRECATED void NotifySessionStartedResult(
-      int32_t connection_id,
-      uint8_t session_id,
-      uint8_t generated_session_id,
-      uint32_t hash_id,
-      bool protection,
-      std::vector<std::string>& rejected_params) OVERRIDE;
 
   /**
    * @brief Called by connection handler to notify the result of
@@ -409,8 +462,14 @@ class ProtocolHandlerImpl
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
+  DEPRECATED
   void NotifySessionStarted(const SessionContext& context,
-                            std::vector<std::string>& rejected_params) OVERRIDE;
+                            std::vector<std::string>& rejected_params,
+                            const std::string err_reason) OVERRIDE;
+
+  void NotifySessionStarted(SessionContext& context,
+                            std::vector<std::string>& rejected_params,
+                            const std::string err_reason) OVERRIDE;
 
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
@@ -420,10 +479,21 @@ class ProtocolHandlerImpl
   const impl::ToMobileQueue& get_to_mobile_queue() const {
     return raw_ford_messages_to_mobile_;
   }
+
+  void set_tcp_config(bool tcp_enabled,
+                      std::string tcp_address,
+                      std::string tcp_port) {
+    tcp_enabled_ = tcp_enabled;
+    tcp_ip_address_ = tcp_address;
+    tcp_port_ = tcp_port;
+  }
 #endif
 
+  void OnAuthTokenUpdated(const std::string&, const std::string&) OVERRIDE;
+
  private:
-  void SendEndServicePrivate(int32_t connection_id,
+  void SendEndServicePrivate(int32_t primary_connection_id,
+                             int32_t connection_id,
                              uint8_t session_id,
                              uint8_t service_type);
 
@@ -433,6 +503,28 @@ class ProtocolHandlerImpl
   RESULT_CODE SendHeartBeatAck(ConnectionID connection_id,
                                uint8_t session_id,
                                uint32_t message_id);
+
+  /*
+   * Prepare and send TransportUpdateEvent message
+   */
+  void SendTransportUpdateEvent(ConnectionID connection_id, uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id);
+
+  /*
+   * Prepare and send RegisterSecondaryTransportNAck message
+   */
+  RESULT_CODE SendRegisterSecondaryTransportNAck(
+      ConnectionID connection_id,
+      ConnectionID primary_transport_connection_id,
+      uint8_t session_id,
+      BsonObject* reason = NULL);
 
   /**
    * @brief Notifies about receiving message from TM.
@@ -472,13 +564,22 @@ class ProtocolHandlerImpl
   void OnConnectionClosed(
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
+  void OnUnexpectedDisconnect(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::CommunicationError& error) OVERRIDE;
+
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
+
   /**
-   * @brief OnPTUFinished the callback which signals PTU has finished
+   * @brief Notifies that configuration of a transport has been updated.
    *
-   * @param ptu_result the result from the PTU - true if successful,
-   * otherwise false.
+   * @param configs pairs of key and value that represent configuration.
    */
-  void OnPTUFinished(const bool ptu_result) OVERRIDE;
+  void OnTransportConfigUpdated(
+      const transport_manager::transport_adapter::TransportConfig& configs)
+      OVERRIDE;
 
   /**
    * @brief Notifies subscribers about message
@@ -505,6 +606,7 @@ class ProtocolHandlerImpl
                                      const uint8_t service_type,
                                      const size_t data_size,
                                      const uint8_t* data,
+                                     const bool needs_encryption,
                                      const bool is_final_message);
 
   /**
@@ -527,6 +629,7 @@ class ProtocolHandlerImpl
                                     const size_t data_size,
                                     const uint8_t* data,
                                     const size_t max_frame_size,
+                                    const bool needs_encryption,
                                     const bool is_final_message);
 
   /**
@@ -576,14 +679,14 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
-  DEPRECATED RESULT_CODE
-  HandleControlMessageStartSession(const ProtocolPacket& packet);
-
   RESULT_CODE HandleControlMessageStartSession(const ProtocolFramePtr packet);
+
+  RESULT_CODE HandleControlMessageRegisterSecondaryTransport(
+      const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
-  void PopValideAndExpirateMultiframes();
+  void PopValidAndExpiredMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
@@ -608,6 +711,56 @@ class ProtocolHandlerImpl
    * @brief Function returns supported SDL Protocol Version,
    */
   uint8_t SupportedSDLProtocolVersion() const;
+
+  const impl::TransportDescription GetTransportTypeFromConnectionType(
+      const std::string& device_type) const;
+
+  const bool ParseSecondaryTransportConfiguration(
+      const ConnectionID connection_id,
+      std::vector<std::string>& secondaryTransports,
+      std::vector<int32_t>& audioServiceTransports,
+      std::vector<int32_t>& videoServiceTransports) const;
+
+  void GenerateSecondaryTransportsForStartSessionAck(
+      const std::vector<std::string>& secondary_transport_types,
+      bool device_is_ios,
+      bool device_is_android,
+      std::vector<std::string>& secondaryTransports) const;
+
+  void GenerateServiceTransportsForStartSessionAck(
+      bool secondary_enabled,
+      const std::vector<std::string>& service_transports,
+      const std::string& primary_connection_type,
+      const impl::TransportType primary_transport_type,
+      const std::vector<std::string>& secondary_transport_types,
+      std::vector<int32_t>& serviceTransports) const;
+
+  const std::string TransportTypeFromTransport(
+      const utils::custom_string::CustomString& transport) const;
+
+  const ServiceStatus ServiceDisallowedBySettings(
+      const ServiceType service_type,
+      const ConnectionID connection_id,
+      const uint8_t session_id,
+      const bool protection) const;
+
+  /**
+   * @brief Writes available protocol vehicle data into structured bson
+   * @param params bson params to write into
+   * @param data data to write
+   */
+  void WriteProtocolVehicleData(
+      BsonObject& params, const connection_handler::ProtocolVehicleData& data);
+
+  /**
+   * \brief Parces full protocol version from start service message headers bson
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
+   * \param packet Sart service message
+   * \return true if version successfully parsed, otherwise false
+   */
+  bool ParseFullVersion(utils::SemanticVersion& full_version,
+                        const ProtocolFramePtr& packet) const;
 
   const ProtocolHandlerSettings& settings_;
 
@@ -683,10 +836,6 @@ class ProtocolHandlerImpl
 
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager* security_manager_;
-
-  bool is_ptu_triggered_;
-  std::list<std::shared_ptr<HandshakeHandler> > ptu_pending_handlers_;
-  sync_primitives::Lock ptu_handlers_lock_;
 #endif  // ENABLE_SECURITY
 
   // Thread that pumps non-parsed messages coming from mobile side.
@@ -698,6 +847,16 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
+
+  // Map policy app id -> auth token
+  sync_primitives::Lock auth_token_map_lock_;
+  std::map<std::string, std::string> auth_token_map_;
+
+  bool tcp_enabled_;
+  std::string tcp_port_;
+  std::string tcp_ip_address_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

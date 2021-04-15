@@ -29,15 +29,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "hmi_message_handler/websocket_session.h"
-#include "hmi_message_handler/mb_controller.h"
 #include <unistd.h>
+#include "hmi_message_handler/mb_controller.h"
+#include "utils/jsoncpp_reader_wrapper.h"
+
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
+
+SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
 
 WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
                                    CMessageBrokerController* controller)
     : ws_(std::move(socket))
-    , strand_(ws_.get_executor())
     , controller_(controller)
     , stop(false)
     , m_receivingBuffer("")
@@ -46,22 +49,21 @@ WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
-  thread_->start(threads::ThreadOptions());
+  m_writer["indentation"] = "";
+  thread_->Start(threads::ThreadOptions());
 }
 
 WebsocketSession::~WebsocketSession() {}
 
 void WebsocketSession::Accept() {
-  ws_.async_accept(boost::asio::bind_executor(
-      strand_,
-      std::bind(
-          &WebsocketSession::Recv, shared_from_this(), std::placeholders::_1)));
+  ws_.async_accept(std::bind(
+      &WebsocketSession::Recv, shared_from_this(), std::placeholders::_1));
 }
 
 void WebsocketSession::Shutdown() {
   shutdown_ = true;
   thread_delegate_->SetShutdown();
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete thread_delegate_;
   threads::DeleteThread(thread_);
 }
@@ -77,22 +79,22 @@ void WebsocketSession::Recv(boost::system::error_code ec) {
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
-    controller_->deleteController(this);
+    controller_->deleteController(*this);
     return;
   }
 
   ws_.async_read(buffer_,
-                 boost::asio::bind_executor(strand_,
-                                            std::bind(&WebsocketSession::Read,
-                                                      shared_from_this(),
-                                                      std::placeholders::_1,
-                                                      std::placeholders::_2)));
+                 std::bind(&WebsocketSession::Read,
+                           shared_from_this(),
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
-void WebsocketSession::Send(std::string& message, Json::Value& json_message) {
+void WebsocketSession::Send(const std::string& message,
+                            Json::Value& json_message) {
   if (shutdown_) {
     return;
   }
@@ -102,7 +104,7 @@ void WebsocketSession::Send(std::string& message, Json::Value& json_message) {
 }
 
 void WebsocketSession::sendJsonMessage(Json::Value& message) {
-  std::string str_msg = m_writer.write(message);
+  const std::string str_msg = Json::writeString(m_writer, message) + '\n';
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (!isNotification(message) && !isResponse(message)) {
     mWaitResponseQueue.insert(std::map<std::string, std::string>::value_type(
@@ -117,10 +119,10 @@ void WebsocketSession::Read(boost::system::error_code ec,
   boost::ignore_unused(bytes_transferred);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
-    controller_->deleteController(this);
+    controller_->deleteController(*this);
     buffer_.consume(buffer_.size());
     return;
   }
@@ -128,14 +130,15 @@ void WebsocketSession::Read(boost::system::error_code ec,
   std::string data = boost::beast::buffers_to_string(buffer_.data());
   m_receivingBuffer += data;
 
+  utils::JsonReader reader;
   Json::Value root;
-  if (!m_reader.parse(m_receivingBuffer, root)) {
-    std::string str_err = "Invalid JSON Message: " + data;
-    LOG4CXX_ERROR(ws_logger_, str_err);
+
+  if (!reader.parse(data, &root)) {
+    SDL_LOG_ERROR("Invalid JSON Message.");
     return;
   }
 
-  std::string wmes = m_receiverWriter.write(root);
+  const std::string wmes = Json::writeString(m_receiver_writer, root);
   ssize_t beginpos = m_receivingBuffer.find(wmes);
   if (-1 != beginpos) {
     m_receivingBuffer.erase(0, beginpos + wmes.length());
@@ -174,8 +177,7 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
           if (message.isMember("result") && message["result"].isInt()) {
             mControllersIdStart = message["result"].asInt();
           } else {
-            LOG4CXX_ERROR(ws_logger_,
-                          "Not possible to initialize mControllersIdStart!");
+            SDL_LOG_ERROR("Not possible to initialize mControllersIdStart!");
           }
         } else if ("MB.subscribeTo" == method ||
                    "MB.unregisterComponent" == method ||
@@ -185,22 +187,21 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
           controller_->processResponse(method, message);
         }
       } else {
-        LOG4CXX_ERROR(ws_logger_,
-                      "Request with id: " + id + " has not been found!");
+        SDL_LOG_ERROR("Request with id: " + id + " has not been found!");
       }
     } else {
       std::string method = message["method"].asString();
       std::string component_name = GetComponentName(method);
 
       if (component_name == "MB") {
-        controller_->processInternalRequest(message, this);
+        controller_->processInternalRequest(message, *this);
       } else {
-        controller_->pushRequest(message, this);
+        controller_->pushRequest(message, *this);
         controller_->processRequest(message);
       }
     }
   } else {
-    LOG4CXX_ERROR(ws_logger_, "Message contains wrong data!\n");
+    SDL_LOG_ERROR("Message contains wrong data!\n");
     sendJsonMessage(error);
   }
 }
@@ -304,12 +305,13 @@ void WebsocketSession::LoopThreadDelegate::exitThreadMain() {
 }
 
 void WebsocketSession::LoopThreadDelegate::DrainQueue() {
-  while (!message_queue_.empty()) {
-    Message message_ptr;
-    message_queue_.pop(message_ptr);
-    if (!shutdown_) {
-      handler_.ws_.write(boost::asio::buffer(*message_ptr));
-    };
+  Message message_ptr;
+  while (!shutdown_ && message_queue_.pop(message_ptr)) {
+    boost::system::error_code ec;
+    handler_.ws_.write(boost::asio::buffer(*message_ptr), ec);
+    if (ec) {
+      SDL_LOG_ERROR("A system error has occurred: " << ec.message());
+    }
   }
 }
 
@@ -319,4 +321,4 @@ void WebsocketSession::LoopThreadDelegate::SetShutdown() {
     message_queue_.Shutdown();
   }
 }
-}
+}  // namespace hmi_message_handler

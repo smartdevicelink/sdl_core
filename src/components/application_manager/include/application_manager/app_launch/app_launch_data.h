@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_DATA_H_
 
 #include <stdint.h>
-#include <vector>
+#include <memory>
 #include <string>
-#include "utils/shared_ptr.h"
+#include <vector>
 
 namespace app_launch {
 
@@ -59,7 +59,7 @@ struct ApplicationData {
            bundle_id_ == app_data.bundle_id_ && device_mac_ == device_mac_;
   }
 };
-typedef utils::SharedPtr<ApplicationData> ApplicationDataPtr;
+typedef std::shared_ptr<ApplicationData> ApplicationDataPtr;
 
 /**
  * @brief class contains interfaces to AppLaunchDataDB and AppLaunchDataJson

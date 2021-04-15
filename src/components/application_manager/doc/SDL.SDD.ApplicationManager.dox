@@ -1,0 +1,76 @@
+/**
+\page application_manager Application Manager Detailed Design
+## Table of contents
+- \subpage application_manager_intoduction
+- \subpage application_manager_detail_design
+  + \ref application_manager_state_controller      "2.1 State Controller"
+*/
+//-----------------------------------------------------------
+/**
+\page application_manager_intoduction 1 Introduction
+The document is intended to support software developers,
+maintenance and integration engineers with sufficient,
+detailed information concerning the design, development and
+deployment concepts, to accomplish their respective tasks without reliance on the authors.
+*/
+//-----------------------------------------------------------
+/**
+\page application_manager_detail_design 2 Component Detail Design
+\anchor application_manager_state_controller
+### 2.1 State Controller
+While application activating by HMI service new HMI level assigned to its state.
+The only one application can exist in the same time with HMI level 'FULL'.
+Therefore states of other application with their HMI level should be changed respectively.
+State Controller handles properly states of other applications while one of them changing it state.
+
+The main logic of application HMI Level conflict resolver
+If applied HMI state is FULL:
+ - all NOT audio/video applications becomes BACKGROUND
+ - all audio/video applications with other application type (navi, vc, media, projection) in FULL becomes LIMMITED
+ - all applications with same application type becomes BACKGROUND
+ 
+If applied HMI state is LIMITED:
+ - all NOT audio/video applications saves their's HMI states
+ - all applications with other application types saves their's HMI states
+ - all applications with same application type becomes BACKGROUND
+
+If applied HMI state is BACKGROUND:
+ - all applications will save their's HMI states
+
+Resolve tables to figure out audio/video streaming state for FULL/LIMITED HMI level.
+For example if applied is 'NAVIGATION' and resolve application is 'PROJECTION' then to resolve becomes 'NOT_STREAMABLE'.
+According to video resolve table the only one application may be 'STREAMABLE' in the same time.
+
+Video app resolve table(S --> STREAMABLE, NS --> NOT_STREAMABLE)
+
+| resolve/applied | NAVIGATION | PROJECTION | Other |
+|-----------------|------------|------------|-------|
+|NAVIGATION       |     NS     |     NS     |  S    |
+|PROJECTION       |     NS     |     NS     |  S    |
+|Other            |     NS     |     NS     |  NS   |
+
+Audio application resolve table(A --> AUDIBLE, NS --> NOT_AUDIBLE)
+
+| resolve/applied | NAVIGATION | COMMUNICATION | IsMediaApp | Other |
+|-----------------|------------|---------------|------------|-------|
+|NAVIGATION       |     NA     |      A        |     A      |   A   |
+|COMMUNICATION    |     A      |      NA       |     A      |   A   |
+|IsMediaApp       |     A      |      A        |     NA     |   A   |
+|Other            |     NA     |      NA       |     NA     |   NA  |
+
+\note
+For instance if applied application is 'PROJECTION' & isMedia=true with applied HMI level 'FULL' (STREAMABLE & AUDIBLE)
+and application to resolve is 'NAVIGATION' with HMI level 'FULL' or 'LIMITED' STREAMABLE & AUDIBLE)
+then to resolve becomes 'LIMITED' (NOT_STREAMABLE & AUDIBLE).
+So, the only one application may stream video in the same time. But audio application such types as 'NAVIGATION', 'COMMUNICATION'
+may stream audio/video in 'LIMITED' level with application of other types.
+
+\note
+If applied application is 'NAVIGATION' (STREAMABLE & AUDIBLE) and application to resolve is same type
+'NAVIGATION' (STREAMABLE & AUDIBLE) then to resolve application becomes BACKGROUND (NOT_STREAMABLE & NOT_AUDIBLE).
+
+\note
+When a 'NAVIGATION' application does not start audio streaming service, media application is AUDIBLE,
+When the 'NAVIGATION' application starts streaming service, media application is ATTENUATED if system supports mixing,
+otherwise media application is NOT_AUDIBLE
+*/

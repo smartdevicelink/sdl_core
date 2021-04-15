@@ -267,6 +267,13 @@ Notifications:
 			
 			{
 				"longPressAvailable" : true,
+				"name" : "PLAY_PAUSE",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+
+			{
+				"longPressAvailable" : true,
 				"name" : "SEEKLEFT",
 				"shortPressAvailable" : true,
 				"upDownAvailable" : true

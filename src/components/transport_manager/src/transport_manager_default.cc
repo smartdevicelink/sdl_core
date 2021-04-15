@@ -44,82 +44,154 @@
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
 
-#if defined(BUILD_TESTS)
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
+#endif
+
+#if defined(ENABLE_IAP2EMULATION)
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
-#endif  // BUILD_TEST
+#endif  // ENABLE_IAP2EMULATION
 
 namespace transport_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
+
+TransportAdapterFactory::TransportAdapterFactory() {
+#ifdef BLUETOOTH_SUPPORT
+  ta_bluetooth_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                             const TransportManagerSettings& settings) {
+    return new transport_adapter::BluetoothTransportAdapter(last_state_wrapper,
+                                                            settings);
+  };
+#endif
+  ta_tcp_creator_ = [](const uint16_t port,
+                       resumption::LastStateWrapperPtr last_state_wrapper,
+                       const TransportManagerSettings& settings) {
+    return new transport_adapter::TcpTransportAdapter(
+        port, last_state_wrapper, settings);
+  };
+#if defined(USB_SUPPORT)
+  ta_usb_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                       const TransportManagerSettings& settings) {
+    return new transport_adapter::UsbAoaAdapter(last_state_wrapper, settings);
+  };
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  ta_cloud_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                         const TransportManagerSettings& settings) {
+    return new transport_adapter::CloudWebsocketTransportAdapter(
+        last_state_wrapper, settings);
+  };
+#endif
+
+#if defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  ta_websocket_server_creator_ =
+      [](resumption::LastStateWrapperPtr last_state_wrapper,
+         const TransportManagerSettings& settings) {
+        return new transport_adapter::WebSocketServerTransportAdapter(
+            last_state_wrapper, settings);
+      };
+#endif
+}
 
 TransportManagerDefault::TransportManagerDefault(
-    const TransportManagerSettings& settings)
-    : TransportManagerImpl(settings) {}
+    const TransportManagerSettings& settings,
+    const TransportAdapterFactory& ta_factory)
+    : TransportManagerImpl(settings), ta_factory_(ta_factory) {}
 
-int TransportManagerDefault::Init(resumption::LastState& last_state) {
-  LOG4CXX_TRACE(logger_, "enter");
-  if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
-                  "TransportManagerImpl::Init()");
+int TransportManagerDefault::Init(
+    resumption::LastStateWrapperPtr last_state_wrapper) {
+  SDL_LOG_TRACE("enter");
+  if (E_SUCCESS != TransportManagerImpl::Init(last_state_wrapper)) {
+    SDL_LOG_TRACE(
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+        "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-#ifdef BLUETOOTH_SUPPORT
-  transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state,
-                                                       get_settings());
+  const auto& settings = get_settings();
+
+#if defined(BLUETOOTH_SUPPORT)
+  auto ta_bluetooth =
+      ta_factory_.ta_bluetooth_creator_(last_state_wrapper, settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_bluetooth->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_bluetooth);
-  ta_bluetooth = NULL;
-#endif
+#endif  // BLUETOOTH_SUPPORT
 
-  const uint16_t port = get_settings().transport_manager_tcp_adapter_port();
-  transport_adapter::TransportAdapterImpl* ta_tcp =
-      new transport_adapter::TcpTransportAdapter(
-          port, last_state, get_settings());
+  auto ta_tcp =
+      ta_factory_.ta_tcp_creator_(settings.transport_manager_tcp_adapter_port(),
+                                  last_state_wrapper,
+                                  settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_tcp->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_tcp);
-  ta_tcp = NULL;
 
 #if defined(USB_SUPPORT)
-  transport_adapter::TransportAdapterImpl* ta_usb =
-      new transport_adapter::UsbAoaAdapter(last_state, get_settings());
+  auto ta_usb = ta_factory_.ta_usb_creator_(last_state_wrapper, settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_usb->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_usb);
-  ta_usb = NULL;
 #endif  // USB_SUPPORT
 
-#if defined BUILD_TESTS
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  auto ta_cloud = ta_factory_.ta_cloud_creator_(last_state_wrapper, settings);
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta_cloud->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_cloud);
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  auto ta_websocket =
+      ta_factory_.ta_websocket_server_creator_(last_state_wrapper, settings);
+
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta_websocket->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_websocket);
+  ta_websocket = NULL;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
+#if defined ENABLE_IAP2EMULATION
   const uint16_t iap2_bt_emu_port = 23456;
   transport_adapter::IAP2BluetoothEmulationTransportAdapter*
       iap2_bt_emu_adapter =
           new transport_adapter::IAP2BluetoothEmulationTransportAdapter(
-              iap2_bt_emu_port, last_state, get_settings());
+              iap2_bt_emu_port, last_state_wrapper, settings);
 
   AddTransportAdapter(iap2_bt_emu_adapter);
 
   const uint16_t iap2_usb_emu_port = 34567;
   transport_adapter::IAP2USBEmulationTransportAdapter* iap2_usb_emu_adapter =
       new transport_adapter::IAP2USBEmulationTransportAdapter(
-          iap2_usb_emu_port, last_state, get_settings());
+          iap2_usb_emu_port, last_state_wrapper, settings);
 
   AddTransportAdapter(iap2_usb_emu_adapter);
-#endif  // BUILD_TEST
+#endif  // ENABLE_IAP2EMULATION
 
-  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  SDL_LOG_TRACE("exit with E_SUCCESS");
   return E_SUCCESS;
+}
+
+int TransportManagerDefault::Init(resumption::LastState&) {
+  return 1;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {}

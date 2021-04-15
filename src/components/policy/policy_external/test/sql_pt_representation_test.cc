@@ -29,71 +29,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <fstream>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <algorithm>
+#include <fstream>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
+#include "json/reader.h"
+#include "json/writer.h"
+#include "policy/mock_policy_settings.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/file_system.h"
 #include "utils/system.h"
-#include "policy/sql_wrapper.h"
-#include "policy/policy_types.h"
-#include "json/writer.h"
-#include "json/reader.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_table/enums.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
-using policy::SQLPTRepresentation;
 using policy::CheckPermissionResult;
-using policy::UserFriendlyMessage;
 using policy::EndpointUrls;
+using policy::SQLPTRepresentation;
+using policy::UserFriendlyMessage;
 using policy::VehicleInfo;
 
-using testing::ReturnRef;
-using testing::Return;
-using testing::NiceMock;
 using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {
 namespace policy_test {
 
-namespace {
-const int32_t kPolicyTablesNumber = 27;
-}
-
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
- public:
-  static const bool in_memory_;
-
  protected:
-  static SQLPTRepresentation* reps;
-  static const std::string kDatabaseName;
-  static utils::dbms::SQLQuery* query_wrapper_;
+  static std::shared_ptr<SQLPTRepresentation> reps;
+  static std::shared_ptr<utils::dbms::SQLQuery> query_wrapper_;
   // Gtest can show message that this object doesn't destroyed
-  static std::auto_ptr<policy_handler_test::MockPolicySettings>
+  static std::shared_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
-    reps = new SQLPTRepresentation(in_memory_);
+    reps = std::make_shared<SQLPTRepresentation>(true);
     ASSERT_TRUE(reps != NULL);
-    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
-        new policy_handler_test::MockPolicySettings());
-    ON_CALL(*policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
+    policy_settings_ =
+        std::make_shared<policy_handler_test::MockPolicySettings>();
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
-    query_wrapper_ = new utils::dbms::SQLQuery(reps->db());
+    query_wrapper_ = std::make_shared<utils::dbms::SQLQuery>(reps->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
@@ -102,12 +90,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 
   static void TearDownTestCase() {
-    delete query_wrapper_;
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
     reps->RemoveDB();
-    delete reps;
-    policy_settings_.reset();
   }
 
   virtual utils::dbms::SQLDatabase* db() const {
@@ -177,7 +162,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_table::Strings& temp_groups = apps_iter->second.groups;
       StringsCompare(groups, temp_groups);
       EXPECT_EQ(0u, (*(apps_iter->second.nicknames)).size());
-      EXPECT_EQ(prio, apps_iter->second.priority);
+      EXPECT_EQ(prio, (apps_iter->second).priority);
       EXPECT_EQ(0u, (*(apps_iter->second.AppHMIType)).size());
       EXPECT_EQ(memory_kb, (*(apps_iter->second.memory_kb)));
       EXPECT_EQ(heart_beat_timeout_ms,
@@ -203,136 +188,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     StringsCompare(groups, app_groups);
   }
 
-  void PolicyTableUpdatePrepare(Json::Value& table) {
-    PolicyTableUpdatePrepareNoParameters(table);
-
-    table["policy_table"]["functional_groupings"]["default"]["rpcs"]["Update"]
-         ["parameters"] = Json::Value(Json::arrayValue);
-    table["policy_table"]["functional_groupings"]["default"]["rpcs"]["Update"]
-         ["parameters"][0] = Json::Value("speed");
-  }
-
-  void PolicyTableUpdatePrepareEmptyParameters(Json::Value& table) {
-    PolicyTableUpdatePrepareNoParameters(table);
-
-    // Parameters are empty
-    table["policy_table"]["functional_groupings"]["default"]["rpcs"]["Update"]
-         ["parameters"] = Json::Value(Json::arrayValue);
-  }
-
-  void PolicyTableUpdatePrepareNoParameters(Json::Value& table) {
-    table["policy_table"] = Json::Value(Json::objectValue);
-    Json::Value& policy_table = table["policy_table"];
-    policy_table["module_config"] = Json::Value(Json::objectValue);
-    policy_table["functional_groupings"] = Json::Value(Json::objectValue);
-    policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
-    policy_table["app_policies"] = Json::Value(Json::objectValue);
-
-    Json::Value& module_config = policy_table["module_config"];
-    module_config["preloaded_date"] = Json::Value("25-04-2015");
-    module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
-    module_config["exchange_after_x_kilometers"] = Json::Value(100);
-    module_config["exchange_after_x_days"] = Json::Value(5);
-    module_config["timeout_after_x_seconds"] = Json::Value(500);
-    module_config["seconds_between_retries"] = Json::Value(Json::arrayValue);
-    Json::Value& seconds_between_retries =
-        module_config["seconds_between_retries"];
-    seconds_between_retries[0] = Json::Value(10);
-    seconds_between_retries[1] = Json::Value(20);
-    seconds_between_retries[2] = Json::Value(30);
-    module_config["endpoints"] = Json::Value(Json::objectValue);
-    Json::Value& endpoins = module_config["endpoints"];
-    endpoins["0x00"] = Json::Value(Json::objectValue);
-    endpoins["0x00"]["default"] = Json::Value(Json::arrayValue);
-    endpoins["0x00"]["default"][0] =
-        Json::Value("http://ford.com/cloud/default");
-    module_config["notifications_per_minute_by_priority"] =
-        Json::Value(Json::objectValue);
-    module_config["notifications_per_minute_by_priority"]["emergency"] =
-        Json::Value(1);
-    module_config["notifications_per_minute_by_priority"]["navigation"] =
-        Json::Value(2);
-    module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-        Json::Value(3);
-    module_config["notifications_per_minute_by_priority"]["communication"] =
-        Json::Value(4);
-    module_config["notifications_per_minute_by_priority"]["normal"] =
-        Json::Value(5);
-    module_config["notifications_per_minute_by_priority"]["none"] =
-        Json::Value(6);
-    module_config["vehicle_make"] = Json::Value("MakeT");
-    module_config["vehicle_model"] = Json::Value("ModelT");
-    module_config["vehicle_year"] = Json::Value("2014");
-    module_config["certificate"] = Json::Value("my_cert");
-
-    Json::Value& functional_groupings = policy_table["functional_groupings"];
-    functional_groupings["default"] = Json::Value(Json::objectValue);
-    Json::Value& default_group = functional_groupings["default"];
-    default_group["rpcs"] = Json::Value(Json::objectValue);
-    default_group["rpcs"]["Update"] = Json::Value(Json::objectValue);
-    default_group["rpcs"]["Update"]["hmi_levels"] =
-        Json::Value(Json::arrayValue);
-    default_group["rpcs"]["Update"]["hmi_levels"][0] = Json::Value("FULL");
-    // No parameters
-
-    Json::Value& consumer_friendly_messages =
-        policy_table["consumer_friendly_messages"];
-    consumer_friendly_messages["version"] = Json::Value("1.2");
-    consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-    consumer_friendly_messages["messages"]["MSG1"] =
-        Json::Value(Json::objectValue);
-    Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG1"];
-    msg1["languages"] = Json::Value(Json::objectValue);
-    msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
-    msg1["languages"]["en-us"]["tts"] = Json::Value("TTS message");
-    msg1["languages"]["en-us"]["label"] = Json::Value("LABEL message");
-    msg1["languages"]["en-us"]["line1"] = Json::Value("LINE1 message");
-    msg1["languages"]["en-us"]["line2"] = Json::Value("LINE2 message");
-    msg1["languages"]["en-us"]["textBody"] = Json::Value("TEXTBODY message");
-
-    Json::Value& app_policies = policy_table["app_policies"];
-    app_policies["default"] = Json::Value(Json::objectValue);
-    app_policies["default"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["default"]["memory_kb"] = Json::Value(50);
-    app_policies["default"]["heart_beat_timeout_ms"] = Json::Value(100);
-    app_policies["default"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["default"]["groups"][0] = Json::Value("default");
-    app_policies["default"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["default"]["is_revoked"] = Json::Value(true);
-    app_policies["default"]["default_hmi"] = Json::Value("FULL");
-    app_policies["default"]["keep_context"] = Json::Value(true);
-    app_policies["default"]["steal_focus"] = Json::Value(true);
-
-    app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
-    app_policies["pre_DataConsent"]["memory_kb"] = Json::Value(40);
-    app_policies["pre_DataConsent"]["heart_beat_timeout_ms"] = Json::Value(90);
-    app_policies["pre_DataConsent"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["pre_DataConsent"]["groups"][0] = Json::Value("default");
-    app_policies["pre_DataConsent"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["pre_DataConsent"]["default_hmi"] = Json::Value("FULL");
-    app_policies["pre_DataConsent"]["is_revoked"] = Json::Value(false);
-    app_policies["pre_DataConsent"]["keep_context"] = Json::Value(true);
-    app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(true);
-    app_policies["1234"] = Json::Value(Json::objectValue);
-    app_policies["1234"]["memory_kb"] = Json::Value(150);
-    app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(200);
-    app_policies["1234"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["1234"]["groups"][0] = Json::Value("default");
-    app_policies["1234"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["1234"]["default_hmi"] = Json::Value("FULL");
-    app_policies["1234"]["is_revoked"] = Json::Value(true);
-    app_policies["1234"]["keep_context"] = Json::Value(false);
-    app_policies["1234"]["steal_focus"] = Json::Value(false);
-    app_policies["device"] = Json::Value(Json::objectValue);
-    app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
-    app_policies["device"]["groups"][0] = Json::Value("default");
-    app_policies["device"]["priority"] = Json::Value("EMERGENCY");
-    app_policies["device"]["is_revoked"] = Json::Value(true);
-    app_policies["device"]["default_hmi"] = Json::Value("FULL");
-    app_policies["device"]["keep_context"] = Json::Value(true);
-    app_policies["device"]["steal_focus"] = Json::Value(true);
-  }
-
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
     if (table.is_valid()) {
       return ::testing::AssertionSuccess();
@@ -344,16 +199,15 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
-utils::dbms::SQLQuery* SQLPTRepresentationTest::query_wrapper_ = 0;
-const std::string SQLPTRepresentationTest::kDatabaseName = ":memory:";
-const bool SQLPTRepresentationTest::in_memory_ = true;
-std::auto_ptr<policy_handler_test::MockPolicySettings>
-    SQLPTRepresentationTest::policy_settings_;
+std::shared_ptr<SQLPTRepresentation> SQLPTRepresentationTest::reps = NULL;
+std::shared_ptr<utils::dbms::SQLQuery> SQLPTRepresentationTest::query_wrapper_ =
+    NULL;
+std::shared_ptr<policy_handler_test::MockPolicySettings>
+    SQLPTRepresentationTest::policy_settings_ = NULL;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
-  SQLPTRepresentation* reps;
+  std::shared_ptr<SQLPTRepresentation> reps;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   virtual void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
@@ -364,18 +218,113 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
         .WillByDefault(Return(kOpenAttemptTimeoutMs));
     ON_CALL(policy_settings_, attempts_to_open_policy_db())
         .WillByDefault(Return(kAttemptsToOpenPolicyDB));
-    reps = new SQLPTRepresentation;
+    reps = std::make_shared<SQLPTRepresentation>();
     ASSERT_TRUE(reps != NULL);
   }
 
   virtual void TearDown() OVERRIDE {
+    chmod(kAppStorageFolder.c_str(), 755);
     file_system::RemoveDirectory(kAppStorageFolder, true);
-    delete reps;
+    reps.reset();
   }
   const std::string kAppStorageFolder = "storage123";
   const uint16_t kOpenAttemptTimeoutMs = 70u;
   const uint16_t kAttemptsToOpenPolicyDB = 2u;
 };
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
+  policy_table::VehicleDataItem rpm;
+  rpm.mark_initialized();
+  rpm.name = "rpm";
+  rpm.type = "Integer";
+  rpm.key = "OEM_REF_RPM";
+  rpm.mandatory = false;
+  *rpm.array = false;
+  rpm.params->mark_initialized();
+  ASSERT_FALSE(reps->VehicleDataItemExists(rpm));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
+  ASSERT_TRUE(reps->VehicleDataItemExists(rpm));
+
+  auto rpm_retrieved = reps->GetVehicleDataItem(rpm.name, rpm.key);
+
+  std::cout << rpm.ToJsonValue().toStyledString() << std::endl;
+  std::cout << rpm_retrieved.ToJsonValue().toStyledString() << std::endl;
+
+  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
+  policy_table::VehicleDataItem message;
+  message.name = "messsageName";
+  message.type = "String";
+  message.key = "OEM_REF_MSG";
+  message.mandatory = false;
+  *message.array = false;
+  *message.since = "1.0";
+  *message.until = "5.0";
+  *message.removed = false;
+  *message.deprecated = false;
+  *message.defvalue = "0";
+  *message.minvalue = 0;
+  *message.maxvalue = 255;
+  *message.minsize = 0;
+  *message.maxsize = 255;
+  *message.minlength = 0;
+  *message.maxlength = 255;
+  message.params->mark_initialized();
+  ASSERT_TRUE(reps->InsertVehicleDataItem(message));
+
+  auto message_retrieved = reps->GetVehicleDataItem(message.name, message.key);
+  ASSERT_EQ(message.ToJsonValue(), message_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Struct) {
+  policy_table::VehicleDataItem alss;
+  alss.mark_initialized();
+  alss.name = "ambientLightSensorStatus";
+  alss.type = "AmbientLightStatus";
+  alss.key = "OEM_REF_AMB_LIGHT";
+  alss.mandatory = false;
+  alss.params->mark_initialized();
+  policy_table::VehicleDataItem lss;
+  lss.mark_initialized();
+  lss.name = "LightSensorStatus";
+  lss.type = "Struct";
+  lss.key = "OEM_REF_SEN_LIGHT";
+  lss.mandatory = false;
+  lss.params->mark_initialized();
+  (*lss.params).push_back(alss);
+
+  policy_table::VehicleDataItem hbo;
+  hbo.mark_initialized();
+  hbo.name = "highBeamsOn";
+  hbo.type = "Boolean";
+  hbo.key = "OEM_REF_HIGH_BEAM";
+  hbo.mandatory = true;
+  hbo.params->mark_initialized();
+  policy_table::VehicleDataItem lbo;
+  lbo.mark_initialized();
+  lbo.name = "lowBeamsOn";
+  lbo.type = "Boolean";
+  lbo.key = "OEM_REF_LOW_BEAM";
+  lbo.mandatory = false;
+  lbo.params->mark_initialized();
+  policy_table::VehicleDataItem hls;
+  hls.mark_initialized();
+  hls.name = "headLampStatus";
+  hls.type = "Struct";
+  hls.key = "OEM_REF_HLSTATUS";
+  hls.mandatory = false;
+  hls.params->mark_initialized();
+  (*hls.params).push_back(lss);
+  (*hls.params).push_back(lbo);
+  (*hls.params).push_back(hbo);
+  ASSERT_TRUE(reps->InsertVehicleDataItem(alss));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(hls));
+
+  auto hls_retrieved = reps->GetVehicleDataItem(hls.name, hls.key);
+  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.begin()->ToJsonValue());
+}
 
 TEST_F(SQLPTRepresentationTest2,
        CheckActualAttemptsToOpenDB_ExpectCorrectNumber) {
@@ -407,7 +356,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  const int policy_tables_number = 32;
+  // 42 - is current total tables number created by schema
+  const int policy_tables_number = 42;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -965,25 +915,6 @@ TEST_F(
   ASSERT_EQ(0, query.GetInteger(0));
 }
 
-TEST_F(
-    SQLPTRepresentationTest,
-    GetVehicleInfo_ManuallySetVehcleInfoThenCallGetVehicleInfo_ExpectValuesReceived) {
-  // Check
-  const std::string query_insert_module_config =
-      "UPDATE `module_config` SET `preloaded_pt` = 1, "
-      " `exchange_after_x_ignition_cycles` = 50,"
-      "  `exchange_after_x_kilometers` = 2000, `exchange_after_x_days` = 30,"
-      " `timeout_after_x_seconds` = 5, `vehicle_make` = 'FORD', "
-      "  `vehicle_model` = 'MUSTANG', `vehicle_year` = '2003', "
-      "`preloaded_date` = '25.04.2015'";
-  ASSERT_TRUE(query_wrapper_->Exec(query_insert_module_config));
-  VehicleInfo info = reps->GetVehicleInfo();
-
-  ASSERT_EQ("FORD", info.vehicle_make);
-  ASSERT_EQ("MUSTANG", info.vehicle_model);
-  ASSERT_EQ("2003", info.vehicle_year);
-}
-
 TEST_F(SQLPTRepresentationTest,
        GetUserFriendlyMsg_SetMsg_ExpectReceivedMsgSetInParams) {
   // Arrange
@@ -1079,17 +1010,11 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ("EMERGENCY", priority);
 }
 
-namespace {
-const std::string kAppStorageFolder = "storage";
-}
 TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   // Arrange
-  const bool in_memory_ = true;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   // Checks
-  ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
   reps.RemoveDB();
@@ -1111,10 +1036,7 @@ TEST(SQLPTRepresentationTest3,
      Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
   // Arrange
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
-  const bool in_memory_ = true;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_TRUE(reps.Close());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
@@ -1556,9 +1478,8 @@ TEST_F(SQLPTRepresentationTest,
 
 TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
-  const bool in_memory_ = true;
   policy_handler_test::MockPolicySettings policy_settings_;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
   std::string path = (reps.db())->get_path();
@@ -1566,289 +1487,6 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   reps.RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
-}
-
-TEST_F(SQLPTRepresentationTest,
-       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
-  // TODO(AKutsan):APPLINK-31526 Test requires initial preloaded pt for
-  // preloaded date reading
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepare(table);
-
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-
-  // Assert
-  ASSERT_TRUE(IsValid(update));
-  ASSERT_TRUE(reps->Save(update));
-
-  // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
-  snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
-  // Remove fields which must be absent in snapshot
-  table["policy_table"]["consumer_friendly_messages"].removeMember("messages");
-  table["policy_table"]["app_policies"]["1234"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["1234"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["1234"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["default"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["default"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["default"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "default_hmi");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "keep_context");
-  table["policy_table"]["app_policies"]["pre_DataConsent"].removeMember(
-      "steal_focus");
-  table["policy_table"]["app_policies"]["device"].removeMember("default_hmi");
-  table["policy_table"]["app_policies"]["device"].removeMember("keep_context");
-  table["policy_table"]["app_policies"]["device"].removeMember("steal_focus");
-  table["policy_table"]["app_policies"]["device"].removeMember("groups");
-  table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
-  table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
-  table["policy_table"]["module_config"]["preloaded_pt"] = Json::Value(false);
-  policy_table::Table expected(&table);
-  Json::StyledWriter writer;
-  // Checks
-  EXPECT_EQ(writer.write(expected.ToJsonValue()),
-            writer.write(snapshot->ToJsonValue()));
-  std::cout << writer.write(snapshot->ToJsonValue()) << std::endl;
-  EXPECT_EQ(expected.ToJsonValue().toStyledString(),
-            snapshot->ToJsonValue().toStyledString());
-}
-
-TEST_F(SQLPTRepresentationTest,
-       DISABLED_Save_SetPolicyTableThenSave_ExpectSavedToPT) {
-  // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for
-  // preloaded date reading
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepare(table);
-
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  // Checks PT before Save
-  policy_table::FunctionalGroupings func_groups;
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Check functional groupings section
-  EXPECT_EQ(0u, func_groups.size());
-
-  policy_table::ApplicationPoliciesSection policies;
-  GatherApplicationPoliciesSection(&policies);
-  // Check ApplicationPoliciesSection
-  EXPECT_EQ(0u, policies.apps.size());
-  EXPECT_EQ(0u, (policies.device.preconsented_groups)->size());
-  EXPECT_EQ(0u, policies.device.groups.size());
-  EXPECT_EQ(policy_table::Priority::P_EMERGENCY, policies.device.priority);
-  EXPECT_EQ(policy_table::HmiLevel::HL_BACKGROUND, policies.device.default_hmi);
-  EXPECT_FALSE(policies.device.keep_context);
-  EXPECT_FALSE(policies.device.steal_focus);
-
-  policy_table::ModuleConfig config;
-  GatherModuleConfig(&config);
-  // Check Module config section
-  EXPECT_TRUE(*config.preloaded_pt);
-  EXPECT_EQ(0, config.exchange_after_x_ignition_cycles);
-  EXPECT_EQ(0, config.exchange_after_x_kilometers);
-  EXPECT_EQ(0, config.exchange_after_x_days);
-  EXPECT_EQ(0, config.timeout_after_x_seconds);
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_make));
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_model));
-  EXPECT_EQ("", static_cast<std::string>(*config.vehicle_year));
-  EXPECT_EQ("", static_cast<std::string>(*config.preloaded_date));
-  EXPECT_EQ("", static_cast<std::string>(*config.certificate));
-  EXPECT_EQ(0u, config.seconds_between_retries.size());
-  EXPECT_EQ(0u, config.endpoints.size());
-  EXPECT_EQ(0u, config.notifications_per_minute_by_priority.size());
-
-  policy_table::ConsumerFriendlyMessages messages;
-  GatherConsumerFriendlyMessages(&messages);
-  EXPECT_EQ("0", static_cast<std::string>(messages.version));
-  policy_table::DeviceData devices;
-  GatherDeviceData(&devices);
-  EXPECT_EQ(0u, devices.size());
-  policy_table::UsageAndErrorCounts counts;
-  GatherUsageAndErrorCounts(&counts);
-  EXPECT_EQ(0u, counts.app_level->size());
-  ASSERT_TRUE(IsValid(update));
-  // Act
-  ASSERT_TRUE(reps->Save(update));
-
-  // Check Functional Groupings
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Checks
-  EXPECT_EQ(1u, func_groups.size());
-  policy_table::FunctionalGroupings::iterator func_groups_iter =
-      func_groups.find("default");
-  ASSERT_TRUE(func_groups.end() != func_groups_iter);
-  policy_table::Rpcs& rpcs = func_groups_iter->second;
-  EXPECT_EQ("", static_cast<std::string>(*rpcs.user_consent_prompt));
-  policy_table::Rpc& rpc = rpcs.rpcs;
-  EXPECT_EQ(1u, rpc.size());
-  policy_table::Rpc::const_iterator rpc_iter = rpc.find("Update");
-  EXPECT_TRUE(rpc.end() != rpc_iter);
-  const policy_table::HmiLevels& hmi_levels = rpc_iter->second.hmi_levels;
-  EXPECT_EQ(1u, hmi_levels.size());
-  EXPECT_TRUE(hmi_levels.end() != std::find(hmi_levels.begin(),
-                                            hmi_levels.end(),
-                                            policy_table::HmiLevel::HL_FULL));
-
-  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
-  EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() != std::find(parameters.begin(),
-                                            parameters.end(),
-                                            policy_table::Parameter::P_SPEED));
-  // Check Application Policies Section
-  GatherApplicationPoliciesSection(&policies);
-  const uint32_t apps_size = 3u;
-
-  rpc::String<1ul, 255ul> str("default");
-  policy_table::Strings groups;
-  groups.push_back(str);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "1234",
-                          150u,
-                          200u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "default",
-                          50u,
-                          100u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "pre_DataConsent",
-                          40u,
-                          90u,
-                          groups);
-  CheckAppPoliciesSection(policies,
-                          apps_size,
-                          policy_table::Priority::P_EMERGENCY,
-                          "device",
-                          0u,
-                          0u,
-                          groups);
-  EXPECT_EQ(0u, (policies.device.preconsented_groups)->size());
-  EXPECT_EQ(0u, policies.device.groups.size());
-  EXPECT_EQ(policy_table::HmiLevel::HL_BACKGROUND, policies.device.default_hmi);
-  EXPECT_FALSE(policies.device.keep_context);
-  EXPECT_FALSE(policies.device.steal_focus);
-
-  CheckAppGroups("1234", groups);
-  CheckAppGroups("default", groups);
-  CheckAppGroups("pre_DataConsent", groups);
-  CheckAppGroups("device", groups);
-
-  GatherModuleConfig(&config);
-  // Check Module Config section
-  ASSERT_FALSE(*config.preloaded_pt);
-  ASSERT_EQ("my_cert", static_cast<std::string>(*config.certificate));
-  ASSERT_EQ("25-04-2015", static_cast<std::string>(*config.preloaded_date));
-  ASSERT_EQ("2014", static_cast<std::string>(*config.vehicle_year));
-  ASSERT_EQ("ModelT", static_cast<std::string>(*config.vehicle_model));
-  ASSERT_EQ("MakeT", static_cast<std::string>(*config.vehicle_make));
-  ASSERT_EQ(10, config.exchange_after_x_ignition_cycles);
-  ASSERT_EQ(100, config.exchange_after_x_kilometers);
-  ASSERT_EQ(5, config.exchange_after_x_days);
-  ASSERT_EQ(500, config.timeout_after_x_seconds);
-  ASSERT_EQ(3u, config.seconds_between_retries.size());
-  ASSERT_EQ(10, config.seconds_between_retries[0]);
-  ASSERT_EQ(20, config.seconds_between_retries[1]);
-  ASSERT_EQ(30, config.seconds_between_retries[2]);
-  ASSERT_EQ(6u, config.notifications_per_minute_by_priority.size());
-  ASSERT_EQ(1, config.notifications_per_minute_by_priority["emergency"]);
-  ASSERT_EQ(2, config.notifications_per_minute_by_priority["navigation"]);
-  ASSERT_EQ(3, config.notifications_per_minute_by_priority["VOICECOMM"]);
-  ASSERT_EQ(4, config.notifications_per_minute_by_priority["communication"]);
-  ASSERT_EQ(5, config.notifications_per_minute_by_priority["normal"]);
-  ASSERT_EQ(6, config.notifications_per_minute_by_priority["none"]);
-  EXPECT_EQ(1u, config.endpoints.size());
-  policy_table::ServiceEndpoints& service_endpoints = config.endpoints;
-  EXPECT_EQ("0x00", service_endpoints.begin()->first);
-  policy_table::URLList& url_list = service_endpoints.begin()->second;
-  EXPECT_EQ("default", url_list.begin()->first);
-  policy_table::URL& url = url_list.begin()->second;
-  EXPECT_EQ("http://ford.com/cloud/default", static_cast<std::string>(url[0]));
-  GatherConsumerFriendlyMessages(&messages);
-  EXPECT_EQ("1.2", static_cast<std::string>(messages.version));
-}
-
-TEST_F(SQLPTRepresentationTest,
-       Save_SavePolicyTable_EmptyParameters_ParametersEMPTY) {
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepareEmptyParameters(table);
-
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  // Checks PT before Save
-  policy_table::FunctionalGroupings func_groups;
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Check functional groupings section
-  EXPECT_EQ(0u, func_groups.size());
-
-  // Act
-  ASSERT_TRUE(reps->Save(update));
-
-  //  Check Functional Groupings
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Checks
-  EXPECT_EQ(1u, func_groups.size());
-  policy_table::FunctionalGroupings::iterator func_groups_iter =
-      func_groups.find("default");
-  ASSERT_TRUE(func_groups.end() != func_groups_iter);
-  policy_table::Rpcs& rpcs = func_groups_iter->second;
-  EXPECT_EQ("", static_cast<std::string>(*rpcs.user_consent_prompt));
-  policy_table::Rpc& rpc = rpcs.rpcs;
-  EXPECT_EQ(1u, rpc.size());
-  policy_table::Rpc::const_iterator rpc_iter = rpc.find("Update");
-  EXPECT_TRUE(rpc.end() != rpc_iter);
-  // Check parameters
-  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
-  // 'parameters' : [] - represented as initialized, but empty
-  // missing 'parameters' - represented as non-initialized and empty
-  EXPECT_TRUE(parameters.is_initialized());
-  EXPECT_TRUE(parameters.empty());
-}
-
-TEST_F(SQLPTRepresentationTest,
-       Save_SavePolicyTable_NoParameters_NoParametersSaved) {
-  // Arrange
-  Json::Value table(Json::objectValue);
-  PolicyTableUpdatePrepareNoParameters(table);
-
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  // Checks PT before Save
-  policy_table::FunctionalGroupings func_groups;
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Check functional groupings section
-  EXPECT_EQ(0u, func_groups.size());
-
-  // Act
-  ASSERT_TRUE(reps->Save(update));
-
-  //  Check Functional Groupings
-  ASSERT_TRUE(reps->GetFunctionalGroupings(func_groups));
-  // Checks
-  EXPECT_EQ(1u, func_groups.size());
-  policy_table::FunctionalGroupings::iterator func_groups_iter =
-      func_groups.find("default");
-  ASSERT_TRUE(func_groups.end() != func_groups_iter);
-  policy_table::Rpcs& rpcs = func_groups_iter->second;
-  EXPECT_EQ("", static_cast<std::string>(*rpcs.user_consent_prompt));
-  policy_table::Rpc& rpc = rpcs.rpcs;
-  EXPECT_EQ(1u, rpc.size());
-  policy_table::Rpc::const_iterator rpc_iter = rpc.find("Update");
-  EXPECT_TRUE(rpc.end() != rpc_iter);
-  // Check parameters
-  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
-  EXPECT_EQ(0u, parameters.size());
 }
 
 }  // namespace policy_test

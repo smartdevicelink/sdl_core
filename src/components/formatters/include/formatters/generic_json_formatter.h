@@ -37,9 +37,9 @@
 
 #include "CFormatterJsonBase.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 class GenericJsonFormatter : public CFormatterJsonBase {
  public:
@@ -49,7 +49,7 @@ class GenericJsonFormatter : public CFormatterJsonBase {
    * @param obj Input SmartObject.
    * @param out_str Resulting JSON string.
    */
-  static void ToString(const NsSmartObjects::SmartObject& obj,
+  static void ToString(const ns_smart_objects::SmartObject& obj,
                        std::string& out_str);
 
   /**
@@ -61,11 +61,11 @@ class GenericJsonFormatter : public CFormatterJsonBase {
    * @return true if success, false otherwise.
    */
   static bool FromString(const std::string& str,
-                         NsSmartObjects::SmartObject& out);
+                         ns_smart_objects::SmartObject& out);
 };
 
-}  // namespace Formatters
-}  // namespace NsJSONHandler
-}  // namespace NsSmartDeviceLink
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_GENERIC_JSON_FORMATTER_H_

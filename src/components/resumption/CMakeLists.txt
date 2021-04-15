@@ -36,6 +36,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS

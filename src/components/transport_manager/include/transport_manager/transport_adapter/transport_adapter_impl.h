@@ -33,20 +33,21 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
 
-#include <queue>
-#include <set>
 #include <map>
 #include <memory>
+#include <queue>
+#include <set>
 #include <string>
 
 #include "utils/lock.h"
 #include "utils/rwlock.h"
+#include "utils/timer.h"
 
+#include "resumption/last_state_wrapper.h"
+#include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "resumption/last_state.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "transport_manager/telemetry_observer.h"
@@ -60,6 +61,8 @@ class TransportAdapterListener;
 class DeviceScanner;
 class ServerConnectionFactory;
 class ClientConnectionListener;
+
+typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 /*
  * @brief Implementation of device adapter class.
@@ -79,8 +82,15 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
                        ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state,
+                       resumption::LastStateWrapperPtr last_state_wrapper,
                        const TransportManagerSettings& settings);
+
+  DEPRECATED
+  TransportAdapterImpl(DeviceScanner* device_scanner,
+                       ServerConnectionFactory* server_connection_factory,
+                       ClientConnectionListener* client_connection_listener,
+                       resumption::LastState& last_state,
+                       const TransportManagerSettings& settings) = delete;
 
   /**
    * @brief Destructor.
@@ -147,6 +157,22 @@ class TransportAdapterImpl : public TransportAdapter,
       const DeviceUID& device_handle) OVERRIDE;
 
   /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  ConnectionStatus GetConnectionStatus(
+      const DeviceUID& device_handle) const OVERRIDE;
+
+  /**
+   * @brief Notifies the application manager that a cloud connection status has
+   * updated and should trigger an UpdateAppList RPC to the HMI
+   */
+  void ConnectionStatusUpdated(DeviceSptr device, ConnectionStatus status);
+
+  /**
    * @brief Disconnect from specified session.
    *
    * @param devcie_handle Device unique identifier.
@@ -183,19 +209,8 @@ class TransportAdapterImpl : public TransportAdapter,
       const ApplicationHandle& app_handle,
       const ::protocol_handler::RawMessagePtr data) OVERRIDE;
 
-  /**
-   * @brief Start client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  TransportAdapter::Error StartClientListening() OVERRIDE;
-
-  /**
-   * @brief Stop client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  TransportAdapter::Error StopClientListening() OVERRIDE;
+  TransportAdapter::Error ChangeClientListening(
+      TransportAction required_change) OVERRIDE;
 
   /**
    * @brief Notify that device scanner is available.
@@ -245,6 +260,10 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   DeviceSptr FindDevice(const DeviceUID& device_handle) const OVERRIDE;
 
+  ConnectionSPtr FindPendingConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const OVERRIDE;
+
   /**
    * @brief Search for device in container of devices, if it is not there - adds
    *it.
@@ -264,13 +283,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   void SearchDeviceFailed(const SearchDeviceError& error) OVERRIDE;
 
-  /**
-   * @brief Add device to the container(map), if container doesn't hold it yet.
-   *
-   * @param device Smart pointer to the device.
-   *
-   * @return Smart pointer to the device.
-   */
   DeviceSptr AddDevice(DeviceSptr device) OVERRIDE;
 
   /**
@@ -304,6 +316,16 @@ class TransportAdapterImpl : public TransportAdapter,
   void ConnectionAborted(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
                          const CommunicationError& error) OVERRIDE;
+
+  /**
+   * @brief Set state of specified connection - PENDING and launch
+   *OnConnectPending event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void ConnectPending(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Set state of specified connection - ESTABLISHED and launch
@@ -400,6 +422,13 @@ class TransportAdapterImpl : public TransportAdapter,
                       const DataSendError& error) OVERRIDE;
 
   /**
+   * @brief Notification that transport's configuration is updated
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
+
+  /**
    * @brief DoTransportSwitch notifies listeners of transport adapter events
    * that transport switching is requested by system
    */
@@ -418,6 +447,18 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return
    */
   SwitchableDevices GetSwitchableDevices() const OVERRIDE;
+
+  /**
+   * @brief Returns the transport's configuration information
+   */
+  virtual TransportConfig GetTransportConfiguration() const OVERRIDE {
+    // default is empty
+    return TransportConfig();
+  }
+
+  void CreateDevice(const std::string& uid) OVERRIDE {
+    return;
+  }
 
   /**
    * @brief Return name of device.
@@ -459,7 +500,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @param observer - pointer to observer
    */
-  void SetTelemetryObserver(TMTelemetryObserver* observer);
+  void SetTelemetryObserver(TMTelemetryObserver* observer) OVERRIDE;
 
   /**
    * @brief Return Time metric observer
@@ -468,6 +509,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TMTelemetryObserver* GetTelemetryObserver() OVERRIDE;
 #endif  // TELEMETRY_MONITOR
+
+  /**
+   * @brief GetWebEngineDevice
+   * @return shared pointer to WebEngine device
+   */
+  DeviceSptr GetWebEngineDevice() const OVERRIDE;
 
  protected:
   /**
@@ -518,6 +565,33 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
   /**
+   * @brief Reattempt the last failed connection to a device
+   */
+  void RetryConnection();
+
+  /**
+   * @brief Clear any retry timers which have been completed
+   */
+  void ClearCompletedTimers();
+
+  /**
+   * @brief Retrieve the next device available for a reattempted connection
+   * @return The handle first device with an expired retry timer if present,
+   * otherwise an empty string
+   */
+  DeviceUID GetNextRetryDevice();
+
+  /**
+   * @brief Remove a connection from the list without triggering
+   *the connection's destructor inside of a list lock
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void RemoveConnection(const DeviceUID& device_id,
+                        const ApplicationHandle& app_handle);
+
+  /**
    * @brief Remove specified device
    * @param device_handle Device unique identifier.
    */
@@ -549,7 +623,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    enum { NEW, ESTABLISHED, FINALISING } state;
+    enum { NEW, ESTABLISHED, FINALISING, PENDING } state;
   };
 
   /**
@@ -579,6 +653,18 @@ class TransportAdapterImpl : public TransportAdapter,
   ConnectionMap connections_;
 
   /**
+   * @brief Queue of retry timers.
+   */
+  std::queue<std::pair<TimerSPtr, DeviceUID> > retry_timer_pool_;
+  sync_primitives::Lock retry_timer_pool_lock_;
+
+  /**
+   * @brief Queue of completed retry timers.
+   */
+  std::queue<std::pair<TimerSPtr, DeviceUID> > completed_timer_pool_;
+  sync_primitives::Lock completed_timer_pool_lock_;
+
+  /**
    * @brief Mutex restricting access to connections map.
    **/
   mutable sync_primitives::RWLock connections_lock_;
@@ -592,7 +678,7 @@ class TransportAdapterImpl : public TransportAdapter,
 #endif  // TELEMETRY_MONITOR
 
   resumption::LastState& last_state() const {
-    return last_state_;
+    return last_state_wrapper_->get_accessor().GetMutableData();
   }
 
   /**
@@ -610,7 +696,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   const TransportManagerSettings& settings_;
 };
 

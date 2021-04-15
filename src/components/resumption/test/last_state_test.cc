@@ -76,13 +76,13 @@ class LastStateTest : public ::testing::Test {
 };
 
 TEST_F(LastStateTest, Basic) {
-  const Value& dictionary = last_state_.get_dictionary();
+  const Value& dictionary = last_state_.dictionary();
   EXPECT_EQ(empty_dictionary_, dictionary.toStyledString());
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    Value& dictionary = last_state_.get_dictionary();
+    Value dictionary = last_state_.dictionary();
     const Value& bluetooth_info =
         dictionary["TransportManager"]["BluetoothAdapter"];
     EXPECT_EQ(empty_dictionary_, bluetooth_info.toStyledString());
@@ -105,18 +105,19 @@ TEST_F(LastStateTest, SetGetData) {
 
     dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
-    last_state_.SaveStateToFileSystem();
+    last_state_.set_dictionary(dictionary);
+    last_state_.SaveToFileSystem();
   }
 
-  const Value& dictionary = last_state_.get_dictionary();
+  const Value dictionary = last_state_.dictionary();
 
   const Value& bluetooth_info =
       dictionary["TransportManager"]["BluetoothAdapter"];
   const Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
-  EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
+  EXPECT_EQ("{\n\t\"devices\" : \"bluetooth_device\"\n}\n",
             bluetooth_info.toStyledString());
   EXPECT_EQ(
-      "{\n   \"devices\" : {\n      \"name\" : \"test_device\"\n   }\n}\n",
+      "{\n\t\"devices\" : \n\t{\n\t\t\"name\" : \"test_device\"\n\t}\n}\n",
       tcp_adapter_info.toStyledString());
 }
 

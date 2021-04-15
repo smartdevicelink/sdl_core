@@ -52,6 +52,7 @@ enum UpdateEvent {
   kOnResetPolicyTableRequireUpdate,
   kOnResetPolicyTableNoUpdate,
   kScheduleUpdate,
+  kPendingUpdate,
   kScheduleManualUpdate,
   kOnResetRetrySequence,
   kNoEvent
@@ -75,46 +76,79 @@ class Status {
          const policy::PolicyTableStatus enum_status);
 
   /**
- * @brief Destructor
- */
+   * @brief Destructor
+   */
   virtual ~Status();
 
   /**
- * @brief Process event by setting next status in case event can affect
- * current status or ignores the event
- * @param manager Status manager pointer
- * @param event Event which needs to be processed
- */
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
   virtual void ProcessEvent(UpdateStatusManagerInterface* manager,
                             UpdateEvent event) = 0;
 
   /**
- * @brief Return current status as string value
- * @return Status as string
- */
+   * @brief Return current status as string value
+   * @return Status as string
+   */
   virtual const std::string get_status_string() const;
 
   /**
- * @brief Return status as enum value
- * @return Status as enum value
- */
+   * @brief Return status as enum value
+   * @return Status as enum value
+   */
   virtual PolicyTableStatus get_status() const;
 
   /**
- * @brief Check whether update is required in terms of status
- * @return True if update is required, otherwise - false
- */
+   * @brief Check whether update is required in terms of status
+   * @return True if update is required, otherwise - false
+   */
   virtual bool IsUpdateRequired() const;
 
   /**
- * @brief Check whether update is pending in terms of status
- * @return True if update is pending, otherwise - false
- */
+   * @brief Check whether update is pending in terms of status
+   * @return True if update is pending, otherwise - false
+   */
   virtual bool IsUpdatePending() const;
 
  private:
   const std::string string_status_;
   const PolicyTableStatus enum_status_;
+};
+
+/**
+ * @brief The UpdatePendingStatus class represents cases when SDL knows that an
+ * update is required but before the snapshot is sent to the HMI
+ */
+class UpdatePendingStatus : public Status {
+ public:
+  /**
+   * @brief Constructor
+   */
+  UpdatePendingStatus();
+
+  /**
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
+  void ProcessEvent(UpdateStatusManagerInterface* manager,
+                    UpdateEvent event) OVERRIDE;
+
+  /**
+   * @brief Check whether update is required in terms of status
+   * @return True if update is required, otherwise - false
+   */
+  bool IsUpdateRequired() const OVERRIDE;
+
+  /**
+   * @brief Check whether update is pending in terms of status
+   * @return True if update is pending, otherwise - false
+   */
+  bool IsUpdatePending() const OVERRIDE;
 };
 
 /**
@@ -128,11 +162,11 @@ class UpToDateStatus : public Status {
   UpToDateStatus();
 
   /**
- * @brief Process event by setting next status in case event can affect
- * current status or ignores the event
- * @param manager Status manager pointer
- * @param event Event which needs to be processed
- */
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
                     UpdateEvent event) OVERRIDE;
 };
@@ -148,18 +182,18 @@ class UpdateNeededStatus : public Status {
   UpdateNeededStatus();
 
   /**
- * @brief Process event by setting next status in case event can affect
- * current status or ignores the event
- * @param manager Status manager pointer
- * @param event Event which needs to be processed
- */
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
                     UpdateEvent event) OVERRIDE;
 
   /**
- * @brief Check whether update is required in terms of status
- * @return True if update is required, otherwise - false
- */
+   * @brief Check whether update is required in terms of status
+   * @return True if update is required, otherwise - false
+   */
   bool IsUpdateRequired() const OVERRIDE;
 };
 
@@ -174,26 +208,26 @@ class UpdatingStatus : public Status {
   UpdatingStatus();
 
   /**
- * @brief Process event by setting next status in case event can affect
- * current status or ignores the event
- * @param manager Status manager pointer
- * @param event Event which needs to be processed
- */
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
   void ProcessEvent(UpdateStatusManagerInterface* manager,
                     UpdateEvent event) OVERRIDE;
 
   /**
- * @brief Check whether update is required in terms of status
- * @return True if update is required, otherwise - false
- */
+   * @brief Check whether update is required in terms of status
+   * @return True if update is required, otherwise - false
+   */
   bool IsUpdateRequired() const OVERRIDE;
 
   /**
- * @brief Check whether update is pending in terms of status
- * @return True if update is pending, otherwise - false
- */
+   * @brief Check whether update is pending in terms of status
+   * @return True if update is pending, otherwise - false
+   */
   bool IsUpdatePending() const OVERRIDE;
 };
-}
+}  // namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_STATUS_H_

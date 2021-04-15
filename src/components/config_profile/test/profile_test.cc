@@ -33,8 +33,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "config_profile/profile.h"
+#include "gtest/gtest.h"
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 
@@ -511,28 +511,58 @@ TEST_F(ProfileTest, StringUpperBoundValue) {
   profile_.set_config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
-  // Total count of elements in ini file's string will be less 512
+  // Total count of elements in ini file's string will be less 1024
   vr_help_title =
       "0/0/0/1/"
       "2345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~"
-      "STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:"
-      "yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!"
-      "def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,"
-      "01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_"
-      "GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$"
-      "mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc!"
-      "def@ghi";
+      "STU{}WXY"
+      "[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-"
+      "DEF_GHIJKL+MNO|P"
+      "QR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*"
+      "vwx:yz()ABC-DEF_G"
+      "HIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%"
+      "pqr^stu*vwx:yz()"
+      "ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@"
+      "ghi#jkl$mno%pqr^stu*"
+      "vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc!def@ghi0/0/0/"
+      "1/2345678"
+      "'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]"
+      "Z,012345"
+      "67890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+"
+      "MNO|PQR~STU{}WX"
+      "Y[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-"
+      "DEF_GHIJKL+MNO|PQ"
+      "R~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:"
+      "yz()ABC-DEF_GHIJK"
+      "L+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^"
+      "stu*vwx:yz()ABC-";
   EXPECT_EQ(vr_help_title, profile_.vr_help_title());
   EXPECT_NE(vr_help_title, profile_.recording_file_name());
   recording_file_name =
       "0/0/0/1/"
       "2345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~"
-      "STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:"
-      "yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!"
-      "def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,"
-      "01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_"
-      "GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$"
-      "mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc";
+      "STU{}WXY"
+      "[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-"
+      "DEF_GHIJKL+MNO|P"
+      "QR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*"
+      "vwx:yz()ABC-DEF_G"
+      "HIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%"
+      "pqr^stu*vwx:yz()"
+      "ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@"
+      "ghi#jkl$mno%pqr^stu*"
+      "vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc!def@ghi0/0/0/"
+      "1/2345678"
+      "'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]"
+      "Z,012345"
+      "67890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+"
+      "MNO|PQR~STU{}WX"
+      "Y[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-"
+      "DEF_GHIJKL+MNO|PQ"
+      "R~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:"
+      "yz()ABC-DEF_GHIJK"
+      "L+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^"
+      "stu*vwx:yz()ABC-"
+      "DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc!def@ghi01234";
   EXPECT_EQ(recording_file_name, profile_.recording_file_name());
   // Update config file
   profile_.UpdateValues();
@@ -690,8 +720,32 @@ TEST_F(ProfileTest, CheckStringContainer) {
   std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
   element_mode++;
   element_mode++;
-  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x03");
   EXPECT_EQ(diag_mode, element_mode);
+}
+
+TEST_F(ProfileTest, CheckStringContainerEmpty) {
+  // Set new config file
+  profile_.set_config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
+
+  bool isread = false;
+  std::vector<std::string> output_list =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list.empty());
+
+  isread = false;
+  std::vector<std::string> output_list2 =
+      profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread, true);
+  EXPECT_TRUE(isread);
+  EXPECT_TRUE(output_list2.empty());
+
+  isread = false;
+  std::vector<std::string> output_list3 =
+      profile_.ReadStringContainer("MAIN", "DoesNotExistKey", &isread, true);
+  EXPECT_FALSE(isread);
+  EXPECT_TRUE(output_list2.empty());
 }
 
 #ifdef ENABLE_SECURITY
