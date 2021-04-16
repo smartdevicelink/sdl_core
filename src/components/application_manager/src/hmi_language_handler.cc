@@ -261,10 +261,13 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
       "Some languages gotten from HMI have "
       "mismatch with persisted values.");
 
-  const ApplicationSet& applications =
+  const ApplicationSet& accessor =
       application_manager_.applications().GetData();
 
-  for (auto app : applications) {
+  ApplicationSetIt it = accessor.begin();
+  for (; accessor.end() != it;) {
+    ApplicationConstSharedPtr app = *it;
+    ++it;
     SDL_LOG_INFO("Application with app_id "
                  << app->app_id()
                  << " will be unregistered because of "
