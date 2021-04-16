@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace transport_manager {
 

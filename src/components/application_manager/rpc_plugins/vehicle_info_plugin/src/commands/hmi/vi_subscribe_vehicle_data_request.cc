@@ -31,32 +31,65 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+                   params.application_manager_,
+                   params.rpc_service_,
+                   params.hmi_capabilities_,
+                   params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
 void VISubscribeVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  auto& msg_params = (*message_)[strings::msg_params];
+
+  smart_objects::SmartObject custom_data;
+  for (const auto& name : msg_params.enumerate()) {
+    const auto& found_it = rpc_spec_vehicle_data.find(name);
+    if (rpc_spec_vehicle_data.end() == found_it) {
+      custom_data[name] = msg_params[name];
+      msg_params.erase(name);
+    }
+  }
+
+  auto hmi_custom_msg_params =
+      custom_vehicle_data_manager_.CreateHMIMessageParams(
+          custom_data.enumerate());
+  for (const auto& item : hmi_custom_msg_params.enumerate()) {
+    msg_params[item] = hmi_custom_msg_params[item];
+  }
 
   SendRequest();
 }
 
-}  // namespace commands
+void VISubscribeVehicleDataRequest::onTimeOut() {
+  event_engine::Event timeout_event(
+      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
+  SDL_LOG_AUTO_TRACE();
 
-}  // namespace application_manager
+  auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
+      function_id(),
+      correlation_id(),
+      hmi_apis::Common_Result::GENERIC_ERROR,
+      std::string("Timed out"));
+  timeout_event.set_smart_object(*error_response);
+  timeout_event.raise(application_manager_.event_dispatcher());
+}
+
+}  // namespace commands
+}  // namespace vehicle_info_plugin

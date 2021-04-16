@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnVIInstantFuelConsumptionNotification::OnVIInstantFuelConsumptionNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ OnVIInstantFuelConsumptionNotification::
     ~OnVIInstantFuelConsumptionNotification() {}
 
 void OnVIInstantFuelConsumptionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
@@ -65,4 +67,4 @@ void OnVIInstantFuelConsumptionNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

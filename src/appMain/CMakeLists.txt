@@ -70,9 +70,20 @@ include_directories(
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+# Create object library
+add_library("LowVoltageHandlerObjLibrary" OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/low_voltage_signals_handler.cc
+)
+add_dependencies("LowVoltageHandlerObjLibrary" Boost)
+
+set (SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/life_cycle_impl.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/signal_handlers.cc
+  $<TARGET_OBJECTS:LowVoltageHandlerObjLibrary>
+)
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -156,8 +167,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CU
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sample_policy_manager.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/start.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/start_external_proprietary.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/core.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/core_external_proprietary.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/init_policy.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
@@ -206,7 +217,8 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
@@ -234,12 +246,19 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif ()
 
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
-  install(FILES start_external_proprietary.sh DESTINATION bin
+  install(FILES core_external_proprietary.sh DESTINATION bin
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE RENAME start.sh)
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE RENAME core.sh)
 else()
-  install(FILES start.sh DESTINATION bin
+  install(FILES core.sh DESTINATION bin
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
+install(FILES start.sh daemon.sh DESTINATION bin
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

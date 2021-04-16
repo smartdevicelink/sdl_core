@@ -34,6 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_HMI_COMMAND_FACTORY_H
 
 #include "application_manager/application_manager.h"
+#include "application_manager/command_factory.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -47,7 +49,8 @@ class VehicleInfoHmiCommandFactory : public app_mngr::CommandFactory {
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      policy::PolicyHandlerInterface& policy_handler,
+      CustomVehicleDataManager& custom_vehicle_data_manager);
 
   app_mngr::CommandSharedPtr CreateCommand(
       const app_mngr::commands::MessageSharedPtr& message,
@@ -62,12 +65,13 @@ class VehicleInfoHmiCommandFactory : public app_mngr::CommandFactory {
   app_mngr::rpc_service::RPCService& rpc_service_;
   app_mngr::HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   app_mngr::CommandCreator& buildCommandCreator(
       const int32_t function_id, const int32_t message_type) const;
 
   DISALLOW_COPY_AND_ASSIGN(VehicleInfoHmiCommandFactory);
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_HMI_COMMAND_FACTORY_H

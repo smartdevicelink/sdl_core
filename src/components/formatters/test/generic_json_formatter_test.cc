@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "formatters/generic_json_formatter.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
 TEST(GenericJsonFormatter, ToString) {
-  namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
-  namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  namespace smartobj = ns_smart_device_link::ns_smart_objects;
+  namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 
   smartobj::SmartObject obj;
   std::string result;
@@ -93,8 +93,8 @@ TEST(GenericJsonFormatter, ToString) {
 }
 
 TEST(GenericJsonFormatter, FromString) {
-  namespace smartobj = NsSmartDeviceLink::NsSmartObjects;
-  namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
+  namespace smartobj = ns_smart_device_link::ns_smart_objects;
+  namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 
   smartobj::SmartObject result;
 
@@ -169,6 +169,6 @@ TEST(GenericJsonFormatter, FromString) {
       result.getElement("subobject").getElement("strField").asString().c_str());
 }
 
-}  // formatters
-}  // components
-}  // test
+}  // namespace formatters
+}  // namespace components
+}  // namespace test

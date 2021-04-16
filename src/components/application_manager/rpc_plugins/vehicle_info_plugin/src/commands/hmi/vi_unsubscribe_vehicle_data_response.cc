@@ -37,22 +37,21 @@ namespace vehicle_info_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIUnsubscribeVehicleDataResponse::VIUnsubscribeVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : ResponseFromHMI(message,
-                      application_manager,
-                      rpc_service,
-                      hmi_capabilities,
-                      policy_handle) {}
+                      params.application_manager_,
+                      params.rpc_service_,
+                      params.hmi_capabilities_,
+                      params.policy_handler_) {}
 
 VIUnsubscribeVehicleDataResponse::~VIUnsubscribeVehicleDataResponse() {}
 
 void VIUnsubscribeVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData);
   event.set_smart_object(*message_);
@@ -60,4 +59,4 @@ void VIUnsubscribeVehicleDataResponse::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

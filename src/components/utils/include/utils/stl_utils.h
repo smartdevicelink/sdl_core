@@ -32,6 +32,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_
 
+#include <cstddef>
 #include "utils/macro.h"
 
 namespace utils {

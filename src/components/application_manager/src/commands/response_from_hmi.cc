@@ -38,6 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
                                  ApplicationManager& application_manager,
                                  rpc_service::RPCService& rpc_service,
@@ -84,7 +86,7 @@ void ResponseFromHMI::CreateHMIRequest(
       std::make_shared<smart_objects::SmartObject>();
 
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    SDL_LOG_ERROR("Memory allocation failed.");
     return;
   }
 
@@ -92,7 +94,7 @@ void ResponseFromHMI::CreateHMIRequest(
   const uint32_t hmi_correlation_id_ =
       application_manager_.GetNextHMICorrelationID();
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+  ns_smart_device_link::ns_smart_objects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id_;
@@ -104,7 +106,7 @@ void ResponseFromHMI::CreateHMIRequest(
   request[strings::msg_params] = msg_params;
 
   if (!rpc_service_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    SDL_LOG_ERROR("Unable to send request");
     return;
   }
 }

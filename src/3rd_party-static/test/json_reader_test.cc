@@ -32,7 +32,7 @@
 
 
 #include "gtest/gtest.h"
-#include "json/reader.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace test {
 namespace third_party_libs {
@@ -62,9 +62,9 @@ class JSONReaderTest : public ::testing::Test {
   std::string comaString_;
   std::string colonString_;
 
-  Json::Reader reader;
   Json::Value json;
-
+public:
+  bool Parse(const std::string &str);
 };
 
 void JSONReaderTest::SetUp()
@@ -88,72 +88,78 @@ void JSONReaderTest::SetUp()
   colonString_ = "{\"field\" : \"va:lue\" }";
 }
 
-TEST_F(JSONReaderTest, ParseNormalString) {
-  ASSERT_TRUE(reader.parse(normalString_, json));
+bool JSONReaderTest::Parse(const std::string &str)
+{
+  utils::JsonReader reader;
+  return reader.parse(str, &json);
 }
 
-TEST_F(JSONReaderTest, ParseBackspaceString) {
-  ASSERT_TRUE(reader.parse(backspaceString_, json));
+TEST_F(JSONReaderTest, Parse_NormalString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(normalString_));
 }
 
-TEST_F(JSONReaderTest, ParseFormFeedString) {
-  ASSERT_TRUE(reader.parse(formfeedString_, json));
-
+TEST_F(JSONReaderTest, Parse_BackspaceString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(backspaceString_));
 }
 
-TEST_F(JSONReaderTest, ParseLineFeedString) {
-  ASSERT_TRUE(reader.parse(linefeedString_, json));
+TEST_F(JSONReaderTest, Parse_FormFeedString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(formfeedString_));
 }
 
-TEST_F(JSONReaderTest, ParseReturnString) {
-  ASSERT_TRUE(reader.parse(returnString_, json));
+TEST_F(JSONReaderTest, Parse_LineFeedString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(linefeedString_));
 }
 
-TEST_F(JSONReaderTest, ParseTabString) {
-  ASSERT_TRUE(reader.parse(tabString_, json));
+TEST_F(JSONReaderTest, ParseReturnString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(returnString_));
 }
 
-TEST_F(JSONReaderTest, ParseBellString) {
-  ASSERT_TRUE(reader.parse(bellString_, json));
+TEST_F(JSONReaderTest, Parse_TabString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(tabString_));
 }
 
-TEST_F(JSONReaderTest, ParseQuoteString) {
-  ASSERT_FALSE(reader.parse(quoteString_, json));
+TEST_F(JSONReaderTest, Parse_BellString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(bellString_));
 }
 
-TEST_F(JSONReaderTest, ParseSlashString) {
-  ASSERT_TRUE(reader.parse(slashString_, json));
+TEST_F(JSONReaderTest, Parse_QuoteString_ExpectUnsuccessfulParsing) {
+  ASSERT_FALSE(Parse(quoteString_));
 }
 
-TEST_F(JSONReaderTest, ParseBackslashString) {
-  ASSERT_FALSE(reader.parse(backslashString_, json));
+TEST_F(JSONReaderTest, Parse_SlashString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(slashString_));
 }
 
-TEST_F(JSONReaderTest, ParseSinglequoteString) {
-  ASSERT_TRUE(reader.parse(singlequoteString_, json));
+TEST_F(JSONReaderTest, Parse_BackslashString_ExpectUnsuccessfulParsing) {
+  ASSERT_FALSE(Parse(backslashString_));
 }
 
-TEST_F(JSONReaderTest, ParseColonString) {
-  ASSERT_TRUE(reader.parse(colonString_, json));
+TEST_F(JSONReaderTest, Parse_SinglequoteString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(singlequoteString_));
 }
 
-TEST_F(JSONReaderTest, ParseComaString) {
-  ASSERT_TRUE(reader.parse(comaString_, json));
+TEST_F(JSONReaderTest, Parse_ColonString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(colonString_));
 }
 
-TEST_F(JSONReaderTest, ParseOpeningbraceString) {
-  ASSERT_TRUE(reader.parse(openingbraceString_, json));
+TEST_F(JSONReaderTest, Parse_ComaString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(comaString_));
 }
 
-TEST_F(JSONReaderTest, ParseClosingbraceString) {
-  ASSERT_TRUE(reader.parse(closingbraceString_, json));
+TEST_F(JSONReaderTest, Parse_OpeningbraceString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(openingbraceString_));
 }
 
-TEST_F(JSONReaderTest, ParseOpeningbracketString) {
-  ASSERT_TRUE(reader.parse(openingbracketString_, json));
+TEST_F(JSONReaderTest, Parse_ClosingbraceString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(closingbraceString_));
 }
-TEST_F(JSONReaderTest, ParseClosingbracketString) {
-  ASSERT_TRUE(reader.parse(closingbracketString_, json));
+
+TEST_F(JSONReaderTest, Parse_OpeningbracketString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(openingbracketString_));
+}
+
+TEST_F(JSONReaderTest, Parse_ClosingbracketString_ExpectSuccessfulParsing) {
+  ASSERT_TRUE(Parse(closingbracketString_));
 }
 
 }  //  namespace json_reader_test

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_MOBILE_COMMAND_FACTORY_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_MOBILE_COMMAND_FACTORY_H_
 
-#include "application_manager/command_factory.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/command_factory.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -59,9 +59,16 @@ class MobileCommandFactory : public app_mngr::CommandFactory {
 
  private:
   app_mngr::CommandCreator& get_creator_factory(
-      mobile_apis::FunctionID::eType id,
-      mobile_apis::messageType::eType message_type,
-      app_mngr::commands::Command::CommandSource source) const;
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type,
+      const app_mngr::commands::Command::CommandSource source) const;
+  app_mngr::CommandCreator& get_command_creator(
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type) const;
+  app_mngr::CommandCreator& get_notification_creator(
+      const mobile_apis::FunctionID::eType id) const;
+  app_mngr::CommandCreator& get_notification_from_mobile_creator(
+      const mobile_apis::FunctionID::eType id) const;
 
   app_mngr::ApplicationManager& application_manager_;
   app_mngr::rpc_service::RPCService& rpc_service_;
@@ -70,6 +77,6 @@ class MobileCommandFactory : public app_mngr::CommandFactory {
   DISALLOW_COPY_AND_ASSIGN(MobileCommandFactory);
 };
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_MOBILE_COMMAND_FACTORY_H_

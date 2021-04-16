@@ -2,8 +2,15 @@
 #include <cstdlib>
 #include "policy/policy_table/types.h"
 
-#include "json/reader.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/file_system.h"
+
+#ifdef ENABLE_LOG
+#include "utils/logger/logger_impl.h"
+#include "utils/logger/log4cxxlogger.h"
+#endif  // ENABLE_LOG
+
+#include "utils/logger.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -43,6 +50,17 @@ int main(int argc, char** argv) {
     help();
     exit(MISSED_FILE_NAME);
   }
+
+#ifdef ENABLE_LOG
+  // --------------------------------------------------------------------------
+  // Logger initialization
+  // Redefine for each paticular logger implementation
+  auto logger = std::unique_ptr<logger::Log4CXXLogger>(new logger::Log4CXXLogger("log4cxx.properties"));
+  auto logger_impl = std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
+  logger::Logger::instance(logger_impl.get());
+  logger_impl->Init(std::move(logger));
+#endif  // ENABLE_LOG
+
   std::string pt_type_str = argv[1];
   std::string file_name = argv[2];
   std::string json_string;
@@ -51,20 +69,22 @@ int main(int argc, char** argv) {
   if (rpc::policy_table_interface_base::PolicyTableType::INVALID_PT_TYPE ==
       pt_type) {
     std::cout << "Invalid policy table type: " << pt_type_str << std::endl;
+    SDL_DEINIT_LOGGER()
     exit(PT_TYPE_ERROR);
   }
   bool read_result = file_system::ReadFile(file_name, json_string);
   if (false == read_result) {
     std::cout << "Read file error: " << file_name << std::endl;
+    SDL_DEINIT_LOGGER()
     exit(READ_ERROR);
   }
 
-  Json::Reader reader;
+  utils::JsonReader  reader;
   Json::Value value;
+  bool parse_result = reader.parse(json_string, &value);
 
-  bool parce_result = reader.parse(json_string, value);
-  if (false == parce_result) {
-    std::cout << "Json parce fails" << std::endl;
+  if (false == parse_result) {
+    SDL_DEINIT_LOGGER()
     exit(PARSE_ERROR);
   }
   std::cout << "DEFAULT_POLICY" << std::endl;
@@ -73,6 +93,7 @@ int main(int argc, char** argv) {
   bool is_valid = table.is_valid();
   if (true == is_valid) {
     std::cout << "Table is valid" << std::endl;
+    SDL_DEINIT_LOGGER()
     exit(SUCCES);
   }
 
@@ -82,5 +103,6 @@ int main(int argc, char** argv) {
   std::cout << "Errors: " << std::endl
             << rpc::PrettyFormat(report) << std::endl;
 
+  SDL_DEINIT_LOGGER()
   return SUCCES;
 }

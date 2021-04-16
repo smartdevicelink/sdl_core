@@ -47,6 +47,6 @@ class HMIMessageObserver {
   virtual void OnErrorSending(
       std::shared_ptr<application_manager::Message> message) = 0;
 };
-}
+}  // namespace hmi_message_handler
 
 #endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_

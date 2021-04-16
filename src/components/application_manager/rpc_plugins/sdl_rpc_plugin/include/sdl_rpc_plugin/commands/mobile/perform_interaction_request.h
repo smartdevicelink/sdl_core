@@ -36,8 +36,8 @@
 
 #include <string>
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -93,6 +93,33 @@ class PerformInteractionRequest
    */
   virtual void onTimeOut();
 
+ protected:
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param ui_response contains result_code from HMI response and
+   * interface that returns response
+   * @param vr_response contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const app_mngr::commands::ResponseInfo& ui_response,
+      const app_mngr::commands::ResponseInfo& vr_response);
+
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param ui_response contains result_code from HMI response and
+   * interface that returns response
+   * @param vr_response contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(
+      app_mngr::commands::ResponseInfo& out_first,
+      app_mngr::commands::ResponseInfo& out_second) const;
+
  private:
   /**
    * @brief Function will be called when VR_OnCommand event
@@ -101,15 +128,13 @@ class PerformInteractionRequest
    * @return true if send response to mobile application otherwise
    * return false.
    */
-  bool ProcessVRResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  bool ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /**
    * @brief Sends PerformInteraction response to mobile side
    * @param message which should send to mobile side
    */
-  void ProcessUIResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  void ProcessUIResponse(const smart_objects::SmartObject& message);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -135,16 +160,6 @@ class PerformInteractionRequest
    * @param app_id Application ID
    */
   void SendUIShowVRHelpRequest(app_mngr::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
-   *
-   * @param app_id Application ID
-   *
-   * return Return TRUE if there are no similar menu names in choice set,
-   * otherwise FALSE
-   */
-  bool CheckChoiceSetMenuNames(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -194,7 +209,7 @@ class PerformInteractionRequest
    * otherwise returns FALSE.
    */
   bool CheckChoiceIDFromResponse(app_mngr::ApplicationSharedPtr app,
-                                 int32_t choice_id);
+                                 const int32_t choice_id);
 
   /**
    * @brief Checks for a match of choice ID, in
@@ -213,6 +228,13 @@ class PerformInteractionRequest
       const smart_objects::SmartObject& choice_set_id_list) const;
 
   /**
+   * @brief Checks each choice in each set for having a VRcommands parameter
+   * @param app contains pointer to application.
+   * @return returns false if request has choice sets with no vrCommands
+   */
+  bool CheckChoiceSetListVRCommands(app_mngr::ApplicationSharedPtr app);
+
+  /**
    * @brief Tells if there are sent requests without responses
    * @return If there is request without response method returns TRUE
    * otherwise returns FALSE
@@ -225,7 +247,28 @@ class PerformInteractionRequest
    */
   void SendBothModeResponse(const smart_objects::SmartObject& msg_param);
 
+  /**
+   * @brief Sends UiClosePopUp request to HMI
+   */
+  void SendClosePopupRequestToHMI();
+
+  /**
+   * @brief Sets the choice according to the current interaction mode and first
+   * received choice id (UI or VR).
+   *
+   * @param msg_param Message parameters which will be included in the response
+   * to mobile device.
+   * @return Returns false, if choice_id received from UI and VR are valid and
+   * not equal. Otherwise returns true.
+   */
+  bool SetChoiceIdToResponseMsgParams(
+      smart_objects::SmartObject& msg_param) const;
+
   mobile_apis::InteractionMode::eType interaction_mode_;
+  std::int32_t ui_choice_id_received_;
+  std::int32_t vr_choice_id_received_;
+  std::string ui_text_entry_received_;
+
   bool ui_response_received_;
   bool vr_response_received_;
   bool app_pi_was_active_before_;
@@ -234,11 +277,12 @@ class PerformInteractionRequest
   hmi_apis::Common_Result::eType ui_result_code_;
   std::string ui_info_;
   std::string vr_info_;
+  smart_objects::SmartObject response_msg_params;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_INTERACTION_REQUEST_H_

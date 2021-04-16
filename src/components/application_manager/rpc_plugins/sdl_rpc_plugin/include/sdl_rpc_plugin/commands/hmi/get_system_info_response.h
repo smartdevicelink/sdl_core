@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
 
-#include "application_manager/commands/response_from_hmi.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/response_from_hmi.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -45,6 +45,7 @@ struct SystemInfo {
   std::string ccpu_version;
   std::string wers_country_code;
   std::string language;
+  std::string hardware_version;
 };
 
 /**
@@ -74,14 +75,13 @@ class GetSystemInfoResponse : public app_mngr::commands::ResponseFromHMI {
   virtual void Run();
 
  private:
-  const SystemInfo GetSystemInfo(
-      const hmi_apis::Common_Result::eType code) const;
+  const SystemInfo GetSystemInfo() const;
 
   DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
 };
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_

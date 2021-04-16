@@ -33,14 +33,11 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
-#include "transport_manager/common.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
-
-namespace resumption {
-class LastState;
-}
+#include "resumption/last_state_wrapper.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace transport_manager {
 
@@ -56,11 +53,14 @@ class TransportManager {
    **/
   virtual ~TransportManager() {}
 
+  DEPRECATED
+  virtual int Init(resumption::LastState& last_state) = 0;
+
   /**
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init(resumption::LastState& last_state) = 0;
+  virtual int Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Reinitializes transport manager
@@ -69,11 +69,32 @@ class TransportManager {
   virtual int Reinit() = 0;
 
   /**
-    * @brief Start scanning for new devices.
-    *
-    * @return Code error.
-    **/
+   * @brief Deinitializes all transport adapters and device instances
+   */
+  virtual void Deinit() = 0;
+
+  /**
+   * @brief Stops transport events processing handler threads
+   */
+  virtual void StopEventsProcessing() = 0;
+
+  /**
+   * @brief Resumes transport events processing handler threads
+   */
+  virtual void StartEventsProcessing() = 0;
+
+  /**
+   * @brief Start scanning for new devices.
+   *
+   * @return Code error.
+   **/
   virtual int SearchDevices() = 0;
+
+  virtual void AddCloudDevice(
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) = 0;
+
+  virtual void RemoveCloudDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -83,6 +104,16 @@ class TransportManager {
    * @return Code error.
    **/
   virtual int ConnectDevice(const DeviceHandle device_id) = 0;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -177,13 +208,25 @@ class TransportManager {
   virtual int RemoveDevice(const DeviceHandle device_handle) = 0;
 
   /**
-   * @brief Turns on or off visibility of SDL to mobile devices
-   * when visibility is ON (on_off = true) mobile devices are able to connect
-   * otherwise ((on_off = false)) SDL is not visible from outside
-   *
-   * @return Code error.
+   * @brief Performs specified action on connected clients
+   * @param required_action is the action which should be performed for the
+   * connected clients
+   * @return error code
    */
-  virtual int Visibility(const bool& on_off) const = 0;
+  virtual int PerformActionOnClients(
+      const TransportAction required_action) const = 0;
+
+  /**
+   * @brief Called when websocket server transport adapter is available.
+   * Creates WebSocketDevice for WebEngine and add it to the device list
+   */
+  virtual void CreateWebEngineDevice() = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const DeviceInfo& GetWebEngineDeviceInfo() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_

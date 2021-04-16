@@ -34,16 +34,16 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/hmi_interfaces.h"
-#include "application_manager/mock_hmi_interface.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -53,12 +53,12 @@ namespace ui_is_ready_request {
 
 namespace am = ::application_manager;
 
+using am::commands::MessageSharedPtr;
+using am::event_engine::Event;
+using sdl_rpc_plugin::commands::UIIsReadyRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::UIIsReadyRequest;
-using am::event_engine::Event;
 
 typedef std::shared_ptr<UIIsReadyRequest> UIIsReadyRequestPtr;
 
@@ -125,9 +125,9 @@ class UIIsReadyRequestTest
         .WillOnce(Return(get_capabilities));
 
     EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*get_language));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_language));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_all_language));
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_capabilities));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_language, _));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_all_language, _));
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(get_capabilities, _));
   }
 
   void PrepareEvent(bool is_message_contain_param,
@@ -141,17 +141,33 @@ class UIIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
+  void HMICapabilitiesExpectations() {
+    EXPECT_CALL(
+        mock_hmi_capabilities_,
+        IsRequestsRequiredForCapabilities(hmi_apis::FunctionID::UI_GetLanguage))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::UI_GetSupportedLanguages))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::UI_GetCapabilities))
+        .WillOnce(Return(true));
+  }
+
   UIIsReadyRequestPtr command_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
 TEST_F(UIIsReadyRequestTest,
-       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_ui_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -161,7 +177,7 @@ TEST_F(UIIsReadyRequestTest,
 }
 
 TEST_F(UIIsReadyRequestTest,
-       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable) {
+       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_ui_cooperating_available = false;
   const bool is_send_message_to_hmi = false;
   const bool is_message_contain_param = true;
@@ -174,12 +190,14 @@ TEST_F(UIIsReadyRequestTest,
   command_->on_event(event);
 }
 
-TEST_F(UIIsReadyRequestTest, OnEvent_KeyAvailableEqualToTrue_StateAvailable) {
+TEST_F(UIIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsent) {
   const bool is_ui_cooperating_available = true;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event, is_ui_cooperating_available);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -187,7 +205,8 @@ TEST_F(UIIsReadyRequestTest, OnEvent_KeyAvailableEqualToTrue_StateAvailable) {
   command_->on_event(event);
 }
 
-TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS) {
+TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
 }

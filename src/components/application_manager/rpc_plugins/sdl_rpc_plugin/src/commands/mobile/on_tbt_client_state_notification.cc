@@ -41,6 +41,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnTBTClientStateNotification::OnTBTClientStateNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -56,7 +58,7 @@ OnTBTClientStateNotification::OnTBTClientStateNotification(
 OnTBTClientStateNotification::~OnTBTClientStateNotification() {}
 
 void OnTBTClientStateNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
@@ -67,7 +69,8 @@ void OnTBTClientStateNotification::Run() {
   std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
     ApplicationSharedPtr app = *it;
-    if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
+    if (mobile_apis::HMILevel::eType::HMI_NONE !=
+        app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();
     }
@@ -76,4 +79,4 @@ void OnTBTClientStateNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

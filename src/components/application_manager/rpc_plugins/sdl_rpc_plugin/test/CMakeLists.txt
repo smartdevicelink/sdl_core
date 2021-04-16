@@ -6,6 +6,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/sdl_rpc_plugin/commands/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${POLICY_MOCK_INCLUDE_PATH}/
+  ${CMAKE_SOURCE_DIR}/src
 )  
 
 
@@ -22,15 +23,9 @@ file(GLOB SOURCES
 )
 
 set(LIBRARIES
+  sdl_rpc_plugin_static
+  Resumption
   gmock
-  Utils
-  SmartObjects
-  HMI_API
-  MOBILE_API
-  connectionHandler
-  sdl_rpc_plugin
-  jsoncpp
-  Policy
 )
 
 create_cotired_test("sdl_commands_test" "${SOURCES}" "${LIBRARIES}" )

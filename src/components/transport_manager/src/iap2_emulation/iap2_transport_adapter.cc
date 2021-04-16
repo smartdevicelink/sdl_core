@@ -32,14 +32,14 @@
 
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "utils/threads/thread.h"
 #include "utils/file_system.h"
+#include "utils/threads/thread.h"
 
 namespace {
 static const mode_t mode = 0666;
@@ -50,17 +50,17 @@ static const auto out_signals_channel = "iap_signals_out";
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "IAP2Emulation");
+SDL_CREATE_LOG_VARIABLE("IAP2Emulation");
 
 IAP2BluetoothEmulationTransportAdapter::IAP2BluetoothEmulationTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
-    : TcpTransportAdapter(port, last_state, settings) {}
+    : TcpTransportAdapter(port, last_state_wrapper, settings) {}
 
 void IAP2BluetoothEmulationTransportAdapter::DeviceSwitched(
     const DeviceUID& device_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   UNUSED(device_handle);
   DCHECK(!"Switching for iAP2 Bluetooth is not supported.");
 }
@@ -69,49 +69,55 @@ DeviceType IAP2BluetoothEmulationTransportAdapter::GetDeviceType() const {
   return IOS_BT;
 }
 
+void IAP2BluetoothEmulationTransportAdapter::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  return;
+}
+
 IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
-    : TcpTransportAdapter(port, last_state, settings), out_(0) {
+    : TcpTransportAdapter(port, last_state_wrapper, settings), out_(0) {
   auto delegate = new IAPSignalHandlerDelegate(*this);
   signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
-  signal_handler_->start();
+  signal_handler_->Start();
   const auto result = mkfifo(out_signals_channel, mode);
-  LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
+  UNUSED(result);
+  SDL_LOG_DEBUG("Out signals channel creation result: " << result);
 }
 
 IAP2USBEmulationTransportAdapter::~IAP2USBEmulationTransportAdapter() {
-  signal_handler_->join();
-  auto delegate = signal_handler_->delegate();
-  signal_handler_->set_delegate(NULL);
+  signal_handler_->Stop(threads::Thread::kThreadSoftStop);
+  auto delegate = signal_handler_->GetDelegate();
+  signal_handler_->SetDelegate(NULL);
   delete delegate;
   threads::DeleteThread(signal_handler_);
-  LOG4CXX_DEBUG(logger_, "Out close result: " << close(out_));
-  LOG4CXX_DEBUG(logger_, "Out unlink result: " << unlink(out_signals_channel));
+  SDL_LOG_DEBUG("Out close result: " << close(out_));
+  SDL_LOG_DEBUG("Out unlink result: " << unlink(out_signals_channel));
 }
 
 void IAP2USBEmulationTransportAdapter::DeviceSwitched(
     const DeviceUID& device_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   UNUSED(device_handle);
   const auto switch_signal_ack = std::string("SDL_TRANSPORT_SWITCH_ACK\n");
 
   auto out_ = open(out_signals_channel, O_WRONLY);
-  LOG4CXX_DEBUG(logger_, "Out channel descriptor: " << out_);
+  SDL_LOG_DEBUG("Out channel descriptor: " << out_);
 
   if (out_ < 0) {
-    LOG4CXX_ERROR(logger_, "Failed to open out signals channel");
+    SDL_LOG_ERROR("Failed to open out signals channel");
     return;
   }
 
   const auto bytes =
       write(out_, switch_signal_ack.c_str(), switch_signal_ack.size());
   UNUSED(bytes);
-  LOG4CXX_DEBUG(logger_, "Written bytes to out: " << bytes);
+  SDL_LOG_DEBUG("Written bytes to out: " << bytes);
 
-  LOG4CXX_DEBUG(logger_, "Switching signal ACK is sent");
-  LOG4CXX_DEBUG(logger_, "iAP2 USB device is switched with iAP2 Bluetooth");
+  SDL_LOG_DEBUG("Switching signal ACK is sent");
+  SDL_LOG_DEBUG("iAP2 USB device is switched with iAP2 Bluetooth");
   close(out_);
 }
 
@@ -119,23 +125,29 @@ DeviceType IAP2USBEmulationTransportAdapter::GetDeviceType() const {
   return IOS_USB;
 }
 
+void IAP2USBEmulationTransportAdapter::TransportConfigUpdated(
+    const TransportConfig& new_config) {
+  return;
+}
+
 IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
     IAPSignalHandlerDelegate(IAP2USBEmulationTransportAdapter& adapter)
     : adapter_(adapter), run_flag_(true), in_(0) {
   const auto result = mkfifo(in_signals_channel, mode);
-  LOG4CXX_DEBUG(logger_, "In signals channel creation result: " << result);
+  UNUSED(result);
+  SDL_LOG_DEBUG("In signals channel creation result: " << result);
 }
 
 void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Signal handling is started");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Signal handling is started");
   const auto switch_signal = "SDL_TRANSPORT_SWITCH";
-  LOG4CXX_DEBUG(logger_, "Waiting for signal: " << switch_signal);
+  SDL_LOG_DEBUG("Waiting for signal: " << switch_signal);
 
   in_ = open(in_signals_channel, O_RDONLY);
-  LOG4CXX_DEBUG(logger_, "In channel descriptor: " << in_);
+  SDL_LOG_DEBUG("In channel descriptor: " << in_);
   if (in_ < 0) {
-    LOG4CXX_ERROR(logger_, "Failed to open in signals channel");
+    SDL_LOG_ERROR("Failed to open in signals channel");
     return;
   }
 
@@ -147,28 +159,28 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::threadMain() {
       continue;
     }
     if (-1 == bytes) {
-      LOG4CXX_DEBUG(logger_, "Error during input pipe read");
+      SDL_LOG_DEBUG("Error during input pipe read");
       break;
     }
-    LOG4CXX_DEBUG(logger_, "Read in bytes: " << bytes);
+    SDL_LOG_DEBUG("Read in bytes: " << bytes);
     buffer[bytes] = '\0';
     std::string str(buffer);
     if (std::string::npos != str.find(switch_signal)) {
-      LOG4CXX_DEBUG(logger_, "Switch signal received.");
+      SDL_LOG_DEBUG("Switch signal received.");
       adapter_.DoTransportSwitch();
     }
   }
 
-  LOG4CXX_DEBUG(logger_, "In close result: " << close(in_));
-  LOG4CXX_DEBUG(logger_, "In unlink result: " << unlink(in_signals_channel));
+  SDL_LOG_DEBUG("In close result: " << close(in_));
+  SDL_LOG_DEBUG("In unlink result: " << unlink(in_signals_channel));
 }
 
 void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
     exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Stopping signal handling.");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Stopping signal handling.");
   run_flag_ = false;
   ThreadDelegate::exitThreadMain();
 }
-}
-}  // namespace transport_manager::transport_adapter
+}  // namespace transport_adapter
+}  // namespace transport_manager

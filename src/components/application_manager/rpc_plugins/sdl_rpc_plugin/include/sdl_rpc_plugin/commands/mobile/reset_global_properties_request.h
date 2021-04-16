@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -85,40 +85,6 @@ class ResetGlobalPropertiesRequest
 
  private:
   /*
-   * @brief Sets default value of the HELPPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
-   *
-   * @param app Registered application
-   * @param is_timeout_promp Flag indicating that timeout prompt
-   * should be reset
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetHelpPromt(app_mngr::ApplicationSharedPtr app);
-
-  /*
-   * @brief  Sets default value of the TIMEOUTPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
-   *
-   * @param app Registered application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetTimeoutPromt(application_manager::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Sets default value of the VRHELPTITLE global property
-   * to the application name and value of the VRHELPITEMS global property
-   * to value equal to registered command -1(default command “Help / Cancel”.)
-   *
-   * @param app Registered application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetVrHelpTitleItems(
-      application_manager::ApplicationSharedPtr const app);
-
-  /*
    * @brief Prepare result for sending to mobile application
    * @param out_result_code contains result code for sending to mobile
    * application
@@ -144,6 +110,6 @@ class ResetGlobalPropertiesRequest
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_

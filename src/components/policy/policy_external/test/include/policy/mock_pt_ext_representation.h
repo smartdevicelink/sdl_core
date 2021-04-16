@@ -37,10 +37,10 @@
 
 #include "gmock/gmock.h"
 
+#include "mock_pt_representation.h"
+#include "policy/policy_table/types.h"
 #include "policy/pt_ext_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
-#include "mock_pt_representation.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
@@ -105,6 +105,7 @@ class MockPTExtRepresentation : public MockPTRepresentation,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& vin));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
   MOCK_METHOD0(IsMetaInfoPresent, bool());
   MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
   MOCK_METHOD0(GetKmFromSuccessfulExchange, int());

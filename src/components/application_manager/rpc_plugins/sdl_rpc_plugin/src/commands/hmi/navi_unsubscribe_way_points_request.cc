@@ -37,7 +37,9 @@ using namespace application_manager;
 
 namespace commands {
 
-NaviUnSubscribeWayPointsRequest::NaviUnSubscribeWayPointsRequest(
+SDL_CREATE_LOG_VARIABLE("Commands")
+
+NaviUnsubscribeWayPointsRequest::NaviUnsubscribeWayPointsRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -49,14 +51,14 @@ NaviUnSubscribeWayPointsRequest::NaviUnSubscribeWayPointsRequest(
                    hmi_capabilities,
                    policy_handle) {}
 
-NaviUnSubscribeWayPointsRequest::~NaviUnSubscribeWayPointsRequest() {}
+NaviUnsubscribeWayPointsRequest::~NaviUnsubscribeWayPointsRequest() {}
 
-void NaviUnSubscribeWayPointsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+void NaviUnsubscribeWayPointsRequest::Run() {
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

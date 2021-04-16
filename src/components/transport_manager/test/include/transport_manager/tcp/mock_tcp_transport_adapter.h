@@ -33,9 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
 
-#include "gmock/gmock.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-#include "transport_manager/transport_manager_settings.h"
 
 namespace test {
 namespace components {
@@ -47,17 +45,26 @@ class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
   MockTCPTransportAdapter(
       uint16_t port,
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const transport_manager::TransportManagerSettings& settings)
-      : TcpTransportAdapter(port, last_state, settings) {}
-  MOCK_CONST_METHOD2(FindEstablishedConnection,
-                     ConnectionSPtr(const DeviceUID& device_handle,
-                                    const ApplicationHandle& app_handle));
+      : TcpTransportAdapter(port, last_state_wrapper, settings) {}
+  MOCK_CONST_METHOD2(
+      FindEstablishedConnection,
+      ConnectionSPtr(const transport_manager::DeviceUID& device_handle,
+                     const transport_manager::ApplicationHandle& app_handle));
 
-  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_CONST_METHOD1(
+      FindDevice,
+      DeviceSptr(const transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(Connect,
-               TransportAdapter::Error(const DeviceUID& device_handle,
-                                       const ApplicationHandle& app_handle));
+               TransportAdapter::Error(
+                   const transport_manager::DeviceUID& device_handle,
+                   const transport_manager::ApplicationHandle& app_handle));
+
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD1(AddListener, void(TransportAdapterListener* listener));
+  MOCK_METHOD0(Init, TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
   void CallStore() {
     Store();
   }

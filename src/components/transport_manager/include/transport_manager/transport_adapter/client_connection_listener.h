@@ -76,6 +76,18 @@ class ClientConnectionListener {
   virtual TransportAdapter::Error StopListening() = 0;
 
   /**
+   * @brief Suspends current listening thread
+   * @return Error information about possible reason of failure.
+   */
+  virtual TransportAdapter::Error SuspendListening() = 0;
+
+  /**
+   * @brief Resumes current listening thread
+   * @return Error information about possible reason of failure.
+   */
+  virtual TransportAdapter::Error ResumeListening() = 0;
+
+  /**
    * @brief Destructor.
    */
   virtual ~ClientConnectionListener() {}

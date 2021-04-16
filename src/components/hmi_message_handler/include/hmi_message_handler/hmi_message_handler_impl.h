@@ -47,12 +47,12 @@ namespace hmi_message_handler {
 
 namespace impl {
 /*
-* These dummy classes are here to locally impose strong typing on different
-* kinds of messages
-* Currently there is no type difference between incoming and outgoing messages
-* TODO(ik): replace these with globally defined message types
-* when we have them.
-*/
+ * These dummy classes are here to locally impose strong typing on different
+ * kinds of messages
+ * Currently there is no type difference between incoming and outgoing messages
+ * TODO(ik): replace these with globally defined message types
+ * when we have them.
+ */
 struct MessageFromHmi : public MessageSharedPointer {
   MessageFromHmi() {}
   explicit MessageFromHmi(const MessageSharedPointer& message)
@@ -77,7 +77,7 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
     FromHmiQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
-}
+}  // namespace impl
 
 class ToHMIThreadImpl;
 class FromHMIThreadImpl;

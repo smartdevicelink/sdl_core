@@ -33,24 +33,27 @@ Copyright (c) 2018, Ford Motor Company
 
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
-#include <vector>
-#include <string>
 #include <stdio.h>
+
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <vector>
+
 #include "application_manager/policies/policy_handler_interface.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "policy/policy_table/enums.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/helpers.h"
+#include "policy/policy_table/enums.h"
 #include "utils/custom_string.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
-CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("Commands")
 namespace {
 
 #ifdef ENABLE_LOG
@@ -69,21 +72,108 @@ const unsigned int kAppIdLengthMax = 40U;
 const unsigned int kAppNameLengthMax = 100U;
 const unsigned int kLanguageArraySizeMax = 100U;
 
+typedef std::set<std::string> SynonymsSet;
+typedef std::map<std::string, SynonymsSet> SynonymsMap;
+
+bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
+                                const std::string& language_name,
+                                SynonymsMap& synonyms_map) {
+  if (!language[language_name].keyExists(json::vrSynonyms)) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "'languages.vrSynonyms' doesn't exist");
+    return false;
+  }
+  const smart_objects::SmartArray* synonyms_array =
+      language[language_name][json::vrSynonyms].asArray();
+  if (!synonyms_array) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynonyms is not array.");
+    return false;
+  }
+  const size_t synonyms_array_size = synonyms_array->size();
+  if (synonyms_array_size < kVrArraySizeMin) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynomyms array has [" << synonyms_array_size
+                 << "] size < allowed min size [" << kVrArraySizeMin << "]");
+    return false;
+  }
+  if (synonyms_array_size > kVrArraySizeMax) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynomyms array size [" << synonyms_array_size
+                 << "] exceeds maximum allowed size [" << kVrArraySizeMax
+                 << "]");
+    return false;
+  }
+
+  for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
+    const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
+    const std::string vrSynonym = synonym.asString();
+    if (vrSynonym.length() > kVrSynonymLengthMax) {
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "vrSYnomym item [" << idx << "] exceeds max length ["
+                   << vrSynonym.length() << "]>[" << kVrSynonymLengthMax
+                   << "]");
+      return false;
+    }
+    if (vrSynonym.length() < kVrSynonymLengthMin) {
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "vrSYnomym item [" << idx << "] length ["
+                   << vrSynonym.length() << "] is less then min length ["
+                   << kVrSynonymLengthMin << "] allowed.");
+      return false;
+    }
+    // Verify duplicates
+    SynonymsMap::iterator synonyms_map_iter = synonyms_map.find(language_name);
+    if (synonyms_map_iter != synonyms_map.end()) {
+      if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "vrSYnomym item already defined [" << vrSynonym.c_str()
+                     << "] for language [" << language_name << "]");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool CheckMandatoryParametersPresent(
+    const smart_objects::SmartObject& app_data) {
+  if (!app_data.keyExists(json::android) && !app_data.keyExists(json::ios)) {
+    return false;
+  }
+
+  if (app_data.keyExists(json::android) &&
+      !app_data[json::android].keyExists(json::packageName)) {
+    return false;
+  }
+
+  if (app_data.keyExists(json::ios) &&
+      !app_data[json::ios].keyExists(json::urlScheme)) {
+    return false;
+  }
+
+  if (!app_data.keyExists(json::appId)) {
+    return false;
+  }
+
+  if (!app_data.keyExists(json::name)) {
+    return false;
+  }
+
+  return true;
+}
+
 class QueryAppsDataValidator {
  public:
-  typedef std::set<std::string> SynonymsSet;
-  typedef std::map<std::string, SynonymsSet> SynonymsMap;
-
   QueryAppsDataValidator(smart_objects::SmartObject& object,
                          const ApplicationManager& manager)
       : data_(object), manager_(manager) {}
 
   bool Validate() {
-    LOG4CXX_AUTO_TRACE(logger_);
+    SDL_LOG_AUTO_TRACE();
     if (!data_.isValid()) {
-      LOG4CXX_ERROR(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "QueryApps response is not valid.");
+      SDL_LOG_ERROR(kQueryAppsValidationFailedPrefix
+                    << "QueryApps response is not valid.");
       return false;
     }
     if (!HasResponseKey()) {
@@ -95,10 +185,9 @@ class QueryAppsDataValidator {
  private:
   bool HasResponseKey() const {
     if (!data_.keyExists(json::response)) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "QueryApps response does not contain '"
-                       << json::response << "' parameter.");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "QueryApps response does not contain '" << json::response
+                   << "' parameter.");
       return false;
     }
     return true;
@@ -108,9 +197,8 @@ class QueryAppsDataValidator {
     smart_objects::SmartArray* objects_array = data_[json::response].asArray();
 
     if (!objects_array) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "QueryApps response is not array.");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "QueryApps response is not array.");
       return false;
     }
 
@@ -124,16 +212,15 @@ class QueryAppsDataValidator {
       const smart_objects::SmartObject& app_data = *applications_iterator;
 
       if (!app_data.isValid()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "Wrong application data in json file.");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "Wrong application data in json file.");
         return false;
       }
 
       if (!CheckMandatoryParametersPresent(app_data)) {
-        LOG4CXX_WARN(logger_,
-                     "Application hasn`t some of mandatory parameters. "
-                     "Application will be skipped.");
+        SDL_LOG_WARN(
+            "Application hasn`t some of mandatory parameters. "
+            "Application will be skipped.");
 
         applications_iterator = objects_array->erase(applications_iterator);
         continue;
@@ -152,12 +239,11 @@ class QueryAppsDataValidator {
       if (json::ios == os_type) {
         if (app_data[json::ios][json::urlScheme].asString().length() >
             kUrlSchemaLengthMax) {
-          LOG4CXX_WARN(
-              logger_,
+          SDL_LOG_WARN(
               kQueryAppsValidationFailedPrefix
-                  << "An urlscheme length exceeds maximum allowed ["
-                  << app_data[json::ios][json::urlScheme].asString().length()
-                  << "]>[" << kUrlSchemaLengthMax << "]");
+              << "An urlscheme length exceeds maximum allowed ["
+              << app_data[json::ios][json::urlScheme].asString().length()
+              << "]>[" << kUrlSchemaLengthMax << "]");
           return false;
         }
       }
@@ -165,22 +251,20 @@ class QueryAppsDataValidator {
       if (json::android == os_type) {
         if (app_data[json::android][json::packageName].asString().length() >
             kPackageNameLengthMax) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "Package name length ["
-                           << app_data[json::android][json::packageName]
-                                  .asString()
-                                  .length() << "] exceeds max length ["
-                           << kPackageNameLengthMax << "]in json file.");
+          SDL_LOG_WARN(
+              kQueryAppsValidationFailedPrefix
+              << "Package name length ["
+              << app_data[json::android][json::packageName].asString().length()
+              << "] exceeds max length [" << kPackageNameLengthMax
+              << "]in json file.");
           return false;
         }
       }
 
       // Languages verification
       if (!app_data[os_type].keyExists(json::languages)) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages' doesn't exist");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "'languages' doesn't exist");
         return false;
       }
       if (!ValidateLanguages(app_data[os_type][json::languages],
@@ -197,18 +281,16 @@ class QueryAppsDataValidator {
     // Verify appid length
     const std::string app_id(app_data[json::appId].asString());
     if (app_id.length() > kAppIdLengthMax) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "An Object ID length exceeds maximum allowed ["
-                       << app_id.length() << "]>[" << kAppIdLengthMax << "]");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "An Object ID length exceeds maximum allowed ["
+                   << app_id.length() << "]>[" << kAppIdLengthMax << "]");
       return false;
     }
 
     // Verify that appid is unique
     if (applications_id_set_.find(app_id) != applications_id_set_.end()) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "An Object ID is not unigue [" << app_id << "]");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "An Object ID is not unigue [" << app_id << "]");
       return false;
     }
     applications_id_set_.insert(app_id);
@@ -217,18 +299,15 @@ class QueryAppsDataValidator {
     ApplicationSharedPtr registered_app =
         manager_.application_by_policy_id(app_id);
     if (registered_app) {
-      LOG4CXX_INFO(logger_,
-                   "Application with the id: " << app_id
+      SDL_LOG_INFO("Application with the id: " << app_id
                                                << " is already registered.");
     }
     // And app name length
     const std::string appName(app_data[json::name].asString());
     if (appName.length() > kAppNameLengthMax) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Name of application exceeds maximum allowed ["
-                       << appName.length() << "]>[" << kAppNameLengthMax
-                       << "].");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "Name of application exceeds maximum allowed ["
+                   << appName.length() << "]>[" << kAppNameLengthMax << "].");
       return false;
     }
     return true;
@@ -239,33 +318,29 @@ class QueryAppsDataValidator {
     bool default_language_found = false;
     const size_t languages_array_size = languages.length();
     if (languages_array_size > kLanguageArraySizeMax) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "'languages' array exceeds max size ["
-                       << languages_array_size << "]>[" << kLanguageArraySizeMax
-                       << "]");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "'languages' array exceeds max size ["
+                   << languages_array_size << "]>[" << kLanguageArraySizeMax
+                   << "]");
       return false;
     }
     // Every language has ttsname string and vrsynonyms array
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language is not a map.");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "language is not a map.");
         return false;
       }
       if (language.length() != 1) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language map size is not equal 1.");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "language map size is not equal 1.");
         return false;
       }
       const std::string language_name = (*language.map_begin()).first;
       if (!language_name.length()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language name is empty");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "language name is empty");
         return false;
       }
       // Verify default language defined
@@ -278,9 +353,8 @@ class QueryAppsDataValidator {
       }
       // ttsName verification
       if (!language[language_name].keyExists(json::ttsName)) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages.ttsName' doesn't exist");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "'languages.ttsName' doesn't exist");
         return false;
       }
       const smart_objects::SmartObject& ttsNameObject =
@@ -290,17 +364,15 @@ class QueryAppsDataValidator {
         const std::string ttsName =
             language[language_name][json::ttsName].asString();
         if (ttsName.length() > kTtsNameLengthMax) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "ttsName string exceeds max length ["
-                           << ttsName.length() << "]>[" << kTtsNameLengthMax
-                           << "]");
+          SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                       << "ttsName string exceeds max length ["
+                       << ttsName.length() << "]>[" << kTtsNameLengthMax
+                       << "]");
           return false;
         }
       } else {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "ttsName is not the string type.");
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "ttsName is not the string type.");
         return false;
       }
 
@@ -309,109 +381,10 @@ class QueryAppsDataValidator {
       }
     }
     if (!default_language_found) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << " 'languages'.default' doesn't exist");
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << " 'languages'.default' doesn't exist");
       return false;
     }
-    return true;
-  }
-
-  bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
-                                  const std::string& language_name,
-                                  SynonymsMap& synonyms_map) const {
-    if (!language[language_name].keyExists(json::vrSynonyms)) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "'languages.vrSynonyms' doesn't exist");
-      return false;
-    }
-    const smart_objects::SmartArray* synonyms_array =
-        language[language_name][json::vrSynonyms].asArray();
-    if (!synonyms_array) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynonyms is not array.");
-      return false;
-    }
-    const size_t synonyms_array_size = synonyms_array->size();
-    if (synonyms_array_size < kVrArraySizeMin) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynomyms array has [" << synonyms_array_size
-                       << "] size < allowed min size [" << kVrArraySizeMin
-                       << "]");
-      return false;
-    }
-    if (synonyms_array_size > kVrArraySizeMax) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynomyms array size [" << synonyms_array_size
-                       << "] exceeds maximum allowed size [" << kVrArraySizeMax
-                       << "]");
-      return false;
-    }
-
-    for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
-      const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
-      const std::string vrSynonym = synonym.asString();
-      if (vrSynonym.length() > kVrSynonymLengthMax) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "vrSYnomym item [" << idx
-                         << "] exceeds max length [" << vrSynonym.length()
-                         << "]>[" << kVrSynonymLengthMax << "]");
-        return false;
-      }
-      if (vrSynonym.length() < kVrSynonymLengthMin) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "vrSYnomym item [" << idx << "] length ["
-                         << vrSynonym.length() << "] is less then min length ["
-                         << kVrSynonymLengthMin << "] allowed.");
-        return false;
-      }
-      // Verify duplicates
-      SynonymsMap::iterator synonyms_map_iter =
-          synonyms_map.find(language_name);
-      if (synonyms_map_iter != synonyms_map.end()) {
-        if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "vrSYnomym item already defined ["
-                           << vrSynonym.c_str() << "] for language ["
-                           << language_name << "]");
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  bool CheckMandatoryParametersPresent(
-      const smart_objects::SmartObject& app_data) const {
-    if (!app_data.keyExists(json::android) && !app_data.keyExists(json::ios)) {
-      return false;
-    }
-
-    if (app_data.keyExists(json::android) &&
-        !app_data[json::android].keyExists(json::packageName)) {
-      return false;
-    }
-
-    if (app_data.keyExists(json::ios) &&
-        !app_data[json::ios].keyExists(json::urlScheme)) {
-      return false;
-    }
-
-    if (!app_data.keyExists(json::appId)) {
-      return false;
-    }
-
-    if (!app_data.keyExists(json::name)) {
-      return false;
-    }
-
     return true;
   }
 
@@ -421,7 +394,7 @@ class QueryAppsDataValidator {
 
   DISALLOW_COPY_AND_ASSIGN(QueryAppsDataValidator);
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -447,13 +420,13 @@ SystemRequest::SystemRequest(
 SystemRequest::~SystemRequest() {}
 
 void SystemRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (application.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -468,16 +441,14 @@ void SystemRequest::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
-                                           request_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "RequestType " << stringified_request_type
+  if (!policy_handler.IsRequestTypeAllowed(
+          application->device(), application->policy_app_id(), request_type)) {
+    SDL_LOG_ERROR("RequestType " << stringified_request_type
                                  << " is DISALLOWED by policies");
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
-  LOG4CXX_TRACE(logger_,
-                "RequestType " << stringified_request_type << " is ALLOWED");
+  SDL_LOG_TRACE("RequestType " << stringified_request_type << " is ALLOWED");
 
   const bool request_subtype_present =
       (*message_)[strings::msg_params].keyExists(strings::request_subtype);
@@ -486,17 +457,15 @@ void SystemRequest::Run() {
         (*message_)[strings::msg_params][strings::request_subtype].asString();
     if (!policy_handler.IsRequestSubTypeAllowed(application->policy_app_id(),
                                                 request_subtype)) {
-      LOG4CXX_ERROR(logger_,
-                    "Request subtype: " << request_subtype
+      SDL_LOG_ERROR("Request subtype: " << request_subtype
                                         << " is DISALLOWED by policies");
       SendResponse(false, mobile_apis::Result::DISALLOWED);
       return;
     }
-    LOG4CXX_TRACE(logger_,
-                  "Request subtype: " << request_subtype << " is ALLOWED");
+    SDL_LOG_TRACE("Request subtype: " << request_subtype << " is ALLOWED");
   }
 
-  std::string file_name = kSYNC;
+  std::string file_name;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
   } else {
@@ -504,8 +473,7 @@ void SystemRequest::Run() {
   }
 
   if (!CheckSyntax(file_name)) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming request contains \t\n \\t \\n or whitespace");
+    SDL_LOG_ERROR("Incoming request contains \t\n \\t \\n or whitespace");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -519,9 +487,10 @@ void SystemRequest::Run() {
     return;
   }
 
-  if (!file_system::IsFileNameValid(file_name)) {
+  if (!file_system::IsFileNameValid(file_name) &&
+      mobile_apis::RequestType::ICON_URL != request_type) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
-    LOG4CXX_ERROR(logger_, err_msg);
+    SDL_LOG_ERROR(err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
     return;
   }
@@ -541,8 +510,22 @@ void SystemRequest::Run() {
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
-    binary_data_folder =
-        application_manager_.get_settings().system_files_path();
+    if (mobile_apis::RequestType::ICON_URL == request_type) {
+      binary_data_folder =
+          application_manager_.get_settings().app_icons_folder();
+      // Use the URL file name to identify the policy id.
+      // Save the icon file with the policy id as the name.
+      file_name = application_manager_.PolicyIDByIconUrl(file_name);
+      if (file_name.empty()) {
+        const std::string err_msg = "Invalid file name";
+        SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+        return;
+      }
+      SDL_LOG_DEBUG("Got ICON_URL Request. File name: " << file_name);
+    } else {
+      binary_data_folder =
+          application_manager_.get_settings().system_files_path();
+    }
   } else {
     binary_data_folder =
         application_manager_.get_settings().app_storage_folder();
@@ -557,13 +540,12 @@ void SystemRequest::Run() {
   file_dst_path += file_name;
 
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Binary data is present. Trying to save it to: " << binary_data_folder);
     if (mobile_apis::Result::SUCCESS !=
         (application_manager_.SaveBinary(
             binary_data, binary_data_folder, file_name, 0))) {
-      LOG4CXX_DEBUG(logger_, "Binary data can't be saved.");
+      SDL_LOG_DEBUG("Binary data can't be saved.");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
     }
@@ -571,23 +553,28 @@ void SystemRequest::Run() {
     std::string app_full_file_path = binary_data_folder;
     app_full_file_path += file_name;
 
-    LOG4CXX_DEBUG(logger_,
-                  "Binary data is not present. Trying to find file "
-                      << file_name << " within previously saved app file in "
-                      << binary_data_folder);
+    SDL_LOG_DEBUG("Binary data is not present. Trying to find file "
+                  << file_name << " within previously saved app file in "
+                  << binary_data_folder);
 
     const application_manager::AppFile* file =
         application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
         !file_system::MoveFile(app_full_file_path, file_dst_path)) {
-      LOG4CXX_DEBUG(logger_, "Binary data not found.");
+      SDL_LOG_DEBUG("Binary data not found.");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
     processing_file_ = file_dst_path;
   }
 
-  LOG4CXX_DEBUG(logger_, "Binary data ok.");
+  SDL_LOG_DEBUG("Binary data ok.");
+
+  if (mobile_apis::RequestType::ICON_URL == request_type) {
+    application_manager_.SetIconFileFromSystemRequest(file_name);
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+    return;
+  }
 
   if (mobile_apis::RequestType::HTTP == request_type &&
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
@@ -597,18 +584,22 @@ void SystemRequest::Run() {
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
-    using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+    using namespace ns_smart_device_link::ns_json_handler::formatters;
+    application_manager_.OnQueryAppsRequest(application->device());
 
-    smart_objects::SmartObject sm_object;
-    Json::Reader reader;
+    utils::JsonReader reader;
     std::string json(binary_data.begin(), binary_data.end());
     Json::Value root;
-    if (!reader.parse(json.c_str(), root)) {
-      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file.");
+
+    if (!reader.parse(json, &root)) {
+      SDL_LOG_DEBUG("Unable to parse query_app json file. ");
       return;
     }
 
+    smart_objects::SmartObject sm_object;
+
     CFormatterJsonBase::jsonValueToObj(root, sm_object);
+
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
@@ -643,7 +634,7 @@ void SystemRequest::Run() {
 }
 
 void SystemRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
@@ -664,7 +655,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (application.use_count() == 0) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SDL_LOG_ERROR("NULL pointer");
         return;
       }
 
@@ -677,7 +668,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
@@ -686,16 +677,14 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 bool SystemRequest::ValidateQueryAppData(
     smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
-    LOG4CXX_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response is not valid.");
+    SDL_LOG_ERROR(kQueryAppsValidationFailedPrefix
+                  << "QueryApps response is not valid.");
     return false;
   }
   if (!data.keyExists(json::response)) {
-    LOG4CXX_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response does not contain '"
-                      << json::response << "' parameter.");
+    SDL_LOG_ERROR(kQueryAppsValidationFailedPrefix
+                  << "QueryApps response does not contain '" << json::response
+                  << "' parameter.");
     return false;
   }
 
@@ -705,4 +694,4 @@ bool SystemRequest::ValidateQueryAppData(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
