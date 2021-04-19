@@ -62,20 +62,24 @@ void VRGetSupportedLanguagesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  if (hmi_apis::Common_Result::SUCCESS != code) {
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::VR_GetSupportedLanguages);
+    return;
+  }
+
+  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  hmi_capabilities.set_vr_supported_languages(
+      (*message_)[strings::msg_params][hmi_response::languages]);
+
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetSupportedLanguages);
 
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    HMICapabilities& hmi_capabilities = hmi_capabilities_;
-    hmi_capabilities.set_vr_supported_languages(
-        (*message_)[strings::msg_params][hmi_response::languages]);
-
-    std::vector<std::string> sections_to_update{hmi_response::languages};
-    if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
-            hmi_interface::vr, sections_to_update, message_->getSchema())) {
-      SDL_LOG_ERROR(
-          "Failed to save VR.GetSupportedLanguages response to cache");
-    }
+  std::vector<std::string> sections_to_update{hmi_response::languages};
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save VR.GetSupportedLanguages response to cache");
   }
 }
 

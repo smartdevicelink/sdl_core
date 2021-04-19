@@ -25,6 +25,7 @@
         <element name="gps" />
         <element name="speed" />
         <element name="engineTorque" />
+        <element name="climateData" />
         <element name="externalTemperature" />
         <element name="turnSignal" />
         <element name="fuelLevel" />
@@ -222,6 +223,7 @@
         <param name="ccpu_version" type="String" maxlength="250" mandatory="false"/>
         <param name="language" type="String" maxlength="250" mandatory="false"/>
         <param name="wers_country_code" type="String" maxlength="250" mandatory="false"/>
+        <param name="hardware_version" type="String" maxlength="500" mandatory="false"/>
         <param name="pt_exchanged_at_odometer_x" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
         <param name="pt_exchanged_x_days_after_epoch" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>
         <param name="ignition_cycles_since_last_exchange" type="Integer" minvalue="0" maxvalue="65535" mandatory="false"/>

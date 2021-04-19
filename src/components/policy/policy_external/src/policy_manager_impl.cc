@@ -762,6 +762,13 @@ void PolicyManagerImpl::StartPTExchange() {
   }
 }
 
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
+  SDL_LOG_AUTO_TRACE();
+  if (ignition_check) {
+    StartPTExchange();
+  }
+}
+
 void PolicyManagerImpl::OnAppsSearchStarted() {
   SDL_LOG_AUTO_TRACE();
   update_status_manager_.OnAppsSearchStarted();
@@ -1616,9 +1623,20 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
+void PolicyManagerImpl::SetHardwareVersion(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  cache_->SetHardwareVersion(hardware_version);
+}
+
 std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
   return cache_->GetCCPUVersionFromPT();
+}
+
+std::string PolicyManagerImpl::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  return cache_->GetHardwareVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(const std::string& priority,

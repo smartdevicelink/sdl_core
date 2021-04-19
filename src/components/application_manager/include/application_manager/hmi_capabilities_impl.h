@@ -81,6 +81,10 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   const std::string& ccpu_version() const OVERRIDE;
 
+  void set_hardware_version(const std::string& hardware_version) OVERRIDE;
+
+  const std::string& hardware_version() const OVERRIDE;
+
   bool attenuated_supported() const OVERRIDE;
 
   void set_attenuated_supported(const bool state) OVERRIDE;
@@ -476,6 +480,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_rc_supported_;
   bool is_driver_distraction_supported_;
   std::string ccpu_version_;
+  std::string hardware_version_;
   smart_objects::SmartObjectSPtr navigation_capability_;
   smart_objects::SmartObjectSPtr phone_capability_;
   smart_objects::SmartObjectSPtr video_streaming_capability_;

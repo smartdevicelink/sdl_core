@@ -43,12 +43,6 @@ struct SemanticVersion {
     patch_version_ = patch;
   }
 
-  SemanticVersion(const SemanticVersion& other) {
-    major_version_ = other.major_version_;
-    minor_version_ = other.minor_version_;
-    patch_version_ = other.patch_version_;
-  }
-
   SemanticVersion(const std::string& versionString)
       : major_version_(0), minor_version_(0), patch_version_(0) {
     int readElements = sscanf(versionString.c_str(),

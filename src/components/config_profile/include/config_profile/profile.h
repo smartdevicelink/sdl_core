@@ -552,6 +552,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   size_t update_before_hours() const;
 
+  /**
+   * @brief Return security level that will be configured in the OpenSSL
+   */
+  uint32_t security_level() const;
+
 #endif  // ENABLE_SECURITY
 
   /**
@@ -1073,6 +1078,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string security_manager_protocol_name_;
   std::vector<int> force_protected_service_;
   std::vector<int> force_unprotected_service_;
+  uint32_t security_level_;
 #endif
 
   /*

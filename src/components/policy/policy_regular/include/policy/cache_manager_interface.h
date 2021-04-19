@@ -586,7 +586,7 @@ class CacheManagerInterface {
   virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
 
   /**
-   * @brief Records information about head unit system to PT
+   * @brief Records mandatory information about head unit system to PT
    * @return bool Success of operation
    */
   virtual bool SetMetaInfo(const std::string& ccpu_version,
@@ -594,10 +594,22 @@ class CacheManagerInterface {
                            const std::string& language) = 0;
 
   /**
+   * @brief Records information about hardware version to PT
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
+
+  /**
    * @brief Get information about last ccpu_version from PT
    * @return ccpu_version from PT
    */
   virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
+   * @brief Get information about last hardware version from PT
+   * @return string representation of hardware version from PT, empty if absent
+   */
+  virtual std::string GetHardwareVersionFromPT() const = 0;
 
   /**
    * @brief Checks, if specific head unit is present in PT

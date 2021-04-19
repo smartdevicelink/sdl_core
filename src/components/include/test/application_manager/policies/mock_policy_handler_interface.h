@@ -186,7 +186,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(OnHardwareVersionReceived,
+               void(const std::string& hardware_version));
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
   MOCK_METHOD0(OnVIIsReady, void());
   MOCK_METHOD1(OnVehicleDataUpdated,
                void(const smart_objects::SmartObject& message));

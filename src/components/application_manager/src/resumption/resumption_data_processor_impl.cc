@@ -29,6 +29,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
@@ -151,6 +152,8 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   if (IsResponseSuccessful(response)) {
     status.successful_requests.push_back(found_request);
   } else {
+    SDL_LOG_DEBUG("Resumption request failed");
+    MessageHelper::PrintSmartObject(response);
     status.error_requests.push_back(found_request);
   }
 
@@ -807,6 +810,21 @@ void ResumptionDataProcessorImpl::DeleteGlobalProperties(
     (*msg)[strings::msg_params] = *msg_params;
     ProcessMessageToHMI(msg, false);
   }
+
+  if (result.HasRCPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::RC_SetGlobalProperties)) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(result,
+                                                            application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::RC_SetGlobalProperties;
+
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessMessageToHMI(msg, false);
+  }
 }
 
 void ResumptionDataProcessorImpl::AddSubscriptions(
@@ -977,7 +995,12 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 }
 
 bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
-  return !response[strings::params].keyExists(strings::error_msg);
+  auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response[strings::params][application_manager::hmi_response::code]
+          .asInt());
+
+  return commands::CommandRequestImpl::IsHMIResultSuccess(result_code) ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
 void ResumptionDataProcessorImpl::CheckVehicleDataResponse(

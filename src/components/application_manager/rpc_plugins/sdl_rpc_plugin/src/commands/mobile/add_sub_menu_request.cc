@@ -86,6 +86,20 @@ void AddSubMenuRequest::Run() {
     }
   }
 
+  if (received_msg_params.keyExists(strings::secondary_image)) {
+    verification_result = MessageHelper::VerifyImage(
+        received_msg_params[strings::secondary_image],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      SDL_LOG_ERROR("MessageHelper::VerifyImage return "
+                    << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
+  }
+
   const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
 
   const auto sub_menu = app->FindSubMenu(menu_id);
@@ -113,12 +127,6 @@ void AddSubMenuRequest::Run() {
 
   const std::string& menu_name =
       received_msg_params[strings::menu_name].asString();
-
-  if (app->IsSubMenuNameAlreadyExist(menu_name, parent_id)) {
-    SDL_LOG_ERROR("Menu name " << menu_name << " is duplicated.");
-    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-    return;
-  }
 
   if (!CheckSubMenuName()) {
     SDL_LOG_ERROR("Sub-menu name is not valid.");
@@ -148,10 +156,22 @@ void AddSubMenuRequest::Run() {
   if (received_msg_params.keyExists(strings::menu_icon)) {
     msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
   }
+  if (received_msg_params.keyExists(strings::secondary_image)) {
+    msg_params[strings::secondary_image] =
+        received_msg_params[strings::secondary_image];
+  }
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
   if (received_msg_params.keyExists(strings::parent_id)) {
     msg_params[strings::menu_params][strings::parent_id] = parent_id;
+  }
+  if (received_msg_params.keyExists(strings::secondary_text)) {
+    msg_params[strings::menu_params][strings::secondary_text] =
+        received_msg_params[strings::secondary_text];
+  }
+  if (received_msg_params.keyExists(strings::tertiary_text)) {
+    msg_params[strings::menu_params][strings::tertiary_text] =
+        received_msg_params[strings::tertiary_text];
   }
 
   msg_params[strings::app_id] = app->app_id();

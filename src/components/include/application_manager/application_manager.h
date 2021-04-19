@@ -623,6 +623,12 @@ class ApplicationManager {
 
   virtual bool IsStopping() const = 0;
 
+  /**
+   * @brief Waits for HMI readiness and blocks thread if it's not ready yet
+   * @return true if HMI is ready and cooperating, otherwise returns false
+   */
+  virtual bool WaitForHmiIsReady() = 0;
+
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   /**
@@ -855,8 +861,13 @@ class ApplicationManager {
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param new_state Defines new streaming state
+   * @param state True if streaming started, false if streaming stopped.
    */
+  virtual void OnAppStreaming(uint32_t app_id,
+                              protocol_handler::ServiceType service_type,
+                              bool state) = 0;
+
+  DEPRECATED
   virtual void OnAppStreaming(uint32_t app_id,
                               protocol_handler::ServiceType service_type,
                               const Application::StreamingState new_state) = 0;

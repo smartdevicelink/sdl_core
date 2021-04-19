@@ -287,7 +287,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
 
-    const protocol_handler::SessionContext context =
+    protocol_handler::SessionContext context =
         GetSessionContext(connection_id,
                           NEW_SESSION_ID,
                           session_id,
@@ -321,11 +321,15 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         // Return sessions start success
         WillOnce(DoAll(
             NotifyTestAsyncWaiter(waiter),
-            InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                     &ProtocolHandler::NotifySessionStarted,
-                                     context,
-                                     ByRef(empty_rejected_param_),
-                                     std::string())));
+            InvokeMemberFuncWithArg3(
+                protocol_handler_impl.get(),
+                static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                      std::vector<std::string>&,
+                                                      const std::string)>(
+                    &ProtocolHandler::NotifySessionStarted),
+                ByRef(context),
+                ByRef(empty_rejected_param_),
+                std::string())));
     times++;
 
     // Expect send Ack with PROTECTION_OFF (on no Security Manager)
@@ -570,6 +574,14 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .WillRepeatedly(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context =
+      GetSessionContext(connection_id,
+                        NEW_SESSION_ID,
+                        SESSION_START_REJECT,
+                        service_type,
+                        HASH_ID_WRONG,
+                        PROTECTION_OFF);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -581,19 +593,18 @@ TEST_F(ProtocolHandlerImplTest,
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           SESSION_START_REJECT,
-                                                           service_type,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_OFF),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times += call_times;
 
   // Expect send NAck
@@ -662,6 +673,14 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       .Times(call_times)
       .WillRepeatedly(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context =
+      GetSessionContext(connection_id,
+                        NEW_SESSION_ID,
+                        SESSION_START_REJECT,
+                        service_type,
+                        HASH_ID_WRONG,
+                        callback_protection_flag);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -676,16 +695,15 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       WillRepeatedly(DoAll(
           NotifyTestAsyncWaiter(waiter),
           SaveArg<2>(&service_type),
-          InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStarted,
-                                   GetSessionContext(connection_id,
-                                                     NEW_SESSION_ID,
-                                                     SESSION_START_REJECT,
-                                                     service_type,
-                                                     HASH_ID_WRONG,
-                                                     callback_protection_flag),
-                                   ByRef(empty_rejected_param_),
-                                   std::string())));
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times += call_times;
 
   // Expect send NAck with encryption OFF
@@ -741,6 +759,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_OFF);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -750,18 +775,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_OFF),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -916,6 +940,22 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
       .WillOnce(Return(true));
+
+  protocol_handler::SessionContext rejected_context =
+      GetSessionContext(connection_id2,
+                        session_id2,
+                        SESSION_START_REJECT,
+                        start_service,
+                        HASH_ID_WRONG,
+                        PROTECTION_OFF);
+
+  protocol_handler::SessionContext context =
+      GetSessionContext(connection_id1,
+                        session_id1,
+                        generated_session_id1,
+                        start_service,
+                        HASH_ID_WRONG,
+                        PROTECTION_OFF);
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id2,
                                        session_id2,
@@ -924,26 +964,24 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .WillOnce(DoAll(
           NotifyTestAsyncWaiter(waiter),
-          InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStarted,
-                                   GetSessionContext(connection_id2,
-                                                     session_id2,
-                                                     SESSION_START_REJECT,
-                                                     start_service,
-                                                     HASH_ID_WRONG,
-                                                     PROTECTION_OFF),
-                                   ByRef(rejected_param_list),
-                                   std::string()),
-          InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                   &ProtocolHandler::NotifySessionStarted,
-                                   GetSessionContext(connection_id1,
-                                                     session_id1,
-                                                     generated_session_id1,
-                                                     start_service,
-                                                     HASH_ID_WRONG,
-                                                     PROTECTION_OFF),
-                                   ByRef(empty_rejected_param_),
-                                   std::string())));
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(rejected_context),
+              ByRef(rejected_param_list),
+              std::string()),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   BsonObject bson_ack_params;
@@ -1208,6 +1246,12 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_OFF);
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1217,18 +1261,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_OFF),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1280,6 +1323,13 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_OFF);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1289,18 +1339,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_OFF),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1334,6 +1383,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                                                start_service,
                                                                HASH_ID_WRONG,
                                                                PROTECTION_ON);
+
   context.is_new_service_ = true;
 
   // Expect verification of allowed transport
@@ -1360,13 +1410,17 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         context,
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1420,6 +1474,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1429,18 +1490,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_ON),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   SetProtocolVersion2();
@@ -1520,13 +1580,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         context,
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   std::vector<int> services;
@@ -1608,6 +1672,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1617,18 +1688,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_ON),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -1721,6 +1791,13 @@ TEST_F(
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1730,18 +1807,17 @@ TEST_F(
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_ON),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -1832,6 +1908,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
       .WillOnce(ReturnRef(video_service_transports));
 
+  protocol_handler::SessionContext context = GetSessionContext(connection_id,
+                                                               NEW_SESSION_ID,
+                                                               session_id,
+                                                               start_service,
+                                                               HASH_ID_WRONG,
+                                                               PROTECTION_ON);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1841,18 +1924,17 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       .
       // Return sessions start success
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           session_id,
-                                                           start_service,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_ON),
-                                         ByRef(empty_rejected_param_),
-                                         std::string())));
+      WillOnce(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (ProtocolHandler::*)(SessionContext&,
+                                                    std::vector<std::string>&,
+                                                    const std::string)>(
+                  &ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              std::string())));
   times++;
 
   // call new SSLContext creation
@@ -4068,6 +4150,7 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest,
        OnTMMessageSend_ReadyToCloseConnection_Disconnect) {
   OnTMMessageSend();
@@ -4097,6 +4180,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   tm_listener->OnTMMessageSend(message);
 }
+#endif
 
 TEST_F(ProtocolHandlerImplTest, OnTMMessageSend_InvalidData_Cancelled) {
   const uint8_t data_size = 8u;
@@ -5170,7 +5254,6 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
 TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
   const ServiceType service_type = kMobileNav;
   const utils::SemanticVersion min_reason_param_version(5, 3, 0);
-
 #ifdef ENABLE_SECURITY
   AddSecurityManager();
 
@@ -5207,6 +5290,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
   bson_object_put_string(&bson_nack_params,
                          protocol_handler::strings::reason,
                          const_cast<char*>(reason.c_str()));
+
   std::vector<uint8_t> nack_params =
       CreateVectorFromBsonObject(&bson_nack_params);
   bson_object_deinitialize(&bson_nack_params);
@@ -5267,6 +5351,14 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .Times(call_times)
       .WillRepeatedly(ReturnRef(allowed_transports));
 
+  protocol_handler::SessionContext context =
+      GetSessionContext(connection_id,
+                        NEW_SESSION_ID,
+                        SESSION_START_REJECT,
+                        service_type,
+                        protocol_handler::HASH_ID_WRONG,
+                        PROTECTION_OFF);
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -5278,20 +5370,19 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .Times(call_times)
       .
       // Return sessions start rejection
-      WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(waiter),
-                SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg3(
-                    protocol_handler_impl.get(),
-                    &protocol_handler::ProtocolHandler::NotifySessionStarted,
-                    GetSessionContext(connection_id,
-                                      NEW_SESSION_ID,
-                                      SESSION_START_REJECT,
-                                      service_type,
-                                      protocol_handler::HASH_ID_WRONG,
-                                      PROTECTION_OFF),
-                    ByRef(empty_rejected_param_),
-                    err_reason)));
+      WillRepeatedly(DoAll(
+          NotifyTestAsyncWaiter(waiter),
+          SaveArg<2>(&service_type),
+          InvokeMemberFuncWithArg3(
+              protocol_handler_impl.get(),
+              static_cast<void (protocol_handler::ProtocolHandler::*)(
+                  protocol_handler::SessionContext&,
+                  std::vector<std::string>&,
+                  const std::string)>(
+                  &protocol_handler::ProtocolHandler::NotifySessionStarted),
+              ByRef(context),
+              ByRef(empty_rejected_param_),
+              err_reason)));
   times += call_times;
 
   // Expect send NAck
@@ -5411,6 +5502,140 @@ TEST_F(ProtocolHandlerImplTest,
                      PROTOCOL_VERSION_5);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_ProtocolVehicleData_VehicleDataParamsForV5) {
+  auto waiter = TestAsyncWaiter::createInstance();
+
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillOnce(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillOnce(Return(PROTOCOL_VERSION_5));
+
+  std::map<std::string, std::string> vehicle_mapping = {
+      {protocol_handler::strings::vehicle_make, "TestMake"},
+      {protocol_handler::strings::vehicle_model, "TestModel"},
+      {protocol_handler::strings::vehicle_model_year, "2021"},
+      {protocol_handler::strings::vehicle_trim, "TestTrim"},
+      {protocol_handler::strings::vehicle_system_hardware_version, "TestHW"},
+      {protocol_handler::strings::vehicle_system_software_version, "TestSW"}};
+
+  connection_handler::ProtocolVehicleData data{
+      vehicle_mapping[protocol_handler::strings::vehicle_make],
+      vehicle_mapping[protocol_handler::strings::vehicle_model],
+      vehicle_mapping[protocol_handler::strings::vehicle_model_year],
+      vehicle_mapping[protocol_handler::strings::vehicle_trim],
+      vehicle_mapping
+          [protocol_handler::strings::vehicle_system_software_version],
+      vehicle_mapping
+          [protocol_handler::strings::vehicle_system_hardware_version]};
+
+  EXPECT_CALL(connection_handler_mock, GetProtocolVehicleData(_))
+      .WillOnce(DoAll(SetArgReferee<0>(data), Return(true)));
+
+  const uint32_t hash_id = 123456;
+  char full_version_string[] = "5.4.0";
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+
+  // vehicle data
+  const uint16_t max_string_length = 500;
+  for (auto& data_pair : vehicle_mapping) {
+    char value_buffer[max_string_length + 1];  // extra byte for NULL symbol
+    strncpy(value_buffer, data_pair.second.c_str(), sizeof(value_buffer));
+    value_buffer[max_string_length] = 0;
+
+    bson_object_put_string(
+        &expected_obj, data_pair.first.c_str(), value_buffer);
+  }
+
+  // secondaryTransports
+  BsonArray secondary_transports;
+  bson_array_initialize(&secondary_transports, 0);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::secondary_transports,
+                        &secondary_transports);
+
+  BsonArray audio_service_transports;
+  bson_array_initialize(&audio_service_transports, 1);
+  bson_array_add_int32(&audio_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::audio_service_transports,
+                        &audio_service_transports);
+
+  BsonArray video_service_transports;
+  bson_array_initialize(&video_service_transports, 1);
+  bson_array_add_int32(&video_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::video_service_transports,
+                        &video_service_transports);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id,
+                                                 Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+
+  connection_handler::SessionTransports dummy_st = {0, 0};
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, kDisabledSecondary))
+      .WillOnce(Return(dummy_st));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(false));
+  std::vector<std::string> empty_vec;
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillRepeatedly(Return("WEBSOCKET"));
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillRepeatedly(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
+  const uint8_t input_protocol_version = 5;
+  utils::SemanticVersion full_version(5, 4, 0);
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             kRpc,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 }  // namespace protocol_handler_test

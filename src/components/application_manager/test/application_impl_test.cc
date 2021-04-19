@@ -840,6 +840,7 @@ TEST_F(ApplicationImplTest, StartStreaming_StreamingApproved) {
 TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
@@ -847,6 +848,7 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
 
 TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
@@ -855,16 +857,12 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
 TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kSuspended));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _));
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kStarted));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _));
   app_impl->WakeUpStreaming(type);
@@ -873,16 +871,12 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
 TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kSuspended));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _));
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kStarted));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _));
   app_impl->WakeUpStreaming(type);
@@ -894,9 +888,7 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
       protocol_handler::ServiceType::kMobileNav;
   app_impl->set_video_streaming_approved(true);
 
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kStopped));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -908,9 +900,7 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   // Stop audio streaming
   app_impl->set_audio_streaming_approved(true);
   type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(
-      mock_application_manager_,
-      OnAppStreaming(app_id, type, Application::StreamingState::kStopped));
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
