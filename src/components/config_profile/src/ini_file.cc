@@ -93,11 +93,10 @@ char* ini_write_inst(const char* fname, uint8_t flag) {
   return const_cast<char*>(fname);
 }
 
-char* ini_read_value(const char* fname,
+char* ini_read_value(FILE* fp,
                      const char* chapter,
                      const char* item,
                      char* value) {
-  FILE* fp = 0;
   bool chapter_found = false;
   char line[INI_LINE_LEN] = "";
   char val[INI_LINE_LEN] = "";
@@ -107,14 +106,11 @@ char* ini_read_value(const char* fname,
   *line = '\0';
   *val = '\0';
   *tag = '\0';
-  if ((NULL == fname) || (NULL == chapter) || (NULL == item) || (NULL == value))
+  if ((NULL == fp) || (NULL == chapter) || (NULL == item) || (NULL == value))
     return NULL;
 
   *value = '\0';
-  if (('\0' == *fname) || ('\0' == *chapter) || ('\0' == *item))
-    return NULL;
-
-  if ((fp = fopen(fname, "r")) == 0)
+  if (('\0' == *chapter) || ('\0' == *item))
     return NULL;
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
@@ -122,6 +118,7 @@ char* ini_read_value(const char* fname,
     tag[i] = toupper(tag[i]);
   }
 
+  fseek(fp, 0, SEEK_SET);
   while (NULL != fgets(line, INI_LINE_LEN, fp)) {
     // Now start the line parsing
     result = ini_parse_line(line, tag, val);
@@ -134,20 +131,15 @@ char* ini_read_value(const char* fname,
           tag[i] = toupper(tag[i]);
       }
     } else {
-      // FIXME (dchmerev): Unnecessary condition
-      if ((INI_RIGHT_CHAPTER == result) || (INI_WRONG_CHAPTER == result)) {
-        fclose(fp);
+      if (INI_WRONG_CHAPTER == result) {
         return NULL;
       }
       if (INI_RIGHT_ITEM == result) {
-        fclose(fp);
         snprintf(value, INI_LINE_LEN, "%s", val);
         return value;
       }
     }
   }
-
-  fclose(fp);
 
   return NULL;
 }
