@@ -32,11 +32,11 @@
 
 #include <string>
 
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "gtest/gtest.h"
 #include "hmi/tts_get_capabilities_response.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
 
 namespace test {
 namespace components {
@@ -52,16 +52,20 @@ using testing::_;
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
+namespace hmi_interface = ::application_manager::hmi_interface;
 
 namespace {
-const std::string kText = "TEXT";
-}
+const std::string kText{"TEXT"};
+const hmi_apis::Common_Result::eType kSuccess =
+    hmi_apis::Common_Result::SUCCESS;
+}  // namespace
 
 class TTSGetCapabilitiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
   (*msg)[strings::msg_params][hmi_response::speech_capabilities] = kText;
   (*msg)[strings::msg_params][hmi_response::prerecorded_speech_capabilities] =
       kText;
@@ -70,50 +74,82 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
               set_speech_capabilities(SmartObject(kText)));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_prerecorded_speech(SmartObject(kText)));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
 
 TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlySpeech_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
   (*msg)[strings::msg_params][hmi_response::speech_capabilities] = kText;
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_speech_capabilities(SmartObject(kText)));
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
 
 TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlyPrerecorded_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
   (*msg)[strings::msg_params][hmi_response::prerecorded_speech_capabilities] =
       kText;
 
   EXPECT_CALL(mock_hmi_capabilities_, set_speech_capabilities(_)).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_,
               set_prerecorded_speech(SmartObject(kText)));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
 
 TEST_F(TTSGetCapabilitiesResponseTest, Run_Nothing_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
 
   EXPECT_CALL(mock_hmi_capabilities_, set_speech_capabilities(_)).Times(0);
   EXPECT_CALL(mock_hmi_capabilities_, set_prerecorded_speech(_)).Times(0);
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(TTSGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
+      CreateCommand<TTSGetCapabilitiesResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::TTS_GetCapabilities));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

@@ -30,92 +30,91 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include <chrono>
 #include <iostream>
 #include <thread>
-#include <chrono>
-#include "rc_rpc_plugin/interior_data_cache_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 
 namespace rc_rpc_plugin {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule");
 
 InteriorDataCacheImpl::InteriorDataCacheImpl() {}
 
 InteriorDataCacheImpl::~InteriorDataCacheImpl() {}
 
-/**
- * @brief MergeModuleData key all keys and values from first parameter and
- * update and append keys and values from the second
- * @param data1 - initial data
- * @param data2 - updated data
- * @return updated data1 with data2 keys and values
- */
-smart_objects::SmartObject MergeModuleData(
-    const smart_objects::SmartObject& data1,
-    const smart_objects::SmartObject& data2) {
-  smart_objects::SmartObject result = data1;
-  auto it = data2.map_begin();
-  for (; it != data2.map_end(); ++it) {
-    const std::string& key = it->first;
-    const smart_objects::SmartObject& value = it->second;
-    result[key] = value;
-  }
-  return result;
-}
-
-void InteriorDataCacheImpl::Add(const std::string& module_type,
+void InteriorDataCacheImpl::Add(const ModuleUid& module,
                                 const smart_objects::SmartObject& module_data) {
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+  SDL_LOG_TRACE("module_type : " << module.first
+                                 << " module_id : " << module.second);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (cached_data_.end() == it) {
-    cached_data_[module_type] = module_data;
+    cached_data_[module] = module_data;
     return;
   }
-  cached_data_[module_type] = MergeModuleData(it->second, module_data);
+  cached_data_[module] = RCHelpers::MergeModuleData(it->second, module_data);
 }
 
 smart_objects::SmartObject InteriorDataCacheImpl::Retrieve(
-    const std::string& module_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+    const ModuleUid& module) const {
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (it == cached_data_.end()) {
-    LOG4CXX_WARN(logger_,
-                 "Module type " << module_type << " was not found in cache");
+    SDL_LOG_WARN("Module with type: " << module.first
+                                      << " and id: " << module.second
+                                      << " was not found in cache");
     return smart_objects::SmartObject(smart_objects::SmartType_Null);
   }
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+  SDL_LOG_TRACE("module_type : " << module.first
+                                 << " module_id : " << module.second);
   return it->second;
 }
 
-bool InteriorDataCacheImpl::Contains(const std::string& module_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+std::vector<ModuleUid> InteriorDataCacheImpl::GetCachedModulesByType(
+    const std::string& module_type) const {
+  std::vector<ModuleUid> modules;
+  for (auto& item : cached_data_) {
+    auto& module = item.first;
+    if (module_type == module.first) {
+      modules.push_back(module);
+    }
+  }
+  return modules;
+}
+
+bool InteriorDataCacheImpl::Contains(const ModuleUid& module) const {
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   const bool contains = it != cached_data_.end();
-  LOG4CXX_TRACE(logger_,
-                "module_type : " << module_type << " "
+  SDL_LOG_TRACE("module_type : " << module.first
+                                 << " module_id : " << module.second << " "
                                  << (contains ? "true" : "false"));
   return contains;
 }
 
-void InteriorDataCacheImpl::Remove(const std::string& module_type) {
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+void InteriorDataCacheImpl::Remove(const ModuleUid& module) {
+  SDL_LOG_TRACE("module_type : " << module.first
+                                 << " module_id : " << module.second);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (cached_data_.end() == it) {
-    LOG4CXX_TRACE(logger_, "Not existing module_type : " << module_type);
+    SDL_LOG_TRACE("Not existing module : " << module.first << " "
+                                           << module.second);
     return;
   }
   cached_data_.erase(it);
 }
 
 void InteriorDataCacheImpl::Clear() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock autolock(cached_data_lock_);
   cached_data_.clear();
 }
-}
+}  // namespace rc_rpc_plugin

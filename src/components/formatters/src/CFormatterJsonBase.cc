@@ -31,8 +31,8 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#include "json/json.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "json/json.h"
 #include "utils/convert_utils.h"
 
 void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
@@ -45,14 +45,14 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
 
       Json::Value::Members members = value.getMemberNames();
 
-      for (uint32_t i = 0; i < members.size(); i++) {
+      for (uint32_t i = 0; i < members.size(); ++i) {
         jsonValueToObj(value[members[i]], obj[members[i]]);
       }
     } else if (value.type() == Json::arrayValue) {
       obj = ns_smart_device_link::ns_smart_objects::SmartObject(
           ns_smart_device_link::ns_smart_objects::SmartType_Array);
 
-      for (uint32_t i = 0; i < value.size(); i++) {
+      for (uint32_t i = 0; i < value.size(); ++i) {
         jsonValueToObj(value[i], obj[i]);
       }
     } else if (value.type() == Json::intValue) {
@@ -81,7 +81,7 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
         obj.getType()) {
       item = Json::arrayValue;
 
-      for (uint32_t i = 0; i < obj.length(); i++) {
+      for (uint32_t i = 0; i < obj.length(); ++i) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(i), value);
@@ -95,7 +95,7 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end();
-           key++) {
+           ++key) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(*key), value);
@@ -107,10 +107,10 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
       item = obj.asBool();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_Integer ==
                obj.getType()) {
-      item = utils::ConvertInt64ToLongLongInt(obj.asInt());
+      item = obj.asInt();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_UInteger ==
                obj.getType()) {
-      item = utils::ConvertUInt64ToLongLongUInt(obj.asUInt());
+      item = obj.asUInt();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_Double ==
                obj.getType()) {
       item = obj.asDouble();

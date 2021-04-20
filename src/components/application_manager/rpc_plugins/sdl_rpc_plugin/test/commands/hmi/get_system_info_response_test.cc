@@ -33,32 +33,32 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_from_hmi.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/response_from_hmi.h"
-#include "hmi/get_system_info_response.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/get_system_info_response.h"
+#include "smart_objects/smart_object.h"
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace get_system_info_response {
 
-using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::GetSystemInfoResponse;
 using sdl_rpc_plugin::commands::SystemInfo;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
@@ -68,9 +68,9 @@ typedef NiceMock<
 namespace {
 const uint32_t kConnectionKey = 2u;
 const std::string ccpu_version("4.1.3.B_EB355B");
+const std::string kHardwareVersion("1.1.1.1");
 const std::string wers_country_code("WAEGB");
-const uint32_t lang_code = 0u;
-const std::string kLanguage = "";
+const std::string lang_code("EN-US");
 }  // namespace
 
 class GetSystemInfoResponseTest
@@ -83,34 +83,19 @@ class GetSystemInfoResponseTest
     (*command_msg)[strings::msg_params]["ccpu_version"] = ccpu_version;
     (*command_msg)[strings::msg_params]["wersCountryCode"] = wers_country_code;
     (*command_msg)[strings::msg_params]["language"] = lang_code;
-
     return command_msg;
+  }
+
+  void SetHardwareVersionFromPT() {
+    const std::string hardware_version_from_pt = "1.1.1.0";
+    ON_CALL(mock_policy_handler_, GetHardwareVersionFromPT())
+        .WillByDefault(Return(hardware_version_from_pt));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                set_hardware_version(hardware_version_from_pt));
   }
 
   SmartObject capabilities_;
 };
-
-TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
-  MessageSharedPtr command_msg = CreateCommandMsg();
-  (*command_msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
-      (capabilities_);
-
-  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
-
-  std::string language;
-  EXPECT_CALL(mock_message_helper_,
-              CommonLanguageToString(
-                  static_cast<hmi_apis::Common_Language::eType>(lang_code)))
-      .WillOnce(Return(language));
-  EXPECT_EQ(kLanguage, language);
-
-  EXPECT_CALL(mock_policy_handler_,
-              OnGetSystemInfo(ccpu_version, wers_country_code, kLanguage));
-
-  command->Run();
-}
 
 TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
@@ -121,13 +106,64 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
 
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
 
-  EXPECT_CALL(mock_message_helper_,
-              CommonLanguageToString(
-                  static_cast<hmi_apis::Common_Language::eType>(lang_code)))
+  EXPECT_CALL(mock_hmi_capabilities_, UpdateCachedCapabilities());
+  EXPECT_CALL(mock_policy_handler_, SetPreloadedPtFlag(false));
+
+  command->Run();
+}
+
+TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UpdateCapabilities_Called) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_, OnSoftwareVersionReceived(ccpu_version));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(GetSystemInfoResponseTest,
+       GetSystemInfo_SaveHardwareVersionToHMICapabilitiesIfPresentInResponse) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+  (*command_msg)[strings::msg_params][strings::system_hardware_version] =
+      kHardwareVersion;
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  SetHardwareVersionFromPT();
+  EXPECT_CALL(mock_policy_handler_, OnHardwareVersionReceived(_));
+  EXPECT_CALL(mock_hmi_capabilities_, set_hardware_version(kHardwareVersion));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(
+    GetSystemInfoResponseTest,
+    GetSystemInfo_DontSaveHardwareVersionToHMICapabilitiesIfAbsentInResponse) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  SetHardwareVersionFromPT();
+  EXPECT_CALL(mock_policy_handler_, OnHardwareVersionReceived(_)).Times(0);
+  EXPECT_CALL(mock_hmi_capabilities_, set_hardware_version(kHardwareVersion))
       .Times(0);
 
-  EXPECT_CALL(mock_policy_handler_, OnGetSystemInfo("", "", ""));
-
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 

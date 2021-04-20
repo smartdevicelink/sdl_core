@@ -34,8 +34,8 @@
 #include "gtest/gtest.h"
 #include "utils/macro.h"
 
-#include "utils/resource_usage.h"
 #include "utils/file_system.h"
+#include "utils/resource_usage.h"
 
 namespace utils {
 
@@ -80,7 +80,7 @@ TEST_F(ResourceUsagePrivateTest, GetProcPathTest) {
   // assert
   EXPECT_EQ(filename, fd + "/stat");
 }
-}
+}  // namespace utils
 
 namespace test {
 namespace components {

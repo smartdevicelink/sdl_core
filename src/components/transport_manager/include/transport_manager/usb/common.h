@@ -110,7 +110,7 @@ inline bool IsAppleDevice(const PlatformUsbDevice* device) {
   return IsAppleIAPDevice(device) || IsAppleIAP2Device(device);
 }
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_

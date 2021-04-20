@@ -58,7 +58,7 @@ set(LIBRARIES
     connectionHandler
     encryption
     Resumption
-    Policy
+    PolicyStatic
     ${SecurityManagerLibrary}
 )
 

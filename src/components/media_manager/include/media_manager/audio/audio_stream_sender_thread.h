@@ -34,33 +34,17 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_AUDIO_STREAM_SENDER_THREAD_H_
 
 #include <string>
-#include "utils/macro.h"
-#include "utils/threads/thread_delegate.h"
+#include "smart_objects/smart_object.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-#include "smart_objects/smart_object.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace application_manager {
 class ApplicationManager;
 }
 
 namespace media_manager {
-
-typedef enum {
-  SR_INVALID = -1,
-  SR_8KHZ = 0,
-  SR_16KHZ = 1,
-  SR_22KHZ = 2,
-  SR_44KHZ = 3
-} SamplingRate;
-
-typedef enum {
-  ACQ_INVALID = -1,
-  ACQ_8_BIT = 0,
-  ACQ_16_BIT = 1
-} AudioCaptureQuality;
-
-typedef enum { AT_INVALID = -1, AT_PCM = 0 } AudioType;
 
 // AudioPassThru
 typedef struct {

@@ -51,14 +51,19 @@ class CDefaultSchemaItem : public ISchemaItem {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
 
   /**
    * @brief Set default value to an object.
@@ -104,14 +109,15 @@ CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
 template <typename Type>
 errors::eType CDefaultSchemaItem<Type>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (getSmartType() != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(getSmartType()) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(getSmartType()) +
+        ", got: " + SmartObject::typeToString(Object.getType());
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   } else {
     return errors::OK;

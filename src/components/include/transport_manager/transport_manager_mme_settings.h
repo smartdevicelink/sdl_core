@@ -60,6 +60,6 @@ class TransportManagerMMESettings {
 
   virtual uint32_t iap_hub_connection_wait_timeout() const = 0;
 };
-}
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_MME_SETTINGS_H_

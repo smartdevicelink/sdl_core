@@ -35,20 +35,20 @@
 #include <unistd.h>
 #endif
 
-#include <string>
 #include <string.h>
-#include "application_manager/application_manager.h"
+#include <string>
 #include "application_manager/application_impl.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
-#include "smart_objects/smart_object.h"
+#include "application_manager/message.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "media_manager/audio/audio_stream_sender_thread.h"
+#include "media_manager/media_manager_settings.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-#include "media_manager/media_manager_settings.h"
-#include "media_manager/audio/audio_stream_sender_thread.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/message.h"
 
 namespace media_manager {
 using sync_primitives::AutoLock;
@@ -70,7 +70,7 @@ const uint32_t kMqueueMessageSize = 4095;
 // the files.
 static const uint32_t kRIFFHeaderSize = 44;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOG_VARIABLE("MediaManager")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
     const std::string& fileName,
@@ -83,13 +83,13 @@ AudioStreamSenderThread::AudioStreamSenderThread(
     , shouldBeStoped_lock_()
     , shouldBeStoped_cv_()
     , application_manager_(app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {}
 
 void AudioStreamSenderThread::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   offset_ = kRIFFHeaderSize;
 
@@ -101,30 +101,30 @@ void AudioStreamSenderThread::threadMain() {
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::vector<uint8_t> binaryData;
   std::vector<uint8_t>::iterator from;
   std::vector<uint8_t>::iterator to;
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
-    LOG4CXX_ERROR(logger_, "Unable to read file." << fileName_);
+    SDL_LOG_ERROR("Unable to read file." << fileName_);
 
     return;
   }
 
   if (binaryData.empty()) {
-    LOG4CXX_ERROR(logger_, "Binary data is empty.");
+    SDL_LOG_ERROR("Binary data is empty.");
     return;
   }
 
-  LOG4CXX_INFO(logger_, "offset = " << offset_);
+  SDL_LOG_INFO("offset = " << offset_);
 
   from = binaryData.begin() + offset_;
   to = binaryData.end();
 
   if (from < binaryData.end() /*from != binaryData.end()*/) {
-    LOG4CXX_INFO(logger_, "from != binaryData.end()");
+    SDL_LOG_INFO("from != binaryData.end()");
 
     offset_ = offset_ + to - from;
     std::vector<uint8_t> data(from, to);
@@ -140,12 +140,12 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
 
 void AudioStreamSenderThread::SendAudioPassThroughNotification(
     uint32_t session_key, std::vector<uint8_t>& binary_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!application_manager_.is_audio_pass_thru_active()) {
-    LOG4CXX_ERROR(logger_,
-                  "Trying to send PassThroughNotification"
-                  " when PassThrough is not active");
+    SDL_LOG_ERROR(
+        "Trying to send PassThroughNotification"
+        " when PassThrough is not active");
     return;
   }
 
@@ -157,11 +157,11 @@ void AudioStreamSenderThread::SendAudioPassThroughNotification(
       std::make_shared<smart_objects::SmartObject>();
 
   if (!on_audio_pass) {
-    LOG4CXX_ERROR(logger_, "OnAudioPassThru NULL pointer");
+    SDL_LOG_ERROR("OnAudioPassThru NULL pointer");
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Fill smart object");
+  SDL_LOG_DEBUG("Fill smart object");
 
   (*on_audio_pass)[strings::params][strings::message_type] =
       application_manager::MessageType::kNotification;
@@ -171,13 +171,13 @@ void AudioStreamSenderThread::SendAudioPassThroughNotification(
   (*on_audio_pass)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnAudioPassThruID;
 
-  LOG4CXX_DEBUG(logger_, "Fill binary data");
+  SDL_LOG_DEBUG("Fill binary data");
   // binary data
   (*on_audio_pass)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(data.binary_data);
 
-  LOG4CXX_DEBUG(logger_, "After fill binary data");
-  LOG4CXX_DEBUG(logger_, "Send data");
+  SDL_LOG_DEBUG("After fill binary data");
+  SDL_LOG_DEBUG("Send data");
   application_manager_.GetRPCService().ManageMobileCommand(
       on_audio_pass, application_manager::commands::Command::SOURCE_SDL);
 }
@@ -195,7 +195,7 @@ void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
 }
 
 void AudioStreamSenderThread::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   setShouldBeStopped(true);
 }
 

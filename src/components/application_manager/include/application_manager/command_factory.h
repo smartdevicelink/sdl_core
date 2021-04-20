@@ -33,10 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
 
-#include "application_manager/commands/command.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -49,6 +50,11 @@ typedef std::shared_ptr<commands::Command> CommandSharedPtr;
 class CommandFactory {
  public:
   /**
+   * @brief Class destructor
+   */
+  virtual ~CommandFactory() {}
+
+  /**
    * @brief Create command object and return pointer to it
    *
    * @param  message SmartObject shared pointer.
@@ -58,10 +64,10 @@ class CommandFactory {
       const commands::MessageSharedPtr& message,
       commands::Command::CommandSource source) = 0;
   /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
+   * @param int32_t command id
+   * @param CommandSource source
+   * @return return true if command can be create, else return false
+   **/
   virtual bool IsAbleToProcess(
       const int32_t,
       const application_manager::commands::Command::CommandSource source)

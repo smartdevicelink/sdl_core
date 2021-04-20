@@ -33,13 +33,13 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "hmi/mixing_audio_supported_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -51,9 +51,9 @@ using ::testing::_;
 using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
+using am::commands::CommandImpl;
 using am::commands::RequestToHMI;
 using sdl_rpc_plugin::commands::MixingAudioSupportedRequest;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 

@@ -31,6 +31,7 @@
  */
 
 #include "gmock/gmock.h"
+#define final  // Disable error: cannot derive from ‘final’ base
 #include "smart_objects/smart_object.h"
 
 namespace test {
@@ -42,7 +43,7 @@ using namespace ns_smart_device_link::ns_smart_objects;
 class TestHelper : public ::testing::Test {
  protected:
   void makeMapObject(SmartObject& obj, const int size) const {
-    char i_key[8], j_key[8], k_key[8], value[8];
+    char i_key[32], j_key[32], k_key[32], value[32];
 
     for (int i = 0; i < size; i++)
       for (int j = 0; j < size; j++)
@@ -56,7 +57,7 @@ class TestHelper : public ::testing::Test {
   }
 
   void checkMapObject(SmartObject& obj, const int size) const {
-    char i_key[8], j_key[8], k_key[8], value[8];
+    char i_key[32], j_key[32], k_key[32], value[32];
 
     for (int i = 0; i < size; i++)
       for (int j = 0; j < size; j++)
@@ -584,6 +585,29 @@ TEST(MapEraseTest, SmartObjectTest) {
   ASSERT_FALSE(srcObj.erase("one"));
 }
 // TODO: Add a test to check accessing an array at strange indexes.
+
+TEST(DoubleCleanupDataTest, SmartObjectTest) {
+  class DerivedSmartObject : public SmartObject {
+   public:
+    DerivedSmartObject(SmartType Type) : SmartObject(Type) {}
+    using SmartObject::operator=;
+    void cleanup_data() {
+      SmartObject::cleanup_data();
+    }
+  };
+
+  DerivedSmartObject obj(SmartType_String);
+  ASSERT_EQ(SmartType_String, obj.getType());
+
+  obj = "test string_value";
+  ASSERT_EQ(std::string("test string_value"), obj.asString());
+
+  obj.cleanup_data();
+  ASSERT_EQ(std::string(""), obj.asCharArray());
+
+  obj.cleanup_data();
+  ASSERT_EQ(std::string(""), obj.asCharArray());
+}
 
 }  // namespace smart_object_test
 }  // namespace components

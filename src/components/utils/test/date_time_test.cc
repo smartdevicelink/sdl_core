@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/date_time.h"
 #include <boost/thread/thread.hpp>
 #include "gtest/gtest.h"
-#include "utils/date_time.h"
 
 namespace test {
 namespace components {

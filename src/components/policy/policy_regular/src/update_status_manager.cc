@@ -36,7 +36,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOG_VARIABLE("Policy")
 
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
@@ -54,6 +54,11 @@ void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   DoTransition();
 }
 
+void UpdateStatusManager::PendingUpdate() {
+  SDL_LOG_AUTO_TRACE();
+  ProcessEvent(kPendingUpdate);
+}
+
 void UpdateStatusManager::SetNextStatus(std::shared_ptr<Status> status) {
   next_status_ = status;
 }
@@ -67,27 +72,27 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 }
 
 void UpdateStatusManager::OnUpdateSentOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnUpdateSentOut);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnUpdateTimeout);
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnValidUpdateReceived);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnWrongUpdateReceived);
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (is_update_required) {
     ProcessEvent(kOnResetPolicyTableRequireUpdate);
     return;
@@ -96,30 +101,36 @@ void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
 }
 
 void UpdateStatusManager::OnResetRetrySequence() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnResetRetrySequence);
 }
 
-void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (kDeviceAllowed != consent) {
-    app_registered_from_non_consented_device_ = true;
-    return;
-  }
-  app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
-}
-
-void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+void UpdateStatusManager::OnExistedApplicationAdded(
+    const bool is_update_required) {
+  SDL_LOG_AUTO_TRACE();
   if (is_update_required) {
     current_status_.reset(new UpToDateStatus());
     ProcessEvent(kScheduleUpdate);
   }
 }
 
+void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
+  SDL_LOG_AUTO_TRACE();
+  if (kDeviceAllowed != consent) {
+    app_registered_from_non_consented_device_ = true;
+    return;
+  }
+  app_registered_from_non_consented_device_ = false;
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
+  }
+}
+
 void UpdateStatusManager::OnDeviceConsented() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (app_registered_from_non_consented_device_) {
     ProcessEvent(kOnNewAppRegistered);
   }
@@ -146,19 +157,19 @@ std::string UpdateStatusManager::StringifiedUpdateStatus() const {
 }
 
 void policy::UpdateStatusManager::OnAppsSearchStarted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = true;
 }
 
 void policy::UpdateStatusManager::OnAppsSearchCompleted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = false;
 }
 
 bool policy::UpdateStatusManager::IsAppsSearchInProgress() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   return apps_search_in_progress_;
 }
@@ -171,8 +182,11 @@ void UpdateStatusManager::DoTransition() {
 
   current_status_ = next_status_;
   next_status_.reset();
-  LOG4CXX_DEBUG(logger_, "last_processed_event_ = " << last_processed_event_);
-  if (last_processed_event_ != kScheduleManualUpdate) {
+  SDL_LOG_DEBUG("last_processed_event_ = " << last_processed_event_);
+  const bool is_update_pending =
+      policy::StatusProcessingSnapshot == current_status_->get_status();
+
+  if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());
   }
   if (!postponed_status_) {

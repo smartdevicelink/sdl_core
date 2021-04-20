@@ -34,14 +34,14 @@
 
 #include <pthread.h>
 
-#include "utils/threads/thread.h"
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 namespace threads {
 
 ThreadDelegate::~ThreadDelegate() {
   if (thread_) {
-    thread_->set_delegate(NULL);
+    thread_->SetDelegate(NULL);
   }
 }
 
@@ -50,7 +50,7 @@ void ThreadDelegate::exitThreadMain() {
     if (thread_->IsCurrentThread()) {
       pthread_exit(NULL);
     } else {
-      pthread_cancel(thread_->thread_handle());
+      pthread_cancel(thread_->ThreadHandle());
     }
     thread_ = NULL;
   }

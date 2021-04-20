@@ -36,6 +36,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ButtonPressResponse::ButtonPressResponse(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -48,7 +50,7 @@ ButtonPressResponse::ButtonPressResponse(
 ButtonPressResponse::~ButtonPressResponse() {}
 
 void ButtonPressResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 

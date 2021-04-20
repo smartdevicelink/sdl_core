@@ -32,13 +32,15 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/list_files_response.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 ListFilesResponse::ListFilesResponse(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,11 +57,11 @@ ListFilesResponse::ListFilesResponse(
 ListFilesResponse::~ListFilesResponse() {}
 
 void ListFilesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include <list>
-#include "utils/macro.h"
 #include "protocol/common.h"
 #include "transport_manager/common.h"
+#include "utils/macro.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -103,12 +103,15 @@ class ProtocolPacket {
     void set_max_rpc_payload_size(const size_t max_payload_size);
     void set_max_audio_payload_size(const size_t max_payload_size);
     void set_max_video_payload_size(const size_t max_payload_size);
+    void set_max_protocol_version_supported(
+        const uint16_t max_protocol_version_supported);
 
     size_t max_payload_size() const;
     size_t max_control_payload_size() const;
     size_t max_rpc_payload_size() const;
     size_t max_audio_payload_size() const;
     size_t max_video_payload_size() const;
+    uint16_t max_protocol_version_supported() const;
 
     size_t max_payload_size_by_service_type(const ServiceType type) const;
 
@@ -123,6 +126,7 @@ class ProtocolPacket {
     size_t max_rpc_payload_size_;
     size_t max_audio_payload_size_;
     size_t max_video_payload_size_;
+    uint16_t max_protocol_version_supported_;
   };
 
   /**
@@ -275,8 +279,8 @@ class ProtocolPacket {
   /*End of Deserialization*/
 
   /**
-    * \brief Getter for Connection Identifier
-    */
+   * \brief Getter for Connection Identifier
+   */
   ConnectionID connection_id() const;
 
   /**
@@ -285,13 +289,13 @@ class ProtocolPacket {
   void set_connection_id(ConnectionID connection_id);
 
   /**
-    * \brief Getter for data payload size
-    */
+   * \brief Getter for data payload size
+   */
   uint32_t payload_size() const;
 
   /**
-    * \brief Getter for full header information
-    */
+   * \brief Getter for full header information
+   */
   const ProtocolHeader& packet_header() const;
 
  private:
@@ -311,9 +315,9 @@ class ProtocolPacket {
   uint32_t payload_size_;
 
   /**
-    * \brief Connection Identifier
-    * Obtained from connection_handler
-    */
+   * \brief Connection Identifier
+   * Obtained from connection_handler
+   */
   ConnectionID connection_id_;
 
   DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);

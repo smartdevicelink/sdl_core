@@ -6,3 +6,8 @@ CMakeFiles/
 *.pyc
 .idea
 src/appMain/build_config.txt
+*venv*
+*.DS_Store
+*htmlcov
+*.coverage
+src/components/interfaces/MOBILE_API.*

@@ -30,12 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
+#include <algorithm>
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "encryption/hashing.h"
+#include "interfaces/HMI_API.h"
 
 namespace {
 // TODO(AOleynik) : replace this !!!
@@ -72,12 +73,14 @@ std::string convert_to_bt_mac(std::string& deviceInternalId) {
 
   return bt_mac;
 }
-}
+}  // namespace
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -94,7 +97,7 @@ OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
 OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {}
 
 void OnDeviceStateChangedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if ((*message_)[strings::msg_params]["deviceState"] ==
       hmi_apis::Common_DeviceState::UNPAIRED) {
@@ -109,11 +112,11 @@ void OnDeviceStateChangedNotification::Run() {
       }
     } else {
       // Policy uses hashed MAC address as device_id
-      LOG4CXX_DEBUG(logger_, "Device_id from HMI: " << device_id);
+      SDL_LOG_DEBUG("Device_id from HMI: " << device_id);
       std::string bt_mac = convert_to_bt_mac(device_id);
-      LOG4CXX_DEBUG(logger_, "Device_id as BT MAC: " << bt_mac);
+      SDL_LOG_DEBUG("Device_id as BT MAC: " << bt_mac);
       device_id = encryption::MakeHash(bt_mac);
-      LOG4CXX_DEBUG(logger_, "Device_id hashed as BT MAC : " << device_id);
+      SDL_LOG_DEBUG("Device_id hashed as BT MAC : " << device_id);
     }
     policy_handler_.RemoveDevice(device_id);
   }
@@ -121,4 +124,4 @@ void OnDeviceStateChangedNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

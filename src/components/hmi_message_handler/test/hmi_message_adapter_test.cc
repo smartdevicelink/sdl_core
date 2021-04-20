@@ -40,8 +40,8 @@ namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::Return;
 using hmi_message_handler::HMIMessageHandlerImpl;
+using ::testing::Return;
 
 typedef std::shared_ptr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
@@ -74,6 +74,6 @@ TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {
   EXPECT_EQ(NULL, message_adapter_impl->get_handler());
 }
 
-}  // namespace hmi_message_helper_test
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
