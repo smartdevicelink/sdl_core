@@ -390,7 +390,7 @@ TEST_F(RPCPassingHandlerTest,
 
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
   uint32_t timeout_in_ms = 4;
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
 
   app_services_.push_back(CreateAppService(
       kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));

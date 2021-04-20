@@ -60,7 +60,6 @@ class PolicyListener {
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
-  virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(

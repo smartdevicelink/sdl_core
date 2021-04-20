@@ -53,15 +53,13 @@
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
+    SDL_LOG_INFO("Setting value '" << value << "' for key '" << key         \
                                    << "' in section '" << section << "'."); \
   }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
   {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
+    SDL_LOG_INFO("Setting value '" << std::boolalpha << value << "' for key '" \
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
@@ -101,6 +99,7 @@ const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
+const char* kHmiCapabilitiesCacheFileKey = "HMICapabilitiesCacheFile";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
 const char* kAttemptsToOpenPolicyDBKey = "AttemptsToOpenPolicyDB";
@@ -141,6 +140,7 @@ const char* kSecurityKeyPathKey = "KeyPath";
 const char* kSecurityCipherListKey = "CipherList";
 const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
+const char* kSecurityLevel = "SecurityLevel";
 #endif
 
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
@@ -338,10 +338,11 @@ const char* kDefaultSecurityProtocol = "TLSv1.2";
 const char* kDefaultSSLMode = "CLIENT";
 const bool kDefaultVerifyPeer = false;
 const uint32_t kDefaultBeforeUpdateHours = 24;
+const uint32_t kDefaultSecurityLevel = 1;
 #endif  // ENABLE_SECURITY
 
 const uint32_t kDefaultHubProtocolIndex = 0;
-const uint32_t kDefaultHeartBeatTimeout = 0;
+const uint32_t kDefaultHeartBeatTimeout = 5000;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultWebSocketServerPort = 2020;
@@ -444,7 +445,7 @@ const char* kDefaultAOAFilterSerialNumber = "N000000";
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion)
@@ -472,6 +473,7 @@ Profile::Profile()
     , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
+    , hmi_capabilities_cache_file_name_()
     , help_prompt_()
     , time_out_promt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -648,6 +650,10 @@ size_t Profile::maximum_video_payload_size() const {
 
 const std::string& Profile::hmi_capabilities_file_name() const {
   return hmi_capabilities_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_cache_file_name() const {
+  return hmi_capabilities_cache_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -1113,6 +1119,10 @@ const std::vector<int>& Profile::force_protected_service() const {
 const std::vector<int>& Profile::force_unprotected_service() const {
   return force_unprotected_service_;
 }
+
+uint32_t Profile::security_level() const {
+  return security_level_;
+}
 #endif  // ENABLE_SECURITY
 
 bool Profile::logs_enabled() const {
@@ -1241,7 +1251,7 @@ const std::string Profile::hmi_origin_id() const {
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // SDL version
   ReadStringValue(
@@ -1304,6 +1314,11 @@ void Profile::UpdateValues() {
                 kSecuritySection,
                 kBeforeUpdateHours);
 
+  ReadUIntValue(&security_level_,
+                kDefaultSecurityLevel,
+                kSecuritySection,
+                kSecurityLevel);
+
 #endif  // ENABLE_SECURITY
 
   // Logs enabled
@@ -1334,6 +1349,21 @@ void Profile::UpdateValues() {
   }
 
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
+
+  // HMI capabilities cache file
+  ReadStringValue(&hmi_capabilities_cache_file_name_,
+                  "",
+                  kMainSection,
+                  kHmiCapabilitiesCacheFileKey);
+
+  if (!hmi_capabilities_cache_file_name_.empty()) {
+    hmi_capabilities_cache_file_name_ =
+        app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
+  }
+
+  LOG_UPDATED_VALUE(hmi_capabilities_cache_file_name_,
+                    kHmiCapabilitiesCacheFileKey,
+                    kMainSection);
 
   // Application resourse folder
   ReadStringValue(&app_resource_folder_,
@@ -1531,7 +1561,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
-  named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+  named_video_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_video_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_video_pipe_path_, kNamedVideoPipePathKey, kMediaManagerSection);
@@ -1542,7 +1573,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
-  named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
+  named_audio_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_audio_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_audio_pipe_path_, kNamedAudioPipePathKey, kMediaManagerSection);
@@ -1551,7 +1583,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &video_stream_file_, "", kMediaManagerSection, kVideoStreamFileKey);
 
-  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  video_stream_file_ =
+      app_storage_folder_ + "/" + std::string(video_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       video_stream_file_, kVideoStreamFileKey, kMediaManagerSection);
@@ -1560,7 +1593,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &audio_stream_file_, "", kMediaManagerSection, kAudioStreamFileKey);
 
-  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  audio_stream_file_ =
+      app_storage_folder_ + "/" + std::string(audio_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);
@@ -1716,8 +1750,7 @@ void Profile::UpdateValues() {
   help_prompt_.clear();
   std::string help_prompt_value;
   if (ReadValue(&help_prompt_value, kGlobalPropertiesSection, kHelpPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1736,8 +1769,7 @@ void Profile::UpdateValues() {
   std::string timeout_prompt_value;
   if (ReadValue(
           &timeout_prompt_value, kGlobalPropertiesSection, kTimeoutPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1761,8 +1793,7 @@ void Profile::UpdateValues() {
   vr_commands_.clear();
   std::string vr_help_command_value;
   if (ReadValue(&vr_help_command_value, kVrCommandsSection, kHelpCommandKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
     while (str != NULL) {
       const std::string vr_item = str;
       vr_commands_.push_back(vr_item);
@@ -1844,8 +1875,8 @@ void Profile::UpdateValues() {
                       "",
                       kMainSection,
                       kSupportedDiagModesKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
+    char* str =
+        strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
       errno = 0;
       uint32_t user_value = strtol(str, NULL, 16);
@@ -2330,7 +2361,7 @@ void Profile::UpdateValues() {
                           entry->ini_key_name,
                           kTransportRequiredForResumptionSection);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2530,7 +2561,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2568,7 +2599,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 }
@@ -2828,7 +2859,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
 
 bool Profile::IsRelativePath(const std::string& path) {
   if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    SDL_LOG_ERROR("Empty path passed.");
     return false;
   }
   return '/' != path[0];

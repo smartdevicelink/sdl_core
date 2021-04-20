@@ -198,12 +198,18 @@ class PTExtRepresentation : public virtual PTRepresentation {
                                           const std::string& language) = 0;
 
   /**
-   * @brief Records information about head unit system to PT
+   * @brief Records mandatory information about head unit system to PT
    * @return bool Success of operation
    */
   virtual bool SetMetaInfo(const std::string& ccpu_version,
                            const std::string& wers_country_code,
                            const std::string& language) = 0;
+
+  /**
+   * @brief Records information about hardware version to PT
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
 
   /**
    * @brief Checks, if specific head unit is present in PT

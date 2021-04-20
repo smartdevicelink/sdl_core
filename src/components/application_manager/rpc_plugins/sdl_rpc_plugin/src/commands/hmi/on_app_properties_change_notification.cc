@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppPropertiesChangeNotification::OnAppPropertiesChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -50,7 +52,7 @@ OnAppPropertiesChangeNotification::OnAppPropertiesChangeNotification(
                         policy_handle) {}
 
 void OnAppPropertiesChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendNotification();
 }
 

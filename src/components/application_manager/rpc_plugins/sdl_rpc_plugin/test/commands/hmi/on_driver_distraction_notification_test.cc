@@ -95,8 +95,6 @@ class HMIOnDriverDistractionNotificationTest
         .WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
-    ON_CALL(mock_message_helper_, MobileLanguageToString(kMobileLanguage))
-        .WillByDefault(Return(kDefaultLanguage));
   }
 
   MockAppPtr mock_app_;
@@ -327,8 +325,6 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
       mobile_apis::Language::FR_FR;
   std::string required_language = "FR-FR";
   ON_CALL(*mock_app_, ui_language()).WillByDefault(ReturnRef(mobile_language));
-  ON_CALL(mock_message_helper_, MobileLanguageToString(mobile_language))
-      .WillByDefault(Return(required_language));
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;

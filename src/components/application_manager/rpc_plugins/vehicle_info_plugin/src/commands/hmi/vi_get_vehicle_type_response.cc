@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -48,12 +50,32 @@ VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
 VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
 
 void VIGetVehicleTypeResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities.set_vehicle_type(
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
+    return;
+  }
+
+  std::vector<std::string> sections_to_update{hmi_response::vehicle_type};
+  hmi_capabilities_.set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vehicle_info,
+          sections_to_update,
+          message_->getSchema())) {
+    SDL_LOG_ERROR(
+        "Failed to save VehicleInfo.GetVehicleType response to cache");
+  }
 }
 
 }  // namespace commands

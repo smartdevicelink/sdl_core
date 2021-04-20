@@ -166,9 +166,9 @@ TEST_P(TcpClientListenerTest, StartListening) {
   SleepFor(kThreadStartWaitMsec);
 
   if (InterfaceNameSpecified()) {
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   } else {
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   // Stop() and Deinit() will be called during destructor
@@ -200,7 +200,7 @@ TEST_P(TcpClientListenerTest, StopListening) {
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
 
   EXPECT_EQ(TransportAdapter::OK, tcp_client_listener_->StopListening());
-  EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+  EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
 
   EXPECT_CALL(*interface_listener_mock_, Deinit()).Times(1);
 }
@@ -250,7 +250,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   int s = socket(AF_INET, SOCK_STREAM, 0);
   EXPECT_TRUE(0 <= s);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
 
   // controller should be notified of AddDevice event
   DeviceSptr mock_device = std::make_shared<MockTCPDevice>(
@@ -258,7 +258,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   EXPECT_CALL(adapter_controller_mock_, AddDevice(_))
       .WillOnce(Return(mock_device));
   EXPECT_CALL(adapter_controller_mock_, ConnectionCreated(_, _, _))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   // adapter_controller_mock_ may also receive ConnectDone() and
   // ConnectionFinished() from ThreadedSocketConnection. Ignore them as hey are
@@ -273,7 +273,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
                     client_addr_len));
 
   // since the connection is handled on another thread, wait for some time
-  EXPECT_TRUE(waiter.WaitFor(1, kConnectionCreatedTimeoutMsec));
+  EXPECT_TRUE(waiter->WaitFor(1, kConnectionCreatedTimeoutMsec));
 
   close(s);
 
@@ -310,7 +310,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_ValidIPv4Address) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -357,7 +357,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -403,7 +403,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_same) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -450,7 +450,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -509,7 +509,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -539,7 +539,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_EmptyIPv4Address) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));

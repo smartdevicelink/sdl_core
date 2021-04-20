@@ -41,7 +41,7 @@ std::shared_ptr<CAlwaysTrueSchemaItem> CAlwaysTrueSchemaItem::create() {
 
 errors::eType CAlwaysTrueSchemaItem::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   return errors::OK;

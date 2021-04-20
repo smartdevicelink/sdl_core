@@ -40,6 +40,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetAppServiceDataResponseFromMobile::GetAppServiceDataResponseFromMobile(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ GetAppServiceDataResponseFromMobile::GetAppServiceDataResponseFromMobile(
 GetAppServiceDataResponseFromMobile::~GetAppServiceDataResponseFromMobile() {}
 
 void GetAppServiceDataResponseFromMobile::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::MobileEvent event(mobile_apis::FunctionID::GetAppServiceDataID);
   event.set_smart_object(*message_);

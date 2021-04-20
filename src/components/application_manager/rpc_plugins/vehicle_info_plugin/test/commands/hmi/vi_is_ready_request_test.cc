@@ -32,6 +32,9 @@
 
 #include "hmi/vi_is_ready_request.h"
 
+#include <memory>
+#include <set>
+
 #include "gtest/gtest.h"
 
 #include "application_manager/event_engine/event.h"
@@ -55,11 +58,18 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
+namespace strings = ::application_manager::strings;
+using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
+using am::commands::RequestToHMI;
 using am::event_engine::Event;
 using vehicle_info_plugin::commands::VIIsReadyRequest;
 
 typedef std::shared_ptr<VIIsReadyRequest> VIIsReadyRequestPtr;
+
+namespace {
+const uint32_t kConnectionKey = 2u;
+}  // namespace
 
 class VIIsReadyRequestTest
     : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -67,13 +77,13 @@ class VIIsReadyRequestTest
   VIIsReadyRequestTest() : command_(CreateCommandVI<VIIsReadyRequest>()) {}
 
   void SetUpExpectations(bool is_vi_cooperating_available,
-                         bool is_send_message_to_hmi,
-                         bool is_message_contain_param,
+                         bool should_message_be_sent,
+                         bool message_contains_param,
                          am::HmiInterfaces::InterfaceState state) {
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_ivi_cooperating(is_vi_cooperating_available));
 
-    if (is_message_contain_param) {
+    if (message_contains_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
           .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_,
@@ -90,7 +100,7 @@ class VIIsReadyRequestTest
                 GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VehicleInfo))
         .WillOnce(Return(state));
 
-    if (is_send_message_to_hmi) {
+    if (should_message_be_sent) {
       ExpectSendMessagesToHMI();
     }
   }
@@ -104,61 +114,102 @@ class VIIsReadyRequestTest
     EXPECT_CALL(mock_rpc_service_, ManageHMICommand(ivi_type, _));
   }
 
-  void PrepareEvent(bool is_message_contain_param,
-                    Event& event,
-                    bool is_vi_cooperating_available = false) {
+  void PrepareEvent(bool message_contains_param,
+                    bool is_vi_cooperating_available,
+                    Event& out_event) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    if (is_message_contain_param) {
+    if (message_contains_param) {
       (*msg)[am::strings::msg_params][am::strings::available] =
           is_vi_cooperating_available;
     }
-    event.set_smart_object(*msg);
+    out_event.set_smart_object(*msg);
+  }
+
+  void HMICapabilitiesExpectations() {
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::VehicleInfo_GetVehicleType))
+        .WillOnce(Return(true));
   }
 
   VIIsReadyRequestPtr command_;
 };
 
+TEST_F(VIIsReadyRequestTest, RUN_SendRequest_SUCCESS) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
+  VIIsReadyRequestPtr command = CreateCommandVI<VIIsReadyRequest>(command_msg);
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
+}
+
 TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_vi_cooperating_available = false;
-  const bool is_send_message_to_hmi = true;
-  const bool is_message_contain_param = false;
+  const bool should_message_be_sent = true;
+  const bool message_contains_param = false;
+  const auto state = am::HmiInterfaces::STATE_NOT_RESPONSE;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-  PrepareEvent(is_message_contain_param, event);
+  PrepareEvent(message_contains_param, is_vi_cooperating_available, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_vi_cooperating_available,
-                    is_send_message_to_hmi,
-                    is_message_contain_param,
-                    am::HmiInterfaces::STATE_NOT_RESPONSE);
+                    should_message_be_sent,
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
 TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
   const bool is_vi_cooperating_available = false;
-  const bool is_send_message_to_hmi = false;
-  const bool is_message_contain_param = true;
+  const bool should_message_be_sent = false;
+  const bool message_contains_param = true;
+  const auto state = am::HmiInterfaces::STATE_NOT_AVAILABLE;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-  PrepareEvent(is_message_contain_param, event);
+  PrepareEvent(message_contains_param, is_vi_cooperating_available, event);
   SetUpExpectations(is_vi_cooperating_available,
-                    is_send_message_to_hmi,
-                    is_message_contain_param,
-                    am::HmiInterfaces::STATE_NOT_AVAILABLE);
+                    should_message_be_sent,
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
 TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
   const bool is_vi_cooperating_available = true;
-  const bool is_send_message_to_hmi = true;
-  const bool is_message_contain_param = true;
+  const bool should_message_be_sent = true;
+  const bool message_contains_param = true;
+  const auto state = am::HmiInterfaces::STATE_AVAILABLE;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-  PrepareEvent(is_message_contain_param, event, is_vi_cooperating_available);
+  HMICapabilitiesExpectations();
+  PrepareEvent(message_contains_param, is_vi_cooperating_available, event);
   SetUpExpectations(is_vi_cooperating_available,
-                    is_send_message_to_hmi,
-                    is_message_contain_param,
-                    am::HmiInterfaces::STATE_AVAILABLE);
+                    should_message_be_sent,
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
 TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->onTimeOut();
 }
 

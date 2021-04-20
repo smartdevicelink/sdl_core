@@ -176,10 +176,12 @@ class RPCHandlerImpl : public RPCHandler,
 
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output,
+                          std::string& out_warning_info,
                           const bool allow_unknown_parameters = false,
                           const bool validate_params = true);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
+
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
 

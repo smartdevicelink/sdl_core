@@ -51,7 +51,14 @@ class CommandNotificationImpl : public CommandImpl {
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  void SendNotification();
+
+  /**
+   * @brief SendNotification Constructs the message with Message Type
+   * Notification and send it to mobile.
+   * @param final_message if true - connection to mobile will be closed
+   * after processing this message
+   */
+  void SendNotification(const bool final_message = false);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandNotificationImpl);

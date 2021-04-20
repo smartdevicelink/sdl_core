@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AllowAllAppsResponse::AllowAllAppsResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ AllowAllAppsResponse::AllowAllAppsResponse(
 AllowAllAppsResponse::~AllowAllAppsResponse() {}
 
 void AllowAllAppsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   application_manager_.SetAllAppsAllowed(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool());

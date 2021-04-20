@@ -37,7 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 namespace {
 struct CommandIdComparator {
@@ -205,14 +205,16 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
-    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , choice_set_map_()
-    , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , choice_set_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , performinteraction_choice_set_map_()
     , performinteraction_choice_set_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
     , window_params_map_()
-    , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , window_params_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
     , perform_interaction_mode_(-1)
@@ -244,6 +246,21 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     show_command_ = NULL;
   }
 
+  if (keyboard_props_) {
+    delete keyboard_props_;
+    keyboard_props_ = NULL;
+  }
+
+  if (menu_title_) {
+    delete menu_title_;
+    menu_title_ = NULL;
+  }
+
+  if (menu_icon_) {
+    delete menu_icon_;
+    menu_icon_ = NULL;
+  }
+
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
@@ -262,6 +279,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     delete sub_menu_it->second;
   }
   sub_menu_.clear();
+
+  for (auto command : choice_set_map_) {
+    delete command.second;
+  }
+  choice_set_map_.clear();
 
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
@@ -380,29 +402,35 @@ DynamicApplicationDataImpl::display_capabilities() const {
 
 smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Array);
-  const auto window_caps =
-      (*display_capabilities_)[0][strings::window_capabilities].asArray();
-  if (!window_caps) {
-    LOG4CXX_WARN(logger_, "Current window capabilities are empty");
+  if (!display_capabilities_) {
+    SDL_LOG_WARN("Current window capabilities are empty");
     // SDL still needs to retreive display capabilities
     return display_capabilities_;
   }
-  auto find_res =
-      std::find_if(window_caps->begin(),
-                   window_caps->end(),
-                   [&window_id](const smart_objects::SmartObject& element) {
-                     if (window_id == element[strings::window_id].asInt()) {
-                       return true;
-                     }
 
-                     return false;
-                   });
+  smart_objects::SmartObject result_window_caps(
+      smart_objects::SmartType::SmartType_Map);
 
-  DCHECK(find_res != window_caps->end());
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (window_caps) {
+    auto find_res = std::find_if(
+        window_caps->begin(),
+        window_caps->end(),
+        [&window_id](const smart_objects::SmartObject& element) {
+          return (window_id == element[strings::window_id].asInt());
+        });
+
+    if (find_res != window_caps->end()) {
+      result_window_caps = *find_res;
+    }
+  }
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+
   const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
   for (const auto& key : disp_caps_keys) {
     if (strings::window_capabilities == key) {
@@ -411,7 +439,8 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
   }
 
-  (*result_display_caps)[0][strings::window_capabilities][0] = *find_res;
+  (*result_display_caps)[0][strings::window_capabilities][0] =
+      result_window_caps;
 
   return result_display_caps;
 }
@@ -546,7 +575,7 @@ void DynamicApplicationDataImpl::set_night_color_scheme(
 }
 
 void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace mobile_apis::PredefinedWindows;
   smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
   template_config[strings::template_layout] = layout;
@@ -555,7 +584,7 @@ void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
 
 void DynamicApplicationDataImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& incoming_window_capabilities =
       display_capabilities[0][strings::window_capabilities];
 
@@ -568,28 +597,35 @@ void DynamicApplicationDataImpl::set_display_capabilities(
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
 
-  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id) {
+  auto get_window_index = [&tmp_window_capabilities](const WindowID window_id) {
     const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
     if (!tmp_window_capabilities_arr) {
-      return false;
+      return -1;
     }
 
+    int index = 0;
     for (auto element : *tmp_window_capabilities_arr) {
       if (element.keyExists(strings::window_id)) {
         if (window_id == element[strings::window_id].asInt())
-          return true;
+          return index;
       } else if (window_id == 0) {
-        return true;
+        return index;
       }
+      ++index;
     }
-
-    return false;
+    return -1;
   };
 
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
-    const auto window_id =
-        incoming_window_capabilities[i][strings::window_id].asInt();
-    if (!has_window_id(window_id)) {
+    int64_t window_id = 0;
+    if (incoming_window_capabilities[i].keyExists(strings::window_id)) {
+      window_id = incoming_window_capabilities[i][strings::window_id].asInt();
+    }
+    int found_index = get_window_index(window_id);
+    if (0 <= found_index) {
+      // Update the existing window capability
+      tmp_window_capabilities[found_index] = incoming_window_capabilities[i];
+    } else {
       tmp_window_capabilities[tmp_window_capabilities.length()] =
           incoming_window_capabilities[i];
     }
@@ -601,7 +637,12 @@ void DynamicApplicationDataImpl::set_display_capabilities(
 
 void DynamicApplicationDataImpl::remove_window_capability(
     const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+
+  if (!display_capabilities_) {
+    SDL_LOG_ERROR("Application display capabilities are not available");
+    return;
+  }
 
   auto window_capabilities =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();
@@ -618,9 +659,8 @@ void DynamicApplicationDataImpl::remove_window_capability(
     }
   }
 
-  LOG4CXX_WARN(
-      logger_,
-      "No window id " << window_id << " found in display capabilities");
+  SDL_LOG_WARN("No window id " << window_id
+                               << " found in display capabilities");
 }
 
 bool DynamicApplicationDataImpl::menu_layout_supported(
@@ -655,7 +695,7 @@ bool DynamicApplicationDataImpl::menu_layout_supported(
 
 void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
                                                    const std::string& layout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
 
   template_config[strings::template_layout] = layout;
@@ -664,21 +704,21 @@ void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
 
 void DynamicApplicationDataImpl::set_day_color_scheme(
     const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
   window_templates_[window_id][strings::day_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_night_color_scheme(
     const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
   window_templates_[window_id][strings::night_color_scheme] = color_scheme;
 }
 
 std::string DynamicApplicationDataImpl::window_layout(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -695,7 +735,7 @@ std::string DynamicApplicationDataImpl::window_layout(
 
 smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -712,7 +752,7 @@ smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
 
 smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -738,7 +778,7 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       (this->*callback)(param);
     }
   } else {
-    LOG4CXX_WARN(logger_, "Invalid or Null smart object");
+    SDL_LOG_WARN("Invalid or Null smart object");
   }
 }
 
@@ -749,11 +789,10 @@ void DynamicApplicationDataImpl::AddCommand(
   CommandsMap::const_iterator it = commands_.find(internal_id);
   if (commands_.end() == it) {
     commands_[internal_id] = new smart_objects::SmartObject(command);
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number "
-                      << internal_id << " and id "
-                      << (*commands_[internal_id])[strings::cmd_id].asUInt()
-                      << " is added.");
+    SDL_LOG_DEBUG("Command with internal number "
+                  << internal_id << " and id "
+                  << (*commands_[internal_id])[strings::cmd_id].asUInt()
+                  << " is added.");
   }
 }
 
@@ -766,19 +805,17 @@ void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
 
   if (it != commands_.end()) {
     delete it->second;
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number " << (it->first) << " and id "
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
                                                   << cmd_id << " is removed.");
     commands_.erase(it);
 
     return;
   }
-  LOG4CXX_WARN(
-      logger_,
-      "Command with id " << cmd_id << " is not found. Removal skipped.");
+  SDL_LOG_WARN("Command with id " << cmd_id
+                                  << " is not found. Removal skipped.");
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindCommand(
     const uint32_t cmd_id) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
 
@@ -787,13 +824,13 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
       find_if(commands_.begin(), commands_.end(), is_id_equal);
 
   if (it != commands_.end()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number " << (it->first) << " and id "
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
                                                   << cmd_id << " is found.");
-    return it->second;
+    smart_objects::SmartObject command(*it->second);
+    return command;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 // TODO(VS): Create common functions for processing collections
@@ -816,24 +853,26 @@ void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindSubMenu(
     uint32_t menu_id) const {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
-    return it->second;
+    smart_objects::SmartObject sub_menu(*it->second);
+    return sub_menu;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-    const std::string& name) {
+    const std::string& name, const uint32_t parent_id) {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
     smart_objects::SmartObject* menu = it->second;
-    if ((*menu)[strings::menu_name] == name) {
+    if ((*menu)[strings::menu_name].asString() == name &&
+        (*menu)[strings::parent_id].asInt() == parent_id) {
       return true;
     }
   }
@@ -848,7 +887,7 @@ DynamicApplicationDataImpl::window_optional_params_map() const {
 
 void DynamicApplicationDataImpl::SetWindowInfo(
     const WindowID window_id, const smart_objects::SmartObject& window_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto it = window_params_map_.find(window_id);
   if (window_params_map_.end() == it) {
     window_params_map_[window_id] =
@@ -858,12 +897,12 @@ void DynamicApplicationDataImpl::SetWindowInfo(
 
 DisplayCapabilitiesBuilder&
 DynamicApplicationDataImpl::display_capabilities_builder() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return display_capabilities_builder_;
 }
 
 void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   window_params_map_.erase(window_id);
 }
 
@@ -886,15 +925,16 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindChoiceSet(
     uint32_t choice_set_id) {
   sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
-    return it->second;
+    smart_objects::SmartObject choice_set(*it->second);
+    return choice_set;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(

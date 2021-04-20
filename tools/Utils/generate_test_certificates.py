@@ -9,6 +9,7 @@
 import os
 import subprocess
 import tempfile
+import shutil
 from argparse import ArgumentParser
 from subprocess import check_call
 
@@ -42,6 +43,22 @@ def gen_root_cert(out_cert_file, key_file, days, answer):
     """
     openssl("req -x509 -new -key", key_file, "-days", days, "-out", out_cert_file, "-subj", answer)
 
+def gen_ca_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, answer):
+    request_file = out_cert_file + ".req"
+    openssl("req -new -key", key_file, "-days", days, "-out", request_file, "-subj", answer)
+
+    temp_dir = tempfile.mkdtemp()
+    config_file_path = os.path.join(temp_dir, "ca.conf")
+    config_file = open(config_file_path, 'w')
+    config_file.write("""[ v3_intermediate_ca ]
+        basicConstraints = critical, CA:true\n""")
+    config_file.close()
+
+    openssl("x509 -hash -req -in", request_file, "-CA", ca_cert_file, "-CAkey", ca_key_file, \
+        "-CAcreateserial -out", out_cert_file, "-days", days, "-extfile", config_file_path, "-extensions v3_intermediate_ca")
+
+    shutil.rmtree(temp_dir)
+
 def gen_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, answer):
     """Certificate generator
     wrap console call
@@ -58,7 +75,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
     """Expired certificate generator
     wrap console call
     'openssl req -new -key $key_file -days $days -out $out_cert_file -subj $answer'
-    'openssl ca -batch -config $config_file_path -in $request_file -out $out_cert_file, 
+    'openssl ca -batch -config $config_file_path -in $request_file -out $out_cert_file,
         "-cert",  ca_cert_file, "-keyfile", ca_key_file, "-startdate 150101000000Z -enddate 150314092653Z'
     """
     request_file = out_cert_file + ".req"
@@ -83,7 +100,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
         default_ca = ca_default
 
         [ ca_default ]
-        dir = %s""" % (temp_dir, ) + """ 
+        dir = %s""" % (temp_dir, ) + """
         certs = %s""" % (current_dir, ) + """
         new_certs_dir =  %s""" % (current_dir, ) + """
         database = %s""" % (database_file_path, ) + """
@@ -93,7 +110,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
         private_key =  %s""" % (os.path.abspath(ca_key_file), ) + """
         default_days = 365
         default_crl_days = 30
-        default_md = md5
+        default_md = sha256
         preserve = no
         policy = generic_policy
         [ generic_policy ]
@@ -108,6 +125,8 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
 
     openssl("ca -batch -config", config_file_path, "-in", request_file, "-out", out_cert_file,
         "-startdate 150101000000Z -enddate 150314092653Z")
+
+    shutil.rmtree(temp_dir)
 
 def gen_pkcs12(out, key_file, cert_file, verification_certificate) :
     """Pem to PKCS#12 standard
@@ -140,7 +159,7 @@ def answers(name, app_id, country, state, locality, organization, unit, email) :
     return answer
 
 def concat_files(out_file_name, *args) :
-    print "Concatenate text files", args, "into", out_file_name 
+    print "Concatenate text files", args, "into", out_file_name
     with open(out_file_name, 'w') as outfile:
         for fname in args :
             with open(fname) as infile :
@@ -199,14 +218,14 @@ def main():
     ford_server_key_file  = os.path.join(server_dir, "ford_server.key")
     ford_server_cert_file = os.path.join(server_dir, "ford_server.crt")
     gen_rsa_key(ford_server_key_file, 2048)
-    gen_cert(ford_server_cert_file, ford_server_key_file, server_root_cert_file, server_root_key_file, days, ford_server_answer)
+    gen_ca_cert(ford_server_cert_file, ford_server_key_file, server_root_cert_file, server_root_key_file, days, ford_server_answer)
 
     print
     print " --== Ford client CA certificate generating ==-- "
     ford_client_key_file  = os.path.join(client_dir, "ford_client.key")
     ford_client_cert_file = os.path.join(client_dir, "ford_client.crt")
     gen_rsa_key(ford_client_key_file, 2048)
-    gen_cert(ford_client_cert_file, ford_client_key_file, client_root_cert_file, client_root_key_file, days, ford_client_answer)
+    gen_ca_cert(ford_client_cert_file, ford_client_key_file, client_root_cert_file, client_root_key_file, days, ford_client_answer)
 
     print
     print " --== SDL and SPT adjustment  ==-- "

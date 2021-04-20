@@ -175,11 +175,11 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
 TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   hmi_message_handler::MessageSharedPointer message = CreateMessage();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
 
   MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
   EXPECT_CALL(message_adapter, SendMessageToHMI(message))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   hmi_handler_->AddHMIMessageAdapter(&message_adapter);
   hmi_handler_->SendMessageToHMI(message);
@@ -187,11 +187,18 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   // Wait for the message to be processed
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
 
-  EXPECT_TRUE(waiter.WaitFor(1, 100));
+  EXPECT_TRUE(waiter->WaitFor(1, 100));
 }
 
 TEST(WebsocketSessionTest, SendMessage_UnpreparedConnection_WithoutFall) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  // Value "threadsafe" is preferable for this case, but as workaround for
+  // possible bug in gcc compiler value "fast" was set. Because of this warning
+  // message is appeared.
+
+  // ToDo: set value "threadsafe", if current version of gcc can handle
+  // this value correctly without causing of core dump.
+
+  ::testing::FLAGS_gtest_death_test_style = "fast";
 
   auto send_message = []() {
     auto message =

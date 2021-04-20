@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppRegisteredNotification::OnAppRegisteredNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ OnAppRegisteredNotification::OnAppRegisteredNotification(
 OnAppRegisteredNotification::~OnAppRegisteredNotification() {}
 
 void OnAppRegisteredNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   // SDL must notify system about app registration before any dependent actions
   // will be started
   SendNotification();

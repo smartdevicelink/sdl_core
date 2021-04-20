@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIGetLanguageResponse::UIGetLanguageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,8 +56,17 @@ UIGetLanguageResponse::UIGetLanguageResponse(
 UIGetLanguageResponse::~UIGetLanguageResponse() {}
 
 void UIGetLanguageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace hmi_apis;
+  const Common_Result::eType result_code = static_cast<Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (Common_Result::SUCCESS != result_code) {
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::UI_GetLanguage);
+    return;
+  }
 
   Common_Language::eType language = Common_Language::INVALID_ENUM;
 
@@ -67,10 +78,17 @@ void UIGetLanguageResponse::Run() {
 
   hmi_capabilities_.set_active_ui_language(language);
 
-  LOG4CXX_DEBUG(logger_,
-                "Raising event for function_id " << function_id()
-                                                 << " and correlation_id "
-                                                 << correlation_id());
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetLanguage);
+
+  std::vector<std::string> sections_to_update{hmi_response::language};
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::ui, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save UI.GetLanguage response to cache");
+  }
+
+  SDL_LOG_DEBUG("Raising event for function_id "
+                << function_id() << " and correlation_id " << correlation_id());
   event_engine::Event event(FunctionID::UI_GetLanguage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

@@ -34,7 +34,7 @@
 #include "application_manager/application_manager.h"
 
 namespace policy {
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+SDL_CREATE_LOG_VARIABLE("PolicyHandler")
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 AppPermissionDelegate::AppPermissionDelegate(
@@ -57,7 +57,7 @@ AppPermissionDelegate::AppPermissionDelegate(
 #endif
 
 void AppPermissionDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy_handler_.OnAppPermissionConsentInternal(

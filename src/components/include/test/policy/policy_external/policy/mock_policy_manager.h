@@ -173,6 +173,8 @@ class MockPolicyManager : public PolicyManager {
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD2(SendNotificationOnPermissionsUpdated,
                void(const std::string& device_id,
                     const std::string& application_id));
@@ -206,9 +208,9 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(CleanupUnpairedDevices, bool());
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
-  MOCK_METHOD0(OnSystemReady, void());
-  MOCK_CONST_METHOD1(GetNotificationsNumber,
-                     uint32_t(const std::string& priority));
+  MOCK_CONST_METHOD2(GetNotificationsNumber,
+                     uint32_t(const std::string& priority,
+                              const bool is_subtle));
   MOCK_METHOD1(SetVINValue, void(const std::string& value));
   MOCK_CONST_METHOD1(IsPredataPolicy, bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
@@ -268,6 +270,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
+  MOCK_METHOD0(TriggerPTUOnStartupIfRequired, void());
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,
@@ -306,6 +309,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(OnSystemRequestReceived, void());
   MOCK_METHOD0(RetrySequenceFailed, void());
   MOCK_METHOD0(ResetTimeout, void());
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
 };
 }  // namespace policy_manager_test
 }  // namespace components

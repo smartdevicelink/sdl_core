@@ -183,7 +183,6 @@ class WebsocketClientConnection
     WebsocketClientConnection& handler_;
     sync_primitives::Lock queue_lock_;
     sync_primitives::ConditionalVariable queue_new_items_;
-    std::atomic_bool write_pending_;
     std::atomic_bool shutdown_;
 
     sync_primitives::Lock write_lock_;

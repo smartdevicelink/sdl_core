@@ -35,7 +35,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOG_VARIABLE("MediaManager")
 
 MediaAdapterImpl::MediaAdapterImpl() : current_application_(0) {}
 
@@ -44,12 +44,12 @@ MediaAdapterImpl::~MediaAdapterImpl() {
 }
 
 void MediaAdapterImpl::AddListener(const MediaListenerPtr& listener) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   media_listeners_.insert(listener);
 }
 
 void MediaAdapterImpl::RemoveListener(const MediaListenerPtr& listener) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   media_listeners_.erase(listener);
 }
 

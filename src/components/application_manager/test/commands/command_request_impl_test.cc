@@ -402,6 +402,8 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::message_type] =
+      mobile_apis::messageType::request;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
 
@@ -541,8 +543,8 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
@@ -562,8 +564,8 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -581,8 +583,8 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = false;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = false;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -600,8 +602,8 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));

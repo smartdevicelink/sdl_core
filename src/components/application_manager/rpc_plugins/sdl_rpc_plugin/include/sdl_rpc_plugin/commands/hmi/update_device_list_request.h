@@ -46,8 +46,7 @@ namespace commands {
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
-                                public app_mngr::event_engine::EventObserver {
+class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
@@ -70,23 +69,7 @@ class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   * Need to observe OnHMIReady event, to send UpdateDeviceListRequest
-   * when HMI will be ready
-   * @param event The received event
-   */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
-
-  /**
-   * @brief Need to stop execution StopMethod if HMI did not started
-   */
-  virtual bool CleanUp();
-
  private:
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::ConditionalVariable termination_condition_;
-
   DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };
 
