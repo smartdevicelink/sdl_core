@@ -884,7 +884,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @return true if app connection information is valid, otherwise - false
    */
   bool CollectRegisteredAppsPermissions(
-      std::vector<FunctionalGroupPermission>& outPermissions);
+      std::vector<FunctionalGroupPermission>& out_permissions);
 
   /**
    * @brief Collects permissions for application with certain connection key
