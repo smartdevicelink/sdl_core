@@ -280,131 +280,94 @@ char ini_write_value(const char* fname,
 }
 #endif  // BUILD_TESTS
 
+inline bool is_whitespace(char ch) {
+  return ' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch;
+}
+
 Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   const char* line_ptr;
-  char temp_str[INI_LINE_LEN] = "";
-  *temp_str = '\0';
-
+  char temp_str[INI_LINE_LEN] = "\0";
   snprintf(value, INI_LINE_LEN, "%s", line);
 
-  /* cut leading spaces */
+  /* cut leading whitespace */
   line_ptr = line;
-  for (uint32_t i = 0; i < strlen(line); i++) {
-    if ((line[i] == ' ') || (line[i] == 9) ||  // TAB
-        (line[i] == 10) ||                     // LF
-        (line[i] == 13)) {                     // CR
-      line_ptr++;
-    } else {
-      break;
-    }
+  while (is_whitespace(*line_ptr)) {
+    ++line_ptr;
   }
+
   if ('\0' == *line_ptr) {
     snprintf(value, INI_LINE_LEN, "\n");
     return INI_NOTHING;
   }
 
-  if ((*line_ptr == ';') || (*line_ptr == '*')) /* remark */
+  if (';' == *line_ptr || '*' == *line_ptr)
     return INI_REMARK;
 
-  if (*line_ptr == '[' && strrchr(line_ptr, ']') != NULL) {
-    line_ptr++;
+  if ('[' == *line_ptr && strrchr(line_ptr, ']') != NULL) {
+    /* cut leading [ and whitespace */
+    do {
+      ++line_ptr;
+    } while (is_whitespace(*line_ptr));
 
-    /* cut leading stuff */
-    uint16_t len = strlen(line_ptr);
-    for (int32_t i = 0; i < len; i++) {
-      if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
-          (*line_ptr == 10) ||                       // LF
-          (*line_ptr == 13)) {                       // CR
-        line_ptr++;
-      } else {
-        break;
-      }
-    }
-    if (*line_ptr == '\0')
+    if (']' == *line_ptr)
       return INI_NOTHING;
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
     char* temp_ptr = strrchr(temp_str, ']');
-    if (NULL == temp_ptr) {
-      return INI_NOTHING;
-    } else {
+
+    /* cut trailing ] and whitespace */
+    do {
       *temp_ptr = '\0';
-    }
-
-    /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
-      if ((temp_str[i] == ' ') || (temp_str[i] == 9) ||  // TAB
-          (temp_str[i] == 10) ||                         // LF
-          (temp_str[i] == 13)) {                         // CR
-        temp_str[i] = '\0';
-      } else {
-        break;
-      }
-    }
+      --temp_ptr;
+    } while (is_whitespace(*temp_ptr));
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
-
-    for (uint32_t i = 0; i < strlen(temp_str); i++)
+    size_t str_len = temp_ptr - temp_str + 1;
+    for (size_t i = 0; i < str_len; i++)
       temp_str[i] = toupper(temp_str[i]);
-    if (strcmp(temp_str, tag) == 0)
-      return INI_RIGHT_CHAPTER;
-    else
-      return INI_WRONG_CHAPTER;
+
+    return strcmp(temp_str, tag) == 0 ? INI_RIGHT_CHAPTER : INI_WRONG_CHAPTER;
   }
 
-  if (NULL != strchr(line_ptr, '=')) {
-    strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
-    /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
-      if ((temp_str[i] == '=') || (temp_str[i] == ' ') ||
-          (temp_str[i] == 9) ||   // TAB
-          (temp_str[i] == 10) ||  // LF
-          (temp_str[i] == 13)) {  // CR
-        temp_str[i] = '\0';
-      } else {
-        break;
-      }
-    }
+  const char* equals_ptr = strchr(line_ptr, '=');
+  if (NULL == equals_ptr)
+    return INI_NOTHING;
 
-    snprintf(value, INI_LINE_LEN, "%s", temp_str);
+  strncpy(temp_str, line_ptr, equals_ptr - line_ptr);
 
-    for (uint32_t i = 0; i < strlen(temp_str); i++)
-      temp_str[i] = toupper(temp_str[i]);
-    if (strcmp(temp_str, tag) == 0) {
-      line_ptr = strchr(line_ptr, '=') + 1;
-      uint16_t len = strlen(line_ptr);
-      /* cut trailing stuff */
-      for (uint32_t i = 0; i < len; i++) {
-        if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
-            (*line_ptr == 10) ||                       // LF
-            (*line_ptr == 13)) {                       // CR
-          line_ptr++;
-        } else {
-          break;
-        }
-      }
+  /* ensure temp_str ends in \0 and remove whitespace */
+  char* temp_back = temp_str + (equals_ptr - line_ptr);
+  do {
+    *temp_back = '\0';
+    --temp_back;
+  } while (is_whitespace(*temp_back));
 
-      snprintf(value, INI_LINE_LEN, "%s", line_ptr);
+  snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
-      if (value[0] != '\0') {
-        /* cut trailing stuff */
-        for (int32_t i = strlen(value) - 1; i > 0; i--) {
-          if ((value[i] == ' ') || (value[i] == ';') ||
-              (value[i] == 9) ||   // TAB
-              (value[i] == 10) ||  // LF
-              (value[i] == 13)) {  // CR
-            value[i] = '\0';
-          } else {
-            break;
-          }
-        }
-      }
-      return INI_RIGHT_ITEM;
-    } else {
-      return INI_WRONG_ITEM;
+  size_t str_len = temp_back - temp_str + 1;
+  for (size_t i = 0; i < str_len; ++i)
+    temp_str[i] = toupper(temp_str[i]);
+
+  if (strcmp(temp_str, tag) != 0)
+    return INI_WRONG_ITEM;
+
+  /* skip leading whitespace on value */
+  line_ptr = equals_ptr + 1;
+  while (is_whitespace(*line_ptr))
+    ++line_ptr;
+
+  snprintf(value, INI_LINE_LEN, "%s", line_ptr);
+
+  if (value[0] != '\0') {
+    /* trim trailing whitespace on value */
+    char* value_end = value + strlen(value) - 1;
+    while (is_whitespace(*value_end)) {
+      *value_end = '\0';
+      --value_end;
     }
   }
 
-  return INI_NOTHING;
+  return INI_RIGHT_ITEM;
 }
+
 }  // namespace profile
