@@ -40,7 +40,10 @@ namespace profile_test {
 
 using namespace ::profile;
 
-char* ini_read_value(const char* fname, const char* chapter, const char* item, char* val) {
+char* ini_read_value(const char* fname,
+                     const char* chapter,
+                     const char* item,
+                     char* val) {
   FILE* fp = fopen(fname, "r");
 
   auto ret = ::profile::ini_read_value(fp, chapter, item, val);

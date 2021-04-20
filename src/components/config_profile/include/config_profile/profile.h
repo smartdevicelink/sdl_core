@@ -825,6 +825,17 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_transport_change_timer_addition() const OVERRIDE;
 
   /**
+   * @brief Opens the configuration file
+   * @return true if the config opens successfully
+   */
+  bool OpenConfig();
+
+  /**
+   * @brief Closes the configuration file
+   */
+  void CloseConfig();
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();

@@ -1219,11 +1219,22 @@ const std::string Profile::hmi_origin_id() const {
   return hmi_origin_id_;
 }
 
+bool Profile::OpenConfig() {
+  config_file_ = fopen(config_file_name_.c_str(), "r");
+  return nullptr != config_file_;
+}
+
+void Profile::CloseConfig() {
+  if (nullptr != config_file_) {
+    fclose(config_file_);
+    config_file_ = nullptr;
+  }
+}
+
 void Profile::UpdateValues() {
   SDL_LOG_AUTO_TRACE();
 
-  config_file_ = fopen(config_file_name_.c_str(), "r");
-  if (nullptr == config_file_) {
+  if (!OpenConfig()) {
     SDL_LOG_DEBUG(
         "Could not open configuration file, profile values will be set to "
         "defaults");
@@ -2143,9 +2154,9 @@ void Profile::UpdateValues() {
                 kProtocolHandlerSection,
                 kMalformedMessageFiltering);
 
-  LOG_UPDATED_VALUE(malformed_message_filtering_,
-                    kMalformedMessageFiltering,
-                    kProtocolHandlerSection);
+  LOG_UPDATED_BOOL_VALUE(malformed_message_filtering_,
+                         kMalformedMessageFiltering,
+                         kProtocolHandlerSection);
 
   // Count for malformed message detection
   ReadUIntValue(&malformed_frequency_count_,
@@ -2646,9 +2657,7 @@ void Profile::UpdateValues() {
     }
   }
 
-  if (nullptr != config_file_) {
-    fclose(config_file_);
-  }
+  CloseConfig();
 }
 
 bool Profile::ReadValue(bool* value,
