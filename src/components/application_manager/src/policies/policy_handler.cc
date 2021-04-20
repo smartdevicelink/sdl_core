@@ -943,15 +943,16 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
           ? CollectAppPermissions(connection_key, permissions)
           : CollectRegisteredAppsPermissions(permissions);
 
-  if (collect_result) {
-    MessageHelper::SendGetListOfPermissionsResponse(
-        permissions,
+  MessageHelper::SendGetListOfPermissionsResponse(
+      permissions,
 #ifdef EXTERNAL_PROPRIETARY_MODE
-        policy_manager->GetExternalConsentStatus(),
+      policy_manager->GetExternalConsentStatus(),
 #endif  // EXTERNAL_PROPRIETARY_MODE
-        correlation_id,
-        application_manager_);
-  } else {
+      correlation_id,
+      application_manager_,
+      collect_result);
+
+  if (!collect_result) {
     SDL_LOG_ERROR(
         "Permissions collection failed for application with connection key:"
         << connection_key);

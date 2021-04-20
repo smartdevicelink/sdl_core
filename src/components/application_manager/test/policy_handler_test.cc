@@ -1590,14 +1590,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1625,14 +1625,16 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_CollectResult_false) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _))
-      .Times(0);
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, false))
+      .WillOnce(Return());
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _))
-      .Times(0);
+              SendGetListOfPermissionsResponse(_, corr_id, _, false))
+      .WillOnce(Return());
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1666,14 +1668,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1742,14 +1744,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
