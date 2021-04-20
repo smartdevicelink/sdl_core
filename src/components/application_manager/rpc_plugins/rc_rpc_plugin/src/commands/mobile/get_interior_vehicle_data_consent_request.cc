@@ -116,7 +116,7 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   module_ids_for_consent->clear();
 
   auto module_ids = msg_params[message_params::kModuleIds].asArray();
-  for (uint32_t i = 0; i < module_ids->size(); i++) {
+  for (uint32_t i = 0; i < module_ids->size(); ++i) {
     // Only add modules whose consent is unknown(needs to be sent to the hmi)
     bool is_consent_undefined =
         (*hmi_request_consents_.asArray())[i].getType() ==
@@ -207,7 +207,7 @@ void GetInteriorVehicleDataConsentRequest::on_event(
         consent.getType() == smart_objects::SmartType::SmartType_Null;
     if (is_consent_undefined) {
       consent = (*response_consents)[response_consents_counter];
-      response_consents_counter++;
+      ++response_consents_counter;
     }
   }
 

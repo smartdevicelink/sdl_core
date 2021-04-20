@@ -114,7 +114,7 @@ char* ini_read_value(FILE* fp,
     return NULL;
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (uint32_t i = 0; i < strlen(tag); i++) {
+  for (uint32_t i = 0; i < strlen(tag); ++i) {
     tag[i] = toupper(tag[i]);
   }
 
@@ -127,7 +127,7 @@ char* ini_read_value(FILE* fp,
         chapter_found = true;
 
         snprintf(tag, INI_LINE_LEN, "%s", item);
-        for (uint32_t i = 0; i < strlen(tag); i++)
+        for (uint32_t i = 0; i < strlen(tag); ++i)
           tag[i] = toupper(tag[i]);
       }
     } else {
@@ -208,7 +208,7 @@ char ini_write_value(const char* fname,
 #endif  // #else #if USE_MKSTEMP
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (uint32_t i = 0; i < strlen(tag); i++)
+  for (uint32_t i = 0; i < strlen(tag); ++i)
     tag[i] = toupper(tag[i]);
 
   wr_result = 1;
@@ -223,7 +223,7 @@ char ini_write_value(const char* fname,
           chapter_found = true;
           // coding style
           snprintf(tag, INI_LINE_LEN, "%s", item);
-          for (uint32_t i = 0; i < strlen(tag); i++)
+          for (uint32_t i = 0; i < strlen(tag); ++i)
             tag[i] = toupper(tag[i]);
         }
       } else {
@@ -236,7 +236,7 @@ char ini_write_value(const char* fname,
              first chapter is significant */
           value_written = true;
         } else if (result == INI_RIGHT_ITEM) {
-          for (uint16_t i = 0; i < cr_count; i++)
+          for (uint16_t i = 0; i < cr_count; ++i)
             fprintf(wr_fp, "\n");
           cr_count = 0;
           wr_result = fprintf(wr_fp, "%s=%s\n", item, value);
@@ -247,9 +247,9 @@ char ini_write_value(const char* fname,
     } /* if (!value_written) */
 
     if (0 == strcmp(val, "\n")) {
-      cr_count++;
+      ++cr_count;
     } else {
-      for (uint32_t i = 0; i < cr_count; i++)
+      for (uint32_t i = 0; i < cr_count; ++i)
         fprintf(wr_fp, "\n");
       cr_count = 0;
       wr_result = fprintf(wr_fp, "%s", line);

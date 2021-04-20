@@ -611,7 +611,7 @@ void DynamicApplicationDataImpl::set_display_capabilities(
       } else if (window_id == 0) {
         return index;
       }
-      index++;
+      ++index;
     }
     return -1;
   };

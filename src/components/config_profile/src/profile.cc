@@ -2415,7 +2415,7 @@ void Profile::UpdateValues() {
                           entry->ini_key_name,
                           kTransportRequiredForResumptionSection);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2615,7 +2615,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2653,7 +2653,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 

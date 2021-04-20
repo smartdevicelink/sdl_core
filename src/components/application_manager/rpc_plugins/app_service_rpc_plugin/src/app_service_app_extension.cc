@@ -91,7 +91,7 @@ void AppServiceAppExtension::SaveResumptionData(
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
     resumption_data[app_mngr::hmi_interface::app_service][i] = subscription;
-    i++;
+    ++i;
   }
 }
 

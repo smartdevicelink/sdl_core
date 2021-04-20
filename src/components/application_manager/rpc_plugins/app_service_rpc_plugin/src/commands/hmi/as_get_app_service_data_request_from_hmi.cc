@@ -92,7 +92,7 @@ void ASGetAppServiceDataRequestFromHMI::GetWeatherImagePaths(
   if (data.keyExists(strings::minute_forecast)) {
     smart_objects::SmartObject& minute_forecast =
         data[strings::minute_forecast];
-    for (size_t i = 0; i < minute_forecast.length(); i++) {
+    for (size_t i = 0; i < minute_forecast.length(); ++i) {
       if (minute_forecast[i].keyExists(strings::weather_icon)) {
         MessageHelper::VerifyImage(minute_forecast[i][strings::weather_icon],
                                    app,
@@ -104,7 +104,7 @@ void ASGetAppServiceDataRequestFromHMI::GetWeatherImagePaths(
   if (data.keyExists(strings::hourly_forecast)) {
     smart_objects::SmartObject& hourly_forecast =
         data[strings::hourly_forecast];
-    for (size_t i = 0; i < hourly_forecast.length(); i++) {
+    for (size_t i = 0; i < hourly_forecast.length(); ++i) {
       if (hourly_forecast[i].keyExists(strings::weather_icon)) {
         MessageHelper::VerifyImage(hourly_forecast[i][strings::weather_icon],
                                    app,
@@ -116,7 +116,7 @@ void ASGetAppServiceDataRequestFromHMI::GetWeatherImagePaths(
   if (data.keyExists(strings::multiday_forecast)) {
     smart_objects::SmartObject& multiday_forecast =
         data[strings::multiday_forecast];
-    for (size_t i = 0; i < multiday_forecast.length(); i++) {
+    for (size_t i = 0; i < multiday_forecast.length(); ++i) {
       if (multiday_forecast[i].keyExists(strings::weather_icon)) {
         MessageHelper::VerifyImage(multiday_forecast[i][strings::weather_icon],
                                    app,
@@ -145,7 +145,7 @@ void ASGetAppServiceDataRequestFromHMI::GetNavigationImagePaths(
 
   if (data.keyExists(strings::instructions)) {
     smart_objects::SmartObject& instructions = data[strings::instructions];
-    for (size_t i = 0; i < instructions.length(); i++) {
+    for (size_t i = 0; i < instructions.length(); ++i) {
       if (instructions[i].keyExists(strings::image)) {
         MessageHelper::VerifyImage(
             instructions[i][strings::image], app, application_manager_);

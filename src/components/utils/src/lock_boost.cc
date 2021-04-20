@@ -72,7 +72,7 @@ void Lock::AssertFreeAndMarkTaken() {
     SDL_LOG_FATAL("Locking already taken not recursive mutex");
     NOTREACHED();
   }
-  lock_taken_++;
+  ++lock_taken_;
 }
 
 void Lock::AssertTakenAndMarkFree() {
@@ -80,7 +80,7 @@ void Lock::AssertTakenAndMarkFree() {
     SDL_LOG_FATAL("Unlocking a mutex that is not taken");
     NOTREACHED();
   }
-  lock_taken_--;
+  --lock_taken_;
 }
 
 // Recursive lock looks the same on the surface, some code duplication is
@@ -112,7 +112,7 @@ bool RecursiveLock::Try() {
 }
 
 void RecursiveLock::AssertFreeAndMarkTaken() {
-  lock_taken_++;
+  ++lock_taken_;
 }
 
 void RecursiveLock::AssertTakenAndMarkFree() {
@@ -120,7 +120,7 @@ void RecursiveLock::AssertTakenAndMarkFree() {
     SDL_LOG_FATAL("Unlocking a recursive mutex that is not taken");
     NOTREACHED();
   }
-  lock_taken_--;
+  --lock_taken_;
 }
 
 }  // namespace sync_primitives
