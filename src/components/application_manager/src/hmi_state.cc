@@ -259,16 +259,9 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
 
   auto expected = HMILevel::HMI_FULL;
   if (is_navi_app() || is_mobile_projection_app()) {
-<<<<<<< HEAD
-    return HMILevel::HMI_LIMITED;
-  }
-  if (!is_media_app() && !is_voice_communication_app()) {
-    return parent()->hmi_level();
-=======
     expected = HMILevel::HMI_LIMITED;
-  } else if (is_media_app()) {
+  } else if (is_media_app() || is_voice_communication_app()) {
     expected = HMILevel::HMI_BACKGROUND;
->>>>>>> origin/develop
   }
 
   return std::max(expected, parent_max_hmi_level());
