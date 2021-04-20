@@ -257,7 +257,7 @@ bool AppLaunchDataJson::DeleteOldestAppData() {
 
   // Copy in temporary vector Json list without oldest record
   int32_t i = 0;
-  for (auto it = apps_list.begin(); it != apps_list.end(); ++it, i++) {
+  for (auto it = apps_list.begin(); it != apps_list.end(); ++it, ++i) {
     if ((*it).isMember(strings::device_id) &&
         (*it).isMember(strings::bundle_id) && (*it).isMember(strings::app_id) &&
         (*it).isMember(strings::app_launch_last_session)) {

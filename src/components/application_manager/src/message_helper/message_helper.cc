@@ -520,7 +520,7 @@ smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
         smart_objects::SmartType_Map);
     app_service_capability[strings::updated_app_service_record] = record;
     app_services[i] = app_service_capability;
-    i++;
+    ++i;
   }
 
   app_service_capabilities[strings::app_services] = app_services;

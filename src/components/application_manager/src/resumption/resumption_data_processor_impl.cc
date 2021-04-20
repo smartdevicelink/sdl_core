@@ -975,7 +975,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
           smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
       module_data_so[index][message_params::kModuleId] = module.second;
-      index++;
+      ++index;
     }
   }
 

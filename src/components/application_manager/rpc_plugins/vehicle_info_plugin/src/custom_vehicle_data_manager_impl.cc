@@ -114,7 +114,7 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
         auto& input_param = input_params[key];
         if (*schema->array &&
             input_param.getType() == smart_objects::SmartType_Array) {
-          for (size_t i = 0; i < input_param.length(); i++) {
+          for (size_t i = 0; i < input_param.length(); ++i) {
             const auto param =
                 fill_mobile_msg(input_param[i], SearchMethod::RECURSIVE);
             out_params[item_name][i] = param;

@@ -371,7 +371,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray secondaryTransportsArr;
           bson_array_initialize(&secondaryTransportsArr,
                                 secondaryTransports.size());
-          for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
+          for (unsigned int i = 0; i < secondaryTransports.size(); ++i) {
             char secondaryTransport[255];
             strncpy(secondaryTransport,
                     secondaryTransports[i].c_str(),
@@ -389,7 +389,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray audioServiceTransportsArr;
           bson_array_initialize(&audioServiceTransportsArr,
                                 audioServiceTransports.size());
-          for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
+          for (unsigned int i = 0; i < audioServiceTransports.size(); ++i) {
             SDL_LOG_DEBUG("Adding " << audioServiceTransports[i]
                                     << " to audioServiceTransports parameter "
                                        "of StartSessionAck");
@@ -403,7 +403,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray videoServiceTransportsArr;
           bson_array_initialize(&videoServiceTransportsArr,
                                 videoServiceTransports.size());
-          for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
+          for (unsigned int i = 0; i < videoServiceTransports.size(); ++i) {
             SDL_LOG_DEBUG("Adding " << videoServiceTransports[i]
                                     << " to videoServiceTransports parameter "
                                        "of StartSessionAck");

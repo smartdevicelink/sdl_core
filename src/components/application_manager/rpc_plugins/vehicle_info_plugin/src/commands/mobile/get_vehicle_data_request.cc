@@ -91,7 +91,7 @@ void GetVehicleDataRequest::Run() {
       continue;
     }
     hmi_msg_params[name] = msg_params[name];
-    params_count++;
+    ++params_count;
   }
 
   const int minimal_params_count = 1;

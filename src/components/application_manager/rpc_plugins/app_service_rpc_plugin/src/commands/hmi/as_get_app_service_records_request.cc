@@ -75,7 +75,7 @@ void ASGetAppServiceRecordsRequest::Run() {
       continue;
     }
     records[index] = record;
-    index++;
+    ++index;
   }
 
   if (!records.empty()) {

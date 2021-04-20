@@ -132,8 +132,9 @@ void ShowConstantTBTRequest::Run() {
     msg_params.erase(strings::navigation_text_1);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::navigationText1);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::navigation_text_1];
+    ++index;
   }
 
   if (msg_params.keyExists(strings::navigation_text_2)) {
@@ -141,8 +142,9 @@ void ShowConstantTBTRequest::Run() {
     msg_params.erase(strings::navigation_text_2);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::navigationText2);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::navigation_text_2];
+    ++index;
   }
 
   if (msg_params.keyExists(strings::eta)) {
@@ -150,8 +152,9 @@ void ShowConstantTBTRequest::Run() {
     msg_params.erase(strings::eta);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::ETA);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::eta];
+    ++index;
   }
 
   if (msg_params.keyExists(strings::total_distance)) {
@@ -159,8 +162,9 @@ void ShowConstantTBTRequest::Run() {
     msg_params.erase(strings::total_distance);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::totalDistance);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::total_distance];
+    ++index;
   }
 
   if (msg_params.keyExists(strings::time_to_destination)) {
@@ -168,8 +172,9 @@ void ShowConstantTBTRequest::Run() {
     msg_params.erase(strings::time_to_destination);
     msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
         static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+    msg_params[hmi_request::navi_texts][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::time_to_destination];
+    ++index;
   }
 
   if (msg_params.keyExists(strings::soft_buttons)) {
