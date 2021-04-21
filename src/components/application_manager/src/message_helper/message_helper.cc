@@ -2347,7 +2347,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
   params[hmi_response::code] = static_cast<int32_t>(
-      sucess_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2391,7 +2391,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
   params[hmi_response::code] = static_cast<int32_t>(
-      sucess_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 

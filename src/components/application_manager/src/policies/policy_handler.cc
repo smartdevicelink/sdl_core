@@ -887,7 +887,7 @@ bool PolicyHandler::CollectRegisteredAppsPermissions(
     consolidator.Consolidate(group_permissions);
   }
 
-  outPermissions = consolidator.GetConsolidatedPermissions();
+  out_permissions = consolidator.GetConsolidatedPermissions();
   return true;
 }
 
@@ -920,7 +920,7 @@ bool PolicyHandler::CollectAppPermissions(
   }
 
   policy_manager->GetUserConsentForApp(
-      device_params.device_mac_address, app->policy_app_id(), outPermissions);
+      device_params.device_mac_address, app->policy_app_id(), out_permissions);
 
   return true;
 }

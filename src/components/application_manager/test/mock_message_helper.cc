@@ -179,7 +179,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 #endif  // EXTERNAL_PROPRIETARY_MODE
       correlation_id,
       app_mngr,
-      sucess_flag);
+      success_flag);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
