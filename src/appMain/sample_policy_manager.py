@@ -51,7 +51,6 @@ def decrypt(data):
 
 
 def pack(data, encryption, add_http_header):
-    print("Pack")
     file_path = data['fileName']
     file_ptr = open(file_path, "r+")
 
@@ -72,7 +71,6 @@ def pack(data, encryption, add_http_header):
 
 
 def unpack(data, encryption):
-    print("Unpack")
     file_path = data['fileName']
     file_ptr = open(file_path, 'r+')
 
