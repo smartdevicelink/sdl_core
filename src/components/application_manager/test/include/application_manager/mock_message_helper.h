@@ -145,7 +145,7 @@ class MockMessageHelper {
            const policy::ExternalConsentStatus& external_consent_status,
            uint32_t correlation_id,
            ApplicationManager& app_mngr,
-           const bool sucess_flag));
+           const bool success_flag));
 #else
   MOCK_METHOD4(
       SendGetListOfPermissionsResponse,

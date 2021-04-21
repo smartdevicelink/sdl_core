@@ -867,7 +867,7 @@ void PolicyHandler::ExchangePolicyManager(
 }
 
 bool PolicyHandler::CollectRegisteredAppsPermissions(
-    std::vector<FunctionalGroupPermission>& outPermissions) {
+    std::vector<FunctionalGroupPermission>& out_permissions) {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
@@ -893,7 +893,7 @@ bool PolicyHandler::CollectRegisteredAppsPermissions(
 
 bool PolicyHandler::CollectAppPermissions(
     const uint32_t connection_key,
-    std::vector<policy::FunctionalGroupPermission>& outPermissions) {
+    std::vector<policy::FunctionalGroupPermission>& out_permissions) {
   std::vector<FunctionalGroupPermission> group_permissions;
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);

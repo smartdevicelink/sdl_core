@@ -2334,7 +2334,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const policy::ExternalConsentStatus& external_consent_status,
     uint32_t correlation_id,
     ApplicationManager& app_mngr,
-    const bool sucess_flag) {
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2378,7 +2378,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     uint32_t correlation_id,
     ApplicationManager& app_mngr,
-    const bool sucess_flag) {
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 

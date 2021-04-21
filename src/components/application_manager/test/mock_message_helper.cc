@@ -171,7 +171,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 #endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
     ApplicationManager& app_mngr,
-    const bool sucess_flag) {
+    const bool success_flag) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
       permissions,
 #ifdef EXTERNAL_PROPRIETARY_MODE

@@ -880,7 +880,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
-   * @param outPermissions output ref on list of application permissions
+   * @param out_permissions output ref on list of application permissions
    * @return true if app connection information is valid, otherwise - false
    */
   bool CollectRegisteredAppsPermissions(
@@ -889,7 +889,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Collects permissions for application with certain connection key
    * @param connection_key Connection key of application to look for
-   * @param outPermissions output ref on list of application permissions
+   * @param out_permissions output ref on list of application permissions
    * @return true if app connection information is valid, otherwise - false
    */
   bool CollectAppPermissions(

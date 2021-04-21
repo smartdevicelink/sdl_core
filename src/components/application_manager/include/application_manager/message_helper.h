@@ -491,7 +491,7 @@ class MessageHelper {
  * @param external_consent_status External user consent status
  * @param correlation_id Correlation id of request
  * @param app_mngr ApplicationManager instance
- * @param sucess_flag Indication that we were able to collect permissions
+ * @param success_flag Indication that we were able to collect permissions
  */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   static void SendGetListOfPermissionsResponse(
@@ -499,13 +499,13 @@ class MessageHelper {
       const policy::ExternalConsentStatus& external_consent_status,
       const uint32_t correlation_id,
       ApplicationManager& app_mngr,
-      const bool sucess_flag);
+      const bool success_flag = true);
 #else
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
       const uint32_t correlation_id,
       ApplicationManager& app_mngr,
-      const bool sucess_flag);
+      const bool success_flag = true);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
