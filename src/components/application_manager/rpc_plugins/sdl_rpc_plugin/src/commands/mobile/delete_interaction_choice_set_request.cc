@@ -56,8 +56,7 @@ DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , response_result_code_(hmi_apis::Common_Result::eType::INVALID_ENUM)
-    , response_result_(false) {}
+    , response_result_codes_() {}
 
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {}
 
@@ -101,35 +100,33 @@ bool DeleteInteractionChoiceSetRequest::Init() {
 void DeleteInteractionChoiceSetRequest::on_event(
     const event_engine::Event& event) {
   using namespace helpers;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (event.id() == hmi_apis::FunctionID::VR_DeleteCommand) {
-    {
-      sync_primitives::AutoLock auto_lock(requests_lock_);
-      const smart_objects::SmartObject& message = event.smart_object();
-      response_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      const std::uint32_t correlation_id = static_cast<uint32_t>(
-          message[strings::params][strings::correlation_id].asUInt());
+    const smart_objects::SmartObject& message = event.smart_object();
+    const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+        message[strings::params][hmi_response::code].asInt());
+    response_result_codes_.push_back(result_code);
+    const std::uint32_t correlation_id = static_cast<uint32_t>(
+        message[strings::params][strings::correlation_id].asUInt());
 
-      auto found_request = sent_requests_.find(correlation_id);
-      if (sent_requests_.end() == found_request) {
-        LOG4CXX_WARN(logger_,
-                     "Request with " << *found_request
-                                     << " correlation_id is not found.");
-        return;
-      }
-      sent_requests_.erase(found_request);
+    sync_primitives::AutoLock auto_lock(requests_lock_);
+    auto found_request = sent_requests_.find(correlation_id);
+    if (sent_requests_.end() == found_request) {
+      SDL_LOG_WARN("Request with " << *found_request
+                                   << " correlation_id is not found.");
+      return;
+    }
+    sent_requests_.erase(found_request);
 
-      if (sent_requests_.empty()) {
-        SendDeleteInteractionChoiceSetResponse();
-      }
+    if (sent_requests_.empty()) {
+      SendDeleteInteractionChoiceSetResponse();
     }
   }
 }
 
 void DeleteInteractionChoiceSetRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
 }
 
@@ -184,29 +181,37 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
   choice_set = choice_set[strings::choice_set];
 
   sync_primitives::AutoLock auto_lock(requests_lock_);
-  for (uint32_t i = 0; i < choice_set.length(); ++i) {    
+  for (uint32_t i = 0; i < choice_set.length(); ++i) {
     msg_params[strings::cmd_id] = choice_set[i][strings::choice_id];
     const uint32_t delte_cmd_hmi_corr_id = SendHMIRequest(
-      hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
+        hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
     sent_requests_.insert(delte_cmd_hmi_corr_id);
   }
 }
 
 void DeleteInteractionChoiceSetRequest::
     SendDeleteInteractionChoiceSetResponse() {
-  const mobile_apis::Result::eType result_code =
-      MessageHelper::HMIToMobileResult(response_result_code_);
-  response_result_ =
-      helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
-          result_code,
-          mobile_apis::Result::SUCCESS,
-          mobile_apis::Result::WARNINGS);
-  if (response_result_) {
+  hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  for (const auto& code : response_result_codes_) {
+    if (result_code == hmi_apis::Common_Result::INVALID_ENUM) {
+      result_code = code;
+      continue;
+    }
+
+    if (!IsHMIResultSuccess(code)) {
+      result_code = code;
+    }
+  }
+
+  const bool response_result = PrepareResultForMobileResponse(
+      result_code, HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
+
+  if (response_result) {
     ApplicationSharedPtr app =
         application_manager_.application(connection_key());
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with connection key " << connection_key()
+      SDL_LOG_ERROR("Application with connection key " << connection_key()
                                                        << " did not find.");
       return;
     }
@@ -216,11 +221,10 @@ void DeleteInteractionChoiceSetRequest::
     app->RemoveChoiceSet(choice_set_id);
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Response sent. Result code: " << result_code
+  SDL_LOG_DEBUG("Response sent. Result code: " << result_code
                                                << " sussess: " << std::boolalpha
                                                << result_code);
-  SendResponse(response_result_, result_code);
+  SendResponse(response_result, MessageHelper::HMIToMobileResult(result_code));
 }
 
 }  // namespace commands
