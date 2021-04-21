@@ -106,12 +106,14 @@ char* ini_read_value(FILE* fp,
   *line = '\0';
   *val = '\0';
   *tag = '\0';
-  if ((NULL == fp) || (NULL == chapter) || (NULL == item) || (NULL == value))
+  if ((NULL == fp) || (NULL == chapter) || (NULL == item) || (NULL == value)) {
     return NULL;
+  }
 
   *value = '\0';
-  if (('\0' == *chapter) || ('\0' == *item))
+  if (('\0' == *chapter) || ('\0' == *item)) {
     return NULL;
+  }
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
   for (uint32_t i = 0; i < strlen(tag); ++i) {
@@ -300,8 +302,9 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     return INI_NOTHING;
   }
 
-  if (';' == *line_ptr || '*' == *line_ptr)
+  if (';' == *line_ptr || '*' == *line_ptr) {
     return INI_REMARK;
+  }
 
   if ('[' == *line_ptr && strrchr(line_ptr, ']') != NULL) {
     /* cut leading [ and whitespace */
@@ -309,8 +312,9 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       ++line_ptr;
     } while (is_whitespace(*line_ptr));
 
-    if (']' == *line_ptr)
+    if (']' == *line_ptr) {
       return INI_NOTHING;
+    }
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
     char* temp_ptr = strrchr(temp_str, ']');
@@ -323,15 +327,17 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
     size_t str_len = temp_ptr - temp_str + 1;
-    for (size_t i = 0; i < str_len; i++)
+    for (size_t i = 0; i < str_len; i++) {
       temp_str[i] = toupper(temp_str[i]);
+    }
 
     return strcmp(temp_str, tag) == 0 ? INI_RIGHT_CHAPTER : INI_WRONG_CHAPTER;
   }
 
   const char* equals_ptr = strchr(line_ptr, '=');
-  if (NULL == equals_ptr)
+  if (NULL == equals_ptr) {
     return INI_NOTHING;
+  }
 
   strncpy(temp_str, line_ptr, equals_ptr - line_ptr);
 
@@ -345,16 +351,19 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
   size_t str_len = temp_back - temp_str + 1;
-  for (size_t i = 0; i < str_len; ++i)
+  for (size_t i = 0; i < str_len; ++i) {
     temp_str[i] = toupper(temp_str[i]);
+  }
 
-  if (strcmp(temp_str, tag) != 0)
+  if (strcmp(temp_str, tag) != 0) {
     return INI_WRONG_ITEM;
+  }
 
   /* skip leading whitespace on value */
   line_ptr = equals_ptr + 1;
-  while (is_whitespace(*line_ptr))
+  while (is_whitespace(*line_ptr)) {
     ++line_ptr;
+  }
 
   snprintf(value, INI_LINE_LEN, "%s", line_ptr);
 
