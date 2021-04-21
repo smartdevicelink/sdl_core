@@ -894,7 +894,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   bool CollectAppPermissions(
       const uint32_t connection_key,
-      std::vector<policy::FunctionalGroupPermission>& outPermissions);
+      std::vector<policy::FunctionalGroupPermission>& out_permissions);
 
  private:
   static const std::string kLibrary;
