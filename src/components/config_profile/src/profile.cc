@@ -1219,25 +1219,71 @@ const std::string Profile::hmi_origin_id() const {
   return hmi_origin_id_;
 }
 
-bool Profile::OpenConfig() {
-  config_file_ = fopen(config_file_name_.c_str(), "r");
-  return nullptr != config_file_;
-}
-
-void Profile::CloseConfig() {
-  if (nullptr != config_file_) {
-    fclose(config_file_);
-    config_file_ = nullptr;
-  }
-}
-
 void Profile::UpdateValues() {
   SDL_LOG_AUTO_TRACE();
 
-  if (!OpenConfig()) {
-    SDL_LOG_DEBUG(
-        "Could not open configuration file, profile values will be set to "
-        "defaults");
+  FILE* config_file_ = fopen(config_file_name_.c_str(), "r");
+  config_obj_ = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (nullptr != config_file_) {
+    char line[INI_LINE_LEN] = "\0";
+    std::string chapter;
+
+    while (nullptr != fgets(line, INI_LINE_LEN, config_file_)) {
+      std::string line_str(line);
+      auto whitespace_len = line_str.find_first_not_of(" \t\r\n");
+      if (std::string::npos == whitespace_len) {
+        continue;
+      }
+      line_str.erase(0, whitespace_len);
+
+      if (';' == line_str[0] || '*' == line_str[0]) {
+        continue;
+      }
+
+      if ('[' == line_str[0] && std::string::npos != line_str.find(']')) {
+        line_str.erase(0, line_str.find_first_not_of("[ \t\r\n"));
+        line_str.erase(line_str.find_last_not_of(" \t\r\n]") + 1);
+
+        if (false == line_str.empty()) {
+          chapter = line_str;
+          config_obj_[chapter] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+        }
+
+        continue;
+      }
+
+      size_t equals_idx = line_str.find('=');
+      if (std::string::npos == equals_idx) {
+        continue;
+      }
+
+      std::string key(line_str.data(), equals_idx);
+      std::string value(line_str.data() + equals_idx + 1);
+      auto val_whitespace_len = value.find_first_not_of(" \t\r\n");
+      if (std::string::npos == val_whitespace_len) {
+        value = "";
+      } else {
+        value.erase(0, value.find_first_not_of(" \t\r\n"));
+        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+      }
+
+      auto key_whitespace_len = key.find_first_not_of(" \t\r\n");
+      if (std::string::npos == key_whitespace_len) {
+        continue;
+      }
+      key.erase(0, key_whitespace_len);
+      key.erase(key.find_last_not_of(" \t\r\n") + 1);
+
+      if (false == config_obj_[chapter].keyExists(key)) {
+        config_obj_[chapter][key] = value;
+      }
+    }
+  }
+
+  if (nullptr != config_file_) {
+    fclose(config_file_);
+    config_file_ = nullptr;
   }
 
   // SDL version
@@ -2656,8 +2702,6 @@ void Profile::UpdateValues() {
       ++entry;
     }
   }
-
-  CloseConfig();
 }
 
 bool Profile::ReadValue(bool* value,
@@ -2666,18 +2710,17 @@ bool Profile::ReadValue(bool* value,
   DCHECK(value);
   bool ret = false;
 
-  char buf[INI_LINE_LEN + 1];
-  *buf = '\0';
-  if ((0 != ini_read_value(config_file_, pSection, pKey, buf)) &&
-      ('\0' != *buf)) {
-    const int32_t tmpVal = atoi(buf);
-    if ((0 == strcmp("true", buf)) || (0 != tmpVal)) {
+  if (config_obj_.keyExists(pSection) && config_obj_[pSection].keyExists(pKey)) {
+    auto val_str = config_obj_[pSection][pKey].asString();
+    const int32_t tmpVal = atoi(val_str.data());
+    if ((0 == strcmp("true", val_str.data())) || (0 != tmpVal)) {
       *value = true;
     } else {
       *value = false;
     }
     ret = true;
   }
+
   return ret;
 }
 
@@ -2694,10 +2737,8 @@ bool Profile::ReadValueEmpty(std::string* value,
   DCHECK(value);
   bool ret = false;
 
-  char buf[INI_LINE_LEN + 1];
-  *buf = '\0';
-  if (0 != ini_read_value(config_file_, pSection, pKey, buf)) {
-    *value = buf;
+  if (config_obj_.keyExists(pSection) && config_obj_[pSection].keyExists(pKey)) {
+    *value = config_obj_[pSection][pKey].asString();
     ret = true;
   }
 

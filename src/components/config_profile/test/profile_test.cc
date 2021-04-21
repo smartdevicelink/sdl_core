@@ -602,7 +602,6 @@ TEST_F(ProfileTest, CheckReadStringValue) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   std::string app_storage_folder_;
   profile_.ReadStringValue(
       &app_storage_folder_, "", "MAIN", "AppStorageFolder");
@@ -613,7 +612,6 @@ TEST_F(ProfileTest, CheckReadStringValue) {
   std::string server_address;
   profile_.ReadStringValue(&server_address, "", "HMI", "ServerAddress");
   EXPECT_EQ("127.0.0.1", server_address);
-  profile_.CloseConfig();
 }
 
 TEST_F(ProfileTest, CheckReadBoolValue) {
@@ -635,10 +633,8 @@ TEST_F(ProfileTest, CheckReadIntValue) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   int server_port = 0;
   profile_.ReadIntValue(&server_port, 0, "HMI", "ServerPort");
-  profile_.CloseConfig();
 
   EXPECT_EQ(8088, server_port);
 }
@@ -648,12 +644,10 @@ TEST_F(ProfileTest, CheckIntContainer) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   bool isread = false;
   std::vector<int> diagmodes_list =
       profile_.ReadIntContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
-  profile_.CloseConfig();
 
   std::vector<int>::iterator diag_mode =
       std::find(diagmodes_list.begin(), diagmodes_list.end(), 0x12);
@@ -681,12 +675,10 @@ TEST_F(ProfileTest, CheckVectorContainer) {
   // Get diag_modes after updating
   const std::vector<uint32_t>& diag_modes = profile_.supported_diag_modes();
 
-  profile_.OpenConfig();
   bool isread = false;
   std::vector<int> diagmodes_list =
       profile_.ReadIntContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
-  profile_.CloseConfig();
 
   // Compare with result of ReadIntContainer
   ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
@@ -710,12 +702,10 @@ TEST_F(ProfileTest, CheckStringContainer) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   bool isread = false;
   std::vector<std::string> diagmodes_list =
       profile_.ReadStringContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
-  profile_.CloseConfig();
 
   std::vector<std::string>::iterator diag_mode =
       std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x12");
@@ -740,7 +730,6 @@ TEST_F(ProfileTest, CheckStringContainerEmpty) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   bool isread = false;
   std::vector<std::string> output_list =
       profile_.ReadStringContainer("MAIN", "AppConfigFolder", &isread);
@@ -758,7 +747,6 @@ TEST_F(ProfileTest, CheckStringContainerEmpty) {
       profile_.ReadStringContainer("MAIN", "DoesNotExistKey", &isread, true);
   EXPECT_FALSE(isread);
   EXPECT_TRUE(output_list2.empty());
-  profile_.CloseConfig();
 }
 
 #ifdef ENABLE_SECURITY
@@ -767,13 +755,11 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
 
-  profile_.OpenConfig();
   std::vector<int> force_unprotected_list = profile_.ReadIntContainer(
       "Security Manager", "ForceUnprotectedService", NULL);
 
   std::vector<int> force_protected_list = profile_.ReadIntContainer(
       "Security Manager", "ForceProtectedService", NULL);
-  profile_.CloseConfig();
 
   std::vector<int>::iterator res_unprotect = std::find(
       force_unprotected_list.begin(), force_unprotected_list.end(), 0x07);

@@ -45,6 +45,7 @@
 #include "policy/policy_settings.h"
 #include "protocol_handler/protocol_handler_settings.h"
 #include "transport_manager/transport_manager_settings.h"
+#include "smart_objects/smart_object.h"
 #include "utils/macro.h"
 
 namespace profile {
@@ -825,17 +826,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_transport_change_timer_addition() const OVERRIDE;
 
   /**
-   * @brief Opens the configuration file
-   * @return true if the config opens successfully
-   */
-  bool OpenConfig();
-
-  /**
-   * @brief Closes the configuration file
-   */
-  void CloseConfig();
-
-  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -1000,7 +990,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   size_t maximum_audio_payload_size_;
   size_t maximum_video_payload_size_;
   std::string config_file_name_;
-  FILE* config_file_;
+  smart_objects::SmartObject config_obj_;
   std::string server_address_;
   uint16_t server_port_;
   uint16_t video_streaming_port_;
