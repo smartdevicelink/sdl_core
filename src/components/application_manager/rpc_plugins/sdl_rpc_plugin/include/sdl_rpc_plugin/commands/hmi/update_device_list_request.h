@@ -35,8 +35,8 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/event_engine/event_observer.h"
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -46,8 +46,7 @@ namespace commands {
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
-                                public app_mngr::event_engine::EventObserver {
+class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
@@ -70,28 +69,12 @@ class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   * Need to observe OnHMIReady event, to send UpdateDeviceListRequest
-   * when HMI will be ready
-   * @param event The received event
-   */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
-
-  /**
-   * @brief Need to stop execution StopMethod if HMI did not started
-   */
-  virtual bool CleanUp();
-
  private:
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::ConditionalVariable termination_condition_;
-
   DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_UPDATE_DEVICE_LIST_REQUEST_H_

@@ -34,11 +34,12 @@
 #include <unistd.h>
 #include <cstring>
 #include <sstream>
+#include "interfaces/MOBILE_API.h"
 #include "utils/logger.h"
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOG_VARIABLE("MediaManager")
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 
@@ -46,35 +47,42 @@ GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 static const int kNumAudioChannels = 1;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
-    const std::string& output_file, int32_t duration)
+    const std::string& output_file,
+    int32_t duration,
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type)
     : threads::ThreadDelegate()
     , argc_(5)
     , argv_(NULL)
     , oKey_("-o")
     , tKey_("-t")
     , sleepThread_(NULL)
-    , outputFileName_(output_file) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    , outputFileName_(output_file)
+    , samplingRate_(sampling_rate)
+    , bitsPerSample_(bits_per_sample) {
+  SDL_LOG_AUTO_TRACE();
   set_record_duration(duration);
+  // audio_type is not used as we always employ LPCM
 }
 
 FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (sleepThread_) {
-    sleepThread_->join();
-    delete sleepThread_->delegate();
+    sleepThread_->Stop(threads::Thread::kThreadSoftStop);
+    delete sleepThread_->GetDelegate();
     threads::DeleteThread(sleepThread_);
   }
 }
 
 void FromMicToFileRecorderThread::set_output_file(
     const std::string& output_file) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   outputFileName_ = output_file;
 }
 
 void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::stringstream stringStream;
   stringStream << duration / 1000;
@@ -82,9 +90,9 @@ void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
 }
 
 void FromMicToFileRecorderThread::initArgs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  argv_ = new gchar* [argc_];
+  argv_ = new gchar*[argc_];
 
   argv_[0] = new gchar[14];
   argv_[1] = new gchar[3];
@@ -100,10 +108,10 @@ void FromMicToFileRecorderThread::initArgs() {
 }
 
 void FromMicToFileRecorderThread::deinitArgs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (argv_) {
-    for (int32_t i = 0; i < argc_; i++) {
+    for (int32_t i = 0; i < argc_; ++i) {
       delete[] argv_[i];
     }
     delete[] argv_;
@@ -112,7 +120,7 @@ void FromMicToFileRecorderThread::deinitArgs() {
 }
 
 void FromMicToFileRecorderThread::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   {
     sync_primitives::AutoLock auto_lock(stopFlagLock_);
@@ -122,7 +130,7 @@ void FromMicToFileRecorderThread::threadMain() {
   initArgs();
 
   GstElement* pipeline;
-  GstElement* alsasrc, *audioconvert, *capsfilter, *wavenc, *filesink;
+  GstElement *alsasrc, *audioconvert, *capsfilter, *wavenc, *filesink;
   GstCaps* audiocaps;
   GstBus* bus;
 
@@ -155,8 +163,8 @@ void FromMicToFileRecorderThread::threadMain() {
                             {NULL}};
   // g_option_context_parse() modifies params, so keep argc_ and argv_
   int32_t argc = argc_;
-  gchar** argv = new gchar* [argc];
-  for (int32_t i = 0; i < argc; i++) {
+  gchar** argv = new gchar*[argc];
+  for (int32_t i = 0; i < argc; ++i) {
     argv[i] = argv_[i];
   }
 
@@ -178,9 +186,9 @@ void FromMicToFileRecorderThread::threadMain() {
     g_error("Must supply destination (-d FILE)\n");
   }
 
-  LOG4CXX_TRACE(logger_, "Reading from device: " << device);
-  LOG4CXX_TRACE(logger_, "Saving pipeline output to: " << outfile);
-  LOG4CXX_TRACE(logger_, "Duration set to: " << duration);
+  SDL_LOG_TRACE("Reading from device: " << device);
+  SDL_LOG_TRACE("Saving pipeline output to: " << outfile);
+  SDL_LOG_TRACE("Duration set to: " << duration);
 
   // Initialize gstreamer and setup the main loop information
   gst_init(&argc, &argv);
@@ -205,9 +213,11 @@ void FromMicToFileRecorderThread::threadMain() {
   wavenc = gst_element_factory_make("wavenc", "wavenc0");
   filesink = gst_element_factory_make("filesink", "filesink0");
 
-  // create a capability to downmix the recorded audio to monaural
-  audiocaps = gst_caps_new_simple(
-      "audio/x-raw", "channels", G_TYPE_INT, kNumAudioChannels, NULL);
+  // Create a capability to specify audio format. It also downmixes the recorded
+  // audio to monaural.
+  std::string caps_string = create_caps_string();
+  SDL_LOG_DEBUG("Using audio caps: " << caps_string);
+  audiocaps = gst_caps_from_string(caps_string.c_str());
 
   // Assert that all the elements were created
   if (!alsasrc || !audioconvert || !capsfilter || !wavenc || !filesink ||
@@ -238,7 +248,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-  LOG4CXX_TRACE(logger_, "Initializing pipeline ...");
+  SDL_LOG_TRACE("Initializing pipeline ...");
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
     bool shouldBeStoped;
     {
@@ -256,7 +266,7 @@ void FromMicToFileRecorderThread::threadMain() {
       return;
     }
   }
-  LOG4CXX_TRACE(logger_, "Pipeline started ...\n");
+  SDL_LOG_TRACE("Pipeline started ...\n");
 
   // Start up a timer for the pipeline
   if (duration > 0) {
@@ -266,7 +276,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
     sleepThread_ =
         threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
-    sleepThread_->start();
+    sleepThread_->Start();
   }
 
   loop = g_main_loop_new(NULL, FALSE);
@@ -275,7 +285,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
   gst_element_set_state(pipeline, GST_STATE_NULL);
 
-  LOG4CXX_TRACE(logger_, "Deleting pipeline\n");
+  SDL_LOG_TRACE("Deleting pipeline\n");
   gst_object_unref(GST_OBJECT(pipeline));
   g_main_loop_unref(loop);
   g_option_context_free(context);
@@ -285,12 +295,55 @@ void FromMicToFileRecorderThread::threadMain() {
   loop = NULL;
 }
 
+std::string FromMicToFileRecorderThread::create_caps_string() {
+  SDL_LOG_AUTO_TRACE();
+
+  std::stringstream ss;
+  ss << "audio/x-raw";
+
+  switch (bitsPerSample_) {
+    case mobile_apis::BitsPerSample::BitsPerSample_8_BIT:
+      // format is 8-bit unsigned
+      ss << ",format=(string)U8";
+      break;
+    case mobile_apis::BitsPerSample::BitsPerSample_16_BIT:
+      // format is 16-bit signed, in little endian
+      ss << ",format=(string)S16LE";
+      break;
+    default:
+      // do not specify the format; use system default
+      break;
+  }
+
+  switch (samplingRate_) {
+    case mobile_apis::SamplingRate::SamplingRate_8KHZ:
+      ss << ",rate=8000";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_16KHZ:
+      ss << ",rate=16000";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_22KHZ:
+      ss << ",rate=22050";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_44KHZ:
+      ss << ",rate=44100";
+      break;
+    default:
+      // do not specify the sampling rate; use system default
+      break;
+  }
+
+  ss << ",channels=" << kNumAudioChannels;
+
+  return ss.str();
+}
+
 FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(
     GstTimeout timeout)
     : threads::ThreadDelegate(), timeout_(timeout) {}
 
 void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
-  LOG4CXX_TRACE(logger_, "Sleep for " << timeout_.duration << " seconds");
+  SDL_LOG_TRACE("Sleep for " << timeout_.duration << " seconds");
 
   sleep(timeout_.duration);
 
@@ -302,21 +355,21 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
 }
 
 void FromMicToFileRecorderThread::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (NULL != loop) {
     if (g_main_loop_is_running(loop)) {
-      LOG4CXX_TRACE(logger_, "Quit loop\n");
+      SDL_LOG_TRACE("Quit loop\n");
       g_main_loop_quit(loop);
     }
   }
 
   if (sleepThread_) {
-    LOG4CXX_DEBUG(logger_, "Stop sleep thread\n");
+    SDL_LOG_DEBUG("Stop sleep thread\n");
     sleepThread_->stop();
   }
 
-  LOG4CXX_TRACE(logger_, "Set should be stopped flag\n");
+  SDL_LOG_TRACE("Set should be stopped flag\n");
   sync_primitives::AutoLock auto_lock(stopFlagLock_);
   shouldBeStoped_ = true;
 }

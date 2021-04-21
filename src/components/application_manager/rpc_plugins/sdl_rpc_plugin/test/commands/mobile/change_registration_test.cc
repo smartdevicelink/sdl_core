@@ -31,25 +31,25 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/change_registration_request.h"
 
-#include "gtest/gtest.h"
-#include "utils/helpers.h"
-#include "utils/custom_string.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
-#include "policy/policy_regular/policy/usage_statistics/mock_statistics_manager.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "policy/policy_regular/policy/usage_statistics/mock_statistics_manager.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
+#include "utils/helpers.h"
 
 namespace test {
 namespace components {
@@ -58,18 +58,18 @@ namespace mobile_commands_test {
 namespace change_registration_request {
 
 namespace am = application_manager;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
+using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::ChangeRegistrationRequest;
+using ::test::components::application_manager_test::MockApplication;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgPointee;
-using sdl_rpc_plugin::commands::ChangeRegistrationRequest;
-using policy_test::MockPolicyHandlerInterface;
-using ::test::components::application_manager_test::MockApplication;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
@@ -103,11 +103,11 @@ class ChangeRegistrationRequestTest
     (*supported_languages_)[0] =
         static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
     EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
     EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
@@ -242,11 +242,11 @@ class ChangeRegistrationRequestTest
   void ExpectationsHmiCapabilities(
       smart_objects::SmartObjectSPtr supported_languages) {
     EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
     EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
     EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -381,11 +381,11 @@ TEST_F(ChangeRegistrationRequestTest,
   (*supported_languages_)[0] =
       static_cast<int32_t>(mobile_apis::Language::EN_US);
   EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
   EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
   EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
 
   EXPECT_CALL(app_mngr_, hmi_interfaces())
       .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));

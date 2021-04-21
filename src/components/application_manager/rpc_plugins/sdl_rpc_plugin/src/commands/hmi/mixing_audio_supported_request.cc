@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 MixingAudioSupportedRequest::MixingAudioSupportedRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,11 +54,11 @@ MixingAudioSupportedRequest::MixingAudioSupportedRequest(
 MixingAudioSupportedRequest::~MixingAudioSupportedRequest() {}
 
 void MixingAudioSupportedRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

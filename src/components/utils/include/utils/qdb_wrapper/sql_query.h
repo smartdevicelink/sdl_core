@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_QUERY_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_QDB_WRAPPER_SQL_QUERY_H_
 
-#include <stdint.h>
 #include <qdb/qdb.h>
+#include <stdint.h>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 #include "qdb_wrapper/sql_error.h"
 #include "utils/lock.h"
 

@@ -32,12 +32,12 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_consent_notification.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/message_helper.h"
 #include <algorithm>
 #include <functional>
 #include <string>
+#include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
@@ -50,7 +50,7 @@ namespace {
 struct PermissionsAppender
     : public std::unary_function<void,
                                  const smart_objects::SmartArray::value_type&> {
-  PermissionsAppender(policy::PermissionConsent& consents)
+  explicit PermissionsAppender(policy::PermissionConsent& consents)
       : allowed_key_(application_manager::hmi_response::allowed)
       , consents_(consents) {}
   void operator()(const smart_objects::SmartArray::value_type& item) const {
@@ -82,7 +82,7 @@ struct PermissionsAppender
  */
 struct ExternalConsentStatusAppender
     : std::unary_function<void, const smart_objects::SmartArray::value_type&> {
-  ExternalConsentStatusAppender(
+  explicit ExternalConsentStatusAppender(
       policy::ExternalConsentStatus& external_consent_status)
       : external_consent_status_(external_consent_status) {}
   void operator()(const smart_objects::SmartArray::value_type& item) const {
@@ -112,6 +112,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -127,7 +129,7 @@ OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
 OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
 
 void OnAppPermissionConsentNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   uint32_t connection_key = 0;
@@ -178,5 +180,5 @@ void OnAppPermissionConsentNotification::Run() {
   policy_handler_.OnAppPermissionConsent(connection_key, permission_consent);
 #endif
 }
-}  // commands
-}  // namespace application_manager
+}  // namespace commands
+}  // namespace sdl_rpc_plugin

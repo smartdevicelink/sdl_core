@@ -35,15 +35,16 @@
 
 #include <string>
 #include <vector>
+#include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace utils {
 namespace dbms {
 class SQLDatabase;
+class SQLQuery;
 }  // namespace dbms
 }  // namespace utils
 
@@ -52,6 +53,7 @@ namespace policy {
 class SQLPTRepresentation : public virtual PTRepresentation {
  public:
   SQLPTRepresentation();
+  explicit SQLPTRepresentation(bool in_memory);
   ~SQLPTRepresentation();
   virtual void CheckPermissions(const PTString& app_id,
                                 const PTString& hmi_level,
@@ -69,13 +71,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual int TimeoutResponse();
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
   virtual bool RefreshDB();
-  virtual const VehicleInfo GetVehicleInfo() const;
 
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 
   virtual EndpointUrls GetUpdateUrls(int service_type);
-  virtual std::string GetLockScreenIconUrl() const;
   virtual int GetNotificationsNumber(const std::string& priority);
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority);
@@ -90,7 +90,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL);
   bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
-
+  bool SetMetaInfo(const std::string& ccpu_version) OVERRIDE;
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
 #ifdef BUILD_TESTS
   uint32_t open_counter() {
     return open_counter_;
@@ -123,6 +124,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       policy_table::ConsumerFriendlyMessages* messages) const;
   virtual bool GatherApplicationPoliciesSection(
       policy_table::ApplicationPoliciesSection* policies) const;
+  virtual bool GatherVehicleDataItems(
+      policy_table::VehicleDataItems* vehicle_data_items) const;
+  virtual bool GatherVehicleData(policy_table::VehicleData* vehicle_data) const;
 
   bool GatherAppGroup(const std::string& app_id,
                       policy_table::Strings* app_groups) const;
@@ -133,6 +137,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool GatherRequestSubType(
       const std::string& app_id,
       policy_table::RequestSubTypes* request_subtypes) const;
+  bool GatherAppServiceParameters(
+      const std::string& app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const;
+
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
@@ -155,6 +163,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool SaveSpecificAppPolicy(
       const policy_table::ApplicationPolicies::value_type& app);
   virtual bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
+  virtual bool SaveVehicleDataItems(
+      const policy_table::VehicleDataItems& vehicle_data_items);
+  virtual bool SaveVehicleData(const policy_table::VehicleData& vehicle_data);
 
   virtual bool SaveMessageString(const std::string& type,
                                  const std::string& lang,
@@ -171,6 +182,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveRequestSubType(
       const std::string& app_id,
       const policy_table::RequestSubTypes& request_subtypes);
+  bool SaveAppServiceParameters(
+      const std::string& app_id,
+      const policy_table::AppServiceParameters& app_service_parameters);
 
  public:
   bool UpdateRequired() const;
@@ -195,6 +209,26 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool IsDBVersionActual() const OVERRIDE;
   virtual bool UpdateDBVersion() const OVERRIDE;
 
+  policy_table::VehicleDataItems GetVehicleDataItem(
+      const std::string& name, const std::string& key) const;
+  bool InsertVehicleDataItem(
+      const policy_table::VehicleDataItem& vehicle_data_item);
+  bool VehicleDataItemExists(
+      const policy_table::VehicleDataItem& vehicle_data_item) const;
+
+  /**
+   * @brief Retrieves vehicle data items of type Struct (which contains
+   * params) from the database including these parameters.
+   * @return Array of composite VehicleDataItems
+   */
+  policy_table::VehicleDataItems SelectCompositeVehicleDataItems() const;
+
+  /**
+   * @brief Retrieves vehicle data items of non Struct type from the database.
+   * @return Array of primitive VehicleDataItems
+   */
+  policy_table::VehicleDataItems SelectPrimitiveVehicleDataItems() const;
+
  private:
   static const std::string kDatabaseName;
   utils::dbms::SQLDatabase* db_;
@@ -210,12 +244,19 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   const int32_t GetDBVersion() const;
   bool SaveRpcs(int64_t group_id, const policy_table::Rpc& rpcs);
   bool SaveServiceEndpoints(const policy_table::ServiceEndpoints& endpoints);
+  bool SaveServiceEndpointProperties(
+      const policy_table::ServiceEndpointProperties& endpoint_properties);
   bool SaveSecondsBetweenRetries(
       const policy_table::SecondsBetweenRetries& seconds);
   bool SaveNumberOfNotificationsPerMinute(
       const policy_table::NumberOfNotificationsPerMinute& notifications);
+  bool SaveNumberOfSubtleNotificationsPerMinute(
+      const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);
+  policy_table::VehicleDataItem PopulateVDIFromQuery(
+      const utils::dbms::SQLQuery& query) const;
+  bool DeleteVehicleDataItems() const;
 
   bool is_in_memory;
 };

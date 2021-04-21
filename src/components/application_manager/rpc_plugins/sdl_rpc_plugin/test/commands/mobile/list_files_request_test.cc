@@ -35,15 +35,15 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
-#include "mobile/list_files_request.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/list_files_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -52,13 +52,18 @@ namespace mobile_commands_test {
 namespace list_files_request {
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::DoAll;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::ListFilesRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::ListFilesRequest;
+
+namespace {
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
 
 class ListFilesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -86,7 +91,7 @@ TEST_F(ListFilesRequestTest, Run_TooManyHmiNone_UNSUCCESS) {
   std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(*app, hmi_level())
+  ON_CALL(*app, hmi_level(kDefaultWindowId))
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t kListFilesInNoneAllowed = 1u;
@@ -121,7 +126,7 @@ TEST_F(ListFilesRequestTest, Run_SUCCESS) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  ON_CALL(*app, hmi_level())
+  ON_CALL(*app, hmi_level(kDefaultWindowId))
       .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
 
   ON_CALL(*app, increment_list_files_in_none_count()).WillByDefault(Return());

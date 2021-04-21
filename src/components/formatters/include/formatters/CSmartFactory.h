@@ -35,10 +35,10 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
 #include <map>
 #include <string>
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {
@@ -94,7 +94,7 @@ extern const std::string kCode;
  * @brief String constant for "message" param name.
  */
 extern const std::string kMessage;
-}
+}  // namespace strings
 
 /**
  * @brief Smart Schema key.
@@ -147,16 +147,18 @@ class CSmartFactory {
    * @brief Attach schema to the function SmartObject.
    *
    * @param object SmartObject to attach schema for.
-   *
-   * @param RemoveFakeParameters contains true if need
+   * @param remove_unknown_parameters contains true if need
    * to remove fake parameters from smart object otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
+   * @param report__ object for reporting warnings during schema application
    *
    * @return True if operation was successful or false otherwise.
    */
   bool attachSchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& object,
-      const bool RemoveFakeParameters,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const bool remove_unknown_parameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      rpc::ValidationReport* report__ = nullptr);
 
   /**
    * @brief Attach schema to the struct SmartObject.
@@ -276,8 +278,9 @@ CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::CSmartFactory(
 template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     ns_smart_device_link::ns_smart_objects::SmartObject& object,
-    const bool RemoveFakeParameters,
-    const utils::SemanticVersion& MessageVersion) {
+    const bool remove_unknown_parameters,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
   if (false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE))
@@ -286,11 +289,11 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     return false;
 
   MessageTypeEnum msgtype(
-      (MessageTypeEnum)
-          object[strings::S_PARAMS][strings::S_MESSAGE_TYPE].asInt());
+      (MessageTypeEnum)object[strings::S_PARAMS][strings::S_MESSAGE_TYPE]
+          .asInt());
   FunctionIdEnum fid(
-      (FunctionIdEnum)
-          object[strings::S_PARAMS][strings::S_FUNCTION_ID].asInt());
+      (FunctionIdEnum)object[strings::S_PARAMS][strings::S_FUNCTION_ID]
+          .asInt());
 
   SmartSchemaKey<FunctionIdEnum, MessageTypeEnum> key(fid, msgtype);
 
@@ -305,7 +308,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   object.setSchema(schemaIterator->second);
 
   schemaIterator->second.applySchema(
-      object, RemoveFakeParameters, MessageVersion);
+      object, remove_unknown_parameters, MessageVersion, report__);
 
   return true;
 }
@@ -415,6 +418,6 @@ bool operator<(const SmartSchemaKey<FunctionIdEnum, MessageTypeEnum>& l,
 
   return false;
 }
-}
-}
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CSMARTFACTORY_H_

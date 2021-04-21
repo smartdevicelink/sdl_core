@@ -34,11 +34,11 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_USAGE_STATISTICS_COUNTER_H_
 
 #include <ctime>
-#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/usage_statistics/app_stopwatch.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
-#include "utils/timer.h"
 #include "utils/macro.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
 

@@ -1,4 +1,4 @@
-[Delete any non-applicable sections, but we may ask for more information.]
+[Delete any non-applicable sections, but we may ask for more information. Please reference the [SmartDeviceLink GitHub Best Practices](https://d83tozu1c8tt6.cloudfront.net/media/resources/SDL_GitHub_BestPractices.pdf) for further instructions on how to enter an issue.]
 
 ### Bug Report
 [Summary]

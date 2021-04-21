@@ -32,10 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
 
+#include "application_manager/app_service_manager.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -49,15 +53,19 @@ OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
 OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
 
 void OnNaviWayPointChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnWayPointChangeID);
+  application_manager_.SaveWayPointsMessage(message_, 0);
 
-  SendNotificationToMobile(message_);
+  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() ==
+      nullptr) {
+    SendNotificationToMobile(message_);
+  }
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

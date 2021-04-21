@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_METRIC_WRAPPER_H_
 
 #include <string>
-#include "utils/resource_usage.h"
 #include "json/json.h"
+#include "utils/resource_usage.h"
 
 namespace telemetry_monitor {
 

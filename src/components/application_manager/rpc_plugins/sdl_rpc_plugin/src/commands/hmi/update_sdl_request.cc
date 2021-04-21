@@ -32,11 +32,14 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/update_sdl_request.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 UpdateSDLRequest::UpdateSDLRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -53,7 +56,7 @@ UpdateSDLRequest::UpdateSDLRequest(
 UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   policy_handler_.PTExchangeAtUserRequest(
       (*message_)[strings::params][strings::correlation_id].asInt());
@@ -61,4 +64,4 @@ void UpdateSDLRequest::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

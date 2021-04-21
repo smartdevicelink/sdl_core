@@ -38,15 +38,15 @@
 
 #include "formatters/CSmartFactory.h"
 #include "interfaces/HMI_API_schema.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/object_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/string_schema_item.h"
 
 namespace test {
 namespace components {
@@ -107,11 +107,8 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
 
  protected:
   typedef std::map<const StructIdentifiersTest::eType,
-                   std::shared_ptr<ISchemaItem> > TStructsSchemaItems;
-
-  static std::shared_ptr<ISchemaItem> ProvideObjectSchemaItemForStruct(
-      TStructsSchemaItems& struct_schema_items,
-      const StructIdentifiersTest::eType struct_id);
+                   std::shared_ptr<ISchemaItem> >
+      TStructsSchemaItems;
 
   void InitStructSchemes(TStructsSchemaItems& struct_schema_items);
 

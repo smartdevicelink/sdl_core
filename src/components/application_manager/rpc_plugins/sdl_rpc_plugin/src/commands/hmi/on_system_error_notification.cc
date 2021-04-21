@@ -32,12 +32,15 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_system_error_notification.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnSystemErrorNotification::OnSystemErrorNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -54,7 +57,7 @@ OnSystemErrorNotification::OnSystemErrorNotification(
 OnSystemErrorNotification::~OnSystemErrorNotification() {}
 
 void OnSystemErrorNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const int code =
       (*message_)[strings::msg_params][hmi_notification::error].asInt();
@@ -64,4 +67,4 @@ void OnSystemErrorNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

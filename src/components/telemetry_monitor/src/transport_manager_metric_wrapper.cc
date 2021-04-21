@@ -31,9 +31,9 @@
  */
 
 #include "telemetry_monitor/transport_manager_metric_wrapper.h"
+#include "application_manager/smart_object_keys.h"
 #include "json/json.h"
 #include "telemetry_monitor/json_keys.h"
-#include "application_manager/smart_object_keys.h"
 
 namespace telemetry_monitor {
 

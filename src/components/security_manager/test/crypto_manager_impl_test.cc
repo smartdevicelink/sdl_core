@@ -33,19 +33,22 @@
 #ifdef __QNXNTO__
 #include <openssl/ssl3.h>
 #else
+#include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 #endif  //__QNXNTO__
-#include <limits>
 #include <fstream>
+#include <limits>
 #include <sstream>
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/mock_security_manager_settings.h"
 
+#define OPENSSL1_1_VERSION 0x1010000fL
+
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace {
 const size_t kUpdatesBeforeHour = 24;
@@ -62,7 +65,7 @@ const std::string kFordCipher = SSL3_TXT_RSA_DES_192_CBC3_SHA;
 // Used cipher from ford protocol requirement
 const std::string kFordCipher = TLS1_TXT_RSA_WITH_AES_256_GCM_SHA384;
 #endif
-}
+}  // namespace
 
 namespace test {
 namespace components {
@@ -158,6 +161,9 @@ TEST_F(CryptoManagerTest, WrongInit) {
   EXPECT_FALSE(crypto_manager_->Init());
   EXPECT_NE(std::string(), crypto_manager_->LastError());
 
+#if OPENSSL1_1_VERSION >= OPENSSL_VERSION_NUMBER
+  // Legacy test, openssl 1.1.1 changed the error behavior of
+  // SSL_CTX_set_cipher_list
   EXPECT_CALL(*mock_security_manager_settings_,
               security_manager_protocol_name())
       .WillOnce(Return(security_manager::TLSv1_2));
@@ -167,6 +173,7 @@ TEST_F(CryptoManagerTest, WrongInit) {
       .WillRepeatedly(ReturnRef(invalid_cipher));
   EXPECT_FALSE(crypto_manager_->Init());
   EXPECT_NE(std::string(), crypto_manager_->LastError());
+#endif
 }
 
 //  #ifndef __QNXNTO__

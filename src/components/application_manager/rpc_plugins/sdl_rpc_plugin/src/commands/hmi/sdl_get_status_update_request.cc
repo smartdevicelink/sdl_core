@@ -32,11 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_request.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -53,10 +56,10 @@ SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
 SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   policy_handler_.OnGetStatusUpdate(
       (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

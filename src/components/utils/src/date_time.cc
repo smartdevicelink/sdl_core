@@ -46,9 +46,7 @@ namespace date_time {
 TimeDuration getCurrentTime() {
   return bpt::microsec_clock::local_time() - bpt::from_time_t(0);
 }
-TimeDuration TimeDurationZero() {
-  return TimeDuration(0, 0, 0, 0);
-}
+
 int64_t getSecs(const TimeDuration& t) {
   return t.total_seconds();
 }
@@ -61,13 +59,22 @@ int64_t getuSecs(const TimeDuration& t) {
   return t.total_microseconds();
 }
 
+#ifdef BUILD_TESTS
+// cppcheck-suppress unusedFunction //Used in unit tests
+TimeDuration TimeDurationZero() {
+  return TimeDuration(0, 0, 0, 0);
+}
+
+// cppcheck-suppress unusedFunction //Used in unit tests
 int64_t get_just_mSecs(const TimeDuration& t) {
   return t.total_milliseconds() % MILLISECONDS_IN_SECOND;
 }
 
+// cppcheck-suppress unusedFunction //Used in unit tests
 int64_t get_just_uSecs(const TimeDuration& t) {
   return t.total_microseconds() % MICROSECONDS_IN_SECOND;
 }
+#endif  // BUILD_TESTS
 
 int64_t calculateTimeSpan(const TimeDuration& sinceTime) {
   return calculateTimeDiff(getCurrentTime(), sinceTime);
@@ -100,6 +107,19 @@ TimeCompare compareTime(const TimeDuration& time1, const TimeDuration& time2) {
   if (Less(time1, time2))
     return LESS;
   return EQUAL;
+}
+
+int64_t calculateAmountDaysFromDate(const std::time_t& start_date) {
+  const time_t current_date = std::time(NULL);
+
+  // std::difftime returns difference between two timepoints in seconds
+  const uint32_t diff_consent_and_current_dates = (static_cast<uint32_t>(
+      std::fabs(std::difftime(current_date, start_date))));
+
+  const uint32_t past_period_in_days =
+      diff_consent_and_current_dates / date_time::SECONDS_IN_DAY;
+
+  return past_period_in_days;
 }
 
 }  // namespace date_time

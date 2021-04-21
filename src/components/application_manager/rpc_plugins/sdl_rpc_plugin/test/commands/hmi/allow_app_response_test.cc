@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/allow_app_response.h"
+#include "gtest/gtest.h"
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
@@ -53,7 +53,7 @@ namespace hmi_response = ::application_manager::hmi_response;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const bool kIsResponseAllowed = true;
-}
+}  // namespace
 
 typedef std::shared_ptr<AllowAppResponse> ResponsePtr;
 

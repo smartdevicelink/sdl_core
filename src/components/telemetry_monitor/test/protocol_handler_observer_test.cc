@@ -31,9 +31,9 @@
  */
 
 #include "gtest/gtest.h"
-#include "telemetry_monitor/telemetry_monitor.h"
-#include "telemetry_monitor/mock_telemetry_monitor.h"
 #include "protocol_handler/telemetry_observer.h"
+#include "telemetry_monitor/mock_telemetry_monitor.h"
+#include "telemetry_monitor/telemetry_monitor.h"
 
 namespace test {
 namespace components {

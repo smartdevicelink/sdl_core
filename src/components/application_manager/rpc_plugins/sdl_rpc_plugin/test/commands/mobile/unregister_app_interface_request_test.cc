@@ -51,8 +51,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using sdl_rpc_plugin::commands::UnregisterAppInterfaceRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::UnregisterAppInterfaceRequest;
 
 typedef std::shared_ptr<UnregisterAppInterfaceRequest> CommandPtr;
 
@@ -85,19 +85,8 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(mock_app));
-
-  const mobile_apis::AppInterfaceUnregisteredReason::eType kUnregisterReason =
-      mobile_apis::AppInterfaceUnregisteredReason::INVALID_ENUM;
-
-  MessageSharedPtr dummy_msg(CreateMessage());
-  EXPECT_CALL(mock_message_helper_,
-              GetOnAppInterfaceUnregisteredNotificationToMobile(
-                  kConnectionKey, kUnregisterReason))
-      .WillOnce(Return(dummy_msg));
   {
     ::testing::InSequence sequence;
-
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(dummy_msg, _));
 
     EXPECT_CALL(app_mngr_,
                 UnregisterApplication(

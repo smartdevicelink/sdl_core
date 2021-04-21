@@ -1,0 +1,9 @@
+{
+  "UI": {
+    "audioPassThruCapabilities": {
+      "samplingRate": "22KHZ",
+      "bitsPerSample": "16_BIT",
+      "audioType": "PCM"
+    }
+  }
+}

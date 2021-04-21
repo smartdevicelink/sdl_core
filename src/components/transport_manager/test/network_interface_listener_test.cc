@@ -3,8 +3,8 @@
 #include <time.h>
 
 #include "gtest/gtest.h"
-#include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/mock_tcp_client_listener.h"
+#include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "utils/test_async_waiter.h"
 #include "utils/threads/thread.h"
 
@@ -15,7 +15,7 @@ namespace transport_manager_test {
 namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kStartNotificationTimeoutMsec = 500;
-}
+}  // namespace
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -30,22 +30,8 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
   virtual ~NetworkInterfaceListenerTest() {}
 
  protected:
-  struct InterfaceEntry {
-    const char* name;
-    const char* ipv4_address;
-    const char* ipv6_address;
-    unsigned int flags;
-  };
-
   void Deinit() {
     delete interface_listener_impl_;
-  }
-
-  void SleepFor(long msec) const {
-    if (msec > 0) {
-      struct timespec ts = {0, msec * 1000 * 1000};
-      nanosleep(&ts, NULL);
-    }
   }
 
   NetworkInterfaceListenerImpl* interface_listener_impl_;

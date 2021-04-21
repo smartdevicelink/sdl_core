@@ -29,12 +29,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
-#include <vector>
-#include <map>
 #include <algorithm>
-#include <utility>
 #include <limits>
+#include <map>
+#include <utility>
+#include <vector>
+#include "gtest/gtest.h"
 
 #include "protocol_handler/multiframe_builder.h"
 

@@ -40,10 +40,6 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
-enum capabilitiesStatus { success, missedLightName, missedParam, readOnly };
-
-typedef std::pair<std::string, capabilitiesStatus> ModuleCapability;
-
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   SetInteriorVehicleDataRequest(
@@ -66,9 +62,11 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id Resource id
    * @return True if free, otherwise - false
    */
-  bool IsResourceFree(const std::string& module_type) const FINAL;
+  bool IsResourceFree(const std::string& module_type,
+                      const std::string& module_id) const FINAL;
 
   /**
    * @brief SetResourceState changes state of resource
@@ -85,28 +83,14 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
-   * @brief Method that check if READ_ONLY parameters present
-   * @param request_params params from received message,
-   * @param module_data_capabilities info for notification to mobile
-   * @return true if present , false - otherwise
-   */
-  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data,
-                                ModuleCapability& module_data_capabilities);
-
-  /**
-   * @brief Method that check if all request parameters are READ_ONLY
-   * @param request_params params from received message
-   * @return true if all are read only , false - otherwise
-   */
-  bool AreAllParamsReadOnly(const smart_objects::SmartObject& module_data);
-
-  /**
    * @brief Method that cuts-off READ_ONLY parameters
    * @param module_data params to handle
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
+
+  std::string ModuleId() const FINAL;
 
   /**
    * @brief SetInteriorVehicleDataRequest class destructor
@@ -114,14 +98,6 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   ~SetInteriorVehicleDataRequest();
 
  private:
-  /**
-   * @brief ControlData
-   * @param module_data received params
-   * @return value of module data depending on module type
-   */
-  const smart_objects::SmartObject& ControlData(
-      const smart_objects::SmartObject& module_data);
-
   /**
    * @brief CheckAudioSource check that if app wants to change
    * the audio source from MOBILE_APP to other types of audio

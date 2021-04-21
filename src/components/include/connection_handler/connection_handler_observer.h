@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_
 
 #include <string>
-#include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
+#include "connection_handler/device.h"
 #include "protocol/service_type.h"
 
 #ifdef ENABLE_SECURITY
@@ -160,6 +160,30 @@ class ConnectionHandlerObserver {
    * \param session_key session ID representing the app
    */
   virtual void OnSecondaryTransportEndedCallback(const int32_t session_key) = 0;
+
+  virtual void OnConnectionStatusUpdated() = 0;
+
+  virtual void CreatePendingApplication(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info,
+      connection_handler::DeviceHandle device_id) = 0;
+
+  virtual void SetPendingApplicationState(
+      const transport_manager::ConnectionUID connection_id,
+      const transport_manager::DeviceInfo& device_info) = 0;
+
+  /**
+   *@brief Called when webengine device added
+   */
+  virtual void OnWebEngineDeviceCreated() = 0;
+
+  /**
+   * @brief Collects all vehicle data required by a protocol layer
+   * @param data output structure to store received vehicle data
+   * @return true if data has been received successfully, otherwise returns
+   * false
+   */
+  virtual bool GetProtocolVehicleData(ProtocolVehicleData& data) = 0;
 
  protected:
   /**

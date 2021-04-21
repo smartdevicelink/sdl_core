@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/threads/async_runner.h"
 #include <stdlib.h>
 #include <ctime>
 #include <memory>
-#include "utils/lock.h"
-#include "utils/threads/async_runner.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -49,7 +49,7 @@ using namespace threads;
 namespace {
 size_t kCheckValue = 0u;
 const size_t kDelegatesAmount = 4u;
-}
+}  // namespace
 
 // ThreadDelegate successor
 class TestThreadDelegate : public ThreadDelegate {
@@ -93,7 +93,7 @@ class AsyncRunnerTest : public ::testing::Test {
   std::shared_ptr<AsyncRunner> async_runner_;
 
   void CreateThreadsArray() {
-    delegates_ = new ThreadDelegate* [kDelegatesAmount];
+    delegates_ = new ThreadDelegate*[kDelegatesAmount];
   }
 
   void DeleteThreadsArray() {

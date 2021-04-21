@@ -33,12 +33,14 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_context_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/state_controller.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnSystemContextNotification::OnSystemContextNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,20 +57,34 @@ OnSystemContextNotification::OnSystemContextNotification(
 OnSystemContextNotification::~OnSystemContextNotification() {}
 
 void OnSystemContextNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   mobile_api::SystemContext::eType system_context =
       static_cast<mobile_api::SystemContext::eType>(
           (*message_)[strings::msg_params][hmi_notification::system_context]
               .asInt());
 
+  WindowID window_id = mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    window_id = (*message_)[strings::msg_params][strings::window_id].asInt();
+  }
+
   ApplicationSharedPtr app;
-  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
-      (mobile_api::SystemContext::SYSCTXT_MENU == system_context) ||
-      (mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED == system_context)) {
+  if (helpers::
+          Compare<mobile_api::SystemContext::eType, helpers::EQ, helpers::ONE>(
+              system_context,
+              mobile_api::SystemContext::SYSCTXT_VRSESSION,
+              mobile_api::SystemContext::SYSCTXT_MENU,
+              mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED)) {
     app = application_manager_.active_application();
-  } else if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) ||
-             (mobile_api::SystemContext::SYSCTXT_MAIN == system_context)) {
+  }
+
+  if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id ||
+      helpers::Compare<mobile_api::SystemContext::eType,
+                       helpers::EQ,
+                       helpers::ONE>(system_context,
+                                     mobile_api::SystemContext::SYSCTXT_ALERT,
+                                     mobile_api::SystemContext::SYSCTXT_MAIN)) {
     if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
       app = application_manager_.application(
           (*message_)[strings::msg_params][strings::app_id].asUInt());
@@ -76,13 +92,13 @@ void OnSystemContextNotification::Run() {
   }
 
   if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
-    application_manager_.state_controller().SetRegularState(app,
-                                                            system_context);
+    application_manager_.state_controller().SetRegularState(
+        app, window_id, system_context);
   } else {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    SDL_LOG_ERROR("Application does not exist");
   }
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

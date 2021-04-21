@@ -30,15 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
+#include <string>
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "utils/file_system.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,23 +58,23 @@ OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(
 OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   const std::string& file_path =
       (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
   if (!file_system::ReadBinaryFile(file_path, file_content)) {
-    LOG4CXX_ERROR(logger_, "Failed to read Update file.");
+    SDL_LOG_ERROR("Failed to read Update file.");
     return;
   }
   policy_handler_.ReceiveMessageFromSDK(file_path, file_content);
 #else
-  LOG4CXX_WARN(logger_,
-               "This RPC is part of extended policy flow."
-               "Please re-build with extended policy mode enabled.");
+  SDL_LOG_WARN(
+      "This RPC is part of extended policy flow. "
+      "Please re-build with extended policy mode enabled.");
 #endif
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

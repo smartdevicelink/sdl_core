@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_TASK_IMPL_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_TASK_IMPL_H_
 
-#include "utils/timer_task.h"
 #include "utils/macro.h"
+#include "utils/timer_task.h"
 
 namespace timer {
 

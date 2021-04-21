@@ -36,7 +36,7 @@
 #include "policy/cache_manager.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
+SDL_CREATE_LOG_VARIABLE("PolicyManagerImpl")
 
 using policy_table::DeviceData;
 using policy_table::FunctionalGroupings;
@@ -48,11 +48,10 @@ struct ToHMIType {
   policy_table::AppHMITypes::value_type operator()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
-      LOG4CXX_WARN(logger_, "HMI type isn't known " << item);
+      SDL_LOG_WARN("HMI type isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
-    LOG4CXX_DEBUG(logger_,
-                  "HMI type: " << item << " - " << EnumToJsonString(type));
+    SDL_LOG_DEBUG("HMI type: " << item << " - " << EnumToJsonString(type));
     return policy_table::AppHMITypes::value_type(type);
   }
 };
@@ -94,7 +93,7 @@ AccessRemoteImpl::AccessRemoteImpl(std::shared_ptr<CacheManager> cache)
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
                                        policy_table::ModuleType module) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!cache_->IsApplicationRepresented(app_id)) {
     return false;
   }
@@ -117,10 +116,10 @@ bool AccessRemoteImpl::IsAllowed(const policy_table::AccessModules& modules,
                                  const std::string& module_name,
                                  const std::string& rpc_name,
                                  RemoteControlParams* input) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   policy_table::AccessModules::const_iterator i = modules.find(module_name);
   if (i == modules.end()) {
-    LOG4CXX_DEBUG(logger_, "Module " << module_name << " wasn't found");
+    SDL_LOG_DEBUG("Module " << module_name << " wasn't found");
     return false;
   }
 
@@ -133,19 +132,19 @@ bool AccessRemoteImpl::IsAllowed(const policy_table::AccessModules& modules,
     const policy_table::Strings& parameters = j->second;
     return CompareParameters(parameters, input);
   }
-  LOG4CXX_DEBUG(logger_, "RPC " << rpc_name << " wasn't found");
+  SDL_LOG_DEBUG("RPC " << rpc_name << " wasn't found");
   return false;
 }
 
 bool AccessRemoteImpl::CompareParameters(
     const policy_table::Strings& parameters, RemoteControlParams* input) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (parameters.empty()) {
     return true;
   }
 
   if (input->empty()) {
-    LOG4CXX_DEBUG(logger_, "Input is empty");
+    SDL_LOG_DEBUG("Input is empty");
     return false;
   }
 
@@ -157,7 +156,7 @@ bool AccessRemoteImpl::CompareParameters(
 
 void AccessRemoteImpl::SetDefaultHmiTypes(const ApplicationOnDevice& who,
                                           const std::vector<int>& hmi_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(),
                  hmi_types.end(),
@@ -168,7 +167,7 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const ApplicationOnDevice& who,
 
 const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
     const ApplicationOnDevice& who) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (cache_->IsDefaultPolicy(who.app_id)) {
     return hmi_types_[who];
   } else {
@@ -180,12 +179,12 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 
 const policy_table::Strings& AccessRemoteImpl::GetGroups(
     const ApplicationOnDevice& who) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return cache_->GetGroups(who.app_id);
 }
 
 bool AccessRemoteImpl::IsAppRemoteControl(const ApplicationOnDevice& who) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(),
                    hmi_types.end(),
@@ -195,7 +194,7 @@ bool AccessRemoteImpl::IsAppRemoteControl(const ApplicationOnDevice& who) {
 bool AccessRemoteImpl::GetPermissionsForApp(const std::string& device_id,
                                             const std::string& app_id,
                                             FunctionalIdType& group_types) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   GetGroupsIds(device_id, app_id, group_types[kTypeGeneral]);
   GetGroupsIds(device_id, kDefaultId, group_types[kTypeDefault]);
   GetGroupsIds(
@@ -221,7 +220,7 @@ void AccessRemoteImpl::GetGroupsIds(const std::string& device_id,
                  groups.end(),
                  groups_ids.begin(),
                  &CacheManager::GenerateHash);
-  LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
+  SDL_LOG_DEBUG("Groups Ids: " << groups_ids);
 }
 
 bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,

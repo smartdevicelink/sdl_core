@@ -31,22 +31,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/mobile/put_file_request.h"
+#include <algorithm>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/rpc_service.h"
 
-#include "utils/file_system.h"
 #include <boost/crc.hpp>
+#include "utils/file_system.h"
 
 namespace {
 /**
-* Calculates CRC32 checksum
-* @param binary_data - input data for which CRC32 should be calculated
-* @return calculated CRC32 checksum
-*/
+ * Calculates CRC32 checksum
+ * @param binary_data - input data for which CRC32 should be calculated
+ * @return calculated CRC32 checksum
+ */
 uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
   const std::size_t file_size = binary_data.size();
   boost::crc_32_type result;
@@ -60,6 +60,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 PutFileRequest::PutFileRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -81,7 +83,7 @@ PutFileRequest::PutFileRequest(
 PutFileRequest::~PutFileRequest() {}
 
 void PutFileRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
@@ -89,18 +91,19 @@ void PutFileRequest::Run() {
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
+  if (mobile_api::HMILevel::HMI_NONE ==
+          application->hmi_level(
+              mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       application_manager_.get_settings().put_file_in_none() <=
           application->put_file_in_none_count()) {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
-    LOG4CXX_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SDL_LOG_ERROR("Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Too many requests from the app with HMILevel HMI_NONE",
@@ -109,7 +112,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
-    LOG4CXX_ERROR(logger_, "Binary data empty");
+    SDL_LOG_ERROR("Binary data empty");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Binary data empty",
@@ -118,7 +121,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::sync_file_name)) {
-    LOG4CXX_ERROR(logger_, "No file name");
+    SDL_LOG_ERROR("No file name");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "No file name",
@@ -127,7 +130,7 @@ void PutFileRequest::Run() {
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::file_type)) {
-    LOG4CXX_ERROR(logger_, "No file type");
+    SDL_LOG_ERROR("No file type");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "No file type",
@@ -139,7 +142,7 @@ void PutFileRequest::Run() {
 
   if (!file_system::IsFileNameValid(sync_file_name_)) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
-    LOG4CXX_ERROR(logger_, err_msg);
+    SDL_LOG_ERROR(err_msg);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  err_msg.c_str(),
@@ -162,7 +165,6 @@ void PutFileRequest::Run() {
   is_persistent_file_ = false;
   bool is_system_file = false;
   length_ = binary_data.size();
-  bool is_download_complete = true;
   bool offset_exist =
       (*message_)[strings::msg_params].keyExists(strings::offset);
 
@@ -194,7 +196,7 @@ void PutFileRequest::Run() {
       response_params[strings::space_available] =
           static_cast<uint32_t>(space_available);
 
-      LOG4CXX_ERROR(logger_, "Out of memory");
+      SDL_LOG_ERROR("Out of memory");
       SendResponse(false,
                    mobile_apis::Result::OUT_OF_MEMORY,
                    "Out of memory",
@@ -204,7 +206,7 @@ void PutFileRequest::Run() {
   }
 
   if (!file_system::CreateDirectoryRecursively(file_path)) {
-    LOG4CXX_ERROR(logger_, "Can't create folder");
+    SDL_LOG_ERROR("Can't create folder");
     SendResponse(false,
                  mobile_apis::Result::GENERIC_ERROR,
                  "Can't create folder.",
@@ -214,12 +216,12 @@ void PutFileRequest::Run() {
   const std::string full_path = file_path + "/" + sync_file_name_;
 
   if ((*message_)[strings::msg_params].keyExists(strings::crc32_check_sum)) {
-    LOG4CXX_TRACE(logger_, "Binary Data Size:  " << binary_data.size());
+    SDL_LOG_TRACE("Binary Data Size:  " << binary_data.size());
     const uint32_t crc_received =
         (*message_)[strings::msg_params][strings::crc32_check_sum].asUInt();
-    LOG4CXX_TRACE(logger_, "CRC32 SUM Received: " << crc_received);
+    SDL_LOG_TRACE("CRC32 SUM Received: " << crc_received);
     const uint32_t crc_calculated = GetCrc32CheckSum(binary_data);
-    LOG4CXX_TRACE(logger_, "CRC32 SUM Calculated: " << crc_calculated);
+    SDL_LOG_TRACE("CRC32 SUM Calculated: " << crc_calculated);
     if (crc_calculated != crc_received) {
       SendResponse(false,
                    mobile_apis::Result::CORRUPTED_DATA,
@@ -230,16 +232,14 @@ void PutFileRequest::Run() {
     }
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Writing " << binary_data.size() << " bytes to " << full_path
+  SDL_LOG_DEBUG("Writing " << binary_data.size() << " bytes to " << full_path
                            << " (current size is"
                            << file_system::FileSize(full_path) << ")");
 
   mobile_apis::Result::eType save_result = application_manager_.SaveBinary(
       binary_data, file_path, sync_file_name_, offset_);
 
-  LOG4CXX_DEBUG(logger_,
-                "New size of " << full_path << " is "
+  SDL_LOG_DEBUG("New size of " << full_path << " is "
                                << file_system::FileSize(full_path) << " bytes");
   if (!is_system_file) {
     response_params[strings::space_available] =
@@ -249,23 +249,23 @@ void PutFileRequest::Run() {
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      LOG4CXX_INFO(logger_, "PutFile is successful");
+      SDL_LOG_INFO("PutFile is successful");
       if (!is_system_file) {
+        bool is_download_complete = true;
         AppFile file(sync_file_name_,
                      is_persistent_file_,
                      is_download_complete,
                      file_type_);
 
         if (0 == offset_) {
-          LOG4CXX_INFO(logger_, "New file downloading");
+          SDL_LOG_INFO("New file downloading");
           if (!application->AddFile(file)) {
-            LOG4CXX_INFO(logger_,
-                         "Couldn't add file to application (File already Exist"
-                             << " in application and was rewritten on FS)");
+            SDL_LOG_INFO("Couldn't add file to application (File already Exist"
+                         << " in application and was rewritten on FS)");
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {
-              LOG4CXX_ERROR(logger_, "Couldn't update file");
+              SDL_LOG_ERROR("Couldn't update file");
               /* If it is impossible to update file, application doesn't
               know about existing this file */
               SendResponse(false,
@@ -284,21 +284,18 @@ void PutFileRequest::Run() {
       }
 
       SendResponse(true, save_result, "File was downloaded", &response_params);
-      if (is_system_file) {
-        SendOnPutFileNotification();
-      }
+      SendOnPutFileNotification(is_system_file);
       break;
     }
     default:
-      LOG4CXX_WARN(logger_,
-                   "PutFile is unsuccessful. Result = " << save_result);
+      SDL_LOG_WARN("PutFile is unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }
 }
 
-void PutFileRequest::SendOnPutFileNotification() {
-  LOG4CXX_INFO(logger_, "SendOnPutFileNotification");
+void PutFileRequest::SendOnPutFileNotification(bool is_system_file) {
+  SDL_LOG_INFO("SendOnPutFileNotification");
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -316,9 +313,10 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
+  message[strings::msg_params][strings::is_system_file] = is_system_file;
   rpc_service_.ManageHMICommand(notification);
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
