@@ -1262,13 +1262,6 @@ void Profile::UpdateValues() {
 
       std::string key(line_str.data(), equals_idx);
       std::string value(line_str.data() + equals_idx + 1);
-      auto val_whitespace_len = value.find_first_not_of(" \t\r\n");
-      if (std::string::npos == val_whitespace_len) {
-        value = "";
-      } else {
-        value.erase(0, value.find_first_not_of(" \t\r\n"));
-        value.erase(value.find_last_not_of(" \t\r\n") + 1);
-      }
 
       auto key_whitespace_len = key.find_first_not_of(" \t\r\n");
       if (std::string::npos == key_whitespace_len) {
@@ -1277,9 +1270,19 @@ void Profile::UpdateValues() {
       key.erase(0, key_whitespace_len);
       key.erase(key.find_last_not_of(" \t\r\n") + 1);
 
-      if (false == config_obj_[chapter].keyExists(key)) {
-        config_obj_[chapter][key] = value;
+      if (true == config_obj_[chapter].keyExists(key)) {
+        continue;
       }
+
+      auto val_whitespace_len = value.find_first_not_of(" \t\r\n");
+      if (std::string::npos == val_whitespace_len) {
+        value = "";
+      } else {
+        value.erase(0, value.find_first_not_of(" \t\r\n"));
+        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+      }
+
+      config_obj_[chapter][key] = value;
     }
   }
 
