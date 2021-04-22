@@ -1248,7 +1248,8 @@ void Profile::UpdateValues() {
 
         if (false == line_str.empty()) {
           chapter = line_str;
-          config_obj_[chapter] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+          config_obj_[chapter] =
+              smart_objects::SmartObject(smart_objects::SmartType_Map);
         }
 
         continue;
@@ -2711,7 +2712,8 @@ bool Profile::ReadValue(bool* value,
   DCHECK(value);
   bool ret = false;
 
-  if (config_obj_.keyExists(pSection) && config_obj_[pSection].keyExists(pKey)) {
+  if (config_obj_.keyExists(pSection) &&
+      config_obj_[pSection].keyExists(pKey)) {
     auto val_str = config_obj_[pSection][pKey].asString();
     const int32_t tmpVal = atoi(val_str.data());
     if ((0 == strcmp("true", val_str.data())) || (0 != tmpVal)) {
@@ -2738,7 +2740,8 @@ bool Profile::ReadValueEmpty(std::string* value,
   DCHECK(value);
   bool ret = false;
 
-  if (config_obj_.keyExists(pSection) && config_obj_[pSection].keyExists(pKey)) {
+  if (config_obj_.keyExists(pSection) &&
+      config_obj_[pSection].keyExists(pKey)) {
     *value = config_obj_[pSection][pKey].asString();
     ret = true;
   }

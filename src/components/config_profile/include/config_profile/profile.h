@@ -44,8 +44,8 @@
 #include "media_manager/media_manager_settings.h"
 #include "policy/policy_settings.h"
 #include "protocol_handler/protocol_handler_settings.h"
-#include "transport_manager/transport_manager_settings.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "utils/macro.h"
 
 namespace profile {
