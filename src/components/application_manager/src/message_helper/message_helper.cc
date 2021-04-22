@@ -2333,7 +2333,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     const policy::ExternalConsentStatus& external_consent_status,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2345,7 +2346,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2375,7 +2377,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2387,7 +2390,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 

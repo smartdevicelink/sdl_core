@@ -139,18 +139,20 @@ class MockMessageHelper {
                void(const std::string& file_name,
                     ApplicationManager& app_mngr));
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  MOCK_METHOD4(
+  MOCK_METHOD5(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
            const policy::ExternalConsentStatus& external_consent_status,
            uint32_t correlation_id,
-           ApplicationManager& app_mngr));
+           ApplicationManager& app_mngr,
+           const bool success_flag));
 #else
-  MOCK_METHOD3(
+  MOCK_METHOD4(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
            uint32_t correlation_id,
-           ApplicationManager& app_mngr));
+           ApplicationManager& app_mngr,
+           const bool success_flag));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD4(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,

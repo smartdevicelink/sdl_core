@@ -292,6 +292,10 @@ class PolicyHandlerTest : public ::testing::Test {
   }
 };
 
+ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
+  *arg3 = mac_adress;
+}
+
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
   // Check before policy enabled from ini file
   EXPECT_CALL(policy_settings_, enable_policy()).WillRepeatedly(Return(false));
@@ -1583,6 +1587,56 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
               GetDataOnDeviceID(
                   testing::An<transport_manager::DeviceHandle>(), _, _, _, _));
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
+  policy_handler_.OnGetListOfPermissions(app_id, corr_id);
+}
+
+TEST_F(PolicyHandlerTest, OnGetListOfPermissions_CollectResult_false) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  const uint32_t app_id = 10u;
+  const uint32_t corr_id = 1u;
+  test_app.insert(mock_app_);
+
+  EXPECT_CALL(app_manager_, application(app_id))
+      .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
+      .WillRepeatedly(
+          DoAll(SetDeviceParamsMacAdress(std::string()), (Return(1u))));
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, false))
+      .WillOnce(Return());
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _, false))
+      .WillOnce(Return());
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
@@ -1614,14 +1668,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1690,14 +1744,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -2316,10 +2370,6 @@ TEST_F(PolicyHandlerTest,
 #endif
 
   EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
-}
-
-ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
-  *arg3 = mac_adress;
 }
 
 TEST_F(PolicyHandlerTest,
