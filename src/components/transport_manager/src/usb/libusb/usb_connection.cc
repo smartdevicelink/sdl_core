@@ -128,6 +128,13 @@ std::string hex_data(const unsigned char* const buffer,
 }
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
+  SDL_LOG_TRACE("enter");
+  if (transfer->status == LIBUSB_TRANSFER_CANCELLED) {
+    SDL_LOG_DEBUG("Free already canceled transfer.");
+    libusb_free_transfer(transfer);
+    return;
+  }
+
   SDL_LOG_TRACE("enter with Libusb_transfer*: " << transfer);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     SDL_LOG_DEBUG("USB incoming transfer, size:"
@@ -200,10 +207,9 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
-LOG4CXX_AUTO_TRACE(logger_);
-
+  SDL_LOG_TRACE("enter");
   if (transfer->status == LIBUSB_TRANSFER_CANCELLED) {
-    LOG4CXX_DEBUG(logger_, "Free already canceled transfer.");
+    SDL_LOG_DEBUG("Free already canceled transfer.");
     libusb_free_transfer(transfer);
     return;
   }
