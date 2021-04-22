@@ -41,6 +41,8 @@
 #include "vehicle_info_plugin/commands/hmi/vi_get_dtcs_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_request.h"
+#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_read_did_request.h"
@@ -49,24 +51,84 @@
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_response.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
-#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_request.h"
-#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
+
+template <typename VehicleInfoCommandType>
+class VehicleInfoCommandCreator : public application_manager::CommandCreator {
+ public:
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
+      : params_(params) {}
+
+ private:
+  bool CanBeCreated() const override {
+    return true;
+  }
+
+  application_manager::CommandSharedPtr create(
+      const application_manager::commands::MessageSharedPtr& message)
+      const override {
+    application_manager::CommandSharedPtr command(
+        new VehicleInfoCommandType(message, params_));
+    return command;
+  }
+
+  VehicleInfoCommandParams params_;
+};
+
+struct VehicleInfoInvalidCommand {};
+
+template <>
+class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
+    : public application_manager::CommandCreator {
+ public:
+  // cppcheck-suppress unusedFunction //Used in VehicleInfoCommandCreatorFactory
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
+    UNUSED(params);
+  }
+
+ private:
+  bool CanBeCreated() const override {
+    return false;
+  }
+
+  application_manager::CommandSharedPtr create(
+      const application_manager::commands::MessageSharedPtr& message)
+      const override {
+    UNUSED(message);
+    return application_manager::CommandSharedPtr();
+  }
+};
+
+struct VehicleInfoCommandCreatorFactory {
+  explicit VehicleInfoCommandCreatorFactory(
+      const VehicleInfoCommandParams& params)
+      : params_(params) {}
+
+  template <typename VehicleInfoCommandType>
+  application_manager::CommandCreator& GetCreator() {
+    SDL_LOG_AUTO_TRACE();
+    static VehicleInfoCommandCreator<VehicleInfoCommandType> res(params_);
+    return res;
+  }
+  const VehicleInfoCommandParams params_;
+};
 
 VehicleInfoHmiCommandFactory::VehicleInfoHmiCommandFactory(
     application_manager::ApplicationManager& application_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    policy::PolicyHandlerInterface& policy_handler,
+    CustomVehicleDataManager& custom_vehicle_data_manager)
     : application_manager_(application_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
-    , policy_handler_(policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    , policy_handler_(policy_handler)
+    , custom_vehicle_data_manager_(custom_vehicle_data_manager) {
+  SDL_LOG_AUTO_TRACE();
 }
 
 app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
@@ -89,9 +151,9 @@ app_mngr::CommandSharedPtr VehicleInfoHmiCommandFactory::CreateCommand(
     message_type_str = "error response";
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "HMICommandFactory::CreateCommand function_id: "
-                    << function_id << ", message type: " << message_type_str);
+  UNUSED(message_type_str);
+  SDL_LOG_DEBUG("HMICommandFactory::CreateCommand function_id: "
+                << function_id << ", message type: " << message_type_str);
 
   return buildCommandCreator(function_id, message_type).create(message);
 }
@@ -106,9 +168,12 @@ bool VehicleInfoHmiCommandFactory::IsAbleToProcess(
 
 app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
     const int32_t function_id, const int32_t message_type) const {
-  auto factory = app_mngr::CommandCreatorFactory(
-      application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
-
+  VehicleInfoCommandParams params = {application_manager_,
+                                     rpc_service_,
+                                     hmi_capabilities_,
+                                     policy_handler_,
+                                     custom_vehicle_data_manager_};
+  auto factory = VehicleInfoCommandCreatorFactory(params);
   switch (function_id) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleType:
       return hmi_apis::messageType::request == message_type
@@ -148,8 +213,8 @@ app_mngr::CommandCreator& VehicleInfoHmiCommandFactory::buildCommandCreator(
                  ? factory.GetCreator<commands::VIDiagnosticMessageRequest>()
                  : factory.GetCreator<commands::VIDiagnosticMessageResponse>();
     default:
-      LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
-      return factory.GetCreator<app_mngr::InvalidCommand>();
+      SDL_LOG_WARN("Unsupported function_id: " << function_id);
+      return factory.GetCreator<VehicleInfoInvalidCommand>();
   }
 }
-}
+}  // namespace vehicle_info_plugin

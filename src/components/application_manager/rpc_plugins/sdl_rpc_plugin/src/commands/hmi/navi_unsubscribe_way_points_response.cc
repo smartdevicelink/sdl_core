@@ -32,13 +32,15 @@
 
 #include "sdl_rpc_plugin/commands/hmi/navi_unsubscribe_way_points_response.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,7 +57,7 @@ NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
 NaviUnsubscribeWayPointsResponse::~NaviUnsubscribeWayPointsResponse() {}
 
 void NaviUnsubscribeWayPointsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
@@ -65,4 +67,4 @@ void NaviUnsubscribeWayPointsResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

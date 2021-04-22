@@ -30,12 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/update_status_manager.h"
 #include "gtest/gtest.h"
 #include "policy/mock_policy_listener.h"
+#include "policy/mock_ptu_retry_handler.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager.h"
 
 #include "utils/conditional_variable.h"
+#include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
@@ -43,8 +45,8 @@ namespace policy_test {
 
 using namespace ::policy;
 using ::testing::_;
-using ::testing::Return;
 using testing::NiceMock;
+using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
@@ -52,6 +54,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> mock_ptu_retry_handler_;
   const std::string up_to_date_status_;
   const std::string update_needed_status_;
   const std::string updating_status_;
@@ -61,6 +64,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
       : manager_(std::make_shared<UpdateStatusManager>())
       , k_timeout_(1000)
       , listener_()
+      , mock_ptu_retry_handler_()
       , up_to_date_status_("UP_TO_DATE")
       , update_needed_status_("UPDATE_NEEDED")
       , updating_status_("UPDATING") {}
@@ -68,64 +72,64 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     manager_->set_listener(&listener_);
     ON_CALL(listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
+    ON_CALL(listener_, ptu_retry_handler())
+        .WillByDefault(ReturnRef(mock_ptu_retry_handler_));
   }
 
   void TearDown() OVERRIDE {}
 };
 
-namespace {
-/**
- * @brief The WaitAsync class
- * can wait for a certain amount of function calls from different
- * threads, or a timeout expires.
- */
-class WaitAsync {
- public:
-  WaitAsync(const uint32_t count, const uint32_t timeout)
-      : count_(count), timeout_(timeout) {}
-
-  void Notify() {
-    count_--;
-    cond_var_.NotifyOne();
-  }
-
-  bool Wait(sync_primitives::AutoLock& auto_lock) {
-    while (count_ > 0) {
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          cond_var_.WaitFor(auto_lock, timeout_);
-      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        return false;
-      }
-    }
-    return true;
-  }
-
- private:
-  int count_;
-  const uint32_t timeout_;
-  sync_primitives::ConditionalVariable cond_var_;
-};
-}
-
-ACTION_P(NotifyAsync, waiter) {
-  waiter->Notify();
+ACTION_P2(RetryFailed, manager, listener) {
+  manager->OnResetRetrySequence();
+  listener->OnPTUFinished(false);
 }
 
 TEST_F(UpdateStatusManagerTest,
        OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded) {
   // Arrange
-  sync_primitives::Lock lock;
-  sync_primitives::AutoLock auto_lock(lock);
   const uint32_t count = 3u;
   const uint32_t timeout = 2u * k_timeout_;
-  WaitAsync waiter(count, timeout);
+  auto waiter = TestAsyncWaiter::createInstance();
+
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
-      .WillRepeatedly(NotifyAsync(&waiter));
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   EXPECT_EQ(StatusUpdatePending, status_);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(count, timeout));
+  status_ = manager_->GetLastUpdateStatus();
+  // Check
+  EXPECT_EQ(StatusUpdateRequired, status_);
+}
+
+TEST_F(
+    UpdateStatusManagerTest,
+    OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded_RetryExceeded) {
+  sync_primitives::Lock lock;
+  sync_primitives::AutoLock auto_lock(lock);
+  const uint32_t count = 3u;
+  const uint32_t timeout = 2u * k_timeout_;
+  auto waiter = TestAsyncWaiter::createInstance();
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
+  EXPECT_CALL(mock_ptu_retry_handler_, RetrySequenceFailed())
+      .WillOnce(RetryFailed(manager_, &listener_));
+  manager_->ScheduleUpdate();
+  manager_->OnUpdateSentOut(k_timeout_);
+  status_ = manager_->GetLastUpdateStatus();
+  {
+    ::testing::InSequence s;
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(listener_, OnPTUFinished(false));
+  }
+  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_TRUE(waiter->WaitFor(count, timeout));
   status_ = manager_->GetLastUpdateStatus();
   // Check
   EXPECT_EQ(StatusUpdateRequired, status_);
@@ -245,7 +249,7 @@ TEST_F(UpdateStatusManagerTest, OnResetRetrySequence_ExpectStatusUpToDate) {
   manager_->OnResetRetrySequence();
   status_ = manager_->GetLastUpdateStatus();
   // Check
-  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_EQ(StatusUpdateRequired, status_);
 }
 
 TEST_F(UpdateStatusManagerTest,
@@ -287,42 +291,6 @@ TEST_F(UpdateStatusManagerTest, ScheduleUpdate_ExpectStatusUpdateNeeded) {
 }
 
 TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateRequired_ExpectStatusUpdateNeeded) {
-  // Arrange
-  manager_->OnPolicyInit(true);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpdateRequired, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_TRUE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       OnPolicyInit_SetUpdateNotRequired_ExpectStatusUpToDate) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  status_ = manager_->GetLastUpdateStatus();
-  // Checks
-  EXPECT_EQ(StatusUpToDate, status_);
-  EXPECT_FALSE(manager_->IsUpdatePending());
-  EXPECT_FALSE(manager_->IsUpdateRequired());
-}
-
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut(k_timeout_);
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
-}
-
-TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange
   manager_->OnAppsSearchStarted();
@@ -334,6 +302,12 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+TEST_F(UpdateStatusManagerTest, OnAppRegistered) {
+  manager_->ScheduleUpdate();
+  ASSERT_EQ(policy::kUpdateNeeded, manager_->StringifiedUpdateStatus());
+  manager_->ProcessEvent(policy::UpdateEvent::kOnNewAppRegistered);
+  EXPECT_EQ(policy::kUpdateNeeded, manager_->StringifiedUpdateStatus());
+}
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

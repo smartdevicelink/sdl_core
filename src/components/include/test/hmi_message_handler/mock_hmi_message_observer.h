@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_OBSERVER_H_
 
 #include "gmock/gmock.h"
-#include "utils/singleton.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "utils/singleton.h"
 
 namespace test {
 namespace components {

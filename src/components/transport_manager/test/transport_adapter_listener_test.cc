@@ -76,7 +76,8 @@ TEST_F(TransportAdapterListenerTest, OnCommunicationError) {
       ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_COMMUNICATION_ERROR,
                                      &adapter_mock,
                                      dev_id,
-                                     app_handle))).WillOnce(Return(E_SUCCESS));
+                                     app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnCommunicationError(&adapter_mock, dev_id, app_handle);
 }
 
@@ -129,7 +130,7 @@ TEST_F(TransportAdapterListenerTest, OnDataReceiveFailed) {
 TEST_F(TransportAdapterListenerTest, OnDataSendDone) {
   unsigned char data[3] = {0x20, 0x07, 0x01};
   ::protocol_handler::RawMessagePtr data_container =
-      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3);
+      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3, false);
 
   EXPECT_CALL(tr_mock,
               ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_SEND_DONE,
@@ -145,7 +146,7 @@ TEST_F(TransportAdapterListenerTest, OnDataSendDone) {
 TEST_F(TransportAdapterListenerTest, OnDataSendFailed) {
   unsigned char data[3] = {0x20, 0x07, 0x01};
   ::protocol_handler::RawMessagePtr data_container =
-      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3);
+      std::make_shared< ::protocol_handler::RawMessage>(1, 1, data, 3, false);
   DataSendError err;
 
   EXPECT_CALL(tr_mock,
@@ -195,7 +196,8 @@ TEST_F(TransportAdapterListenerTest, OnFindNewApplicationsRequest) {
                   IsEvent(EventTypeEnum::ON_FIND_NEW_APPLICATIONS_REQUEST,
                           &adapter_mock,
                           "",
-                          0))).WillOnce(Return(E_SUCCESS));
+                          0)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnFindNewApplicationsRequest(&adapter_mock);
 }
 
@@ -225,7 +227,8 @@ TEST_F(TransportAdapterListenerTest, OnUnexpectedDisconnect) {
       ReceiveEventFromDevice(IsEvent(EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
                                      &adapter_mock,
                                      dev_id,
-                                     app_handle))).WillOnce(Return(E_SUCCESS));
+                                     app_handle)))
+      .WillOnce(Return(E_SUCCESS));
   transport_listener.OnUnexpectedDisconnect(
       &adapter_mock, dev_id, app_handle, err);
 }

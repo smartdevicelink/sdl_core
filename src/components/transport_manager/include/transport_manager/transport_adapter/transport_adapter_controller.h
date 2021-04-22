@@ -2,9 +2,6 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -36,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_
 
-#include "transport_manager/transport_adapter/device.h"
-#include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -91,6 +88,10 @@ class TransportAdapterController {
    */
   virtual DeviceSptr FindDevice(const DeviceUID& device_handle) const = 0;
 
+  virtual ConnectionSPtr FindPendingConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const = 0;
+
   /**
    * @brief Create connection and fill its parameters.
    *
@@ -101,6 +102,16 @@ class TransportAdapterController {
   virtual void ConnectionCreated(ConnectionSPtr connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle) = 0;
+
+  /**
+   * @brief Set state of specified connection - PENDING and launch
+   *OnConnectPending event in device adapter listener.
+   *
+   * @param devcie_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void ConnectPending(const DeviceUID& device_handle,
+                              const ApplicationHandle& app_handle) = 0;
 
   /**
    * @brief Make state of specified connection - ESTABLISHED and launch
@@ -163,12 +174,12 @@ class TransportAdapterController {
                               const ApplicationHandle& app_handle) = 0;
 
   /**
-  * @brief Launch OnDataReceiveDone event in the device adapter listener.
-  *
-  * @param device_handle Device unique identifier.
-  * @param app_handle Handle of application.
-  * @param message Smart pointer to the raw message.
-  */
+   * @brief Launch OnDataReceiveDone event in the device adapter listener.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   * @param message Smart pointer to the raw message.
+   */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
                                ::protocol_handler::RawMessagePtr message) = 0;
@@ -214,6 +225,8 @@ class TransportAdapterController {
    * @param new_config The new configuration of the transport
    */
   virtual void TransportConfigUpdated(const TransportConfig& new_config) = 0;
+
+  virtual DeviceSptr GetWebEngineDevice() const = 0;
 };
 
 }  // namespace transport_adapter

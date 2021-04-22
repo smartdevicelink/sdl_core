@@ -35,7 +35,7 @@
 #include "application_manager/commands/command.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
     : app_manager_(app_manager) {}
@@ -43,32 +43,31 @@ CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
 void CommandHolderImpl::Suspend(
     ApplicationSharedPtr application,
     CommandType type,
+    commands::Command::CommandSource source,
     std::shared_ptr<smart_objects::SmartObject> command) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_DEBUG(logger_,
-                "Suspending command(s) for application: "
-                    << application->policy_app_id());
-  sync_primitives::AutoLock lock(commands_lock_);
+  SDL_LOG_DEBUG("Suspending command(s) for application: "
+                << application->policy_app_id());
 
+  AppCommandInfo info = {command, source};
+
+  sync_primitives::AutoLock lock(commands_lock_);
   if (CommandType::kHmiCommand == type) {
-    app_hmi_commands_[application].push_back(command);
-    LOG4CXX_DEBUG(logger_,
-                  "Suspended HMI command(s): " << app_hmi_commands_.size());
+    app_hmi_commands_[application].push_back(info);
+    SDL_LOG_DEBUG("Suspended HMI command(s): " << app_hmi_commands_.size());
   } else {
-    app_mobile_commands_[application].push_back(command);
-    LOG4CXX_DEBUG(
-        logger_,
+    app_mobile_commands_[application].push_back(info);
+    SDL_LOG_DEBUG(
         "Suspended mobile command(s): " << app_mobile_commands_.size());
   }
 }
 
 void CommandHolderImpl::Resume(ApplicationSharedPtr application,
                                CommandType type) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "Resuming command(s) for application: " << application->policy_app_id());
   if (CommandType::kHmiCommand == type) {
     ResumeHmiCommand(application);
@@ -78,24 +77,21 @@ void CommandHolderImpl::Resume(ApplicationSharedPtr application,
 }
 
 void CommandHolderImpl::Clear(ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "Clearing command(s) for application: " << application->policy_app_id());
   sync_primitives::AutoLock lock(commands_lock_);
   auto app_hmi_commands = app_hmi_commands_.find(application);
   if (app_hmi_commands_.end() != app_hmi_commands) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Clearing HMI command(s): " << app_hmi_commands->second.size());
     app_hmi_commands_.erase(app_hmi_commands);
   }
 
   auto app_mobile_commands = app_mobile_commands_.find(application);
   if (app_mobile_commands_.end() != app_mobile_commands) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Clearing mobile command(s): " << app_mobile_commands->second.size());
     app_mobile_commands_.erase(app_mobile_commands);
   }
@@ -109,12 +105,13 @@ void CommandHolderImpl::ResumeHmiCommand(ApplicationSharedPtr application) {
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Resuming HMI command(s): " << app_hmi_commands_.size());
+  SDL_LOG_DEBUG("Resuming HMI command(s): " << app_hmi_commands_.size());
 
   for (auto cmd : app_commands->second) {
-    (*cmd)[strings::msg_params][strings::app_id] = application->hmi_app_id();
-    app_manager_.GetRPCService().ManageHMICommand(cmd);
+    (*cmd.command_ptr_)[strings::msg_params][strings::app_id] =
+        application->hmi_app_id();
+    app_manager_.GetRPCService().ManageHMICommand(cmd.command_ptr_,
+                                                  cmd.command_source_);
   }
 
   app_hmi_commands_.erase(app_commands);
@@ -128,15 +125,15 @@ void CommandHolderImpl::ResumeMobileCommand(ApplicationSharedPtr application) {
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Resuming mobile command(s): " << app_mobile_commands_.size());
+  SDL_LOG_DEBUG("Resuming mobile command(s): " << app_mobile_commands_.size());
 
   for (auto cmd : app_commands->second) {
-    (*cmd)[strings::params][strings::connection_key] = application->app_id();
-    app_manager_.GetRPCService().ManageMobileCommand(
-        cmd, commands::Command::CommandSource::SOURCE_MOBILE);
+    (*cmd.command_ptr_)[strings::params][strings::connection_key] =
+        application->app_id();
+    app_manager_.GetRPCService().ManageMobileCommand(cmd.command_ptr_,
+                                                     cmd.command_source_);
   }
 
   app_mobile_commands_.erase(app_commands);
 }
-}  // application_manager
+}  // namespace application_manager

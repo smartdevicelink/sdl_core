@@ -32,16 +32,16 @@
 #ifdef __QNX__
 #include <process.h>
 #else  // __QNX__
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #endif  // __QNX__
 
 #include <algorithm>
-#include <functional>
 #include <cstring>
+#include <functional>
 #include <iostream>
 
 #include "utils/logger.h"
@@ -49,7 +49,7 @@
 
 namespace utils {
 
-CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 struct GetCString {
   char* operator()(const std::string& string) {
@@ -87,7 +87,7 @@ bool System::Execute() {
 
 bool System::Execute(bool wait) {
   size_t size = argv_.size();
-  char** argv = new char* [size + 1];
+  char** argv = new char*[size + 1];
   std::transform(argv_.begin(), argv_.end(), argv, GetCString());
   argv[size] = NULL;
 
@@ -96,8 +96,7 @@ bool System::Execute(bool wait) {
   delete[] argv;
 
   if (ret == -1) {
-    LOG4CXX_ERROR(logger_,
-                  "Can't execute command: " << command_ << " Errno is: "
+    SDL_LOG_ERROR("Can't execute command: " << command_ << " Errno is: "
                                             << std::strerror(errno));
     return false;
   }
@@ -117,13 +116,13 @@ bool System::Execute(bool wait) {
 
   switch (pid_command) {
     case -1: {  // Error
-      LOG4CXX_FATAL(logger_, "fork() failed!");
+      SDL_LOG_FATAL("fork() failed!");
       return false;
     }
     case 0: {  // Child process
       int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
       if (0 > fd_dev0) {
-        LOG4CXX_FATAL(logger_, "Open dev0 failed!");
+        SDL_LOG_FATAL("Open dev0 failed!");
         return false;
       }
       // close input/output file descriptors.
@@ -137,13 +136,13 @@ bool System::Execute(bool wait) {
       dup2(fd_dev0, STDERR_FILENO);
 
       size_t size = argv_.size();
-      char** argv = new char* [size + 1];
+      char** argv = new char*[size + 1];
       std::transform(argv_.begin(), argv_.end(), argv, GetCString());
       argv[size] = NULL;
 
       // Execute the program.
       if (execvp(command_.c_str(), argv) == -1) {
-        LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
+        SDL_LOG_ERROR("Can't execute command: " << command_);
         _exit(EXIT_FAILURE);
       }
       delete[] argv;
@@ -151,14 +150,14 @@ bool System::Execute(bool wait) {
       return true;
     }
     default: { /* Parent process */
-      LOG4CXX_INFO(logger_, "Process created with pid " << pid_command);
+      SDL_LOG_INFO("Process created with pid " << pid_command);
       if (wait) {
         int status;
         pid_t wait_pid;
         do {
           wait_pid = waitpid(pid_command, &status, WUNTRACED | WCONTINUED);
           if (wait_pid == -1) {
-            LOG4CXX_ERROR_WITH_ERRNO(logger_, "Can't wait");
+            SDL_LOG_ERROR_WITH_ERRNO("Can't wait");
             _exit(EXIT_FAILURE);
             return false;
           }
@@ -173,4 +172,4 @@ bool System::Execute(bool wait) {
 
 #endif  // __QNX__
 
-}  // utils
+}  // namespace utils

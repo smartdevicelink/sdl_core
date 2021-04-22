@@ -1,35 +1,3 @@
-/*
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided with the
- * distribution.
- *
- * Neither the name of the copyright holders nor the names of its contributors
- * may be used to endorse or promote products derived from this software
- * without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <time.h>
@@ -47,7 +15,7 @@ namespace transport_manager_test {
 namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kStartNotificationTimeoutMsec = 500;
-}
+}  // namespace
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -64,6 +32,7 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
  protected:
   struct InterfaceEntry {
     const char* name;
+    const unsigned int index;
     const char* ipv4_address;
     const char* ipv6_address;
     unsigned int flags;
@@ -80,8 +49,9 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
     delete interface_listener_impl_;
   }
 
-  void SetDummyInterfaceTable(struct InterfaceEntry* entries) {
+  void SetDummyInterfaceTable(const struct InterfaceEntry* entries) {
     InterfaceStatusTable dummy_table;
+    std::map<unsigned int, std::string> dummy_name_map;
 
     while (entries->name != NULL) {
       InterfaceStatus status;
@@ -95,13 +65,16 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
         ASSERT_EQ(1, inet_pton(AF_INET6, entries->ipv6_address, &addr6));
         status.SetIPv6Address(&addr6);
       }
+      status.SetName(entries->name);
       status.SetFlags(entries->flags);
 
-      dummy_table.insert(std::make_pair(entries->name, status));
+      dummy_table.insert(std::make_pair(entries->index, status));
+      dummy_name_map[entries->index] = std::string(entries->name);
       entries++;
     }
 
     interface_listener_impl_->OverwriteStatusTable(dummy_table);
+    interface_listener_impl_->SetDummyNameMap(dummy_name_map);
   }
 
   void SleepFor(long msec) const {
@@ -140,25 +113,25 @@ TEST_F(NetworkInterfaceListenerTest, Start_success) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   SetDummyInterfaceTable(entries);
 
   // after stated, it is expected that the listener notifies current IP address
   // (if it's available)
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(mock_tcp_client_listener_,
               OnIPAddressUpdated(entries[0].ipv4_address, ""))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   EXPECT_TRUE(interface_listener_impl_->Start());
 
   // the "isThreadRunning_" flag of the thread will be update slightly later
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_TRUE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_TRUE(interface_listener_impl_->GetThread()->IsRunning());
 
-  EXPECT_TRUE(waiter.WaitFor(1, kStartNotificationTimeoutMsec));
+  EXPECT_TRUE(waiter->WaitFor(1, kStartNotificationTimeoutMsec));
 
   Deinit();
 }
@@ -193,7 +166,7 @@ TEST_F(NetworkInterfaceListenerTest, Stop_success) {
   EXPECT_TRUE(interface_listener_impl_->Stop());
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_FALSE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_FALSE(interface_listener_impl_->GetThread()->IsRunning());
 
   Deinit();
 }
@@ -230,16 +203,17 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressChanged) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "5.6.7.8", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "5.6.7.8", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries1[0].ipv4_address, ""))
+      .Times(1);
 
   // this test case doesn't call Start() - we only check the behavior of
   // NotifyIPAddresses()
@@ -248,7 +222,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressChanged) {
   SetDummyInterfaceTable(entries2);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries2[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries2[0].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -260,18 +235,19 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressNotChanged) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "172.16.23.30", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "172.16.23.30", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries1[0].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -290,19 +266,20 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_GoesUnavailable) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address,
-                                 entries1[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries1[0].ipv4_address, entries1[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -320,18 +297,19 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Removed) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries1[0].ipv4_address,
-                                 entries1[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries1[0].ipv4_address, entries1[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -349,12 +327,12 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Added) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int0", 2, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -363,7 +341,8 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Added) {
   SetDummyInterfaceTable(entries2);
 
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries2[1].ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(entries2[1].ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -376,9 +355,13 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SelectInterface) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"net_dummy2",
+       2,
+       "192.168.2.3",
+       "fdc2:12af:327a::22",
+       IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
@@ -410,17 +393,22 @@ TEST_F(NetworkInterfaceListenerTest,
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP},
+      {"net_dummy2",
+       2,
+       "192.168.2.3",
+       "fdc2:12af:327a::22",
+       IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
   // dummy_int1 should not be selected
   struct InterfaceEntry* expected = &entries[1];
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address,
-                                 expected->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(expected->ipv4_address, expected->ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -435,16 +423,17 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SkipEmptyInterface) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"net_dummy2", NULL, NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"net_dummy2", 2, NULL, NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
   // net_dummy2 should not be selected
   struct InterfaceEntry* expected = &entries[0];
   EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address, "")).Times(1);
+              OnIPAddressUpdated(expected->ipv4_address, ""))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -459,16 +448,24 @@ TEST_F(NetworkInterfaceListenerTest,
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING | IFF_LOOPBACK},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"dummy_int1",
+                                      1,
+                                      "10.10.10.12",
+                                      NULL,
+                                      IFF_UP | IFF_RUNNING | IFF_LOOPBACK},
+                                     {"net_dummy2",
+                                      2,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   // dummy_int1 should not be selected
   struct InterfaceEntry* expected = &entries[1];
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(expected->ipv4_address,
-                                 expected->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(expected->ipv4_address, expected->ipv6_address))
+      .Times(1);
 
   SetDummyInterfaceTable(entries);
 
@@ -484,9 +481,12 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_DisableInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"net_dummy0", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"net_dummy0",
+                                      1,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
@@ -510,9 +510,12 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_EnableInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"net_dummy0", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"net_dummy0",
+                                      1,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
@@ -531,9 +534,10 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_EnableInterface) {
   entries[0].flags |= IFF_RUNNING;
   SetDummyInterfaceTable(entries);
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(entries[0].ipv4_address,
-                                 entries[0].ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(entries[0].ipv4_address, entries[0].ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 
@@ -547,13 +551,17 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SwitchInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"dummy_int1",
-       "10.10.10.12",
-       "fd53:ba79:241d:30c1::78",
-       IFF_UP | IFF_RUNNING},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"dummy_int1",
+                                      1,
+                                      "10.10.10.12",
+                                      "fd53:ba79:241d:30c1::78",
+                                      IFF_UP | IFF_RUNNING},
+                                     {"net_dummy2",
+                                      2,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
@@ -582,9 +590,10 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SwitchInterface) {
     switched = &entries[0];
   }
 
-  EXPECT_CALL(mock_tcp_client_listener_,
-              OnIPAddressUpdated(switched->ipv4_address,
-                                 switched->ipv6_address)).Times(1);
+  EXPECT_CALL(
+      mock_tcp_client_listener_,
+      OnIPAddressUpdated(switched->ipv4_address, switched->ipv6_address))
+      .Times(1);
 
   interface_listener_impl_->testCallNotifyIPAddresses();
 

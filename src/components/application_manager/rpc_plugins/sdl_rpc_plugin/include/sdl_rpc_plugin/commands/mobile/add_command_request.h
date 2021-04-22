@@ -91,16 +91,6 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
  private:
   /*
-   * @brief Check if command name doesn't exist in application
-   * Please see SDLAQ-CRS-407 for more information
-   *
-   * @param app Mobile application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckCommandName(app_mngr::ApplicationConstSharedPtr app);
-
-  /*
    * @brief Check if command VR synonyms doesn't exist in application commands
    * Please see SDLAQ-CRS-407 for more information
    *
@@ -164,6 +154,6 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ADD_COMMAND_REQUEST_H_

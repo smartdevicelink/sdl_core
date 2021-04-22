@@ -32,6 +32,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
+#include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -39,6 +40,8 @@ using namespace application_manager;
 namespace commands {
 
 namespace str = strings;
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SubscribeButtonRequest::SubscribeButtonRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,37 +58,48 @@ SubscribeButtonRequest::SubscribeButtonRequest(
 SubscribeButtonRequest::~SubscribeButtonRequest() {}
 
 void SubscribeButtonRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
+    SDL_LOG_ERROR("APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const mobile_apis::ButtonName::eType btn_id =
+  mobile_apis::ButtonName::eType btn_id =
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[str::msg_params][str::button_name].asInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "Subscribe on button " << btn_id << " isn't allowed");
+    SDL_LOG_ERROR("Subscribe on button " << btn_id << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
-  if (!CheckHMICapabilities(btn_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "Subscribe on button "
-                      << btn_id << " isn't allowed by HMI capabilities");
+  if (app->msg_version() < utils::rpc_version_5 &&
+      btn_id == mobile_apis::ButtonName::OK && app->is_media_application()) {
+    bool ok_supported = CheckHMICapabilities(mobile_apis::ButtonName::OK);
+    bool play_pause_supported =
+        CheckHMICapabilities(mobile_apis::ButtonName::PLAY_PAUSE);
+    if (play_pause_supported) {
+      SDL_LOG_DEBUG("Converting Legacy OK button to PLAY_PAUSE");
+      btn_id = mobile_apis::ButtonName::PLAY_PAUSE;
+      (*message_)[str::msg_params][str::button_name] = btn_id;
+    } else if (!ok_supported) {
+      SDL_LOG_ERROR("OK button isn't allowed by HMI capabilities");
+      SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    }
+  } else if (!CheckHMICapabilities(btn_id)) {
+    SDL_LOG_ERROR("Subscribe on button "
+                  << btn_id << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 
   if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR(logger_, "Already subscribed to button " << btn_id);
+    SDL_LOG_ERROR("Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
@@ -93,8 +107,8 @@ void SubscribeButtonRequest::Run() {
   app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
   SendSubscribeButtonNotification();
 
-  const bool is_succedeed = true;
-  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+  const bool is_succeeded = true;
+  SendResponse(is_succeeded, mobile_apis::Result::SUCCESS);
 }
 
 bool SubscribeButtonRequest::Init() {
@@ -105,12 +119,33 @@ bool SubscribeButtonRequest::Init() {
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
   if (!app->is_media_application() &&
-      ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
+      ((mobile_apis::ButtonName::PLAY_PAUSE == btn_id) ||
+       (mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
        (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
        (mobile_apis::ButtonName::TUNEUP == btn_id) ||
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }
+
+  if (!app->is_navi() &&
+      ((mobile_apis::ButtonName::NAV_CENTER_LOCATION == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ZOOM_IN == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ZOOM_OUT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_TILT_TOGGLE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ROTATE_CLOCKWISE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ROTATE_COUNTERCLOCKWISE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_HEADING_TOGGLE == btn_id))) {
+    return false;
+  }
+
   return true;
 }
 
@@ -129,4 +164,4 @@ void SubscribeButtonRequest::SendSubscribeButtonNotification() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

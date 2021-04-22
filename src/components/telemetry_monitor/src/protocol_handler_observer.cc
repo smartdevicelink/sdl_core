@@ -30,27 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/date_time.h"
 #include "telemetry_monitor/protocol_handler_observer.h"
 #include "telemetry_monitor/protocol_handler_metric_wrapper.h"
 #include "telemetry_monitor/telemetry_monitor.h"
+#include "utils/date_time.h"
 
 namespace telemetry_monitor {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TelemetryMonitor")
+SDL_CREATE_LOG_VARIABLE("TelemetryMonitor")
 
 ProtocolHandlerObserver::ProtocolHandlerObserver(
     TelemetryMonitor* telemetry_monitor)
     : telemetry_monitor_(telemetry_monitor) {}
 
 void ProtocolHandlerObserver::StartMessageProcess(
-    uint32_t message_id, const TimevalStruct& start_time) {
+    uint32_t message_id, const date_time::TimeDuration& start_time) {
   if (message_id == 0) {
     return;
   }
   if (time_starts.find(message_id) != time_starts.end()) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Already waiting for stop processing for Message ID: " << message_id);
     return;
   }
@@ -60,14 +59,14 @@ void ProtocolHandlerObserver::StartMessageProcess(
 void ProtocolHandlerObserver::EndMessageProcess(
     std::shared_ptr<MessageMetric> m) {
   uint32_t message_id = m->message_id;
-  std::map<uint32_t, TimevalStruct>::const_iterator it =
+  std::map<uint32_t, date_time::TimeDuration>::const_iterator it =
       time_starts.find(message_id);
   if (it == time_starts.end()) {
-    LOG4CXX_WARN(logger_, "Cant find start time for message" << message_id);
+    SDL_LOG_WARN("Cant find start time for message" << message_id);
     return;
   }
   m->begin = time_starts[message_id];
-  m->end = date_time::DateTime::getCurrentTime();
+  m->end = date_time::getCurrentTime();
   auto metric = std::make_shared<ProtocolHandlerMecticWrapper>();
   metric->message_metric = m;
   metric->grabResources();

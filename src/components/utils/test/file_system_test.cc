@@ -32,8 +32,8 @@
 
 #include <algorithm>
 #include <fstream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "utils/file_system.h"
@@ -47,8 +47,8 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-StringArray MergeStringsToArray(const std::string& first,
-                                const std::string& second) {
+StringArray MergeStringsToArray(const std::string first,
+                                const std::string second) {
   StringArray array_of_strings;
   array_of_strings.reserve(2);
 
@@ -57,7 +57,7 @@ StringArray MergeStringsToArray(const std::string& first,
 
   return array_of_strings;
 }
-}
+}  // namespace
 
 TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
@@ -990,13 +990,13 @@ TEST(FileSystemTest,
 TEST(FileSystemTest, WriteFileGetSize) {
   ASSERT_FALSE(FileExists("./test file"));
   EXPECT_TRUE(CreateFile("./test file"));
-  EXPECT_EQ(0, FileSize("./test file"));
+  EXPECT_EQ(0u, FileSize("./test file"));
 
   unsigned char tmp[] = {'t', 'e', 's', 't'};
   std::vector<unsigned char> data(tmp, tmp + 4);
   EXPECT_TRUE(Write("./test file", data));
 
-  EXPECT_NE(0, FileSize("./test file"));
+  EXPECT_NE(0u, FileSize("./test file"));
 
   EXPECT_TRUE(DeleteFile("./test file"));
   EXPECT_FALSE(FileExists("./test file"));
@@ -1022,13 +1022,14 @@ TEST(FileSystemTest, GetFileModificationTime) {
 
   EXPECT_TRUE(CreateFile("./test file"));
 
-  uint64_t modif_time = GetFileModificationTime("./test file");
-  EXPECT_LE(0ul, modif_time);
+  time_t modif_time = GetFileModificationTime("./test file");
+  EXPECT_LE(0ul, static_cast<unsigned long>(modif_time));
 
   std::vector<uint8_t> data(1, 1);
   EXPECT_TRUE(WriteBinaryFile("./test file", data));
 
-  EXPECT_LE(0ul, GetFileModificationTime("./test file"));
+  EXPECT_LE(0ul,
+            static_cast<unsigned long>(GetFileModificationTime("./test file")));
   EXPECT_LE(modif_time, GetFileModificationTime("./test file"));
 
   EXPECT_TRUE(DeleteFile("./test file"));
@@ -1110,15 +1111,6 @@ TEST(FileSystemTest, GetAvailableDiskSpace) {
   EXPECT_GE(available_space, GetAvailableDiskSpace("."));
   EXPECT_TRUE(RemoveDirectory("./Test directory"));
   EXPECT_FALSE(DirectoryExists("./Test directory"));
-}
-
-TEST(FileSystemTest, ConvertPathForURL) {
-  std::string path = "./Test directory";
-  EXPECT_NE(path, ConvertPathForURL(path));
-  std::string path_brackets = "./Test_directory_with(brackets)";
-  EXPECT_NE(path_brackets, ConvertPathForURL(path));
-  std::string another_path = "./Test_directory/new_directory_without_spaces";
-  EXPECT_EQ(another_path, ConvertPathForURL(another_path));
 }
 
 TEST(FileSystemTest, DirectorySize) {

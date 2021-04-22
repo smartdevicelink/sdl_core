@@ -32,11 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SDLGetUserFriendlyMessageRequest::SDLGetUserFriendlyMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -53,11 +56,10 @@ SDLGetUserFriendlyMessageRequest::SDLGetUserFriendlyMessageRequest(
 SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {}
 
 void SDLGetUserFriendlyMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
-    LOG4CXX_WARN(logger_,
-                 "Mandatory parameter '" + messageCodes + "'' is missing");
+    SDL_LOG_WARN("Mandatory parameter '" + messageCodes + "'' is missing");
     return;
   }
   smart_objects::SmartArray* msg =
@@ -68,22 +70,29 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   smart_objects::SmartArray::const_iterator it = msg->begin();
   smart_objects::SmartArray::const_iterator it_end = msg->end();
   for (; it != it_end; ++it) {
-    msg_codes.push_back((*it).asString());
+    std::string str = (*it).asString();
+    if (!CheckSyntax(str)) {
+      SDL_LOG_WARN("Invalid data");
+      SendErrorResponse(correlation_id(),
+                        static_cast<hmi_apis::FunctionID::eType>(function_id()),
+                        hmi_apis::Common_Result::INVALID_DATA,
+                        "invalid messageCode syntax");
+      return;
+    }
+    msg_codes.push_back(str);
   }
 
   std::string required_language;
   if ((*message_)[strings::msg_params].keyExists(strings::language)) {
     uint32_t lang_code =
         (*message_)[strings::msg_params][strings::language].asUInt();
-    required_language =
-        application_manager::MessageHelper::CommonLanguageToString(
-            static_cast<hmi_apis::Common_Language::eType>(lang_code));
+    required_language = application_manager::EnumToString(
+        static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
         hmi_capabilities_.active_ui_language();
 
-    required_language =
-        application_manager::MessageHelper::CommonLanguageToString(ui_language);
+    required_language = application_manager::EnumToString(ui_language);
   }
 
   policy_handler_.OnGetUserFriendlyMessage(
@@ -93,4 +102,4 @@ void SDLGetUserFriendlyMessageRequest::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

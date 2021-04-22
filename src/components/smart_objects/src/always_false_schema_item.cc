@@ -32,8 +32,8 @@
 
 #include "smart_objects/always_false_schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 CAlwaysFalseSchemaItem::CAlwaysFalseSchemaItem() {}
 
@@ -41,15 +41,14 @@ std::shared_ptr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
   return std::shared_ptr<CAlwaysFalseSchemaItem>(new CAlwaysFalseSchemaItem());
 }
 
-Errors::eType CAlwaysFalseSchemaItem::validate(const SmartObject& object) {
-  rpc::ValidationReport report("RPC");
-  return validate(object, &report);
+errors::eType CAlwaysFalseSchemaItem::validate(
+    const SmartObject& Object,
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
+  report->set_validation_info("Generic error");
+  return errors::ERROR;
 }
 
-Errors::eType CAlwaysFalseSchemaItem::validate(
-    const SmartObject& object, rpc::ValidationReport* report__) {
-  report__->set_validation_info("Generic error");
-  return Errors::ERROR;
-}
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

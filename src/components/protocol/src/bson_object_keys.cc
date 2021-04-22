@@ -18,6 +18,13 @@ const char* video_service_transports = "videoServiceTransports";
 const char* tcp_ip_address = "tcpIpAddress";
 const char* tcp_port = "tcpPort";
 const char* reason = "reason";
+const char* auth_token = "authToken";
+const char* vehicle_make = "make";
+const char* vehicle_model = "model";
+const char* vehicle_model_year = "modelYear";
+const char* vehicle_trim = "trim";
+const char* vehicle_system_software_version = "systemSoftwareVersion";
+const char* vehicle_system_hardware_version = "systemHardwareVersion";
 
 }  // namespace strings
 

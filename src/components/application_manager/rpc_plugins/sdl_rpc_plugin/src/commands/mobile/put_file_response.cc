@@ -32,13 +32,15 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/put_file_response.h"
-#include "utils/file_system.h"
 #include "application_manager/application_impl.h"
+#include "utils/file_system.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 PutFileResponse::PutFileResponse(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,12 +57,12 @@ PutFileResponse::PutFileResponse(
 PutFileResponse::~PutFileResponse() {}
 
 void PutFileResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application not registered");
+    SDL_LOG_ERROR("Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -70,4 +72,4 @@ void PutFileResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

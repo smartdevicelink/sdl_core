@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 #define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_RPC_BASE_JSON_INL_H_
 
-#include "rpc_base/rpc_base.h"
 #include "json/value.h"
+#include "rpc_base/rpc_base.h"
 
 namespace rpc {
 
@@ -94,7 +94,7 @@ inline const Json::Value* ValueMember(const Json::Value* value,
   if (value && value->isObject() && value->isMember(member_name)) {
     return &(*value)[member_name];
   }
-  return NULL;
+  return nullptr;
 }
 
 template <class T>
@@ -164,7 +164,7 @@ Json::Value Integer<T, minval, maxval>::ToJsonValue() const {
 
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value)
-    : PrimitiveType(InitHelper(value, &Json::Value::isDouble)), value_() {
+    : PrimitiveType(InitHelper(value, &Json::Value::isNumeric)), value_() {
   if (is_valid()) {
     value_ = value->asDouble();
     value_state_ = range_.Includes(value_) ? kValid : kInvalid;
@@ -174,7 +174,7 @@ Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value)
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value,
                                              double def_value)
-    : PrimitiveType(InitHelper(value, &Json::Value::isDouble))
+    : PrimitiveType(InitHelper(value, &Json::Value::isNumeric))
     , value_(def_value) {
   if (!is_initialized()) {
     value_state_ = kValid;
@@ -206,6 +206,7 @@ String<minlen, maxlen>::String(const Json::Value* value,
   if (!is_initialized()) {
     value_state_ = kValid;
   } else if (is_valid()) {
+    value_ = value->asString();
     value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
 }

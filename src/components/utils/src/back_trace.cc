@@ -33,8 +33,8 @@
 #include "utils/back_trace.h"
 
 #include <algorithm>
-#include <vector>
 #include <sstream>
+#include <vector>
 
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -63,7 +63,7 @@ string demangle(const char* symbol) {
   }
   return symbol;
 }
-}
+}  // namespace
 
 Backtrace::Backtrace(int32_t count, int32_t skip_top)
     : thread_id_(threads::Thread::CurrentId()) {

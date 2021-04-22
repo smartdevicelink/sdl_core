@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/ui_get_language_response.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -47,11 +47,12 @@ namespace ui_get_language_response {
 using sdl_rpc_plugin::commands::UIGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
-using testing::ReturnRef;
 using ::testing::NiceMock;
+using testing::ReturnRef;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
+namespace hmi_interface = application_manager::hmi_interface;
 using namespace hmi_apis;
 
 typedef NiceMock<
@@ -60,6 +61,8 @@ typedef NiceMock<
 
 namespace {
 const hmi_apis::Common_Language::eType kLanguage = Common_Language::EN_GB;
+const hmi_apis::Common_Result::eType kSuccess =
+    hmi_apis::Common_Result::SUCCESS;
 }  // namespace
 
 class UIGetLanguageResponseTest
@@ -68,33 +71,58 @@ class UIGetLanguageResponseTest
 TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
 
   std::shared_ptr<UIGetLanguageResponse> command(
       CreateCommand<UIGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_ui_language(kLanguage));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::ui, _, _));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
 
 TEST_F(UIGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
 
   std::shared_ptr<UIGetLanguageResponse> command(
       CreateCommand<UIGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_active_ui_language(Common_Language::INVALID_ENUM));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::ui, _, _));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(UIGetLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<UIGetLanguageResponse> command(
+      CreateCommand<UIGetLanguageResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::UI_GetLanguage));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

@@ -31,29 +31,30 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
     const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::CommandResponseImpl(message,
-                                                         application_manager,
-                                                         rpc_service,
-                                                         hmi_capabilities,
-                                                         policy_handle) {
-  UNUSED(resource_allocation_manager);
-}
+    const RCCommandParams& params)
+    : application_manager::commands::CommandResponseImpl(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_) {}
 GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
 
 void GetInteriorVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+
+  RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
+      (*message_)[app_mngr::strings::msg_params]);
   application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 

@@ -34,15 +34,15 @@
 #include <string>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "hmi/sdl_get_user_friendly_message_request.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_hmi_capabilities.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_get_user_friendly_message_request.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/commands/command_request_test.h"
 
 namespace test {
 namespace components {
@@ -50,11 +50,11 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace sdl_get_user_friendly_message_request {
 
+using application_manager::MockMessageHelper;
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SDLGetUserFriendlyMessageRequest;
-using application_manager::MockMessageHelper;
-using test::components::policy_test::MockPolicyHandlerInterface;
 using test::components::application_manager_test::MockHMICapabilities;
+using test::components::policy_test::MockPolicyHandlerInterface;
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
@@ -62,8 +62,8 @@ using testing::ReturnRef;
 namespace {
 const uint32_t kCorrelationID = 1u;
 const uint32_t kAppID = 2u;
-const std::string kLanguageDe = "de-de";
-const std::string kLanguageEn = "en-gb";
+const std::string kLanguageDe = "DE-DE";
+const std::string kLanguageEn = "EN-GB";
 const std::string kMessageCodes = "messageCodes";
 const hmi_apis::Common_Language::eType kLanguage =
     hmi_apis::Common_Language::EN_GB;
@@ -102,14 +102,13 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
   std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
-      .WillOnce(Return(kLanguageEn));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
   EXPECT_CALL(mock_policy_handler_,
               OnGetUserFriendlyMessage(msg_codes, kLanguageEn, kCorrelationID));
 
+  command->Init();
   command->Run();
 }
 
@@ -128,14 +127,13 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(kLanguage));
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
-      .WillOnce(Return(kLanguageEn));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
   EXPECT_CALL(mock_policy_handler_,
               OnGetUserFriendlyMessage(msg_codes, kLanguageEn, kCorrelationID));
 
+  command->Init();
   command->Run();
 }
 
@@ -147,9 +145,40 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
   std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
+  command->Init();
+  command->Run();
+}
+
+MATCHER_P(HMIRequestResultCodeIs, result_code, "") {
+  return result_code ==
+         static_cast<hmi_apis::Common_Result::eType>(
+             (*arg)[strings::params][am::hmi_response::code].asInt());
+}
+
+TEST_F(
+    SDLGetUserFriendlyMessageRequestTest,
+    RUN_InvalidRequestInvalidSymbolsStringMandatoryParam_SendInvalidDataErrorResponse) {
+  const std::string kInvalidSyntaxString = "\n\t ";
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::correlation_id] = kCorrelationID;
+  (*msg)[strings::msg_params][strings::app_id] = kAppID;
+
+  (*msg)[strings::msg_params][kMessageCodes] =
+      SmartObject(smart_objects::SmartType_Array);
+  (*msg)[strings::msg_params][kMessageCodes][0] =
+      SmartObject(kInvalidSyntaxString);
+  (*msg)[strings::msg_params][kMessageCodes][1] = SmartObject(kLanguageEn);
+
+  (*msg)[strings::msg_params][strings::language] = kLanguage;
+
+  std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
+      CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
+
+  EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
+
+  command->Init();
   command->Run();
 }
 

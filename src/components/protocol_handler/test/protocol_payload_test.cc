@@ -33,10 +33,10 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "utils/macro.h"
-#include "utils/bitstream.h"
-#include "protocol_handler/protocol_payload.h"
 #include "protocol/common.h"
+#include "protocol_handler/protocol_payload.h"
+#include "utils/bitstream.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -242,8 +242,9 @@ TEST(ProtocolPayloadTest, ExtractProtocolWithJSONWithDataWithWrongPayloadSize) {
   prot_payload_test.json = expect_output_json_string;
   prot_payload_test.header.json_size = prot_payload_test.json.length();
 
-  const size_t data_for_sending_size =
-      PROTOCOL_HEADER_V2_SIZE + prot_payload_test.json.length();
+  const size_t data_for_sending_size = PROTOCOL_HEADER_V2_SIZE +
+                                       prot_payload_test.json.length() +
+                                       prot_payload_test.data.size();
   uint8_t* data_for_sending = new uint8_t[data_for_sending_size];
   prepare_data(data_for_sending, prot_payload_test);
 

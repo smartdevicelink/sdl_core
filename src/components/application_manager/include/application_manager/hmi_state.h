@@ -46,13 +46,14 @@ class ApplicationManager;
 class Application;
 
 typedef std::shared_ptr<HmiState> HmiStatePtr;
+typedef int32_t WindowID;
 
 /**
-* @brief The HmiState class
-*  Handle Hmi state of application (hmi level,
-*  audio streaming state, system context)
-*
-*/
+ * @brief The HmiState class
+ *  Handle Hmi state of application (hmi level,
+ *  audio streaming state, system context)
+ *
+ */
 class HmiState {
   friend std::ostream& operator<<(std::ostream& os, const HmiState& src);
 
@@ -62,18 +63,18 @@ class HmiState {
    * If no events occurred STATE_ID_DEFAULT should be presented
    */
   enum StateID {
-    STATE_ID_CURRENT,
-    STATE_ID_REGULAR,
-    STATE_ID_POSTPONED,
-    STATE_ID_PHONE_CALL,
-    STATE_ID_SAFETY_MODE,
-    STATE_ID_VR_SESSION,
-    STATE_ID_TTS_SESSION,
-    STATE_ID_VIDEO_STREAMING,
-    STATE_ID_NAVI_STREAMING,
-    STATE_ID_DEACTIVATE_HMI,
-    STATE_ID_AUDIO_SOURCE,
-    STATE_ID_EMBEDDED_NAVI
+    STATE_ID_CURRENT = 1,
+    STATE_ID_REGULAR = 2,
+    STATE_ID_POSTPONED = 3,
+    STATE_ID_PHONE_CALL = 4,
+    STATE_ID_SAFETY_MODE = 5,
+    STATE_ID_VR_SESSION = 6,
+    STATE_ID_TTS_SESSION = 7,
+    STATE_ID_VIDEO_STREAMING = 8,
+    STATE_ID_NAVI_STREAMING = 9,
+    STATE_ID_DEACTIVATE_HMI = 10,
+    STATE_ID_AUDIO_SOURCE = 11,
+    STATE_ID_EMBEDDED_NAVI = 12
   };
 
   /**
@@ -91,25 +92,6 @@ class HmiState {
    * @param state_id HMI state to assign
    */
   HmiState(std::shared_ptr<Application> app,
-           const ApplicationManager& app_mngr,
-           StateID state_id);
-
-  /**
-   * DEPRECATED
-   * @brief HmiState constructor
-   * @param app_id Application id
-   * @param app_mngr Application manager
-   */
-  HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-
-  /**
-   * DEPRECATED
-   * @brief HmiState constructor
-   * @param app_id Application id
-   * @param app_mngr Application manager
-   * @param state_id HMI state to assign
-   */
-  HmiState(uint32_t app_id,
            const ApplicationManager& app_mngr,
            StateID state_id);
 
@@ -135,10 +117,27 @@ class HmiState {
    */
   virtual mobile_apis::HMILevel::eType hmi_level() const {
     if (parent_) {
-      return parent_->hmi_level();
+      if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level_) {
+        return parent_->hmi_level();
+      }
+      // Higher values correlate to lower states
+      // (FULL = 0, LIMITED = 1, etc.)
+      return std::max(parent_->max_hmi_level(), hmi_level_);
     }
     return hmi_level_;
   }
+
+  /**
+   * @brief max_hmi_level
+   * @return return maximum hmi level for app
+   */
+  virtual mobile_apis::HMILevel::eType max_hmi_level() const {
+    if (parent_) {
+      return parent_->max_hmi_level();
+    }
+    return mobile_apis::HMILevel::HMI_FULL;
+  }
+
   /**
    * @brief set_hmi_level set hmi_level member
    * @param hmi_level hmi level to setup
@@ -154,9 +153,28 @@ class HmiState {
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const {
     if (parent_) {
-      return parent_->audio_streaming_state();
+      if (mobile_apis::AudioStreamingState::INVALID_ENUM ==
+          audio_streaming_state_) {
+        return parent_->audio_streaming_state();
+      }
+      // Higher values correlate to lower states
+      // (AUDIBLE = 0, ATTENUATED = 1, etc.)
+      return std::max(parent_->max_audio_streaming_state(),
+                      audio_streaming_state_);
     }
     return audio_streaming_state_;
+  }
+
+  /**
+   * @brief max_audio_streaming_state
+   * @return return maximum audio streaming state for app
+   */
+  virtual mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const {
+    if (parent_) {
+      return parent_->max_audio_streaming_state();
+    }
+    return mobile_apis::AudioStreamingState::AUDIBLE;
   }
 
   /**
@@ -166,9 +184,28 @@ class HmiState {
   virtual mobile_apis::VideoStreamingState::eType video_streaming_state()
       const {
     if (parent_) {
-      return parent_->video_streaming_state();
+      if (mobile_apis::VideoStreamingState::INVALID_ENUM ==
+          video_streaming_state_) {
+        return parent_->video_streaming_state();
+      }
+      // Higher values correlate to lower states
+      // (STREAMABLE = 0, NOT_STREAMABLE = 1)
+      return std::max(parent_->max_video_streaming_state(),
+                      video_streaming_state_);
     }
     return video_streaming_state_;
+  }
+
+  /**
+   * @brief max_video_streaming_state
+   * @return return maximum video streaming state for app
+   */
+  virtual mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const {
+    if (parent_) {
+      return parent_->max_video_streaming_state();
+    }
+    return mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
   /**
@@ -194,7 +231,9 @@ class HmiState {
    * @return return system context member
    */
   virtual mobile_apis::SystemContext::eType system_context() const {
-    if (parent_) {
+    // Parent's context should be used if not available for current state
+    if (parent_ &&
+        system_context_ == mobile_apis::SystemContext::INVALID_ENUM) {
       return parent_->system_context();
     }
     return system_context_;
@@ -225,11 +264,24 @@ class HmiState {
     state_id_ = state_id;
   }
 
+  /**
+   * @brief window_type getter for a window type for this type
+   * @return current state window type
+   */
+  mobile_apis::WindowType::eType window_type() const;
+
+  /**
+   * @brief set_window_type sets current state window type
+   * @param window_type new window type
+   */
+  void set_window_type(const mobile_apis::WindowType::eType window_type);
+
  protected:
-  std::shared_ptr<Application> app_;
+  uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
+  mobile_apis::WindowType::eType window_type_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
   mobile_apis::VideoStreamingState::eType video_streaming_state_;
@@ -241,6 +293,12 @@ class HmiState {
    * @return true if app is navi, otherwise return false
    */
   bool is_navi_app() const;
+
+  /**
+   * @brief is_projection_app check if app is projection
+   * @return true if app is projection, otherwise return false
+   */
+  bool is_projection_app() const;
 
   /**
    * @brief is_media_app check if app is media
@@ -261,6 +319,48 @@ class HmiState {
    */
   bool is_mobile_projection_app() const;
 
+  /**
+   * @brief parent_hmi_level
+   * @return return hmi level for parent state if available, otherwise return
+   * HMI_NONE
+   */
+  mobile_apis::HMILevel::eType parent_hmi_level() const;
+
+  /**
+   * @brief parent_max_hmi_level
+   * @return return maximum hmi level for parent state if available, otherwise
+   * return HMI_FULL
+   */
+  mobile_apis::HMILevel::eType parent_max_hmi_level() const;
+
+  /**
+   * @brief parent_audio_state
+   * @return return audio streaming state for parent state if available,
+   * otherwise return NOT_AUDIBLE
+   */
+  mobile_apis::AudioStreamingState::eType parent_audio_state() const;
+
+  /**
+   * @brief parent_max_audio_state
+   * @return return maximum audio streaming state for parent state if available,
+   * otherwise return AUDIBLE
+   */
+  mobile_apis::AudioStreamingState::eType parent_max_audio_state() const;
+
+  /**
+   * @brief parent_video_state
+   * @return return video streaming state for parent state if available,
+   * otherwise return NOT_STREAMABLE
+   */
+  mobile_apis::VideoStreamingState::eType parent_video_state() const;
+
+  /**
+   * @brief parent_max_video_state
+   * @return return maximum video streaming statefor parent state if available,
+   * otherwise return STREAMABLE
+   */
+  mobile_apis::VideoStreamingState::eType parent_max_video_state() const;
+
  private:
   void operator=(const HmiState&);
 };
@@ -272,10 +372,10 @@ class VRHmiState : public HmiState {
  public:
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
+  virtual mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE;
   VRHmiState(std::shared_ptr<Application> app,
              const ApplicationManager& app_mngr);
-
-  DEPRECATED VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
 /**
@@ -286,9 +386,10 @@ class TTSHmiState : public HmiState {
   TTSHmiState(std::shared_ptr<Application> app,
               const ApplicationManager& app_mngr);
 
-  DEPRECATED TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
+
+  virtual mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
       const OVERRIDE;
 };
 
@@ -303,6 +404,9 @@ class VideoStreamingHmiState : public HmiState {
 
   mobile_apis::VideoStreamingState::eType video_streaming_state()
       const OVERRIDE;
+
+  mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const OVERRIDE;
 };
 
 /**
@@ -316,6 +420,9 @@ class NaviStreamingHmiState : public VideoStreamingHmiState {
 
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE;
+
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE;
 };
 
 /**
@@ -327,13 +434,16 @@ class PhoneCallHmiState : public HmiState {
   PhoneCallHmiState(std::shared_ptr<Application> app,
                     const ApplicationManager& app_mngr);
 
-  DEPRECATED PhoneCallHmiState(uint32_t app_id,
-                               const ApplicationManager& app_mngr);
-
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+
+  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE {
+    return audio_streaming_state();
   }
 };
 
@@ -346,9 +456,6 @@ class SafetyModeHmiState : public HmiState {
   SafetyModeHmiState(std::shared_ptr<Application> app,
                      const ApplicationManager& app_mngr);
 
-  DEPRECATED SafetyModeHmiState(uint32_t app_id,
-                                const ApplicationManager& app_mngr);
-
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
@@ -356,6 +463,15 @@ class SafetyModeHmiState : public HmiState {
   mobile_apis::VideoStreamingState::eType video_streaming_state()
       const OVERRIDE {
     return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
+
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE {
+    return audio_streaming_state();
+  }
+  mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const OVERRIDE {
+    return video_streaming_state();
   }
 };
 
@@ -368,8 +484,6 @@ class DeactivateHMI : public HmiState {
   DeactivateHMI(std::shared_ptr<Application> app,
                 const ApplicationManager& app_mngr);
 
-  DEPRECATED DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
-
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -378,6 +492,16 @@ class DeactivateHMI : public HmiState {
   mobile_apis::VideoStreamingState::eType video_streaming_state()
       const OVERRIDE {
     return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+  }
+
+  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE {
+    return audio_streaming_state();
+  }
+  mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const OVERRIDE {
+    return video_streaming_state();
   }
 };
 
@@ -390,17 +514,20 @@ class AudioSource : public HmiState {
   AudioSource(std::shared_ptr<Application> app,
               const ApplicationManager& app_mngr);
 
-  DEPRECATED AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
-
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE {
-    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
-  }
+      const OVERRIDE;
   mobile_apis::VideoStreamingState::eType video_streaming_state()
-      const OVERRIDE {
-    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
-  }
+      const OVERRIDE;
+
+  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE;
+  mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const OVERRIDE;
+
+ private:
+  bool keep_context_;
 };
 
 /**
@@ -413,17 +540,17 @@ class EmbeddedNavi : public HmiState {
   EmbeddedNavi(std::shared_ptr<Application> app,
                const ApplicationManager& app_mngr);
 
-  DEPRECATED EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
-
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE {
-    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
-  }
+      const OVERRIDE;
   mobile_apis::VideoStreamingState::eType video_streaming_state()
-      const OVERRIDE {
-    return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
-  }
+      const OVERRIDE;
+
+  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
+      const OVERRIDE;
+  mobile_apis::VideoStreamingState::eType max_video_streaming_state()
+      const OVERRIDE;
 };
 
 /**

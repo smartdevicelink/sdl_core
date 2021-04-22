@@ -29,15 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
 #include "formatters/meta_formatter_test_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
 
 void CMetaFormatterTestHelper::SetUp() {
   function_id_items_.insert(FunctionIDTest::RegisterAppInterface);
@@ -148,7 +148,7 @@ void CMetaFormatterTestHelper::CompareObjects(const SmartObject& first,
 
     for (std::set<std::string>::const_iterator key = keys.begin();
          key != keys.end();
-         key++) {
+         ++key) {
       CompareObjects(first.getElement(*key), second.getElement(*key));
     }
   } else if (SmartType_Boolean == first.getType()) {

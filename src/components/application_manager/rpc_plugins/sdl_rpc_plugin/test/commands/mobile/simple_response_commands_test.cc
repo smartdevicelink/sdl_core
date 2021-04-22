@@ -38,37 +38,36 @@
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "mobile/delete_command_response.h"
+#include "mobile/add_command_response.h"
+#include "mobile/add_sub_menu_response.h"
 #include "mobile/alert_maneuver_response.h"
 #include "mobile/alert_response.h"
-#include "mobile/list_files_response.h"
-#include "mobile/subscribe_button_response.h"
-#include "mobile/add_sub_menu_response.h"
+#include "mobile/change_registration_response.h"
+#include "mobile/delete_command_response.h"
 #include "mobile/dial_number_response.h"
 #include "mobile/end_audio_pass_thru_response.h"
-#include "mobile/unregister_app_interface_response.h"
-#include "mobile/unsubscribe_button_response.h"
-#include "mobile/unsubscribe_way_points_response.h"
-#include "mobile/update_turn_list_response.h"
-#include "mobile/slider_response.h"
-#include "mobile/speak_response.h"
-#include "mobile/subscribe_way_points_response.h"
-#include "mobile/system_response.h"
+#include "mobile/generic_response.h"
 #include "mobile/get_way_points_response.h"
-#include "mobile/perform_interaction_response.h"
+#include "mobile/list_files_response.h"
 #include "mobile/perform_audio_pass_thru_response.h"
+#include "mobile/perform_interaction_response.h"
+#include "mobile/scrollable_message_response.h"
+#include "mobile/send_location_response.h"
+#include "mobile/set_app_icon_response.h"
+#include "mobile/set_display_layout_response.h"
 #include "mobile/set_global_properties_response.h"
 #include "mobile/set_media_clock_timer_response.h"
 #include "mobile/show_constant_tbt_response.h"
 #include "mobile/show_response.h"
-#include "mobile/add_command_response.h"
-#include "mobile/send_location_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/set_display_layout_response.h"
-#include "mobile/generic_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/scrollable_message_response.h"
-#include "mobile/change_registration_response.h"
+#include "mobile/slider_response.h"
+#include "mobile/speak_response.h"
+#include "mobile/subscribe_button_response.h"
+#include "mobile/subscribe_way_points_response.h"
+#include "mobile/system_response.h"
+#include "mobile/unregister_app_interface_response.h"
+#include "mobile/unsubscribe_button_response.h"
+#include "mobile/unsubscribe_way_points_response.h"
+#include "mobile/update_turn_list_response.h"
 
 namespace test {
 namespace components {
@@ -94,15 +93,12 @@ class MobileResponseCommandsTest
 
 typedef Types<commands::ListFilesResponse,
               commands::DeleteCommandResponse,
-              commands::AlertManeuverResponse,
-              commands::AlertResponse,
               commands::SubscribeButtonResponse,
               commands::AddSubMenuResponse,
               commands::DialNumberResponse,
               commands::EndAudioPassThruResponse,
               commands::UnregisterAppInterfaceResponse,
               commands::UnsubscribeWayPointsResponse,
-              commands::UpdateTurnListResponse,
               commands::UnsubscribeButtonResponse,
               commands::SliderResponse,
               commands::SpeakResponse,
@@ -113,14 +109,14 @@ typedef Types<commands::ListFilesResponse,
               commands::PerformAudioPassThruResponse,
               commands::SetGlobalPropertiesResponse,
               commands::SetMediaClockTimerResponse,
-              commands::ShowConstantTBTResponse,
               commands::ShowResponse,
               commands::SystemResponse,
               commands::AddCommandResponse,
               commands::SendLocationResponse,
               commands::SetAppIconResponse,
               commands::SetDisplayLayoutResponse,
-              commands::ChangeRegistrationResponse> ResponseCommandsList;
+              commands::ChangeRegistrationResponse>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
@@ -128,6 +124,35 @@ TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
+  command->Run();
+}
+
+template <class CommandWithUnsubscribe>
+class MobileResponseWithUnsubscribeCommandsTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  typedef CommandWithUnsubscribe UnsubscribeCommand;
+};
+
+typedef Types<commands::AlertManeuverResponse,
+              commands::AlertResponse,
+              commands::UpdateTurnListResponse,
+              commands::ScrollableMessageResponse,
+              commands::ShowConstantTBTResponse>
+    ResponseWithUnsubscribeCommandList;
+
+TYPED_TEST_CASE(MobileResponseWithUnsubscribeCommandsTest,
+                ResponseWithUnsubscribeCommandList);
+
+TYPED_TEST(MobileResponseWithUnsubscribeCommandsTest,
+           RunWithUnsubscribe_SUCCESS) {
+  std::shared_ptr<typename TestFixture::UnsubscribeCommand> command =
+      this->template CreateCommand<typename TestFixture::UnsubscribeCommand>();
+
+  EXPECT_CALL(this->app_mngr_, UnsubscribeAppFromSoftButtons(_));
+  EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
+
+  command->Init();
   command->Run();
 }
 
@@ -145,7 +170,6 @@ MATCHER_P2(CheckMessageParams, success, result, "") {
       result ==
       static_cast<int32_t>(
           (*arg)[am::strings::msg_params][am::strings::result_code].asInt());
-
   using namespace helpers;
   return Compare<bool, EQ, ALL>(
       true, is_msg_type_correct, is_success_correct, is_result_code_correct);
@@ -164,24 +188,6 @@ TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
 
   command->Run();
 }
-
-class ScrollableMessageResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
-
-TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
-  MessageSharedPtr message = CreateMessage();
-  (*message)[am::strings::msg_params][am::strings::result_code] =
-      mobile_apis::Result::SUCCESS;
-
-  MockAppPtr app(CreateMockApp());
-
-  std::shared_ptr<commands::ScrollableMessageResponse> command(
-      CreateCommand<commands::ScrollableMessageResponse>(message));
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
-  EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
-  command->Run();
-}
-
 }  // namespace simple_response_commands_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test

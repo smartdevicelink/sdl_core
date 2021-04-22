@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
 
 #include <gmock/gmock.h>
-#include <string>
 #include <list>
+#include <string>
 #include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
 
@@ -47,13 +47,6 @@ namespace protocol_handler_test {
  */
 class MockSessionObserver : public ::protocol_handler::SessionObserver {
  public:
-  DEPRECATED MOCK_METHOD5(
-      OnSessionStartedCallback,
-      uint32_t(const transport_manager::ConnectionUID connection_handle,
-               const uint8_t sessionId,
-               const protocol_handler::ServiceType& service_type,
-               const bool is_protected,
-               uint32_t* hash_id));
   MOCK_METHOD5(OnSessionStartedCallback,
                void(const transport_manager::ConnectionUID connection_handle,
                     const uint8_t sessionId,
@@ -72,10 +65,25 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                const uint8_t sessionId,
                uint32_t* hashCode,
                const protocol_handler::ServiceType& service_type));
+  MOCK_METHOD5(
+      OnSessionEndedCallback,
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               const uint32_t& hashCode,
+               const protocol_handler::ServiceType& service_type,
+               std::string* err_reason));
+  MOCK_METHOD5(
+      OnSessionEndedCallback,
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               uint32_t* hashCode,
+               const protocol_handler::ServiceType& service_type,
+               std::string* err_reason));
   MOCK_METHOD1(OnApplicationFloodCallBack,
                void(const uint32_t& connection_key));
   MOCK_METHOD1(OnMalformedMessageCallback,
                void(const uint32_t& connection_key));
+  MOCK_METHOD1(OnFinalMessageCallback, void(const uint32_t& connection_key));
   MOCK_CONST_METHOD1(
       TransportTypeProfileStringFromConnHandle,
       const std::string(transport_manager::ConnectionUID connection_handle));
@@ -110,6 +118,10 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                      bool(uint32_t connection_id,
                           uint8_t session_id,
                           uint8_t& protocol_version));
+  MOCK_CONST_METHOD3(ProtocolVersionUsed,
+                     bool(uint32_t connection_id,
+                          uint8_t session_id,
+                          utils::SemanticVersion& full_protocol_version));
   MOCK_CONST_METHOD2(SessionServiceExists,
                      bool(const uint32_t connection_key,
                           const protocol_handler::ServiceType& service_type));

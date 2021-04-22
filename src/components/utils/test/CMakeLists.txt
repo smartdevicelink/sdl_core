@@ -78,7 +78,6 @@ endif()
 # exclude some tests
 list(APPEND EXCLUDE_PATHS
   generated_code_with_sqlite_test.cc
-  posix_thread_test.cc
   resource_usage_test.cc
 )
 
@@ -87,7 +86,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 set(LIBRARIES
   gmock
   Utils
-  Policy
+  PolicyStatic
   ConfigProfile
 )
 
