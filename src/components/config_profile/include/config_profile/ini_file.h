@@ -87,13 +87,19 @@ extern "C" {
 /*
  * @brief Write usage instructions to the end of the file
  * @param
- *
+ * 
+ * \deprecated This method will be removed in the next major release
+ * See Profile::UpdateValues for the new ini parsing code
+ * 
  * @return NULL if file or desired entry not found, otherwise pointer to fname
  */
 extern char* ini_write_inst(const char* fname, uint8_t flag);
 
 /*
  * @brief Read a certain item of the specified chapter of a ini-file
+ * 
+ * \deprecated This method will be removed in the next major release
+ * See Profile::UpdateValues for the new ini parsing code
  *
  * @return NULL if file or desired entry not found, otherwise pointer to value
  */
@@ -104,6 +110,9 @@ extern char* ini_read_value(const char* fname,
 
 /*
  * @brief Write a certain item of the specified chapter of a ini-file
+ * 
+ * \deprecated This method will be removed in the next major release
+ * See Profile::UpdateValues for the new ini parsing code
  *
  * @return NULL if file not found, otherwise pointer to value
  */
@@ -116,6 +125,9 @@ extern char ini_write_value(const char* fname,
 /*
  * @brief Parse the given line for the item and returns the value if
  *        there is one otherwise NULL
+ * 
+ * \deprecated This method will be removed in the next major release
+ * See Profile::UpdateValues for the new ini parsing code
  *
  * @return NULL if desired entry not found, otherwise pointer to value
  */
