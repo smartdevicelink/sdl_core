@@ -40,21 +40,6 @@ namespace profile_test {
 
 using namespace ::profile;
 
-char* ini_read_value(const char* fname,
-                     const char* chapter,
-                     const char* item,
-                     char* val) {
-  FILE* fp = fopen(fname, "r");
-
-  auto ret = ::profile::ini_read_value(fp, chapter, item, val);
-
-  if (nullptr != fp) {
-    fclose(fp);
-    fp = nullptr;
-  }
-  return ret;
-}
-
 TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";

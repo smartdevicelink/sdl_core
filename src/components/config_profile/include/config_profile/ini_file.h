@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_INI_FILE_H_
 
 #include <stdint.h>
-#include <stdio.h>
 
 namespace profile {
 
@@ -98,7 +97,7 @@ extern char* ini_write_inst(const char* fname, uint8_t flag);
  *
  * @return NULL if file or desired entry not found, otherwise pointer to value
  */
-extern char* ini_read_value(FILE* fp,
+extern char* ini_read_value(const char* fname,
                             const char* chapter,
                             const char* item,
                             char* value);

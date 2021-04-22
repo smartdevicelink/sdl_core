@@ -41,7 +41,6 @@
 
 #include <string>
 
-#include "config_profile/ini_file.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -63,6 +62,8 @@ namespace {
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
+
+#define INI_LINE_LEN 1024
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
