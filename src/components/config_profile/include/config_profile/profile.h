@@ -859,6 +859,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
  private:
   /**
+   * @brief Opens the configuration file
+   * @return a pointer to the FILE
+   */
+  FILE* OpenConfig();
+
+  /**
+   * @brief Closes the configuration file
+   * @param pointer to the FILE to be closed
+   */
+  void CloseConfig(FILE* config_file_);
+
+  /**
    * @brief Checks that filename consists of portable symbols
    * @param file_name - file name to check
    * @return FALSE if file name has unportable symbols otherwise TRUE
