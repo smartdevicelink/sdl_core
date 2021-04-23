@@ -207,7 +207,7 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
-  SDL_LOG_TRACE("enter");
+  SDL_LOG_AUTO_TRACE();
   if (transfer->status == LIBUSB_TRANSFER_CANCELLED) {
     SDL_LOG_DEBUG("Free already canceled transfer.");
     libusb_free_transfer(transfer);
