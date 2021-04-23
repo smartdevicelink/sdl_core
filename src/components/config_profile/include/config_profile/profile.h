@@ -826,6 +826,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_transport_change_timer_addition() const OVERRIDE;
 
   /**
+   * @brief Parses values in config_file_name_ to config_obj_ smart object
+   */
+  void ParseConfiguration();
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();

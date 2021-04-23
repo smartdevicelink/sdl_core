@@ -1220,9 +1220,7 @@ const std::string Profile::hmi_origin_id() const {
   return hmi_origin_id_;
 }
 
-void Profile::UpdateValues() {
-  SDL_LOG_AUTO_TRACE();
-
+void Profile::ParseConfiguration() {
   FILE* config_file_ = fopen(config_file_name_.c_str(), "r");
   config_obj_ = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -1290,6 +1288,12 @@ void Profile::UpdateValues() {
     fclose(config_file_);
     config_file_ = nullptr;
   }
+}
+
+void Profile::UpdateValues() {
+  SDL_LOG_AUTO_TRACE();
+
+  ParseConfiguration();
 
   // SDL version
   ReadStringValue(
