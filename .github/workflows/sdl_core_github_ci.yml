@@ -1,10 +1,12 @@
 name: GitHub Actions Demo
 on: [push]
 jobs:
-  buils:
+  build:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: submodules
+      run: git submodule update --init --recursive -C ${{ github.workspace }}
     # install dependencies
     - name: install-dependencies
       run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools && sudo apt-get install -f clang-format-6.0
