@@ -10,7 +10,10 @@ jobs:
     # install dependencies
     - name: install-dependencies
       run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools && sudo apt-get install -f clang-format-6.0
-    - uses: lukka/get-cmake@v3.16.3
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.8
+      with:
+        cmake-version: '3.16.x'
     # build project
     - name: mkdir-and-cd
       run: cd ${{ github.workspace }} && cd ../ && mkdir build && cd build
