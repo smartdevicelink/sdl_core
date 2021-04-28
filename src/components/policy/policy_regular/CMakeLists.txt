@@ -149,7 +149,8 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-
+message(STATUS "Policy sources")
+message(STATUS ${SOURCES})
 add_library(PolicyStatic ${SOURCES})
 target_link_libraries(PolicyStatic ${LIBRARIES})
 
