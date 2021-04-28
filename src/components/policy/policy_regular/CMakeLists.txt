@@ -31,7 +31,9 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
-
+message(STATUS "Policy cmake paths")
+message(STATUS ${POLICY_PATH})
+message(status ${COMPONENTS_DIR})
 include_directories (
   ${POLICY_PATH}/include/
   ${COMPONENTS_DIR}/
