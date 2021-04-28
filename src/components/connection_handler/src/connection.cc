@@ -527,6 +527,10 @@ bool Connection::ProtocolVersion(uint8_t session_id,
   return true;
 }
 
+bool Connection::IsSessionHeartbeatTracked(const uint8_t session_id) const {
+  return heartbeat_monitor_->IsSessionHeartbeatTracked(session_id);
+}
+
 bool Connection::ProtocolVersion(
     uint8_t session_id, utils::SemanticVersion& full_protocol_version) {
   SDL_LOG_AUTO_TRACE();

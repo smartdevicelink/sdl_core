@@ -435,9 +435,13 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
+
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Get number of notification by priority
@@ -1051,6 +1055,11 @@ class PolicyManagerImpl : public PolicyManager {
    * condition is true.
    */
   void StartPTExchange() OVERRIDE;
+
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  void TriggerPTUOnStartupIfRequired() OVERRIDE;
 
   /**
    * @brief Checks is PT exceeded days

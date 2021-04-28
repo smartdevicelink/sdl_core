@@ -28,7 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
+include_directories(
+  include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/sdl_rpc_plugin
+)
 
 set (COMMANDS_SOURCE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commands

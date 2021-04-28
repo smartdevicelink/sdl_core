@@ -364,7 +364,7 @@ bool CreateInteractionChoiceSetRequest::ProcessSuccesfulHMIResponse(
 }
 
 void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
-  received_chs_count_++;
+  ++received_chs_count_;
   SDL_LOG_DEBUG("Got VR.AddCommand response, there are "
                 << expected_chs_count_ - received_chs_count_
                 << " more to wait.");

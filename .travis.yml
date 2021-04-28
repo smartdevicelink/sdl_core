@@ -1,5 +1,5 @@
 language: cpp
-dist: xenial
+dist: focal
 sudo: required
 only:
   - master
@@ -20,7 +20,7 @@ before_install:
   - sudo apt-get install -f clang-format-6.0
 
 script:
-  - cppcheck --force -isrc/3rd_party -isrc/3rd_party-static --quiet --error-exitcode=1 src
+  - cppcheck --force -isrc/3rd_party -isrc/3rd_party-static --library=googletest --suppress=unknownMacro --suppress=syntaxError:*_test.cc --quiet --error-exitcode=1 src
   - ./tools/infrastructure/check_style.sh
   - mkdir build && cd build
   - cmake ../ -DBUILD_TESTS=ON

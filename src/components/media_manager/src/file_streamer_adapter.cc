@@ -95,7 +95,7 @@ bool FileStreamerAdapter::FileStreamer::Send(
     return false;
   }
 
-  SDL_LOG_INFO("Streamer::sent " << msg->data_size());
+  SDL_LOG_TRACE("Streamer::sent " << msg->data_size());
   return true;
 }
 

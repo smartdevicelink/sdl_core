@@ -53,6 +53,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -183,6 +184,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::cloud_app_vehicle_id,
             mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
+        std::make_pair(strings::climate_data,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_CLIMATEDATA),
         std::make_pair(strings::external_temp,
                        mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
         std::make_pair(strings::turn_signal,
@@ -246,6 +249,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
         std::make_pair(strings::window_status,
                        mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
+        std::make_pair(strings::seat_occupancy,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_SEATOCCUPANCY),
         std::make_pair(
             strings::hands_off_steering,
             mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};
@@ -392,23 +397,61 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
   }
 
   if (reset_result.keyboard_properties) {
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
-    key_board_properties[hmi_request::auto_complete_list] =
+    keyboard_properties[hmi_request::auto_complete_list] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
+    keyboard_properties[strings::auto_complete_text] = "";
+    keyboard_properties[hmi_request::mask_input_characters] =
+        static_cast<int32_t>(
+            hmi_apis::Common_KeyboardInputMask::DISABLE_INPUT_KEY_MASK);
 
-    key_board_properties[strings::auto_complete_text] = "";
     (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
-        key_board_properties;
+        keyboard_properties;
+    application->set_keyboard_props(
+        smart_objects::SmartObject(smart_objects::SmartType_Null));
   }
 
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
 
   return ui_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  namespace rc = rc_rpc_plugin;
+
+  smart_objects::SmartObjectSPtr rc_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.user_location) {
+    smart_objects::SmartObject user_location =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    user_location[rc::strings::kGrid] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& grid = user_location[rc::strings::kGrid];
+    grid[rc::strings::kRow] = 0;
+    grid[rc::strings::kCol] = 0;
+    grid[rc::strings::kLevel] = 0;
+    grid[rc::strings::kRowspan] = 1;
+    grid[rc::strings::kColspan] = 1;
+    grid[rc::strings::kLevelspan] = 1;
+
+    (*rc_reset_global_prop_request)[strings::user_location] = user_location;
+    application->set_user_location(user_location);
+  }
+
+  (*rc_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return rc_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr
@@ -477,7 +520,7 @@ smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
         smart_objects::SmartType_Map);
     app_service_capability[strings::updated_app_service_record] = record;
     app_services[i] = app_service_capability;
-    i++;
+    ++i;
   }
 
   app_service_capabilities[strings::app_services] = app_services;
@@ -1244,38 +1287,38 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   // UI global properties
 
-  if (can_send_ui && (app->vr_help_title() || app->vr_help())) {
+  if (can_send_ui &&
+      (app->vr_help_title() || app->vr_help() || app->keyboard_props() ||
+       app->menu_title() || app->menu_icon())) {
     smart_objects::SmartObjectSPtr ui_global_properties = CreateMessageForHMI(
         hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-    if (!ui_global_properties) {
-      return requests;
-    }
+    if (ui_global_properties) {
+      (*ui_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::UI_SetGlobalProperties);
 
-    (*ui_global_properties)[strings::params][strings::function_id] =
-        static_cast<int>(hmi_apis::FunctionID::UI_SetGlobalProperties);
+      smart_objects::SmartObject ui_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      if (app->vr_help_title()) {
+        ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
+      }
+      if (app->vr_help()) {
+        ui_msg_params[strings::vr_help] = (*app->vr_help());
+      }
+      if (app->keyboard_props()) {
+        ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
+      }
+      if (app->menu_title()) {
+        ui_msg_params[strings::menu_title] = (*app->menu_title());
+      }
+      if (app->menu_icon()) {
+        ui_msg_params[strings::menu_icon] = (*app->menu_icon());
+      }
+      ui_msg_params[strings::app_id] = app->app_id();
 
-    smart_objects::SmartObject ui_msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (app->vr_help_title()) {
-      ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
-    }
-    if (app->vr_help()) {
-      ui_msg_params[strings::vr_help] = (*app->vr_help());
-    }
-    if (app->keyboard_props()) {
-      ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
-    }
-    if (app->menu_title()) {
-      ui_msg_params[strings::menu_title] = (*app->menu_title());
-    }
-    if (app->menu_icon()) {
-      ui_msg_params[strings::menu_icon] = (*app->menu_icon());
-    }
-    ui_msg_params[strings::app_id] = app->app_id();
+      (*ui_global_properties)[strings::msg_params] = ui_msg_params;
 
-    (*ui_global_properties)[strings::msg_params] = ui_msg_params;
-
-    requests.push_back(ui_global_properties);
+      requests.push_back(ui_global_properties);
+    }
   }
 
   const bool can_send_vr = helpers::
@@ -1289,27 +1332,46 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
-    if (!tts_global_properties) {
-      return requests;
+    if (tts_global_properties) {
+      (*tts_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+
+      smart_objects::SmartObject tts_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      if (app->help_prompt()) {
+        tts_msg_params[strings::help_prompt] = (*app->help_prompt());
+      }
+      if (app->timeout_prompt()) {
+        tts_msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
+      }
+      tts_msg_params[strings::app_id] = app->app_id();
+
+      (*tts_global_properties)[strings::msg_params] = tts_msg_params;
+
+      requests.push_back(tts_global_properties);
     }
-
-    (*tts_global_properties)[strings::params][strings::function_id] =
-        static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
-
-    smart_objects::SmartObject tts_msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (app->help_prompt()) {
-      tts_msg_params[strings::help_prompt] = (*app->help_prompt());
-    }
-    if (app->timeout_prompt()) {
-      tts_msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
-    }
-    tts_msg_params[strings::app_id] = app->app_id();
-
-    (*tts_global_properties)[strings::msg_params] = tts_msg_params;
-
-    requests.push_back(tts_global_properties);
   }
+
+  // RC global properties
+  if (!app->get_user_location().empty()) {
+    smart_objects::SmartObjectSPtr rc_global_properties = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+    if (rc_global_properties) {
+      (*rc_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::RC_SetGlobalProperties);
+
+      smart_objects::SmartObject rc_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+      rc_msg_params[strings::user_location] = (app->get_user_location());
+      rc_msg_params[strings::app_id] = app->app_id();
+
+      (*rc_global_properties)[strings::msg_params] = rc_msg_params;
+
+      requests.push_back(rc_global_properties);
+    }
+  }
+
   return requests;
 }
 
@@ -2271,7 +2333,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     const policy::ExternalConsentStatus& external_consent_status,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2283,7 +2346,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2313,7 +2377,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2325,7 +2390,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -3365,16 +3431,20 @@ void MessageHelper::SubscribeApplicationToSoftButton(
     ApplicationSharedPtr app,
     int32_t function_id,
     const WindowID window_id) {
-  SoftButtonID softbuttons_id;
-  smart_objects::SmartObject& soft_buttons =
-      message_params[strings::soft_buttons];
-  unsigned int length = soft_buttons.length();
-  for (unsigned int i = 0; i < length; ++i) {
-    const auto button_id = std::make_pair(
-        soft_buttons[i][strings::soft_button_id].asUInt(), window_id);
-    softbuttons_id.insert(button_id);
+  if (!message_params.keyExists(strings::soft_buttons)) {
+    return;
   }
-  app->SubscribeToSoftButtons(function_id, softbuttons_id);
+
+  std::set<uint32_t> soft_buttons;
+
+  auto& soft_buttons_so = message_params[strings::soft_buttons];
+  for (const auto& softbutton : *(soft_buttons_so.asArray())) {
+    const auto button_id = softbutton[strings::soft_button_id].asUInt();
+    soft_buttons.insert(button_id);
+  }
+
+  WindowSoftButtons window_buttons{window_id, soft_buttons};
+  app->SubscribeToSoftButtons(function_id, window_buttons);
 }
 
 void MessageHelper::SubscribeApplicationToSoftButton(

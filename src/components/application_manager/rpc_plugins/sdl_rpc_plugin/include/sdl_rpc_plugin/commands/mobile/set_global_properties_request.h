@@ -203,7 +203,30 @@ class SetGlobalPropertiesRequest
    */
   bool IsWhiteSpaceExist();
 
-  /*
+  /**
+   * @brief helps to determine layout of interest. Returns keyboard layout,
+   * mentioned in current request. If not, returns saved keyboard layout for
+   * current app. If such layout wasn't saved, returns default keyboard layout
+   * (QWERTY)
+   * @return KeyboardLayout enum value
+   */
+  hmi_apis::Common_KeyboardLayout::eType GetKeyboardLayout() const;
+
+  /**
+   * @brief Returns allowed number of configurable keys for certain layout
+   * @return allowed number of configurable keys, if provided, and zero
+   * otherwise
+   */
+  uint32_t GetAllowedNumberOfConfigurableKeys() const;
+
+  /**
+   * @brief Checks provided custom keys against capabilities.
+   * @return true if the specified keyboard layout supports the number of
+   * custom keys provided.
+   */
+  bool ValidateCustomKeys() const;
+
+  /**
    * @brief Prepare result code and result for sending to mobile application
    * @param result_code contains result code for sending to mobile application
    * @param info contains info for sending to mobile applicaion

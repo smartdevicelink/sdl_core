@@ -149,7 +149,7 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
     SDL_LOG_WARN("Couldn't send all the data to socket " << send_socket_fd_);
   }
 
-  SDL_LOG_INFO("Streamer::sent " << msg->data_size());
+  SDL_LOG_TRACE("Streamer::sent " << msg->data_size());
   return true;
 }
 

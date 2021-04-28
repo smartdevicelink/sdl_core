@@ -326,7 +326,7 @@ const SMember* CObjectSchemaItem::GetCorrectMember(
   }
   // Check for history tag items
   if (!member.mHistoryVector.empty()) {
-    for (uint i = 0; i < member.mHistoryVector.size(); i++) {
+    for (uint i = 0; i < member.mHistoryVector.size(); ++i) {
       if (member.mHistoryVector[i].CheckHistoryFieldVersion(messageVersion)) {
         return &member.mHistoryVector[i];
       }

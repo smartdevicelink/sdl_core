@@ -144,6 +144,7 @@ void AlertManeuverRequest::Run() {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+    msg_params[strings::app_id] = app->app_id();
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
     msg_params[hmi_request::speak_type] =
@@ -236,7 +237,8 @@ bool AlertManeuverRequest::PrepareResponseParameters(
                   application_manager_.hmi_interfaces().GetInterfaceState(
                       HmiInterfaces::HMI_INTERFACE_TTS)))) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    return_info = app_mngr::commands::MergeInfos(
+        navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
     return result;
   }
   result_code =

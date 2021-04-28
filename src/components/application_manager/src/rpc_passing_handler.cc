@@ -85,7 +85,7 @@ bool RPCPassingHandler::CanHandleFunctionID(int32_t function_id) {
   for (auto it = services.begin(); it != services.end(); ++it) {
     auto handled_rpcs =
         it->record[strings::service_manifest][strings::handled_rpcs];
-    for (size_t i = 0; i < handled_rpcs.length(); i++) {
+    for (size_t i = 0; i < handled_rpcs.length(); ++i) {
       if (handled_rpcs[i].asInt() == function_id) {
         return true;
       }
@@ -266,7 +266,7 @@ void RPCPassingHandler::PopulateRPCRequestQueue(
        ++services_it) {
     auto handled_rpcs =
         services_it->record[strings::service_manifest][strings::handled_rpcs];
-    for (size_t i = 0; i < handled_rpcs.length(); i++) {
+    for (size_t i = 0; i < handled_rpcs.length(); ++i) {
       if (handled_rpcs[i].asInt() == function_id) {
         // Add requests to queue
         ServiceInfo service_info{

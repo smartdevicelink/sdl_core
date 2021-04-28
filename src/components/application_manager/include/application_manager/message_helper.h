@@ -75,6 +75,7 @@ struct ResetGlobalPropertiesResult {
   bool menu_name;
   bool menu_icon;
   bool keyboard_properties;
+  bool user_location;
   bool vr_has_been_reset;
 
   ResetGlobalPropertiesResult()
@@ -84,6 +85,7 @@ struct ResetGlobalPropertiesResult {
       , menu_name(false)
       , menu_icon(false)
       , keyboard_properties(false)
+      , user_location(false)
       , vr_has_been_reset(false) {}
 
   bool HasUIPropertiesReset() const {
@@ -92,6 +94,10 @@ struct ResetGlobalPropertiesResult {
 
   bool HasTTSPropertiesReset() const {
     return timeout_prompt || help_prompt;
+  }
+
+  bool HasRCPropertiesReset() const {
+    return user_location;
   }
 };
 
@@ -484,18 +490,22 @@ class MessageHelper {
  * @param permissions Array of groups permissions
  * @param external_consent_status External user consent status
  * @param correlation_id Correlation id of request
+ * @param app_mngr ApplicationManager instance
+ * @param success_flag Indication that we were able to collect permissions
  */
 #ifdef EXTERNAL_PROPRIETARY_MODE
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
       const policy::ExternalConsentStatus& external_consent_status,
       const uint32_t correlation_id,
-      ApplicationManager& app_mngr);
+      ApplicationManager& app_mngr,
+      const bool success_flag = true);
 #else
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
       const uint32_t correlation_id,
-      ApplicationManager& app_mngr);
+      ApplicationManager& app_mngr,
+      const bool success_flag = true);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
@@ -1059,6 +1069,18 @@ class MessageHelper {
    * @return filled smart object with relevant request data
    */
   static smart_objects::SmartObjectSPtr CreateTTSResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
+
+  /**
+   * @brief CreateRCResetGlobalPropertiesRequest Creates request
+   * to reset global properties for RC
+   * @param reset_result struct containing result of global properties reset
+   * procedure
+   * @param application application for which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateRCResetGlobalPropertiesRequest(
       const ResetGlobalPropertiesResult& reset_result,
       const ApplicationSharedPtr application);
 

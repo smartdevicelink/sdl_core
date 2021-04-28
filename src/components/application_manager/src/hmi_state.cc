@@ -260,7 +260,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
   auto expected = HMILevel::HMI_FULL;
   if (is_navi_app() || is_mobile_projection_app()) {
     expected = HMILevel::HMI_LIMITED;
-  } else if (is_media_app()) {
+  } else if (is_media_app() || is_voice_communication_app()) {
     expected = HMILevel::HMI_BACKGROUND;
   }
 

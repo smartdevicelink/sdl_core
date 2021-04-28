@@ -59,6 +59,7 @@ const std::string kCreateSchema =
     "  `ccpu_version` VARCHAR(45), "
     "  `language` VARCHAR(45), "
     "  `wers_country_code` VARCHAR(45), "
+    "  `hardware_version` VARCHAR(45), "
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "

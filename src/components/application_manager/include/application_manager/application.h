@@ -170,9 +170,14 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoice;
 typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 
 /**
- * @brief Defines id of SoftButton
+ * @brief Defines id of SoftButtons for specified WindowID
  */
-typedef std::set<std::pair<uint32_t, WindowID> > SoftButtonID;
+typedef std::pair<WindowID, std::set<uint32_t> > WindowSoftButtons;
+
+/**
+ * @brief Defines id of SoftButtons related to a specified WindowID
+ */
+typedef std::set<WindowSoftButtons> SoftButtonIDs;
 
 /**
  * @brief Defines set of buttons subscription
@@ -369,8 +374,8 @@ class DynamicApplicationData {
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  virtual bool IsSubMenuNameAlreadyExist(const std::string& name,
-                                         const uint32_t parent_id) = 0;
+  DEPRECATED virtual bool IsSubMenuNameAlreadyExist(
+      const std::string& name, const uint32_t parent_id) = 0;
 
   /*
    * @brief Adds a interaction choice set to the application
@@ -524,6 +529,7 @@ class Application : public virtual InitialApplicationData,
    * @brief The StreamingState enum defines current streaming state
    */
   enum class StreamingState { kStopped, kStarted, kSuspended };
+
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
   Application() : is_greyed_out_(false) {}
@@ -664,8 +670,10 @@ class Application : public virtual InitialApplicationData,
   /**
    * @brief Wakes up streaming process for application
    * @param service_type Type of streaming service
+   * @param timer_len The amount of time in ms the timer will wait
    */
-  virtual void WakeUpStreaming(protocol_handler::ServiceType service_type) = 0;
+  virtual void WakeUpStreaming(protocol_handler::ServiceType service_type,
+                               uint32_t timer_len = 0) = 0;
 
   virtual bool is_voice_communication_supported() const = 0;
   virtual void set_voice_communication_supported(
@@ -961,10 +969,10 @@ class Application : public virtual InitialApplicationData,
    * Alert, Show, ScrollableMessage, ShowConstantTBT, AlertManeuver,
    * UpdateTurnList
    * @param cmd_id Unique command id from mobile API
-   * @param list of softbuttons were created by command.
+   * @param window_softbuttons list of softbuttons were created by command.
    */
-  virtual void SubscribeToSoftButtons(int32_t cmd_id,
-                                      const SoftButtonID& softbuttons_id) = 0;
+  virtual void SubscribeToSoftButtons(
+      int32_t cmd_id, const WindowSoftButtons& window_softbuttons) = 0;
 
   /**
    * @brief Retreives window id on which given button is created

@@ -163,7 +163,7 @@ class Device {
    * @brief Increment @link retry_count_ @endlink value
    */
   inline void next_retry() {
-    retry_count_++;
+    ++retry_count_;
   }
 
   /**

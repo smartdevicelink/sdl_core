@@ -286,32 +286,22 @@ class ApplicationManagerImpl
    */
   bool IsAppSubscribedForWayPoints(Application& app) const OVERRIDE;
 
-  void SaveWayPointsMessage(
-      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+  void SaveWayPointsMessage(smart_objects::SmartObjectSPtr way_points_message,
+                            uint32_t app_id = 0) OVERRIDE;
 
-  /**
-   * @brief Subscribe Application for way points
-   * @param Application id
-   */
-  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
+  void SubscribeAppForWayPoints(uint32_t app_id,
+                                bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Subscribe Application for way points
-   * @param Application pointer
-   */
-  void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+  void SubscribeAppForWayPoints(ApplicationSharedPtr app,
+                                bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Unsubscribe Application for way points
-   * @param Application id
-   */
-  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
+  void UnsubscribeAppFromWayPoints(uint32_t app_id,
+                                   bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Unsubscribe Application for way points
-   * @param Application pointer
-   */
-  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) OVERRIDE;
+  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app,
+                                   bool response_from_hmi = true) OVERRIDE;
+
+  bool IsSubscribedToHMIWayPoints() const OVERRIDE;
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -710,6 +700,9 @@ class ApplicationManagerImpl
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
 
+  bool GetProtocolVehicleData(
+      connection_handler::ProtocolVehicleData& data) OVERRIDE;
+
   /**
    * @brief OnDeviceSwitchingStart is invoked on device transport switching
    * start (e.g. from Bluetooth to USB) and creates waiting list of applications
@@ -877,6 +870,10 @@ class ApplicationManagerImpl
   void OnStreamingConfigurationFailed(uint32_t app_id,
                                       std::vector<std::string>& rejected_params,
                                       const std::string& reason) OVERRIDE;
+
+  void OnAppStreaming(uint32_t app_id,
+                      protocol_handler::ServiceType service_type,
+                      bool state) OVERRIDE;
 
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
@@ -1154,6 +1151,8 @@ class ApplicationManagerImpl
     return is_stopping_;
   }
 
+  bool WaitForHmiIsReady() OVERRIDE;
+
   /**
    * @brief ProcessReconnection handles reconnection flow for application on
    * transport switch
@@ -1182,6 +1181,9 @@ class ApplicationManagerImpl
   bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
                        const smart_objects::SmartObject& display_capabilities);
 
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response) OVERRIDE;
+
   /**
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
@@ -1191,7 +1193,15 @@ class ApplicationManagerImpl
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
 
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() OVERRIDE;
+
  private:
+  /**
+   * @brief Sets is_stopping flag to true
+   */
+  void InitiateStopping();
+
   /**
    * @brief Adds application to registered applications list and marks it as
    * registered
@@ -1562,7 +1572,11 @@ class ApplicationManagerImpl
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
 
-  smart_objects::SmartObjectSPtr way_points_data_;
+  bool subscribed_to_hmi_way_points_;
+
+  smart_objects::SmartObjectSPtr hmi_way_points_data_;
+
+  std::map<uint32_t, smart_objects::SmartObject> mobile_way_points_data_;
 
   /**
    * @brief Map contains applications which
@@ -1610,12 +1624,14 @@ class ApplicationManagerImpl
     mobile_apis::SystemContext::eType system_context;
   };
 
-  hmi_apis::HMI_API* hmi_so_factory_;
-  mobile_apis::MOBILE_API* mobile_so_factory_;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
+      mobile_v4_protocol_so_factory_;
 
-  static uint32_t mobile_corelation_id_;
-  static uint32_t corelation_id_;
-  static const uint32_t max_corelation_id_;
+  std::atomic<uint32_t> mobile_correlation_id_;
+  std::atomic<uint32_t> correlation_id_;
+  const uint32_t max_correlation_id_;
 
   std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
@@ -1642,6 +1658,9 @@ class ApplicationManagerImpl
   std::vector<TimerSPtr> end_stream_timer_pool_;
   sync_primitives::Lock close_app_timer_pool_lock_;
   sync_primitives::Lock end_stream_timer_pool_lock_;
+
+  mutable sync_primitives::Lock wait_for_hmi_lock_;
+  sync_primitives::ConditionalVariable wait_for_hmi_condvar_;
 
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;

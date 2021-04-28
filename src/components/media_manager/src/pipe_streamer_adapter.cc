@@ -144,7 +144,7 @@ bool PipeStreamerAdapter::PipeStreamer::Send(
     // Loop to send remaining data if there is any.
   } while (data_remaining);
 
-  SDL_LOG_INFO("Streamer::sent " << msg->data_size());
+  SDL_LOG_TRACE("Streamer::sent " << msg->data_size());
   return true;
 }
 

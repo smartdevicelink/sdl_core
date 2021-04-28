@@ -61,12 +61,17 @@ void LastStateImpl::SaveStateToFileSystem() {
     styled_string = dictionary_.toStyledString();
   }
 
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
+
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   SDL_LOG_INFO("LastState::SaveStateToFileSystem[DEPRECATED] "
-               << app_info_storage_ << styled_string);
-  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+               << full_path << styled_string);
+  DCHECK(file_system::Write(full_path, char_vector_pdata));
 }
 
 void LastStateImpl::SaveToFileSystem() {
@@ -78,17 +83,26 @@ void LastStateImpl::SaveToFileSystem() {
     styled_string = dictionary_.toStyledString();
   }
 
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
+
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   SDL_LOG_INFO("LastState::SaveToFileSystem " << app_info_storage_
-                                              << styled_string);
-  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
+                                              << full_path);
+  DCHECK(file_system::Write(full_path, char_vector_pdata));
 }
 
 void LastStateImpl::LoadFromFileSystem() {
+  const std::string full_path =
+      !app_storage_folder_.empty()
+          ? app_storage_folder_ + "/" + app_info_storage_
+          : app_info_storage_;
   std::string buffer;
-  const bool result = file_system::ReadFile(app_info_storage_, buffer);
+  const bool result = file_system::ReadFile(full_path, buffer);
   utils::JsonReader reader;
 
   if (result && reader.parse(buffer, &dictionary_)) {
