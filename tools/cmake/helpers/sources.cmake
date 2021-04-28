@@ -115,6 +115,8 @@ function(collect_sources SOURCES PATHS)
   get_os(OS)
 
   foreach(PATH_ENTRY ${PATHS})
+    message(STATUS "Path entry")
+    message(STATUS ${PATH_ENTRY})
     file(GLOB_RECURSE SOURCES_TO_FILTER "${PATH_ENTRY}/*.c" "${PATH_ENTRY}/*.cc" "${PATH_ENTRY}/*.cpp")
     filter_files(SOURCES_TO_FILTER "${OPTIONAL_ARG}")
     list(APPEND SOURCES_LOCAL ${SOURCES_TO_FILTER})
@@ -126,6 +128,9 @@ function(collect_sources SOURCES PATHS)
       set(HEADERS_TO_FILTER)
     endif()
   endforeach()
+
+  message(STATUS "Sources local")
+  message(STATUS ${SOURCES_LOCAL})
 
   if(${OS} STREQUAL "win")
     source_group("Header Files" FILES ${HEADERS_LOCAL})
