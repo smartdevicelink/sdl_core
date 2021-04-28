@@ -12,7 +12,7 @@ jobs:
     - name: mkdir-and-cd
       run: mkdir build && cd build
     - name: cmake build
-      run: cmake ../ -DBUILD_TESTS=ON
+      run: cmake ${{ github.workspace }} -DBUILD_TESTS=ON
     - name: cmake make
       run: make install-3rd_party && make -j `nproc` install && sudo ldconfig
     # run tests
