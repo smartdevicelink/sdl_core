@@ -15,6 +15,8 @@ jobs:
       run : ls /home/runner/work/sdl_core/sdl_core/src/components/policy/policy_regular/include && ls /home/runner/work/sdl_core/sdl_core/src/components/policy/policy_regular/src
     - name: mkdir-and-cd
       run: cd ${{ github.workspace }} && cd ../ && mkdir build && cd build
+    - name: log-cmake-version
+      run: cmake --version
     - name: cmake
       run: cmake ../sdl_core -DBUILD_TESTS=ON
     - name: build
