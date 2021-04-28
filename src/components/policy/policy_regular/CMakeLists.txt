@@ -33,6 +33,7 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
 message(STATUS "Policy cmake paths")
 message(STATUS ${POLICY_PATH})
+message(STATUS "Components dir")
 message(status ${COMPONENTS_DIR})
 include_directories (
   ${POLICY_PATH}/include/
@@ -126,6 +127,10 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
+
+message(STATUS "Set policy paths")
+message(STATUS ${PATHS})
+
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
