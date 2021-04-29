@@ -152,6 +152,10 @@ int32_t main(int32_t argc, char** argv) {
 #ifdef LOG4CXX_LOGGER
     auto logger = std::unique_ptr<logger::Log4CXXLogger>(
         new logger::Log4CXXLogger("log4cxx.properties"));
+
+    if (!utils::appenders_loader.Loaded()) {
+      SDL_LOG_ERROR("Appenders plugin not loaded, file logging disabled");
+    }
 #else   // LOG4CXX_LOGGER
     auto logger = std::unique_ptr<logger::BoostLogger>(
         new logger::BoostLogger("boostlogconfig.ini"));
@@ -162,12 +166,6 @@ int32_t main(int32_t argc, char** argv) {
 #endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
-
-#ifdef LOG4CXX_LOGGER
-  if (!utils::appenders_loader.Loaded()) {
-    SDL_LOG_ERROR("Appenders plugin not loaded, file logging disabled");
-  }
-#endif  // LOG4CXX_LOGGER
 
   SDL_LOG_INFO("Application started!");
   SDL_LOG_INFO("SDL version: " << profile_instance.sdl_version());
