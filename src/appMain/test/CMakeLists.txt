@@ -41,6 +41,7 @@ set(testSources
 
 set(LIBRARIES
   gmock
+  SmartObjects
 )
 
 create_test(low_voltage_signals_handler_test "${testSources}" "${LIBRARIES}")
