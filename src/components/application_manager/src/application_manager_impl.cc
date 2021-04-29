@@ -2776,7 +2776,7 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
         app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
   } else if (app_data[json::languages][default_idx][json::default_].keyExists(
                  json::ttsName)) {
-    LOG4CXX_DEBUG(logger_, "Get ttsName from default language");
+    SDL_LOG_DEBUG("Get ttsName from default language");
     ttsName =
         app_data[json::languages][default_idx][json::default_][json::ttsName];
   } else {
