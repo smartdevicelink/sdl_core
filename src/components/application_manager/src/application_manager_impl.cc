@@ -2790,7 +2790,7 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
         app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
   } else if (app_data[json::languages][default_idx][json::default_].keyExists(
                  json::vrSynonyms)) {
-    LOG4CXX_DEBUG(logger_, "Get vrSynonyms from default language");
+    SDL_LOG_DEBUG("Get vrSynonyms from default language");
     vrSynonym = app_data[json::languages][default_idx][json::default_]
                         [json::vrSynonyms];
   } else {
