@@ -31,10 +31,7 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
-message(STATUS "Policy cmake paths")
-message(STATUS ${POLICY_PATH})
-message(STATUS "Components dir")
-message(status ${COMPONENTS_DIR})
+
 include_directories (
   ${POLICY_PATH}/include/
   ${COMPONENTS_DIR}/
@@ -127,9 +124,6 @@ set(PATHS
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 
-message(STATUS "Set policy paths")
-message(STATUS ${PATHS})
-
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
@@ -148,8 +142,6 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-message(STATUS "Policy sources")
-message(STATUS ${SOURCES})
 add_library(PolicyStatic ${SOURCES})
 target_link_libraries(PolicyStatic ${LIBRARIES})
 

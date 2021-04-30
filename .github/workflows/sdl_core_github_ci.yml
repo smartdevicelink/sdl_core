@@ -16,9 +16,15 @@ jobs:
         cmake-version: '3.16.3'
     # build project
     - name: mkdir-and-cd
-      run: cd ${{ github.workspace }} && cd ../ && mkdir build && cd build
-    - name: log-cmake-version
-      run: cmake --version
+      run: cd ${{ github.workspace }} && cd ../ && mkdir core_3rd_party && mkdir build && cd build
+    - name: Set 3rd Party Path
+      run: export THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}../core_3rd_party
+   - name: Cache 3rd Party
+      id: core-3rd-party
+      uses: actions/cache@v2
+      with:
+        path: ${{ github.workspace }}../core_3rd_party
+        key: ${{ runner.os }}-core-3rd-party
     - name: cmake
       run: cmake ../sdl_core -DBUILD_TESTS=ON
     - name: build
