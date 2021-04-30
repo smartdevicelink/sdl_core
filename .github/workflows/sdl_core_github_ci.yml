@@ -18,12 +18,12 @@ jobs:
     - name: mkdir-and-cd
       run: cd ${{ github.workspace }} &&  mkdir core_3rd_party && cd ../ && mkdir build && cd build
     - name: Set 3rd Party Path
-      run: echo "THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
+      run: echo "THIRD_PARTY_INSTALL_PREFIX=/core_3rd_party" >> $GITHUB_ENV
    - name: Cache 3rd Party
       id: core-3rd-party
       uses: actions/cache@v2
       with:
-        path: ${{ github.workspace }}../core_3rd_party
+        path: /core_3rd_party
         key: ${{ runner.os }}-core-3rd-party
     - name: cmake
       run: cmake ../sdl_core -DBUILD_TESTS=ON
