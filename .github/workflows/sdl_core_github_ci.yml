@@ -16,9 +16,9 @@ jobs:
         cmake-version: '3.16.3'
     # build project
     - name: mkdir-and-cd
-      run: cd ${{ github.workspace }} && cd ../ && mkdir core_3rd_party && mkdir build && cd build
+      run: cd ${{ github.workspace }} &&  mkdir core_3rd_party && cd ../ && mkdir build && cd build
     - name: Set 3rd Party Path
-      run: echo "THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}../core_3rd_party" >> $GITHUB_ENV
+      run: echo "THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
    - name: Cache 3rd Party
       id: core-3rd-party
       uses: actions/cache@v2
