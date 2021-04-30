@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
+#include "telemetry_monitor/application_manager_metric_wrapper.h"
 #include "telemetry_monitor/json_keys.h"
 #include "utils/resource_usage.h"
-#include "application_manager/smart_object_keys.h"
-#include "telemetry_monitor/application_manager_metric_wrapper.h"
 
 namespace test {
 namespace components {

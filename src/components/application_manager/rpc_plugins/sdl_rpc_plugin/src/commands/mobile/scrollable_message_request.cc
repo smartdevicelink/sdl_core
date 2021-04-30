@@ -31,20 +31,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
 #include "sdl_rpc_plugin/commands/mobile/scrollable_message_request.h"
+#include <string.h>
 
 #include "application_manager/application_impl.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 ScrollableMessageRequest::ScrollableMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -65,24 +67,20 @@ ScrollableMessageRequest::~ScrollableMessageRequest() {}
 bool ScrollableMessageRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  } else {
-    const int32_t def_value = 30000;
-    default_timeout_ = def_value;
-  }
+  uint32_t request_timeout =
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
+  default_timeout_ += request_timeout;
 
   return true;
 }
 
 void ScrollableMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -96,7 +94,7 @@ void ScrollableMessageRequest::Run() {
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SDL_LOG_ERROR("Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
     return;
   }
@@ -110,7 +108,13 @@ void ScrollableMessageRequest::Run() {
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::timeout] = default_timeout_;
+  msg_params[strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
+
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
@@ -123,18 +127,18 @@ void ScrollableMessageRequest::Run() {
 }
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      SDL_LOG_INFO("Received UI_OnResetTimeout event");
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
-      LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
+      SDL_LOG_INFO("Received UI_ScrollableMessage event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
       hmi_apis::Common_Result::eType result_code =
@@ -153,11 +157,11 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       break;
     }
   }
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

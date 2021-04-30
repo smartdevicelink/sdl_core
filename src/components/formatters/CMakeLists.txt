@@ -38,6 +38,7 @@ include_directories (
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/utils/include
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS

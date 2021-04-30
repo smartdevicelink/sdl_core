@@ -41,15 +41,16 @@ MockApplicationHelper& MockApplicationHelper::application_helper_mock() {
   return application_helper_mock;
 }
 
-}  // application_manager_test
-}  // components
-}  // test
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test
 
 namespace application_manager {
 
 void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
   test::components::application_manager_test::MockApplicationHelper::
-      application_helper_mock().RecallApplicationData(app, app_manager);
+      application_helper_mock()
+          .RecallApplicationData(app, app_manager);
 }
-}  // application_managers
+}  // namespace application_manager

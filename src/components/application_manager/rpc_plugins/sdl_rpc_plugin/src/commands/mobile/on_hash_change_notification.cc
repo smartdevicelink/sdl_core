@@ -34,9 +34,9 @@
 
 #include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 
+#include <string>
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
-#include <string>
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -44,6 +44,8 @@ using namespace application_manager;
 namespace commands {
 
 namespace mobile {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnHashChangeNotification::OnHashChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -60,7 +62,7 @@ OnHashChangeNotification::OnHashChangeNotification(
 OnHashChangeNotification::~OnHashChangeNotification() {}
 
 void OnHashChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
@@ -72,8 +74,7 @@ void OnHashChangeNotification::Run() {
     (*message_)[strings::msg_params][strings::hash_id] = app->curHash();
     SendNotification();
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Application with app_id " << app_id << " does not exist");
+    SDL_LOG_WARN("Application with app_id " << app_id << " does not exist");
   }
 }
 
@@ -81,4 +82,4 @@ void OnHashChangeNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

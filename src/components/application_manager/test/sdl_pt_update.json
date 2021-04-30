@@ -20,7 +20,13 @@
             "nicknames" : [ "SyncProxyTester" ],
             "priority" : "EMERGENCY",
             "steal_focus" : true,
-            "watchdog_timer_ms" : 20000
+            "watchdog_timer_ms" : 20000,
+            "app_services": {
+               "MEDIA": {
+                  "service_names" : ["SDL App", "SDL Music"],
+                  "handled_rpcs" : [{"function_id": 41}]
+               }
+            }
          },
          "default" : {
             "default_hmi" : "NONE",
@@ -1600,10 +1606,12 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "OnVehicleData" : {
@@ -1618,10 +1626,12 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "SubscribeVehicleData" : {
@@ -1636,9 +1646,11 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "UnsubscribeVehicleData" : {
@@ -1653,9 +1665,11 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                }
             },
@@ -1728,6 +1742,15 @@
             "NONE" : 0,
             "NORMAL" : 4,
             "VOICECOMM" : 10
+         },
+         "subtle_notifications_per_minute_by_priority": {
+            "COMMUNICATION": 15,
+            "EMERGENCY": 60,
+            "NAVIGATION": 20,
+            "PROJECTION": 20,
+            "NONE": 0,
+            "NORMAL": 10,
+            "VOICECOMM": 30
          },
          "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
          "timeout_after_x_seconds" : 60,

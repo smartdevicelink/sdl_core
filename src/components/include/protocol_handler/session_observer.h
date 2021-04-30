@@ -37,6 +37,8 @@
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
+
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
@@ -67,6 +69,7 @@ struct SessionContext {
   uint32_t hash_id_;
   bool is_protected_;
   bool is_new_service_;
+  bool is_start_session_failed_;
 
   /**
    * @brief Constructor
@@ -79,7 +82,8 @@ struct SessionContext {
       , service_type_(protocol_handler::kInvalidServiceType)
       , hash_id_(0)
       , is_protected_(false)
-      , is_new_service_(false) {}
+      , is_new_service_(false)
+      , is_start_session_failed_(false) {}
 
   /**
    * @brief Constructor
@@ -109,7 +113,8 @@ struct SessionContext {
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
-      , is_new_service_(false) {}
+      , is_new_service_(false)
+      , is_start_session_failed_(false) {}
 };
 
 /**
@@ -150,13 +155,17 @@ class SessionObserver {
    * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
    * \param service_type Type of service
-   * \return uint32_t 0 if operation fails, session key otherwise
+   * \param err_reason where to write reason for the End Session failure if the
+   * operation fails
+   * \return uint32_t 0 if operation fails, session key
+   * otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t sessionId,
       uint32_t* hashCode,
-      const protocol_handler::ServiceType& service_type) = 0;
+      const protocol_handler::ServiceType& service_type,
+      std::string* err_reason = nullptr) = 0;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -171,6 +180,13 @@ class SessionObserver {
    * \param connection_key used by other components as application identifier
    */
   virtual void OnMalformedMessageCallback(const uint32_t& connection_key) = 0;
+
+  /**
+   * @brief Callback function used by ProtocolHandler when the last message was
+   * sent for a mobile connection
+   * @param connection_key used by other components as an application identifier
+   */
+  virtual void OnFinalMessageCallback(const uint32_t& connection_key) = 0;
 
   /**
    * @brief Converts connection handle to transport type string used in
@@ -266,6 +282,18 @@ class SessionObserver {
                                    uint8_t session_id,
                                    uint8_t& protocol_version) const = 0;
 
+  /**
+   * @brief returns protocol version which application supports
+   * @param connection_id id of connection
+   * @param session_id id of session
+   * @param full_protocol_version where to write the full protocol version
+   * output
+   * @return TRUE if session and connection exist otherwise returns FALSE
+   */
+  virtual bool ProtocolVersionUsed(
+      uint32_t connection_id,
+      uint8_t session_id,
+      utils::SemanticVersion& full_protocol_version) const = 0;
   /**
    * @brief Check if session contains service with specified service type
    * @param connection_key unique id of session to check

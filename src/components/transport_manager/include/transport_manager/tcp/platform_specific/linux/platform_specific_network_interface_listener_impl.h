@@ -22,29 +22,42 @@ class TcpClientListener;
  */
 class InterfaceStatus {
  public:
-  InterfaceStatus() : flags_(0), has_ipv4_(false), has_ipv6_(false) {}
+  InterfaceStatus()
+      : flags_(0)
+      , has_ipv4_(false)
+      , has_ipv6_(false)
+      , ipv4_address_()
+      , ipv6_address_() {}
   ~InterfaceStatus() {}
 
   bool IsAvailable() const;
   bool IsLoopback() const;
+  const std::string& GetName() const {
+    return name_;
+  }
   // only for debugging output
   unsigned int GetFlags() const {
     return flags_;
   }
 
   bool HasIPAddress() const;
-  std::string GetIPv4Address() const;
-  std::string GetIPv6Address() const;
+  const std::string GetIPv4Address() const;
+  const std::string GetIPv6Address() const;
+
+  void SetName(const std::string& name) {
+    name_ = name;
+  }
 
   void SetFlags(unsigned int flags) {
     flags_ = flags;
   }
 
   // specify NULL to remove existing address
-  void SetIPv4Address(struct in_addr* addr);
-  void SetIPv6Address(struct in6_addr* addr);
+  void SetIPv4Address(const struct in_addr* addr);
+  void SetIPv6Address(const struct in6_addr* addr);
 
  private:
+  std::string name_;
   unsigned int flags_;
   bool has_ipv4_;
   bool has_ipv6_;
@@ -52,7 +65,11 @@ class InterfaceStatus {
   struct in6_addr ipv6_address_;
 };
 
-typedef std::map<std::string, InterfaceStatus> InterfaceStatusTable;
+/**
+ * @brief A map to store various status (IP addresses, status flags, etc.) of
+ *        network interfaces. Keys of the map are index numbers of interfaces.
+ */
+typedef std::map<unsigned int, InterfaceStatus> InterfaceStatusTable;
 
 /**
  * @brief Listener to detect various events on network interfaces
@@ -121,6 +138,12 @@ class PlatformSpecificNetworkInterfaceListener
   const std::string& GetSelectedInterfaceName() const {
     return selected_interface_;
   }
+
+  // for testing only: overwrites if_indextoname() by registering a dummy
+  // index-to-name mapping table
+  void SetDummyNameMap(const std::map<unsigned int, std::string>& m) {
+    dummy_name_map_ = m;
+  }
 #endif  // BUILD_TESTS
 
  private:
@@ -132,7 +155,18 @@ class PlatformSpecificNetworkInterfaceListener
     struct sockaddr_storage address;
 
     EventParam(int interface_index, unsigned int interface_flags = 0)
-        : if_index(interface_index), flags(interface_flags) {}
+        : if_index(interface_index), flags(interface_flags), address() {}
+  };
+
+  // use with std::find_if() to search for an entry containing specified
+  // interface name
+  struct NamePredicate {
+    NamePredicate(const std::string& name) : name_(name) {}
+    bool operator()(
+        const std::pair<unsigned int, InterfaceStatus>& entry) const {
+      return entry.second.GetName() == name_;
+    }
+    const std::string& name_;
   };
 
   // parent class which we will notify the events to
@@ -155,6 +189,7 @@ class PlatformSpecificNetworkInterfaceListener
 
 #ifdef BUILD_TESTS
   bool testing_;
+  std::map<unsigned int, std::string> dummy_name_map_;
 #endif
 
   void Loop();
@@ -173,6 +208,8 @@ class PlatformSpecificNetworkInterfaceListener
   // convert ifaddrmsg to a list of EventParam structs
   std::vector<EventParam> ParseIFAddrMessage(struct ifaddrmsg* message,
                                              unsigned int size);
+  // return network interface name of the specified index
+  const std::string GetInterfaceName(unsigned int if_index) const;
   // for debugging
   void DumpTable() const;
 

@@ -35,11 +35,12 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <time.h>
+#include "utils/macro.h"
 
 namespace file_system {
 
@@ -70,10 +71,10 @@ uint64_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory with owner_all permissions
- * @param name path to directory
- * @return path to created directory.
+ * @param name directory to create
+ * @return true if directory was created or already existed.
  */
-std::string CreateDirectory(const std::string& name);
+bool CreateDirectory(const std::string& name);
 
 /**
  * @brief Creates directory recursively
@@ -188,7 +189,7 @@ void remove_directory_content(const std::string& directory_name);
  * @return returns true if the directory is successfully deleted.
  */
 bool RemoveDirectory(const std::string& directory_name,
-                     bool is_recursively = true);
+                     const bool is_recursively = true);
 
 /**
  * @brief Check access rights
@@ -197,7 +198,7 @@ bool RemoveDirectory(const std::string& directory_name,
  * @param how Read/write attribute.
  * @return returns true if file has the given mode.
  */
-bool IsAccessible(const std::string& name, int32_t how);
+bool IsAccessible(const std::string& name, const int32_t how);
 
 /**
  * @brief Check access rights for writing
@@ -241,14 +242,22 @@ bool WriteBinaryFile(const std::string& name,
  */
 bool ReadBinaryFile(const std::string& name, std::vector<uint8_t>& result);
 
-bool ReadFile(const std::string& name, std::string& result);
-
 /**
- * @brief Convert special symbols in system path to percent-encoded
+ * @brief Reads from file
  *
  * @param name path to file
- * @return returns converted path.
+ * @param result read data
+ * @param offset number of bytes to be ignored from begining of file
+ * @return returns true if the operation is successfully.
  */
+bool ReadBinaryFile(const std::string& name,
+                    std::vector<uint8_t>& result,
+                    uint32_t offset,
+                    uint32_t length);
+
+bool ReadFile(const std::string& name, std::string& result);
+
+DEPRECATED
 const std::string ConvertPathForURL(const std::string& path);
 
 /**
@@ -283,6 +292,14 @@ bool CopyFile(const std::string& src, const std::string& dst);
  * @return if result success return true
  */
 bool MoveFile(const std::string& src, const std::string& dst);
+
+/**
+ * @brief Get filename from full path
+ *
+ * @param full_path Source file path
+ * @return parsed filename
+ */
+std::string GetFileName(const std::string& full_path);
 
 }  // namespace file_system
 

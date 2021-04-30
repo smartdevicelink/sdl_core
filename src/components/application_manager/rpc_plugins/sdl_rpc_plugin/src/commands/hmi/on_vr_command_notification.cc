@@ -32,18 +32,20 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/state_controller.h"
 
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnVRCommandNotification::OnVRCommandNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -60,21 +62,24 @@ OnVRCommandNotification::OnVRCommandNotification(
 OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   uint32_t max_cmd_id = application_manager_.get_settings().max_cmd_id();
 
-  // Check if this is one of standart VR commands (i.e. "Help")
+  // Check if this is one of standard VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
-    LOG4CXX_INFO(logger_, "Switched App");
+    SDL_LOG_INFO("Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
     ApplicationSharedPtr app = application_manager_.application(app_id);
     if (app) {
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, true);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_FULL,
+          true);
     } else {
-      LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
+      SDL_LOG_ERROR("Unable to find appication " << app_id);
     }
     return;
   }
@@ -87,7 +92,7 @@ void OnVRCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     return;
   }
   /* check if perform interaction is active
@@ -110,4 +115,4 @@ void OnVRCommandNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

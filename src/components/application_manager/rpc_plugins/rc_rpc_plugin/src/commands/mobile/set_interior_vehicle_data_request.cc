@@ -31,117 +31,21 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
+#include "interfaces/MOBILE_API.h"
+#include "json/json.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_helpers.h"
 #include "smart_objects/enum_schema_item.h"
-#include "utils/macro.h"
-#include "json/json.h"
 #include "utils/helpers.h"
-#include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
 
 using namespace json_keys;
 using namespace message_params;
-
-namespace {
-std::vector<std::string> GetModuleReadOnlyParams(
-    const std::string& module_type) {
-  std::vector<std::string> module_ro_params;
-  if (enums_value::kClimate == module_type) {
-    module_ro_params.push_back(kCurrentTemperature);
-  } else if (enums_value::kRadio == module_type) {
-    module_ro_params.push_back(kRdsData);
-    module_ro_params.push_back(kAvailableHDs);
-    module_ro_params.push_back(kSignalStrength);
-    module_ro_params.push_back(kSignalChangeThreshold);
-    module_ro_params.push_back(kState);
-    module_ro_params.push_back(kSisData);
-  } else if (enums_value::kLight == module_type) {
-    module_ro_params.push_back(kLightStatus);
-  }
-
-  return module_ro_params;
-}
-
-const std::map<std::string, std::string> GetLightCapabilitiesMapping() {
-  std::map<std::string, std::string> mapping = {
-      {message_params::kId, strings::kName},
-      {message_params::kLightStatus, strings::kStatusAvailable},
-      {message_params::kLightDensity, strings::kDensityAvailable},
-      {message_params::kLightColor, strings::kRGBColorSpaceAvailable}};
-  return mapping;
-}
-
-const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
-  std::map<std::string, std::string> mapping;
-  // climate
-  mapping["fanSpeed"] = "fanSpeedAvailable";
-  mapping["currentTemperature"] = "currentTemperatureAvailable";
-  mapping["desiredTemperature"] = "desiredTemperatureAvailable";
-  mapping["acEnable"] = "acEnableAvailable";
-  mapping["circulateAirEnable"] = "circulateAirEnableAvailable";
-  mapping["autoModeEnable"] = "autoModeEnableAvailable";
-  mapping["defrostZone"] = "defrostZoneAvailable";
-  mapping["dualModeEnable"] = "dualModeEnableAvailable";
-  mapping["acMaxEnable"] = "acMaxEnableAvailable";
-  mapping["ventilationMode"] = "ventilationModeAvailable";
-  mapping["heatedSteeringWheelEnable"] = "heatedSteeringWheelAvailable";
-  mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
-  mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
-  mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
-
-  // radio
-  mapping["band"] = "radioBandAvailable";
-  mapping["frequencyInteger"] = "radioFrequencyAvailable";
-  mapping["frequencyFraction"] = "radioFrequencyAvailable";
-  mapping["rdsData"] = "rdsDataAvailable";
-  mapping["availableHDs"] = "availableHDsAvailable";
-  mapping["hdChannel"] = "availableHDsAvailable";
-  mapping["hdRadioEnable"] = "hdRadioEnableAvailable";
-  mapping["signalStrength"] = "signalStrengthAvailable";
-  mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
-  mapping["radioEnable"] = "radioEnableAvailable";
-  mapping["state"] = "stateAvailable";
-  mapping["sisData"] = "sisDataAvailable";
-
-  // seat
-  mapping["heatingEnabled"] = "heatingEnabledAvailable";
-  mapping["coolingEnabled"] = "coolingEnabledAvailable";
-  mapping["heatingLevel"] = "heatingLevelAvailable";
-  mapping["coolingLevel"] = "coolingLevelAvailable";
-  mapping["horizontalPosition"] = "horizontalPositionAvailable";
-  mapping["verticalPosition"] = "verticalPositionAvailable";
-  mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
-  mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
-  mapping["backTiltAngle"] = "backTiltAngleAvailable";
-  mapping["headSupportHorizontalPosition"] =
-      "headSupportHorizontalPositionAvailable";
-  mapping["headSupportVerticalPosition"] =
-      "headSupportVerticalPositionAvailable";
-  mapping["massageEnabled"] = "massageEnabledAvailable";
-  mapping["massageMode"] = "massageModeAvailable";
-  mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
-  mapping["memory"] = "memoryAvailable";
-
-  // audio
-  mapping["source"] = "sourceAvailable";
-  mapping["keepContext"] = "keepContextAvailable";
-  mapping["volume"] = "volumeAvailable";
-  mapping["equalizerSettings"] = "equalizerAvailable";
-
-  // hmi settings
-  mapping["distanceUnit"] = "distanceUnitAvailable";
-  mapping["temperatureUnit"] = "temperatureUnitAvailable";
-  mapping["displayMode"] = "displayModeUnitAvailable";
-
-  return mapping;
-}
-}  // namespace
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -150,317 +54,99 @@ SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
 
 SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
 
-const std::string LightName(const smart_objects::SmartObject& light_name) {
-  const char* name;
-  const bool ok = ns_smart_device_link::ns_smart_objects::
-      EnumConversionHelper<mobile_apis::LightName::eType>::EnumToCString(
-          static_cast<mobile_apis::LightName::eType>(light_name.asUInt()),
-          &name);
-  return ok ? name : "unknown";
-}
-
 /**
- * @brief Check whether the parameter exist in capabilities
- * @param smart object of capabilities
- * @param mapping - map of module data and capabilities
- * @param request_parameter - string
- * @param switched_off_result - ref of mobile_apis::Result
- * @return success if parameter exist in capabilities missedParam otherwise
- */
-capabilitiesStatus GetItemCapability(
-    const smart_objects::SmartObject& capabilities,
-    const std::map<std::string, std::string>& mapping,
-    const std::string& request_parameter,
-    const mobile_apis::Result::eType& switched_off_result) {
-  const auto it = mapping.find(request_parameter);
-
-  if (it == mapping.end()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Parameter " << request_parameter
-                               << " doesn't exist in capabilities.");
-    return capabilitiesStatus::missedParam;
-  }
-
-  const std::string& caps_key = it->second;
-
-  LOG4CXX_DEBUG(logger_,
-                "Checking request parameter "
-                    << request_parameter
-                    << " with capabilities. Appropriate key is " << caps_key);
-
-  if (!capabilities.keyExists(caps_key)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Capability " << caps_key
-                                << " is missed in RemoteControl capabilities");
-    return capabilitiesStatus::missedParam;
-  }
-
-  if (!capabilities[caps_key].asBool()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Capability "
-                      << caps_key
-                      << " is switched off in RemoteControl capabilities");
-    capabilitiesStatus status = capabilitiesStatus::missedParam;
-    if (mobile_apis::Result::READ_ONLY == switched_off_result) {
-      status = capabilitiesStatus::readOnly;
-    }
-    return status;
-  }
-
-  return capabilitiesStatus::success;
-}
-
-/**
- * @brief Check whether the cpabilities for light allowed
- * @param smart object of capabilities
- * @param smart object of control_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetLightDataCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& control_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> mapping = GetLightCapabilitiesMapping();
-
-  for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
-    const std::string& request_parameter = it->first;
-
-    if (message_params::kId == request_parameter) {
-      continue;
-    }
-
-    const capabilitiesStatus status_item_capability =
-        GetItemCapability(capabilities,
-                          mapping,
-                          request_parameter,
-                          mobile_apis::Result::READ_ONLY);
-
-    if (capabilitiesStatus::success != status_item_capability) {
-      return std::make_pair(message_params::kLightState,
-                            status_item_capability);
-    }
-  }
-
-  return std::make_pair("", capabilitiesStatus::success);
-}
-
-/**
- * @brief Check whether the light name exists in capabilities
- * @param smart object of capabilities_status
- * @param smart object of light_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetLightNameCapabilities(
-    const smart_objects::SmartObject& capabilities_status,
-    const smart_objects::SmartObject& light_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto it = capabilities_status.asArray()->begin();
-  for (; it != capabilities_status.asArray()->end(); ++it) {
-    const smart_objects::SmartObject& so = *it;
-    const int64_t current_id = so[message_params::kName].asInt();
-    if (current_id == light_data[message_params::kId].asInt()) {
-      return GetLightDataCapabilities(so, light_data);
-    }
-  }
-  LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
-  return std::make_pair(message_params::kLightState,
-                        capabilitiesStatus::missedLightName);
-}
-
-/**
- * @brief Check whether the exists light data related to correspondent
- * capabilities
- * @param smart object of capabilities
- * @param smart object of control_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetControlDataCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& control_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> mapping =
-      GetModuleDataToCapabilitiesMapping();
-
-  for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
-    const std::string& request_parameter = it->first;
-    if (message_params::kId == request_parameter) {
-      continue;
-    }
-    if (message_params::kLightState == request_parameter) {
-      auto light_data = control_data[request_parameter].asArray()->begin();
-      ModuleCapability light_capability =
-          std::make_pair("", capabilitiesStatus::success);
-
-      for (; light_data != control_data[request_parameter].asArray()->end();
-           ++light_data) {
-        light_capability = GetLightNameCapabilities(
-            capabilities[strings::kSupportedLights], *light_data);
-
-        if (capabilitiesStatus::success != light_capability.second) {
-          return light_capability;
-        }
-      }
-
-      return light_capability;
-    }
-
-    const capabilitiesStatus status_item_capability =
-        GetItemCapability(capabilities[0],
-                          mapping,
-                          request_parameter,
-                          mobile_apis::Result::UNSUPPORTED_RESOURCE);
-
-    if (capabilitiesStatus::success != status_item_capability) {
-      return std::make_pair("", status_item_capability);
-    }
-  }
-
-  return std::make_pair("", capabilitiesStatus::success);
-}
-
-/**
- * @brief Check whether the exists hmi data related to correspondent
- * capabilities
- * @param smart object of capabilities
- * @param smart object of control_data
- * @return pair of state and capability status - ModuleCapability
- */
-ModuleCapability GetHmiControlDataCapabilities(
-    const smart_objects::SmartObject& capabilities,
-    const smart_objects::SmartObject& control_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<std::string, std::string> mapping =
-      GetModuleDataToCapabilitiesMapping();
-
-  for (auto it = control_data.map_begin(); it != control_data.map_end(); ++it) {
-    const capabilitiesStatus status_item_capability =
-        GetItemCapability(capabilities,
-                          mapping,
-                          it->first,
-                          mobile_apis::Result::UNSUPPORTED_RESOURCE);
-
-    if (capabilitiesStatus::success != status_item_capability) {
-      return std::make_pair("", status_item_capability);
-    }
-  }
-
-  return std::make_pair("", capabilitiesStatus::success);
-}
-
-/**
- * @brief Check whether rc module data capabilities are presented
- * @param smart object of rc_capabilities
+ * @brief Clears unrelated module data parameters
+ * @param module type in request
  * @param smart object of module_data
- * @return pair of state and capability status - ModuleCapability
+ * @return true if the correct module parameter is present, false otherwise
  */
-ModuleCapability GetModuleDataCapabilities(
-    const smart_objects::SmartObject& rc_capabilities,
-    const smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  const auto& all_module_types = RCHelpers::GetModulesList();
-  const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
-  const auto& get_capabilities_key =
-      RCHelpers::GetModuleTypeToCapabilitiesMapping();
-  ModuleCapability module_data_capabilities =
-      std::make_pair("", capabilitiesStatus::missedParam);
-
-  for (const auto& module_type : all_module_types) {
-    const auto module_data_key = get_module_data_key(module_type);
-    const auto capabilities_key = get_capabilities_key(module_type);
-    if (module_data.keyExists(module_data_key)) {
-      if (!rc_capabilities.keyExists(capabilities_key)) {
-        LOG4CXX_DEBUG(logger_, module_data_key << " capabilities not present");
-        return module_data_capabilities;
-      }
-      const smart_objects::SmartObject& caps =
-          rc_capabilities[capabilities_key];
-
-      if (message_params::kHmiSettingsControlData == module_data_key) {
-        module_data_capabilities =
-            GetHmiControlDataCapabilities(caps, module_data[module_data_key]);
-      } else {
-        module_data_capabilities =
-            GetControlDataCapabilities(caps, module_data[module_data_key]);
-      }
-    }
-  }
-
-  return module_data_capabilities;
-}
-
-bool isModuleTypeAndDataMatch(const std::string& module_type,
-                              const smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto& all_module_types = RCHelpers::GetModulesList();
+bool ClearUnrelatedModuleData(const std::string& module_type,
+                              smart_objects::SmartObject& module_data) {
+  SDL_LOG_AUTO_TRACE();
+  const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
   for (const auto& type : all_module_types) {
+    const std::string module_key = data_mapping(type);
     if (type == module_type) {
-      module_type_and_data_match = module_data.keyExists(data_mapping(type));
-      break;
+      module_type_and_data_match = module_data.keyExists(module_key);
+    } else if (module_data.keyExists(module_key)) {
+      // Cutting unrelated module data
+      module_data.erase(module_key);
     }
   }
   return module_type_and_data_match;
 }
 
 mobile_apis::Result::eType PrepareResultCodeAndInfo(
-    const ModuleCapability module_data_capabilities, std::string& info) {
+    const ModuleTypeCapability module_data_capabilities, std::string& info) {
   mobile_apis::Result::eType result_code =
       mobile_apis::Result::UNSUPPORTED_RESOURCE;
   if (message_params::kLightState == module_data_capabilities.first) {
     switch (module_data_capabilities.second) {
-      case capabilitiesStatus::missedLightName:
+      case capabilitiesStatus::kMissedLightName:
         info = "The requested LightName is not supported by the vehicle.";
         break;
-      case capabilitiesStatus::missedParam:
+      case capabilitiesStatus::kMissedParam:
         info =
             "The requested parameter of the given LightName is not supported "
             "by the vehicle.";
         break;
-      case capabilitiesStatus::readOnly:
+      case capabilitiesStatus::kReadOnly:
         info = "The requested parameter is read-only.";
         result_code = mobile_apis::Result::READ_ONLY;
         break;
       default:
         break;
     }
-
+  } else if (module_data_capabilities.second ==
+             capabilitiesStatus::kInvalidStatus) {
+    info = "The RC Capability is not available";
   } else {
     info = "Accessing not supported module data.";
   }
+
+  SDL_LOG_WARN(info);
   return result_code;
-  LOG4CXX_WARN(logger_, info);
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObject& module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
   const std::string module_type = ModuleType();
 
-  if (isModuleTypeAndDataMatch(module_type, module_data)) {
-    const smart_objects::SmartObject* rc_capabilities =
-        hmi_capabilities_.rc_capability();
-    ModuleCapability module_data_capabilities;
-
-    if (rc_capabilities) {
-      module_data_capabilities =
-          GetModuleDataCapabilities(*rc_capabilities, module_data);
-
-      if (capabilitiesStatus::success != module_data_capabilities.second) {
-        SetResourceState(ModuleType(), ResourceState::FREE);
-        std::string info;
-        mobile_apis::Result::eType result =
-            PrepareResultCodeAndInfo(module_data_capabilities, info);
-        SendResponse(false, result, info.c_str());
-        return;
-      }
+  if (ClearUnrelatedModuleData(module_type, module_data)) {
+    const std::string module_id = ModuleId();
+    const ModuleUid module(module_type, module_id);
+    if (!rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
+      SDL_LOG_WARN("Accessing not supported module: " << module_type << " "
+                                                      << module_id);
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      SendResponse(false,
+                   mobile_apis::Result::UNSUPPORTED_RESOURCE,
+                   "Accessing not supported module data");
+      return;
     }
 
-    if (AreAllParamsReadOnly(module_data)) {
-      LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");
+    ModuleTypeCapability module_data_capabilities;
+    module_data_capabilities =
+        rc_capabilities_manager_.GetModuleDataCapabilities(module_data,
+                                                           module_id);
+
+    if (capabilitiesStatus::kSuccess != module_data_capabilities.second) {
+      SetResourceState(ModuleType(), ResourceState::FREE);
+      std::string info;
+      mobile_apis::Result::eType result =
+          PrepareResultCodeAndInfo(module_data_capabilities, info);
+      SendResponse(false, result, info.c_str());
+      return;
+    }
+
+    if (rc_capabilities_manager_.AreAllParamsReadOnly(module_data,
+                                                      module_type)) {
+      SDL_LOG_WARN("All request params in module type are READ ONLY!");
       SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false,
                    mobile_apis::Result::READ_ONLY,
@@ -468,13 +154,14 @@ void SetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
-    module_data_capabilities = std::make_pair("", capabilitiesStatus::success);
+    module_data_capabilities = std::make_pair("", capabilitiesStatus::kSuccess);
 
-    if (AreReadOnlyParamsPresent(module_data, module_data_capabilities)) {
-      LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
+    if (rc_capabilities_manager_.AreReadOnlyParamsPresent(
+            module_data, module_type, module_data_capabilities)) {
+      SDL_LOG_DEBUG("Request module type has READ ONLY parameters");
 
       if (enums_value::kLight == module_data_capabilities.first &&
-          capabilitiesStatus::success != module_data_capabilities.second) {
+          capabilitiesStatus::kSuccess != module_data_capabilities.second) {
         SetResourceState(ModuleType(), ResourceState::FREE);
         SendResponse(
             false,
@@ -483,12 +170,13 @@ void SetInteriorVehicleDataRequest::Execute() {
         return;
       }
 
-      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameters... ");
+      SDL_LOG_DEBUG("Cutting-off READ ONLY parameters... ");
 
       CutOffReadOnlyParams(module_data);
     }
 
-    application_manager_.RemoveHMIFakeParameters(message_);
+    application_manager_.RemoveHMIFakeParameters(
+        message_, hmi_apis::FunctionID::RC_SetInteriorVehicleData);
 
     app_mngr::ApplicationSharedPtr app =
         application_manager_.application(connection_key());
@@ -500,20 +188,30 @@ void SetInteriorVehicleDataRequest::Execute() {
         module_data[message_params::kAudioControlData].keyExists(
             message_params::kSource);
 
-    if (app_wants_to_set_audio_src && !app->IsAllowedToChangeAudioSource()) {
-      LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
-      SetResourceState(ModuleType(), ResourceState::FREE);
-      SendResponse(false,
-                   mobile_apis::Result::REJECTED,
-                   "App is not allowed to change audio source");
-      return;
+    if (app_wants_to_set_audio_src) {
+      if (!app->IsAllowedToChangeAudioSource()) {
+        SDL_LOG_WARN("App is not allowed to change audio source");
+        SetResourceState(ModuleType(), ResourceState::FREE);
+        SendResponse(false,
+                     mobile_apis::Result::REJECTED,
+                     "App is not allowed to change audio source");
+        return;
+      } else if (module_data[message_params::kAudioControlData].keyExists(
+                     message_params::kKeepContext)) {
+        app->set_keep_context(module_data[message_params::kAudioControlData]
+                                         [message_params::kKeepContext]
+                                             .asBool());
+      }
     }
 
+    (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+               [message_params::kModuleId] = module_id;
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
   } else {
-    LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
+    SDL_LOG_WARN("Request module type & data mismatch!");
+    SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type & data mismatch!");
@@ -522,7 +220,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
 void SetInteriorVehicleDataRequest::on_event(
     const app_mngr::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   RCCommandRequest::on_event(event);
 
   if (hmi_apis::FunctionID::RC_SetInteriorVehicleData != event.id()) {
@@ -542,186 +240,75 @@ void SetInteriorVehicleDataRequest::on_event(
           mobile_apis::Result::WARNINGS);
 
   smart_objects::SmartObject response_params;
+  bool is_resource_acquired = false;
+
   if (result) {
+    if (!IsModuleIdProvided(hmi_response)) {
+      SDL_LOG_WARN("conditional mandatory parameter "
+                   << message_params::kModuleId << " missed in hmi response");
+      result = false;
+      result_code = mobile_apis::Result::GENERIC_ERROR;
+    }
     response_params = hmi_response[app_mngr::strings::msg_params];
     if (enums_value::kAudio == ModuleType()) {
       CheckAudioSource((
           *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
                     [message_params::kAudioControlData]);
     }
+
+    const std::string module_type = ModuleType();
+    const std::string module_id = ModuleId();
+
+    const rc_rpc_types::ModuleUid resource{module_type, module_id};
+    auto app = application_manager_.application(connection_key());
+
+    if (!app) {
+      SDL_LOG_ERROR("NULL pointer.");
+      SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
+      return;
+    }
+
+    const auto app_id = app->app_id();
+
+    if (!resource_allocation_manager_.IsResourceAlreadyAcquiredByApp(resource,
+                                                                     app_id)) {
+      resource_allocation_manager_.SetResourceAcquired(
+          module_type, module_id, app_id);
+      is_resource_acquired = true;
+    }
+
+  } else {
+    app_mngr::ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    app->set_keep_context(false);
   }
   std::string info;
   GetInfo(hmi_response, info);
   SendResponse(
       result, result_code, info.c_str(), result ? &response_params : nullptr);
-}
 
-const smart_objects::SmartObject& SetInteriorVehicleDataRequest::ControlData(
-    const smart_objects::SmartObject& module_data) {
-  const std::string module_type = ModuleType();
-
-  const auto& all_module_types = RCHelpers::GetModulesList();
-  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
-  for (const auto& type : all_module_types) {
-    if (type == module_type) {
-      return module_data[data_mapping(type)];
-    }
+  if (is_resource_acquired) {
+    resource_allocation_manager_.SendOnRCStatusNotifications(
+        NotificationTrigger::MODULE_ALLOCATION,
+        std::shared_ptr<application_manager::Application>());
   }
-  NOTREACHED();
-  return module_data[0];
 }
 
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const bool should_keep_context =
-      audio_data.keyExists(message_params::kKeepContext) &&
-      audio_data[message_params::kKeepContext].asBool();
-  const bool switch_source_from_app =
-      mobile_apis::PrimaryAudioSource::MOBILE_APP ==
-          application_manager_.get_current_audio_source() &&
-      mobile_apis::PrimaryAudioSource::MOBILE_APP !=
-          audio_data[message_params::kSource].asInt();
-  if (!should_keep_context && switch_source_from_app) {
-    app_mngr::ApplicationSharedPtr app =
-        application_manager_.application(connection_key());
-    if (app->mobile_projection_enabled()) {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_LIMITED);
-    } else {
-      application_manager_.ChangeAppsHMILevel(
-          app->app_id(), mobile_apis::HMILevel::eType::HMI_BACKGROUND);
-    }
+  SDL_LOG_AUTO_TRACE();
+  if (audio_data.keyExists(message_params::kSource)) {
+    application_manager_.set_current_audio_source(
+        audio_data[message_params::kSource].asUInt());
   }
-  application_manager_.set_current_audio_source(
-      audio_data[message_params::kSource].asUInt());
-}
-
-bool SetInteriorVehicleDataRequest::AreAllParamsReadOnly(
-    const smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& module_type_params =
-      ControlData(module_data);
-  auto it = module_type_params.map_begin();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(ModuleType());
-  for (; it != module_type_params.map_end(); ++it) {
-    if (!helpers::in_range(ro_params, it->first)) {
-      return false;
-    }
-  }
-
-  LOG4CXX_DEBUG(logger_, "All params are ReadOnly");
-  return true;
-}
-
-bool CheckReadOnlyParamsForAudio(
-    const smart_objects::SmartObject& module_type_params) {
-  if (module_type_params.keyExists(message_params::kEqualizerSettings)) {
-    const auto& equalizer_settings =
-        module_type_params[message_params::kEqualizerSettings];
-    auto it = equalizer_settings.asArray()->begin();
-
-    for (; it != equalizer_settings.asArray()->end(); ++it) {
-      if (it->keyExists(message_params::kChannelName)) {
-        LOG4CXX_DEBUG(logger_,
-                      "READ ONLY parameter. ChannelName = "
-                          << (*it)[message_params::kChannelName].asString());
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-bool CheckReadOnlyParamsForLight(
-    const smart_objects::SmartObject& module_type_params) {
-  if (module_type_params.keyExists(message_params::kLightState)) {
-    const auto& light_state = module_type_params[message_params::kLightState];
-    auto it = light_state.asArray()->begin();
-
-    for (; it != light_state.asArray()->end(); ++it) {
-      if (it->keyExists(message_params::kLightStatus)) {
-        const mobile_apis::LightStatus::eType light_status =
-            static_cast<mobile_apis::LightStatus::eType>(
-                (*it)[message_params::kLightStatus].asUInt());
-
-        if (helpers::Compare<mobile_apis::LightStatus::eType,
-                             helpers::EQ,
-                             helpers::ONE>(light_status,
-                                           mobile_apis::LightStatus::RAMP_UP,
-                                           mobile_apis::LightStatus::RAMP_DOWN,
-                                           mobile_apis::LightStatus::UNKNOWN,
-                                           mobile_apis::LightStatus::INVALID)) {
-          LOG4CXX_DEBUG(logger_,
-                        "READ ONLY parameter. Status = "
-                            << (*it)[message_params::kLightStatus].asInt());
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-bool SetInteriorVehicleDataRequest::AreReadOnlyParamsPresent(
-    const smart_objects::SmartObject& module_data,
-    ModuleCapability& module_data_capabilities) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& module_type_params =
-      ControlData(module_data);
-  const std::string module_type = ModuleType();
-
-  if (enums_value::kAudio == module_type) {
-    return CheckReadOnlyParamsForAudio(module_type_params);
-  }
-
-  if (enums_value::kLight == module_type) {
-    const bool result = CheckReadOnlyParamsForLight(module_type_params);
-
-    if (result) {
-      module_data_capabilities =
-          std::make_pair(module_type, capabilitiesStatus::readOnly);
-    }
-
-    return result;
-  }
-
-  const std::vector<std::string> ro_params =
-      GetModuleReadOnlyParams(module_type);
-  auto it = module_type_params.map_begin();
-
-  for (; it != module_type_params.map_end(); ++it) {
-    if (helpers::in_range(ro_params, it->first)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
     smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& module_type_params =
-      ControlData(module_data);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
-  std::vector<std::string> ro_params = GetModuleReadOnlyParams(module_type);
-
-  for (auto& it : ro_params) {
-    if (module_type_params.keyExists(it)) {
-      if (enums_value::kClimate == module_type) {
-        module_data[message_params::kClimateControlData].erase(it);
-      } else if (enums_value::kRadio == module_type) {
-        module_data[message_params::kRadioControlData].erase(it);
-      } else {
-        continue;
-      }
-
-      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << it);
-    }
-  }
+  const auto& module_type_params =
+      rc_capabilities_manager_.ControlDataForType(module_data, module_type);
 
   if (enums_value::kAudio == module_type) {
     auto& equalizer_settings = module_data[message_params::kAudioControlData]
@@ -730,15 +317,25 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
     for (; it != equalizer_settings.asArray()->end(); ++it) {
       if (it->keyExists(message_params::kChannelName)) {
         it->erase(message_params::kChannelName);
-        LOG4CXX_DEBUG(logger_,
-                      "Cutting-off READ ONLY parameter: "
-                          << message_params::kChannelName);
+        SDL_LOG_DEBUG("Cutting-off READ ONLY parameter: "
+                      << message_params::kChannelName);
       }
+    }
+  }
+
+  std::vector<std::string> ro_params =
+      RCHelpers::GetModuleReadOnlyParams(module_type);
+  const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
+  for (const auto& param : ro_params) {
+    if (module_type_params.keyExists(param)) {
+      module_data[data_mapping(module_type)].erase(param);
+      SDL_LOG_DEBUG("Cutting-off READ ONLY parameter: " << param);
     }
   }
 }
 
-std::string SetInteriorVehicleDataRequest::ModuleType() {
+std::string SetInteriorVehicleDataRequest::ModuleType() const {
+  SDL_LOG_AUTO_TRACE();
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -750,28 +347,49 @@ std::string SetInteriorVehicleDataRequest::ModuleType() {
   return ok ? str : "unknown";
 }
 
+std::string SetInteriorVehicleDataRequest::ModuleId() const {
+  SDL_LOG_AUTO_TRACE();
+  auto msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params[message_params::kModuleData].keyExists(
+          message_params::kModuleId)) {
+    return msg_params[message_params::kModuleData][message_params::kModuleId]
+        .asString();
+  }
+  if (enums_value::kSeat == ModuleType()) {
+    const auto id = static_cast<mobile_apis::SupportedSeat::eType>(
+        msg_params[message_params::kModuleData]
+                  [message_params::kSeatControlData][message_params::kId]
+                      .asUInt());
+    return rc_capabilities_manager_.GetModuleIdForSeatLocation(id);
+  }
+  const std::string module_id =
+      rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());
+  return module_id;
+}
+
 AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  return resource_allocation_manager_.AcquireResource(module_type,
-                                                      app->app_id());
+
+  return resource_allocation_manager_.AcquireResource(
+      module_type, ModuleId(), app->app_id());
 }
 
 bool SetInteriorVehicleDataRequest::IsResourceFree(
-    const std::string& module_type) const {
-  return resource_allocation_manager_.IsResourceFree(module_type);
+    const std::string& module_type, const std::string& module_id) const {
+  return resource_allocation_manager_.IsResourceFree(module_type, module_id);
 }
 
 void SetInteriorVehicleDataRequest::SetResourceState(
     const std::string& module_type, const ResourceState::eType state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   resource_allocation_manager_.SetResourceState(
-      module_type, app->app_id(), state);
+      module_type, ModuleId(), app->app_id(), state);
 }
 
 }  // namespace commands

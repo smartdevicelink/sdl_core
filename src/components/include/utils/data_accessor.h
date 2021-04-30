@@ -56,6 +56,7 @@ class DataAccessor {
       --(*counter_);
     }
   }
+
   const T& GetData() const {
     return data_;
   }

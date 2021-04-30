@@ -32,19 +32,19 @@
 
 #include "application_manager/mobile_message_handler.h"
 
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <iterator>
+#include <string>
+#include <vector>
 
-#include "gmock/gmock.h"
 #include "application_manager/message.h"
+#include "gmock/gmock.h"
 #include "protocol/raw_message.h"
 
+using application_manager::MobileMessageHandler;
+using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
-using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
-using application_manager::MobileMessageHandler;
 
 namespace test {
 namespace components {
@@ -69,8 +69,11 @@ const unsigned char* data_v1 =
 
 TEST(MobileMessageHandlerTestV1Test,
      HandleIncomingMessageProtocolV1_SendJSONData_ExpectEqual) {
-  RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key_p1, protocol_version_1, data_v1, data_json.length());
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key_p1,
+                                                       protocol_version_1,
+                                                       data_v1,
+                                                       data_json.length(),
+                                                       false);
 
   application_manager::Message* ptr =
       MobileMessageHandler::HandleIncomingMessageProtocol(message);
@@ -89,8 +92,11 @@ TEST(MobileMessageHandlerTestV1Test,
   const unsigned char* data_v1 =
       reinterpret_cast<const unsigned char*>(full_data.c_str());
 
-  RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key_p1, protocol_version_1, data_v1, full_data.length());
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key_p1,
+                                                       protocol_version_1,
+                                                       data_v1,
+                                                       full_data.length(),
+                                                       false);
 
   application_manager::Message* ptr =
       MobileMessageHandler::HandleIncomingMessageProtocol(message);

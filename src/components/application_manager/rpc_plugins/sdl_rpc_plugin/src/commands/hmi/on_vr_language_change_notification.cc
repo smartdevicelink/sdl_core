@@ -33,15 +33,17 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
+#include "application_manager/state_controller.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnVRLanguageChangeNotification::OnVRLanguageChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -58,32 +60,36 @@ OnVRLanguageChangeNotification::OnVRLanguageChangeNotification(
 OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {}
 
 void OnVRLanguageChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-
-  hmi_capabilities.set_active_vr_language(
+  hmi_capabilities_.set_active_vr_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
+  std::vector<std::string> sections_to_update{hmi_response::language};
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save VR.OnLanguageChange response to cache");
+  }
+
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-      hmi_capabilities.active_ui_language();
+      hmi_capabilities_.active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
+  const auto applications = application_manager_.applications().GetData();
 
-  ApplicationSetConstIt it = accessor.begin();
-  for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it++;
+  for (auto app : applications) {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
     if (static_cast<int32_t>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
       application_manager_.state_controller().SetRegularState(
-          app, mobile_api::HMILevel::HMI_NONE, false);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_NONE,
+          false);
 
       rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -98,4 +104,4 @@ void OnVRLanguageChangeNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

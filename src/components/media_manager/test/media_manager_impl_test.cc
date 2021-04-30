@@ -30,20 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"
-#include "media_manager/mock_media_adapter.h"
-#include "media_manager/mock_media_adapter_impl.h"
-#include "media_manager/mock_media_adapter_listener.h"
-#include "media_manager/mock_media_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/message.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
-#include "protocol_handler/mock_protocol_handler.h"
+#include "gmock/gmock.h"
+#include "media_manager/mock_media_adapter.h"
+#include "media_manager/mock_media_adapter_impl.h"
+#include "media_manager/mock_media_adapter_listener.h"
+#include "media_manager/mock_media_manager_settings.h"
 #include "protocol/common.h"
+#include "protocol_handler/mock_protocol_handler.h"
 
 #include "utils/file_system.h"
 #include "utils/scope_guard.h"
@@ -58,13 +59,13 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-using ::utils::ScopeGuard;
-using ::utils::MakeGuard;
-using ::testing::NiceMock;
-using ::protocol_handler::ServiceType;
-using ::protocol_handler::RawMessagePtr;
 using application_manager::ApplicationSharedPtr;
 using application_manager::BinaryData;
+using ::protocol_handler::RawMessagePtr;
+using ::protocol_handler::ServiceType;
+using ::testing::NiceMock;
+using ::utils::MakeGuard;
+using ::utils::ScopeGuard;
 
 namespace {
 const uint16_t kVideoStreamingPort = 8901u;
@@ -109,6 +110,10 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillByDefault(ReturnRef(kDefaultValue));
     ON_CALL(mock_media_manager_settings_, audio_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
+    ON_CALL(mock_hmi_capabilities_, pcm_stream_capabilities())
+        .WillByDefault(Return(nullptr));
+    ON_CALL(app_mngr_, hmi_capabilities())
+        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     mock_app_ = std::make_shared<MockApp>();
     media_manager_impl_.reset(
         new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
@@ -176,7 +181,7 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(Return(true));
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
-    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type));
+    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type, _));
     MockMediaAdapterImplPtr mock_media_streamer =
         std::make_shared<MockMediaAdapterImpl>();
     media_manager_impl_->set_mock_streamer(service_type, mock_media_streamer);
@@ -194,6 +199,7 @@ class MediaManagerImplTest : public ::testing::Test {
                                            kProtocolVersion,
                                            data_sending,
                                            data_sending_size,
+                                           false,
                                            serviceType));
     media_manager_impl_->OnMessageReceived(raw_message_ptr);
     media_manager_impl_->OnMobileMessageSent(raw_message_ptr);
@@ -205,6 +211,7 @@ class MediaManagerImplTest : public ::testing::Test {
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
   std::shared_ptr<MediaManagerImpl> media_manager_impl_;
+  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
 TEST_F(MediaManagerImplTest,
@@ -239,7 +246,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType audio_type = ServiceType::kAudio;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, audio_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, audio_type));
   EmulateMobileMessage(audio_type);
 }
 
@@ -248,7 +255,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType video_type = ServiceType::kMobileNav;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, video_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, video_type));
   EmulateMobileMessage(video_type);
 }
 
@@ -309,7 +316,12 @@ TEST_F(MediaManagerImplTest,
     EXPECT_EQ(data[i], result[i]);
   }
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   EXPECT_TRUE(RemoveDirectory(kResourceFolder, true));
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }
@@ -320,7 +332,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_FALSE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
 }
 
 TEST_F(MediaManagerImplTest,
@@ -336,7 +353,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_TRUE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   chmod(kOutputFilePath.c_str(), S_IWUSR);
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }
@@ -379,10 +401,6 @@ TEST_F(MediaManagerImplTest,
 
 TEST_F(MediaManagerImplTest,
        CheckFramesProcessed_WithCorrectFramesNumber_SUCCESS) {
-  ON_CALL(mock_media_manager_settings_, video_server_type())
-      .WillByDefault(ReturnRef(kDefaultValue));
-  ON_CALL(mock_media_manager_settings_, audio_server_type())
-      .WillByDefault(ReturnRef(kDefaultValue));
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   media_manager_impl_->SetProtocolHandler(&mock_protocol_handler);
   const int32_t frame_number = 10;

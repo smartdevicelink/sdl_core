@@ -33,9 +33,9 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_H_
 
 #include "gmock/gmock.h"
-#include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_settings.h"
+#include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 
 namespace test {
@@ -44,8 +44,9 @@ namespace protocol_handler_test {
 
 class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
  public:
-  MOCK_METHOD2(SendMessageToMobileApp,
+  MOCK_METHOD3(SendMessageToMobileApp,
                void(const ::protocol_handler::RawMessagePtr message,
+                    bool needs_encryption,
                     bool final_message));
   MOCK_METHOD1(AddProtocolObserver,
                void(::protocol_handler::ProtocolObserver* observer));
@@ -63,10 +64,20 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
   MOCK_CONST_METHOD0(get_settings,
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());
-  MOCK_METHOD2(NotifySessionStarted,
+  MOCK_METHOD3(NotifySessionStarted,
+               void(::protocol_handler::SessionContext& context,
+                    std::vector<std::string>& rejected_params,
+                    const std::string err_reason));
+  MOCK_METHOD3(NotifySessionStarted,
                void(const ::protocol_handler::SessionContext& context,
-                    std::vector<std::string>& rejected_params));
-  MOCK_METHOD0(NotifyOnFailedHandshake, void());
+                    std::vector<std::string>& rejected_params,
+                    const std::string err_reason));
+  MOCK_METHOD0(NotifyOnGetSystemTimeFailed, void());
+  MOCK_CONST_METHOD1(IsRPCServiceSecure, bool(const uint32_t connection_key));
+  MOCK_METHOD0(ProcessFailedPTU, void());
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+  MOCK_METHOD0(ProcessFailedCertDecrypt, void());
+#endif
 };
 }  // namespace protocol_handler_test
 }  // namespace components

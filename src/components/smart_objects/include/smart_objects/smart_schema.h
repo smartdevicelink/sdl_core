@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
 
-#include "utils/macro.h"
 #include "smart_objects/schema_item.h"
+#include "utils/macro.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -64,14 +64,19 @@ class CSmartSchema FINAL {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& messageVersion =
-                             utils::SemanticVersion()) const;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report,
+      const utils::SemanticVersion& messageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) const;
 
   /**
    * @brief Set new root schema item.
@@ -81,26 +86,38 @@ class CSmartSchema FINAL {
   void setSchemaItem(const ISchemaItemPtr SchemaItem);
 
   /**
+   * @brief Set new root schema item.
+   *
+   * @param SchemaItem Root schema item.
+   */
+  ISchemaItemPtr getSchemaItem();
+
+  /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
-   *
-   * @param RemoveFakeParameters contains true if need to remove fake parameters
-   * from smart object otherwise contains false.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
+   * @param report object for reporting warnings during schema application
    **/
   void applySchema(
       SmartObject& Object,
-      const bool RemoveFakeParameters,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const bool remove_unknown_parameters,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      rpc::ValidationReport* report = nullptr);
 
   /**
    * @brief The reverse SmartObject conversion using schema.
    *
    * @param object Object to convert.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   * parameters
    */
   // TODO(cpplint): Is this a non-const reference?
   // If so, make const or use a pointer.
-  void unapplySchema(SmartObject& object);
+  void unapplySchema(SmartObject& object,
+                     const bool remove_unknown_parameters = true);
 
   /**
    * @brief Build smart object by smart schema having copied matched

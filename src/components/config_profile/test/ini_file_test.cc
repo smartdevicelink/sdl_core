@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "config_profile/ini_file.h"
+#include "gtest/gtest.h"
 #include "utils/file_system.h"
 
 namespace test {
@@ -39,6 +39,9 @@ namespace components {
 namespace profile_test {
 
 using namespace ::profile;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
@@ -324,6 +327,8 @@ TEST(IniFileTest, ParseLineWithComment) {
   EXPECT_EQ(INI_REMARK, result);
   EXPECT_STREQ(line, res);
 }
+
+#pragma GCC diagnostic pop
 
 }  // namespace profile_test
 }  // namespace components

@@ -43,10 +43,10 @@ namespace commands {
 class SDLPolicyUpdate : public app_mngr::commands::RequestToHMI {
  public:
   /**
-     * @brief SDLPolicyUpdate class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
+   * @brief SDLPolicyUpdate class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
   SDLPolicyUpdate(const app_mngr::commands::MessageSharedPtr& message,
                   app_mngr::ApplicationManager& application_manager,
                   app_mngr::rpc_service::RPCService& rpc_service,
@@ -66,6 +66,6 @@ class SDLPolicyUpdate : public app_mngr::commands::RequestToHMI {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_POLICY_UPDATE_H_
