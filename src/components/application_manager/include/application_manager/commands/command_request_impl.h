@@ -243,14 +243,6 @@ class CommandRequestImpl : public CommandImpl,
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
 
   /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
-   */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
-
-  /**
    * @brief Checks if any request param was marked as disallowed by policy
    * @return true if any param was marked as disallowed
    */
@@ -375,37 +367,15 @@ class CommandRequestImpl : public CommandImpl,
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 
-  /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDisallowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
-
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-   * @brief Adds disallowed parameters to info string, sets result codes if
-   * necessary
-   * @param response Command smart object
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
    */
-  void FormatResponse(smart_objects::SmartObject& response);
-
-  /**
-    * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
-    * is set
-    */
   void UpdateHash();
 
   /**
