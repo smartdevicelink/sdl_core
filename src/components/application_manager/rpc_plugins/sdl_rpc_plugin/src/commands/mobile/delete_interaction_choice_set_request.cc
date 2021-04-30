@@ -110,16 +110,21 @@ void DeleteInteractionChoiceSetRequest::on_event(
     const std::uint32_t correlation_id = static_cast<uint32_t>(
         message[strings::params][strings::correlation_id].asUInt());
 
-    sync_primitives::AutoLock auto_lock(requests_lock_);
-    auto found_request = sent_requests_.find(correlation_id);
-    if (sent_requests_.end() == found_request) {
-      SDL_LOG_WARN("Request with " << *found_request
-                                   << " correlation_id is not found.");
-      return;
-    }
-    sent_requests_.erase(found_request);
+    bool should_send_response = false;
+    {
+      sync_primitives::AutoLock auto_lock(requests_lock_);
+      auto found_request = sent_requests_.find(correlation_id);
+      if (sent_requests_.end() == found_request) {
+        SDL_LOG_WARN("Request with " << *found_request
+                                     << " correlation_id is not found.");
+        return;
+      }
 
-    if (sent_requests_.empty()) {
+      sent_requests_.erase(found_request);
+      should_send_response = sent_requests_.empty();
+    }
+
+    if (should_send_response) {
       SendDeleteInteractionChoiceSetResponse();
     }
   }
