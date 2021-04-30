@@ -185,7 +185,7 @@ void MediaManagerImpl::Init() {
 }
 
 void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
 #if defined(EXTENDED_MEDIA_MODE)
   if (!a2dp_player_ && protocol_handler_) {
@@ -200,7 +200,7 @@ void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
 }
 
 void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (a2dp_player_) {
     a2dp_player_->StopActivity(application_key);
   }

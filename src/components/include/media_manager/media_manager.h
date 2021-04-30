@@ -42,8 +42,8 @@ namespace media_manager {
 
 class MediaManager {
  public:
-  virtual void PlayA2DPSource(int32_t application_key) = 0;
-  virtual void StopA2DPSource(int32_t application_key) = 0;
+  DEPRECATED virtual void PlayA2DPSource(int32_t application_key) = 0;
+  DEPRECATED virtual void StopA2DPSource(int32_t application_key) = 0;
 
   DEPRECATED virtual void StartMicrophoneRecording(
       int32_t application_key,
