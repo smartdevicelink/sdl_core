@@ -115,7 +115,7 @@ void DeleteInteractionChoiceSetRequest::on_event(
       sync_primitives::AutoLock auto_lock(requests_lock_);
       auto found_request = sent_requests_.find(correlation_id);
       if (sent_requests_.end() == found_request) {
-        SDL_LOG_WARN("Request with " << *found_request
+        SDL_LOG_WARN("Request with " << correlation_id
                                      << " correlation_id is not found.");
         return;
       }
