@@ -32,20 +32,32 @@
 
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
+
+namespace app_mngr = application_manager;
+namespace commands = application_manager::commands;
 
 VehicleInfoCommandFactory::VehicleInfoCommandFactory(
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
-    : hmi_command_factory_(new VehicleInfoHmiCommandFactory(
-          application_manager, rpc_service, hmi_capabilities, policy_handler))
-    , mob_command_factory_(new VehicleInfoMobileCommandFactory(
-          application_manager, rpc_service, hmi_capabilities, policy_handler)) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    policy::PolicyHandlerInterface& policy_handler,
+    CustomVehicleDataManager& custom_vehicle_data_manager)
+    : hmi_command_factory_(
+          new VehicleInfoHmiCommandFactory(application_manager,
+                                           rpc_service,
+                                           hmi_capabilities,
+                                           policy_handler,
+                                           custom_vehicle_data_manager))
+    , mob_command_factory_(
+          new VehicleInfoMobileCommandFactory(application_manager,
+                                              rpc_service,
+                                              hmi_capabilities,
+                                              policy_handler,
+                                              custom_vehicle_data_manager)) {
+  SDL_LOG_AUTO_TRACE();
 }
 
 VehicleInfoCommandFactory::~VehicleInfoCommandFactory() {}
@@ -53,7 +65,8 @@ VehicleInfoCommandFactory::~VehicleInfoCommandFactory() {}
 app_mngr::CommandSharedPtr VehicleInfoCommandFactory::CreateCommand(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::commands::Command::CommandSource source) {
-  if (app_mngr::commands::Command::SOURCE_HMI == source) {
+  if (app_mngr::commands::Command::SOURCE_HMI == source ||
+      app_mngr::commands::Command::SOURCE_SDL_TO_HMI == source) {
     return hmi_command_factory_->CreateCommand(message, source);
   } else {
     return mob_command_factory_->CreateCommand(message, source);
@@ -63,8 +76,9 @@ app_mngr::CommandSharedPtr VehicleInfoCommandFactory::CreateCommand(
 bool VehicleInfoCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource source) const {
-  return commands::Command::SOURCE_HMI == source
+  return (commands::Command::SOURCE_HMI == source ||
+          app_mngr::commands::Command::SOURCE_SDL_TO_HMI == source)
              ? hmi_command_factory_->IsAbleToProcess(function_id, source)
              : mob_command_factory_->IsAbleToProcess(function_id, source);
 }
-}
+}  // namespace vehicle_info_plugin

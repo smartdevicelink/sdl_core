@@ -33,11 +33,13 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/smart_objects/include
   )
 
 set(LIBRARIES
   gmock
   ConfigProfile
+  SmartObjects
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")

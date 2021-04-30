@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/update_status_manager.h"
 #include "gtest/gtest.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager.h"
 
 namespace test {
 namespace components {
@@ -60,20 +60,6 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {}
 };
-
-TEST_F(UpdateStatusManagerTest,
-       StringifiedUpdateStatus_SetStatuses_ExpectCorrectStringifiedStatuses) {
-  // Arrange
-  manager_->OnPolicyInit(false);
-  // Check
-  EXPECT_EQ("UP_TO_DATE", manager_->StringifiedUpdateStatus());
-  manager_->OnPolicyInit(true);
-  // Check
-  EXPECT_EQ("UPDATE_NEEDED", manager_->StringifiedUpdateStatus());
-  manager_->OnUpdateSentOut();
-  // Check
-  EXPECT_EQ("UPDATING", manager_->StringifiedUpdateStatus());
-}
 
 TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {

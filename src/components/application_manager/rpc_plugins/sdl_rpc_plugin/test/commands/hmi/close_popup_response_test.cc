@@ -35,13 +35,13 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
-#include "application_manager/commands/response_from_hmi.h"
-#include "hmi/close_popup_response.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_from_hmi.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/smart_object_keys.h"
+#include "hmi/close_popup_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -50,9 +50,9 @@ namespace hmi_commands_test {
 namespace close_popup_response {
 
 namespace am = ::application_manager;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::ClosePopupResponse;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 

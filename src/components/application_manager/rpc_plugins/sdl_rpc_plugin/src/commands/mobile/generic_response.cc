@@ -41,7 +41,7 @@ using namespace application_manager;
 namespace commands {
 
 void GenericResponse::Run() {
-  /*NsSmartDeviceLink::NsSmartObjects::SmartObject response;
+  /*ns_smart_device_link::ns_smart_objects::SmartObject response;
 
    response[strings::params][strings::correlation_id] =
    (*message_)[strings::params][strings::correlation_id];
@@ -63,4 +63,4 @@ void GenericResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

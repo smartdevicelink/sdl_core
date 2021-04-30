@@ -4,12 +4,16 @@ Contains parser for JSON RPC XML format.
 
 """
 
-from generator.parsers import RPCBase
+from parsers.parse_error import ParseError
+from parsers.rpc_base import RPCBase
 
 
-class Parser(RPCBase.Parser):
-
+class Parser(RPCBase):
     """JSON RPC parser."""
+
+    @property
+    def get_version(self):
+        return '1.0.0'
 
     def __init__(self):
         """Constructor."""
@@ -32,15 +36,26 @@ class Parser(RPCBase.Parser):
 
         for element in root:
             if element.tag != "interface":
-                raise RPCBase.ParseError("Subelement '" + element.tag +
-                                         "' is unexpected in interfaces")
+                raise ParseError("Subelement '" + element.tag +
+                                 "' is unexpected in interfaces")
 
             if "name" not in element.attrib:
-                raise RPCBase.ParseError(
+                raise ParseError(
                     "Name is not specified for interface")
 
             self._interface_name = element.attrib["name"]
             self._parse_interface(element, self._interface_name + "_")
+
+    def _check_enum_name(self, enum):
+        """Check enum name.
+
+        This method is called to check whether the newly parsed enum's name
+        conflicts with some predefined enum.
+        As SDLRPCV2 has no predefined enums this implementation does nothing.
+
+        """
+
+        pass
 
     def _provide_enum_element_for_function(self, enum_name, element_name):
         """Provide enum element for functions.
@@ -60,7 +75,7 @@ class Parser(RPCBase.Parser):
         if "FunctionID" == enum_name:
             prefix_length = len(self._interface_name) + 1
             if element_name[:prefix_length] != self._interface_name + '_':
-                raise RPCBase.ParseError(
+                raise ParseError(
                     "Unexpected prefix for function id '" +
                     element_name + "'")
             name = self._interface_name + "." + element_name[prefix_length:]
@@ -83,7 +98,7 @@ class Parser(RPCBase.Parser):
         """
 
         if function_param_name in ['method', 'code']:
-            raise RPCBase.ParseError(
+            raise ParseError(
                 "'" + function_param_name +
                 "' is a predefined name and can't be used" +
                 " as a function parameter name")

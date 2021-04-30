@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemTimeReadyNotification::OnSystemTimeReadyNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& app_man,
@@ -59,4 +61,4 @@ void OnSystemTimeReadyNotification::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

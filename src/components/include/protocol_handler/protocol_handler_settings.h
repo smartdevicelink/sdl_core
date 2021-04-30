@@ -34,12 +34,6 @@ class ProtocolHandlerSettings {
    */
   virtual uint16_t max_supported_protocol_version() const = 0;
 
-  /*
-   * @brief Returns true, if SDL 4.0 is enabled
-   * @deprecated Use max_supported_protocol_version instead
-   */
-  DEPRECATED virtual bool enable_protocol_4() const = 0;
-
   virtual uint32_t multiframe_waiting_timeout() const = 0;
 #ifdef ENABLE_SECURITY
   /**

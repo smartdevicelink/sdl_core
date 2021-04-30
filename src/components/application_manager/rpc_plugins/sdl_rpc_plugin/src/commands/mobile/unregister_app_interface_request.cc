@@ -32,28 +32,25 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_request.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!application_manager_.application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 
-  rpc_service_.ManageMobileCommand(
-      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key(),
-          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      SOURCE_SDL);
   application_manager_.EndNaviServices(connection_key());
   application_manager_.UnregisterApplication(connection_key(),
                                              mobile_apis::Result::SUCCESS);
@@ -62,4 +59,4 @@ void UnregisterAppInterfaceRequest::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

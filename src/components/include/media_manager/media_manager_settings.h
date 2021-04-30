@@ -32,8 +32,8 @@
 
 #ifndef SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_SETTINGS_H_
-#include <string>
 #include <stdint.h>
+#include <string>
 
 namespace media_manager {
 

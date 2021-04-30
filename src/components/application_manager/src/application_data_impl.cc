@@ -37,7 +37,26 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
+
+namespace {
+struct CommandIdComparator {
+  CommandIdComparator(const std::string& key, const uint32_t id)
+      : key_(key), target_id_(id) {}
+
+  bool operator()(const CommandsMap::value_type& new_command) const {
+    smart_objects::SmartObject& command = *(new_command.second);
+    if (command.keyExists(key_)) {
+      return command[key_].asUInt() == target_id_;
+    }
+    return false;
+  }
+
+ private:
+  std::string key_;
+  uint32_t target_id_;
+};
+}  // namespace
 
 InitialApplicationDataImpl::InitialApplicationDataImpl()
     : app_types_(NULL)
@@ -103,6 +122,10 @@ const mobile_api::Language::eType& InitialApplicationDataImpl::ui_language()
   return ui_language_;
 }
 
+const utils::SemanticVersion& InitialApplicationDataImpl::msg_version() const {
+  return msg_version_;
+}
+
 void InitialApplicationDataImpl::set_app_types(
     const smart_objects::SmartObject& app_types) {
   if (app_types_) {
@@ -153,6 +176,11 @@ void InitialApplicationDataImpl::set_ui_language(
   ui_language_ = ui_language;
 }
 
+void InitialApplicationDataImpl::set_msg_version(
+    const utils::SemanticVersion& version) {
+  msg_version_ = version;
+}
+
 void InitialApplicationDataImpl::set_perform_interaction_layout(
     mobile_apis::LayoutMode::eType layout) {
   perform_interaction_layout_ = layout;
@@ -164,31 +192,33 @@ InitialApplicationDataImpl::perform_interaction_layout() const {
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
-    : help_prompt_(NULL)
-    , timeout_prompt_(NULL)
-    , vr_help_title_(NULL)
-    , vr_help_(NULL)
+    : help_prompt_(nullptr)
+    , timeout_prompt_(nullptr)
+    , vr_help_title_(nullptr)
+    , vr_help_(nullptr)
     , tbt_state_(mobile_api::TBTState::INVALID_ENUM)
-    , show_command_(NULL)
-    , keyboard_props_(NULL)
-    , menu_title_(NULL)
-    , menu_icon_(NULL)
-    , tbt_show_command_(NULL)
-    , day_color_scheme_(NULL)
-    , night_color_scheme_(NULL)
-    , display_layout_("")
+    , show_command_(nullptr)
+    , keyboard_props_(nullptr)
+    , menu_title_(nullptr)
+    , menu_icon_(nullptr)
+    , tbt_show_command_(nullptr)
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
-    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , choice_set_map_()
-    , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , choice_set_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , performinteraction_choice_set_map_()
     , performinteraction_choice_set_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
+    , window_params_map_()
+    , window_params_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
-    , perform_interaction_mode_(-1) {}
+    , perform_interaction_mode_(-1)
+    , display_capabilities_builder_(*this) {}
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (help_prompt_) {
@@ -216,19 +246,24 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     show_command_ = NULL;
   }
 
+  if (keyboard_props_) {
+    delete keyboard_props_;
+    keyboard_props_ = NULL;
+  }
+
+  if (menu_title_) {
+    delete menu_title_;
+    menu_title_ = NULL;
+  }
+
+  if (menu_icon_) {
+    delete menu_icon_;
+    menu_icon_ = NULL;
+  }
+
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
-  }
-
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-    day_color_scheme_ = NULL;
-  }
-
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-    night_color_scheme_ = NULL;
   }
 
   for (CommandsMap::iterator command_it = commands_.begin();
@@ -245,6 +280,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   }
   sub_menu_.clear();
 
+  for (auto command : choice_set_map_) {
+    delete command.second;
+  }
+  choice_set_map_.clear();
+
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
     PerformChoice::iterator choice_it =
@@ -256,6 +296,8 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     performinteraction_choice_set_map_[it->first].clear();
   }
   performinteraction_choice_set_map_.clear();
+
+  window_params_map_.clear();
 }
 
 const smart_objects::SmartObject* DynamicApplicationDataImpl::help_prompt()
@@ -307,18 +349,100 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
   return menu_icon_;
 }
 
-const smart_objects::SmartObject* DynamicApplicationDataImpl::day_color_scheme()
+smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme()
     const {
-  return day_color_scheme_;
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    const smart_objects::SmartObject template_config =
+        default_window_it->second;
+    if (template_config.keyExists(strings::day_color_scheme)) {
+      return template_config[strings::day_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
-const smart_objects::SmartObject*
-DynamicApplicationDataImpl::night_color_scheme() const {
-  return night_color_scheme_;
+smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme()
+    const {
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    const smart_objects::SmartObject template_config =
+        default_window_it->second;
+    if (template_config.keyExists(strings::night_color_scheme)) {
+      return template_config[strings::night_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
-const std::string& DynamicApplicationDataImpl::display_layout() const {
-  return display_layout_;
+std::string DynamicApplicationDataImpl::display_layout() const {
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    smart_objects::SmartObject template_config = default_window_it->second;
+    if (template_config.keyExists(strings::template_layout)) {
+      return template_config[strings::template_layout].asString();
+    }
+  }
+
+  return std::string();
+}
+
+smart_objects::SmartObjectSPtr
+DynamicApplicationDataImpl::display_capabilities() const {
+  return display_capabilities_;
+}
+
+smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
+    const WindowID window_id) const {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!display_capabilities_) {
+    SDL_LOG_WARN("Current window capabilities are empty");
+    // SDL still needs to retreive display capabilities
+    return display_capabilities_;
+  }
+
+  smart_objects::SmartObject result_window_caps(
+      smart_objects::SmartType::SmartType_Map);
+
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (window_caps) {
+    auto find_res = std::find_if(
+        window_caps->begin(),
+        window_caps->end(),
+        [&window_id](const smart_objects::SmartObject& element) {
+          return (window_id == element[strings::window_id].asInt());
+        });
+
+    if (find_res != window_caps->end()) {
+      result_window_caps = *find_res;
+    }
+  }
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+
+  const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
+  for (const auto& key : disp_caps_keys) {
+    if (strings::window_capabilities == key) {
+      continue;
+    }
+    (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
+  }
+
+  (*result_display_caps)[0][strings::window_capabilities][0] =
+      result_window_caps;
+
+  return result_display_caps;
 }
 
 void DynamicApplicationDataImpl::load_global_properties(
@@ -438,30 +562,215 @@ void DynamicApplicationDataImpl::set_menu_icon(
 
 void DynamicApplicationDataImpl::set_day_color_scheme(
     const smart_objects::SmartObject& color_scheme) {
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-  }
-
-  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+  using namespace mobile_apis::PredefinedWindows;
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[DEFAULT_WINDOW][strings::day_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_night_color_scheme(
     const smart_objects::SmartObject& color_scheme) {
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-  }
-
-  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+  using namespace mobile_apis::PredefinedWindows;
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[DEFAULT_WINDOW][strings::night_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
-  display_layout_ = layout;
+  SDL_LOG_AUTO_TRACE();
+  using namespace mobile_apis::PredefinedWindows;
+  smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
+  template_config[strings::template_layout] = layout;
+  window_templates_[DEFAULT_WINDOW] = template_config;
+}
+
+void DynamicApplicationDataImpl::set_display_capabilities(
+    const smart_objects::SmartObject& display_capabilities) {
+  SDL_LOG_AUTO_TRACE();
+  const auto& incoming_window_capabilities =
+      display_capabilities[0][strings::window_capabilities];
+
+  smart_objects::SmartObject tmp_window_capabilities;
+  if (display_capabilities_) {
+    tmp_window_capabilities =
+        (*display_capabilities_)[0][strings::window_capabilities];
+  }
+
+  display_capabilities_.reset(
+      new smart_objects::SmartObject(display_capabilities));
+
+  auto get_window_index = [&tmp_window_capabilities](const WindowID window_id) {
+    const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
+    if (!tmp_window_capabilities_arr) {
+      return -1;
+    }
+
+    int index = 0;
+    for (auto element : *tmp_window_capabilities_arr) {
+      if (element.keyExists(strings::window_id)) {
+        if (window_id == element[strings::window_id].asInt())
+          return index;
+      } else if (window_id == 0) {
+        return index;
+      }
+      ++index;
+    }
+    return -1;
+  };
+
+  for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
+    int64_t window_id = 0;
+    if (incoming_window_capabilities[i].keyExists(strings::window_id)) {
+      window_id = incoming_window_capabilities[i][strings::window_id].asInt();
+    }
+    int found_index = get_window_index(window_id);
+    if (0 <= found_index) {
+      // Update the existing window capability
+      tmp_window_capabilities[found_index] = incoming_window_capabilities[i];
+    } else {
+      tmp_window_capabilities[tmp_window_capabilities.length()] =
+          incoming_window_capabilities[i];
+    }
+  }
+
+  (*display_capabilities_)[0][strings::window_capabilities] =
+      tmp_window_capabilities;
+}
+
+void DynamicApplicationDataImpl::remove_window_capability(
+    const WindowID window_id) {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!display_capabilities_) {
+    SDL_LOG_ERROR("Application display capabilities are not available");
+    return;
+  }
+
+  auto window_capabilities =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  DCHECK_OR_RETURN_VOID(window_capabilities);
+
+  for (auto it = window_capabilities->begin(); it != window_capabilities->end();
+       ++it) {
+    const auto cur_window_id = (*it).keyExists(strings::window_id)
+                                   ? (*it)[strings::window_id].asInt()
+                                   : 0;
+    if (window_id == cur_window_id) {
+      window_capabilities->erase(it);
+      return;
+    }
+  }
+
+  SDL_LOG_WARN("No window id " << window_id
+                               << " found in display capabilities");
+}
+
+bool DynamicApplicationDataImpl::menu_layout_supported(
+    const mobile_apis::MenuLayout::eType layout) const {
+  if (!display_capabilities_)
+    return false;
+
+  const auto tmp_window_capabilities_arr =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+
+  if (!tmp_window_capabilities_arr)
+    return false;
+
+  for (auto element : *tmp_window_capabilities_arr) {
+    if ((!element.keyExists(strings::window_id) ||
+         element[strings::window_id].asInt() == 0) &&
+        element.keyExists(strings::menu_layouts_available)) {
+      for (uint32_t i = 0;
+           i < element[strings::menu_layouts_available].length();
+           ++i) {
+        if (static_cast<mobile_apis::MenuLayout::eType>(
+                element[strings::menu_layouts_available][i].asUInt()) ==
+            layout) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
+                                                   const std::string& layout) {
+  SDL_LOG_AUTO_TRACE();
+  smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
+
+  template_config[strings::template_layout] = layout;
+  window_templates_[window_id] = template_config;
+}
+
+void DynamicApplicationDataImpl::set_day_color_scheme(
+    const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
+  SDL_LOG_AUTO_TRACE();
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[window_id][strings::day_color_scheme] = color_scheme;
+}
+
+void DynamicApplicationDataImpl::set_night_color_scheme(
+    const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
+  SDL_LOG_AUTO_TRACE();
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[window_id][strings::night_color_scheme] = color_scheme;
+}
+
+std::string DynamicApplicationDataImpl::window_layout(
+    const WindowID window_id) const {
+  SDL_LOG_AUTO_TRACE();
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::template_layout)) {
+      return template_config[strings::template_layout].asString();
+    }
+  }
+
+  return std::string();
+}
+
+smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
+    const WindowID window_id) const {
+  SDL_LOG_AUTO_TRACE();
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::day_color_scheme)) {
+      return template_config[strings::day_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
+}
+
+smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme(
+    const WindowID window_id) const {
+  SDL_LOG_AUTO_TRACE();
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::night_color_scheme)) {
+      return template_config[strings::night_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
 void DynamicApplicationDataImpl::SetGlobalProperties(
     const smart_objects::SmartObject& param,
     void (DynamicApplicationData::*callback)(
-        const NsSmartDeviceLink::NsSmartObjects::SmartObject&)) {
+        const ns_smart_device_link::ns_smart_objects::SmartObject&)) {
   smart_objects::SmartType so_type = param.getType();
   if (so_type != smart_objects::SmartType::SmartType_Invalid &&
       so_type != smart_objects::SmartType::SmartType_Null) {
@@ -469,37 +778,59 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       (this->*callback)(param);
     }
   } else {
-    LOG4CXX_WARN(logger_, "Invalid or Null smart object");
+    SDL_LOG_WARN("Invalid or Null smart object");
   }
 }
 
 void DynamicApplicationDataImpl::AddCommand(
-    uint32_t cmd_id, const smart_objects::SmartObject& command) {
+    const uint32_t internal_id, const smart_objects::SmartObject& command) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::const_iterator it = commands_.find(cmd_id);
+
+  CommandsMap::const_iterator it = commands_.find(internal_id);
   if (commands_.end() == it) {
-    commands_[cmd_id] = new smart_objects::SmartObject(command);
+    commands_[internal_id] = new smart_objects::SmartObject(command);
+    SDL_LOG_DEBUG("Command with internal number "
+                  << internal_id << " and id "
+                  << (*commands_[internal_id])[strings::cmd_id].asUInt()
+                  << " is added.");
   }
 }
 
-void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
+void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::iterator it = commands_.find(cmd_id);
-  if (commands_.end() != it) {
-    delete it->second;
-    commands_.erase(it);
-  }
-}
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
-    uint32_t cmd_id) {
-  sync_primitives::AutoLock lock(commands_lock_ptr_);
-  CommandsMap::const_iterator it = commands_.find(cmd_id);
+  CommandIdComparator is_id_equal(strings::cmd_id, cmd_id);
+  CommandsMap::iterator it =
+      find_if(commands_.begin(), commands_.end(), is_id_equal);
+
   if (it != commands_.end()) {
-    return it->second;
+    delete it->second;
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
+                                                  << cmd_id << " is removed.");
+    commands_.erase(it);
+
+    return;
+  }
+  SDL_LOG_WARN("Command with id " << cmd_id
+                                  << " is not found. Removal skipped.");
+}
+
+smart_objects::SmartObject DynamicApplicationDataImpl::FindCommand(
+    const uint32_t cmd_id) {
+  sync_primitives::AutoLock lock(commands_lock_ptr_);
+
+  CommandIdComparator is_id_equal(strings::cmd_id, cmd_id);
+  CommandsMap::const_iterator it =
+      find_if(commands_.begin(), commands_.end(), is_id_equal);
+
+  if (it != commands_.end()) {
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
+                                                  << cmd_id << " is found.");
+    smart_objects::SmartObject command(*it->second);
+    return command;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 // TODO(VS): Create common functions for processing collections
@@ -522,28 +853,57 @@ void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindSubMenu(
     uint32_t menu_id) const {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
-    return it->second;
+    smart_objects::SmartObject sub_menu(*it->second);
+    return sub_menu;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-    const std::string& name) {
+    const std::string& name, const uint32_t parent_id) {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
     smart_objects::SmartObject* menu = it->second;
-    if ((*menu)[strings::menu_name] == name) {
+    if ((*menu)[strings::menu_name].asString() == name &&
+        (*menu)[strings::parent_id].asInt() == parent_id) {
       return true;
     }
   }
   return false;
+}
+
+DataAccessor<WindowParamsMap>
+DynamicApplicationDataImpl::window_optional_params_map() const {
+  return DataAccessor<WindowParamsMap>(window_params_map_,
+                                       window_params_map_lock_ptr_);
+}
+
+void DynamicApplicationDataImpl::SetWindowInfo(
+    const WindowID window_id, const smart_objects::SmartObject& window_info) {
+  SDL_LOG_AUTO_TRACE();
+  const auto it = window_params_map_.find(window_id);
+  if (window_params_map_.end() == it) {
+    window_params_map_[window_id] =
+        std::make_shared<smart_objects::SmartObject>(window_info);
+  }
+}
+
+DisplayCapabilitiesBuilder&
+DynamicApplicationDataImpl::display_capabilities_builder() {
+  SDL_LOG_AUTO_TRACE();
+  return display_capabilities_builder_;
+}
+
+void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
+  SDL_LOG_AUTO_TRACE();
+  window_params_map_.erase(window_id);
 }
 
 void DynamicApplicationDataImpl::AddChoiceSet(
@@ -565,15 +925,16 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindChoiceSet(
     uint32_t choice_set_id) {
   sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
-    return it->second;
+    smart_objects::SmartObject choice_set(*it->second);
+    return choice_set;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(

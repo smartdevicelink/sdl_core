@@ -170,18 +170,27 @@ const std::string kCountUnconsentedGroups =
     " WHERE (`a`.`functional_group_id` = `f`.`id`"
     " AND`f`.`user_consent_prompt` IS NULL))";
 
-const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
+const std::string kSelectModuleMeta =
+    "SELECT `ccpu_version`, `language`, "
+    "`wers_country_code`, `hardware_version`, `pt_exchanged_at_odometer_x`, "
+    "`pt_exchanged_x_days_after_epoch`, "
+    "`ignition_cycles_since_last_exchange`, `vin` "
+    "FROM `module_meta`";
 
 const std::string kUpdateMetaParams =
     "UPDATE `module_meta` SET "
-    "`ccpu_version` = ?, `wers_country_code` = ?, `language` = ? ";
+    "`ccpu_version` = ?, `wers_country_code` = ?, `language` = ?";
+
+const std::string kUpdateMetaHardwareVersion =
+    "UPDATE `module_meta` SET `hardware_version` = ? ";
 
 const std::string kUpdateModuleMetaVinParam =
     "UPDATE `module_meta` SET `vin` = ? ";
 
 const std::string kSaveModuleMeta =
     "UPDATE `module_meta` SET `ccpu_version` = ?, `language` = ?,"
-    "`wers_country_code` = ?, `pt_exchanged_at_odometer_x` = ?,"
+    "`wers_country_code` = ?, `hardware_version` = ?, "
+    "`pt_exchanged_at_odometer_x` = ?,"
     "`pt_exchanged_x_days_after_epoch` = ?,"
     "`ignition_cycles_since_last_exchange` = ?, `vin` = ?";
 
@@ -205,7 +214,12 @@ const std::string kUpdateGroupPermissions =
 const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, `steal_focus`, "
     " `default_hmi`, `priority_value`, `is_revoked`, `memory_kb`, "
-    " `heart_beat_timeout_ms`) VALUES( ?, ?, ?, ?, ?, ?, ?, ?) ";
+    " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
+    " `endpoint`, `enabled`, `auth_token`, "
+    " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, "
+    "`encryption_required`) "
+    "VALUES "
+    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
@@ -232,8 +246,11 @@ const std::string kSelectPreconsentedGroupsId =
 
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `default_hmi`, `keep_context`, "
-    "`steal_focus`, "
-    " `memory_kb`, `heart_beat_timeout_ms` FROM `application`";
+    " `steal_focus`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
+    " `hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
+    " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, "
+    "`encryption_required`"
+    "FROM `application`";
 
 const std::string kSelectFunctionalGroupNames =
     "SELECT `id`, `user_consent_prompt`, `name`"

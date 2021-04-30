@@ -5,9 +5,6 @@
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -19,7 +16,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -39,15 +36,15 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
 
-#include <string>
-#include <vector>
 #include <list>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "transport_manager/transport_adapter/device.h"
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/common.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 
@@ -60,21 +57,28 @@ class TransportAdapterListener;
 /**
  * @brief The DeviceType enum defines types based on available transport
  * adapters
- * @deprecated PASA_AOA, PASA_BLUETOOTH, MME
  */
 enum DeviceType {
   AOA,
-  PASA_AOA,
   BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
   IOS_BT,
   IOS_USB,
   TCP,
+  CLOUD_WEBSOCKET,
   IOS_USB_HOST_MODE,
   IOS_USB_DEVICE_MODE,
   IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
+  WEBENGINE_WEBSOCKET,
   UNKNOWN
+};
+
+struct CloudAppProperties {
+  std::string endpoint;
+  std::string certificate;
+  bool enabled;
+  std::string auth_token;
+  std::string cloud_transport_type;
+  std::string hybrid_app_preference;
 };
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
@@ -95,6 +99,7 @@ typedef std::list<TransportAdapterListener*> TransportAdapterListenerList;
  */
 typedef std::map<std::string, std::string> TransportConfig;
 
+typedef std::map<std::string, CloudAppProperties> CloudAppTransportConfig;
 /**
  * @brief TransportConfig keys
  */
@@ -107,7 +112,15 @@ class TransportAdapter {
   /**
    * @enum Available types of errors.
    */
-  enum Error { OK, FAIL, NOT_SUPPORTED, ALREADY_EXISTS, BAD_STATE, BAD_PARAM };
+  enum Error {
+    UNKNOWN = -1,
+    OK,
+    FAIL,
+    NOT_SUPPORTED,
+    ALREADY_EXISTS,
+    BAD_STATE,
+    BAD_PARAM
+  };
 
  public:
   /**
@@ -203,6 +216,26 @@ class TransportAdapter {
   virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
 
   /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual ConnectionStatus GetConnectionStatus(
+      const DeviceUID& device_handle) const = 0;
+
+  /**
+   * @brief Add device to the container(map), if container doesn't hold it yet.
+   * in TransportAdapter is used only to add a WebEngine device
+   *
+   * @param device Smart pointer to the device.
+   *
+   * @return Smart pointer to the device.
+   */
+  virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *
@@ -222,18 +255,10 @@ class TransportAdapter {
   virtual bool IsClientOriginatedConnectSupported() const = 0;
 
   /**
-   * @brief Start client listener.
-   *
+   * @brief Changes client listening state of current adapter
    * @return Error information about possible reason of failure.
    */
-  virtual Error StartClientListening() = 0;
-
-  /**
-   * @brief Stop client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  virtual Error StopClientListening() = 0;
+  virtual Error ChangeClientListening(TransportAction required_change) = 0;
 
   /**
    * @brief Remove marked as FINALISING connection from accounting.
@@ -334,6 +359,8 @@ class TransportAdapter {
    */
   virtual TransportConfig GetTransportConfiguration() const = 0;
 
+  virtual void CreateDevice(const std::string& uid) = 0;
+
 #ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer
@@ -341,6 +368,14 @@ class TransportAdapter {
    * @param return pointer to Time metric observer
    */
   virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  virtual void SetTelemetryObserver(TMTelemetryObserver* observer) = 0;
+
 #endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter

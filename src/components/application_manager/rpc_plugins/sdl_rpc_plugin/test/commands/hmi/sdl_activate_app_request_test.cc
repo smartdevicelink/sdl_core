@@ -32,18 +32,20 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "utils/lock.h"
-#include "utils/helpers.h"
-#include "hmi/sdl_activate_app_request.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/postponed_activation_controller.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_activate_app_request.h"
+#include "utils/helpers.h"
+#include "utils/lock.h"
 
 namespace test {
 namespace components {
@@ -54,16 +56,17 @@ namespace sdl_activate_app_request {
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::SDLActivateAppRequest;
 using am::ApplicationSet;
-using testing::Mock;
-using testing::Return;
-using testing::ReturnRef;
+using am::commands::MessageSharedPtr;
+using am::event_engine::Event;
+using connection_handler_test::MockConnectionHandler;
+using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::SDLActivateAppRequest;
+using testing::Gt;
 using testing::Mock;
 using ::testing::NiceMock;
-using policy_test::MockPolicyHandlerInterface;
-using am::event_engine::Event;
+using testing::Return;
+using testing::ReturnRef;
 
 namespace {
 const uint32_t kCorrelationID = 1u;
@@ -137,18 +140,27 @@ TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
 
-  EXPECT_CALL(app_mngr_, state_controller())
-      .WillOnce(ReturnRef(mock_state_controller_));
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, WaitingApplicationByID(kAppID))
+      .WillOnce(Return(mock_app));
+  ON_CALL(app_mngr_, state_controller())
+      .WillByDefault(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
+  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
+  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+
+  EXPECT_CALL(*mock_app,
+              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillOnce(Return(state));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
 
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DactivateApp_REJECTED) {
+TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DeactivateApp_REJECTED) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
   (*msg)[strings::msg_params][strings::function_id] =
@@ -163,9 +175,9 @@ TEST_F(SDLActivateAppRequestTest, DISABLED_Run_DactivateApp_REJECTED) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::SDL_ActivateApp), _))
       .WillOnce(Return(true));
 
   command->Run();
@@ -189,6 +201,7 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
       .WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app, is_cloud_app()).WillOnce(Return(false));
   ON_CALL(*mock_app, device()).WillByDefault(Return(kHandle));
 
   MockAppPtr mock_app_first(CreateMockApp());
@@ -250,6 +263,7 @@ TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
       .WillOnce(Return(false));
 
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app, is_cloud_app()).WillOnce(Return(false));
   ON_CALL(*mock_app, device()).WillByDefault(Return(kHandle));
 
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
@@ -297,7 +311,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
+TEST_F(SDLActivateAppRequestTest, FirstAppNotActiveNONE_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
 
@@ -306,12 +320,18 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActive_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
-  EXPECT_CALL(app_mngr_, state_controller())
-      .WillOnce(ReturnRef(mock_state_controller_));
+  ON_CALL(app_mngr_, state_controller())
+      .WillByDefault(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
+  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
+  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+
+  EXPECT_CALL(*mock_app,
+              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillOnce(Return(state));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
 
@@ -336,6 +356,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app, is_cloud_app()).WillOnce(Return(false));
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
@@ -427,6 +448,55 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
 }
 #endif
 
+TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
+  MessageSharedPtr msg = CreateMessage();
+  SetCorrelationAndAppID(msg);
+
+  std::shared_ptr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>(msg));
+
+  MockAppPtr mock_app(CreateMockApp());
+
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
+  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_app, is_cloud_app()).WillOnce(Return(true));
+
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(app_mngr_, application(kAppID))
+      .WillOnce(Return(ApplicationSharedPtr()));
+#endif
+  EXPECT_CALL(app_mngr_, WaitingApplicationByID(kAppID))
+      .WillOnce(Return(mock_app));
+
+  EXPECT_CALL(app_mngr_, state_controller())
+      .WillOnce(ReturnRef(mock_state_controller_));
+  EXPECT_CALL(mock_state_controller_,
+              IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
+      .WillOnce(Return(false));
+
+  const uint16_t kRetries = 3;
+  const uint32_t kRetryTimeout = 2000;
+  const uint32_t kMinimumTimeout = kRetries * kRetryTimeout;
+
+  MockApplicationManagerSettings settings;
+  EXPECT_CALL(settings, cloud_app_max_retry_attempts())
+      .WillOnce(Return(kRetries));
+  EXPECT_CALL(settings, cloud_app_retry_timeout())
+      .WillOnce(Return(kRetryTimeout));
+  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings));
+
+  EXPECT_CALL(app_mngr_,
+              updateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
+
+  MockConnectionHandler connection_handler;
+  EXPECT_CALL(connection_handler, ConnectToDevice(kHandle));
+
+  EXPECT_CALL(app_mngr_, connection_handler())
+      .WillOnce(ReturnRef(connection_handler));
+
+  command->Run();
+}
+
 TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   SetCorrelationAndAppID(msg);
@@ -434,7 +504,7 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
   ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   command->onTimeOut();
 }
@@ -486,6 +556,10 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).WillOnce(Return(mock_app));
+
+  auto hmi_state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+  EXPECT_CALL(*mock_app, CurrentHmiState(_)).WillOnce(Return(hmi_state));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppID));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));

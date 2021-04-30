@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_response.h"
-#include "application_manager/commands/response_to_hmi.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -48,8 +48,8 @@ namespace hmi_commands_test {
 namespace simple_response_to_hmi_test {
 
 using ::testing::_;
-using ::testing::Types;
 using ::testing::NotNull;
+using ::testing::Types;
 namespace commands = sdl_rpc_plugin::commands;
 using application_manager::commands::MessageSharedPtr;
 
@@ -63,7 +63,8 @@ class ResponseToHMICommandsTest
 typedef Types<commands::SDLActivateAppResponse,
               commands::SDLGetListOfPermissionsResponse,
               commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+              commands::SDLGetUserFriendlyMessageResponse>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
 

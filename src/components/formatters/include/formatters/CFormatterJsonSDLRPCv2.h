@@ -38,9 +38,9 @@
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 /**
  * @brief Class is used to convert SmartObjects to JSON string and vice versa.
@@ -64,7 +64,7 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
   CFormatterJsonSDLRPCv2(const CFormatterJsonSDLRPCv2&);
 
  public:
-  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
+  typedef ns_smart_device_link::ns_json_handler::formatters::
       meta_formatter_error_code::tMetaFormatterErrorCode
           tMetaFormatterErrorCode;
 
@@ -73,11 +73,14 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    *
    * @param obj input SmartObject
    * @param outStr resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-      std::string& outStr);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -91,10 +94,11 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @return true if success, otherwise - false
    */
   template <typename FunctionId, typename MessageType>
-  static bool fromString(const std::string& str,
-                         NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
-                         FunctionId functionId,
-                         MessageType messageType);
+  static bool fromString(
+      const std::string& str,
+      ns_smart_device_link::ns_smart_objects::SmartObject& out,
+      FunctionId functionId,
+      MessageType messageType);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -113,11 +117,12 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @return true if success, otherwise - false
    */
   template <typename FunctionId, typename MessageType>
-  static bool fromString(const std::string& str,
-                         NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
-                         FunctionId functionId,
-                         MessageType messageType,
-                         int32_t correlationId);
+  static bool fromString(
+      const std::string& str,
+      ns_smart_device_link::ns_smart_objects::SmartObject& out,
+      FunctionId functionId,
+      MessageType messageType,
+      int32_t correlationId);
 
   /**
    * @brief Converts to string the smart object against the given schema
@@ -126,30 +131,36 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @param schema Smart schema which describes 'fake' smart object to be
    *formatted
    * @param outStr Resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return formatting error code
    */
   static tMetaFormatterErrorCode MetaFormatToString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-      std::string& outStr);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& object,
+      const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 };
 
 template <typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
     const std::string& str,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
+    ns_smart_device_link::ns_smart_objects::SmartObject& out,
     FunctionId functionId,
     MessageType messageType) {
   bool result = true;
 
   try {
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
     Json::Value root;
-    Json::Reader reader;
+    const size_t json_len = str.length();
+    namespace strings = ns_smart_device_link::ns_json_handler::strings;
+    const bool result =
+        reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr);
 
-    namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
-    bool result = reader.parse(str, root);
-
-    if (true == result) {
+    if (result) {
       out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
       out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
       out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
@@ -167,12 +178,12 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 template <typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
     const std::string& str,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
+    ns_smart_device_link::ns_smart_objects::SmartObject& out,
     FunctionId functionId,
     MessageType messageType,
     int32_t correlationId) {
   bool result = fromString(str, out, functionId, messageType);
-  namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
+  namespace strings = ns_smart_device_link::ns_json_handler::strings;
 
   if (true == result) {
     out[strings::S_PARAMS][strings::S_CORRELATION_ID] = correlationId;
@@ -180,8 +191,8 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 
   return result;
 }
-}
-}
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONSDLRPCV2_H_

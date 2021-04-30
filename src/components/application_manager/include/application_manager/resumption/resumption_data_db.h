@@ -110,16 +110,11 @@ class ResumptionDataDB : public ResumptionData {
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
 
-  /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
-   */
-  DEPRECATED void OnSuspend() FINAL;
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
 
-  /**
-   * @brief Decrements ignition counter for all registered applications
-   */
-  DEPRECATED void OnAwake() FINAL;
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
 
   /**
    * @brief Increments ignition counter for all registered applications
@@ -358,6 +353,16 @@ class ResumptionDataDB : public ResumptionData {
                                 const std::string& device_id);
 
   /**
+   * @brief Deletes userLocation from saved application
+   * @param policy_app_id - mobile application id
+   * @param device_id - contains id of device on which is running application
+   * @return true if data was deleted otherwise returns
+   * false
+   */
+  bool DeleteUserLocation(const std::string& policy_app_id,
+                          const std::string& device_id);
+
+  /**
    * @brief Deletes commands from saved application
    * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
@@ -445,6 +450,16 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool InsertChoiceSetData(const smart_objects::SmartObject& choicesets,
                            int64_t application_primary_key) const;
+
+  /**
+   * @brief Saves user location data to DB
+   * @param user_location contains data for saving
+   * @param application_primary_key - primary key from DB table application
+   * @return true if data was saved successfully otherwise returns
+   * false
+   */
+  bool InsertUserLocationData(const smart_objects::SmartObject& user_location,
+                              int64_t application_primary_key) const;
 
   /**
    * @brief Saves globalProperties data to DB
@@ -695,6 +710,18 @@ class ResumptionDataDB : public ResumptionData {
                                smart_objects::SmartObject& saved_app) const;
 
   /**
+   * @brief Selects data from applicationUserLocation table
+   * @param policy_app_id contains mobile application id of application
+   * @param device_id contains id of device on which is running application
+   * @param saved_app contains userLocation
+   * @return true if query has been executed successfully otherwise returns
+   * false
+   */
+  bool SelectUserLocationData(const std::string& policy_app_id,
+                              const std::string& device_id,
+                              smart_objects::SmartObject& saved_app) const;
+
+  /**
    * @brief Selects choice set data from DB
    * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
@@ -843,6 +870,7 @@ class ResumptionDataDB : public ResumptionData {
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataDB);
 
   utils::dbms::SQLDatabase* db_;
+  mutable sync_primitives::RecursiveLock resumption_lock_;
 };
 }  // namespace resumption
 

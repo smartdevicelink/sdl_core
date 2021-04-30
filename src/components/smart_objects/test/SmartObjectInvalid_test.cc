@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace smart_object_test {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 TEST(test_SmartObjectInvalidTest, simple_type_can_be_set_in_constructor) {
   SmartObject objMap(SmartType_Map);
@@ -116,7 +116,7 @@ TEST(test_SmartObjectInvalidTest, invalid_object_remains_invalid) {
   ASSERT_EQ(invalid_string_value, obj.asString());
 
   // ---- BINARY ---- //
-  NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
+  ns_smart_device_link::ns_smart_objects::SmartBinary binaryData;
   binaryData.push_back('\0');
   binaryData.push_back('a');
   obj = binaryData;

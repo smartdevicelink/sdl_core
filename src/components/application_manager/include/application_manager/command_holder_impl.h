@@ -35,9 +35,9 @@
 
 #include "application_manager/command_holder.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 #include "application_manager/application.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
@@ -64,10 +64,12 @@ class CommandHolderImpl : public CommandHolder {
    * @brief Suspend collects command for specific application id internally
    * @param application Application pointer
    * @param type Command type
+   * @param source The source of suspended command
    * @param command Command
    */
   void Suspend(ApplicationSharedPtr application,
                CommandType type,
+               commands::Command::CommandSource source,
                smart_objects::SmartObjectSPtr command) FINAL;
 
   /**
@@ -97,9 +99,17 @@ class CommandHolderImpl : public CommandHolder {
    */
   void ResumeMobileCommand(ApplicationSharedPtr application);
 
+  /**
+   * @brief Descriptor of each suspended command containing all necessary
+   * command info
+   */
+  struct AppCommandInfo {
+    std::shared_ptr<smart_objects::SmartObject> command_ptr_;
+    commands::Command::CommandSource command_source_;
+  };
+
   using AppCommands =
-      std::map<ApplicationSharedPtr,
-               std::vector<std::shared_ptr<smart_objects::SmartObject> > >;
+      std::map<ApplicationSharedPtr, std::vector<AppCommandInfo> >;
 
   ApplicationManager& app_manager_;
   sync_primitives::Lock commands_lock_;

@@ -35,14 +35,14 @@
 
 #include "mobile/add_sub_menu_request.h"
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -51,9 +51,9 @@ namespace mobile_commands_test {
 namespace add_sub_menu_request {
 
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::AddSubMenuRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::AddSubMenuRequest;
 using ::testing::_;
 using ::testing::Return;
 
@@ -98,6 +98,31 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
+  std::shared_ptr<AddSubMenuRequest> request_ptr =
+      CreateCommand<AddSubMenuRequest>(msg);
+
+  request_ptr->Run();
+}
+
+TEST_F(AddSubMenuRequestTest, Run_NonExistentParentID_EXPECT_INVALID_ID) {
+  const uint32_t menu_id = 10;
+  const uint32_t parent_id = 4;
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject& msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::menu_id] = menu_id;
+  msg_params[am::strings::menu_name] = "test";
+  msg_params[am::strings::parent_id] = parent_id;
+
+  SmartObject sub_menu(smart_objects::SmartType_Null);
+  EXPECT_CALL(*mock_app, FindSubMenu(menu_id)).WillOnce(Return(sub_menu));
+
+  SmartObject parent(smart_objects::SmartType_Null);
+  EXPECT_CALL(*mock_app, FindSubMenu(parent_id)).WillOnce(Return(parent));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
   std::shared_ptr<AddSubMenuRequest> request_ptr =
       CreateCommand<AddSubMenuRequest>(msg);
 

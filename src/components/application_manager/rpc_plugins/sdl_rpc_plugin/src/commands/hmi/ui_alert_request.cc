@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIAlertRequest::UIAlertRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -47,16 +49,20 @@ UIAlertRequest::UIAlertRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle) {}
+                   policy_handle) {
+  const auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t request_timeout = msg_params[strings::duration].asUInt();
+  default_timeout_ += request_timeout;
+}
 
 UIAlertRequest::~UIAlertRequest() {}
 
 void UIAlertRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

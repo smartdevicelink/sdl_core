@@ -31,14 +31,14 @@
  */
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUME_CTRL_H_
-#include "gmock/gmock.h"
-#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/application.h"
-#include "resumption/last_state.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "gmock/gmock.h"
+#include "resumption/last_state_wrapper.h"
 
 namespace test {
 namespace components {
-namespace resumprion_test {
+namespace resumption_test {
 
 class MockResumeCtrl : public resumption::ResumeCtrl {
  public:
@@ -50,14 +50,25 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD0(OnSuspend, void());
   MOCK_METHOD0(OnIgnitionOff, void());
   MOCK_METHOD0(OnAwake, void());
+  MOCK_CONST_METHOD0(LowVoltageTime, time_t());
+  MOCK_CONST_METHOD0(WakeUpTime, time_t());
+  MOCK_METHOD0(SaveLowVoltageTime, void());
+  MOCK_METHOD0(SaveWakeUpTime, void());
+  MOCK_METHOD0(ResetLowVoltageTime, void());
+  MOCK_METHOD0(ResetWakeUpTime, void());
   MOCK_CONST_METHOD0(is_suspended, bool());
   MOCK_METHOD0(StopSavePersistentDataTimer, void());
-  MOCK_METHOD2(StartResumption,
+  MOCK_METHOD0(StartSavePersistentDataTimer, void());
+  MOCK_METHOD3(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
-                    const std::string& hash));
+                    const std::string& hash,
+                    resumption::ResumeCtrl::ResumptionCallBack));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));
+  MOCK_METHOD2(HandleOnTimeOut,
+               void(const uint32_t correlation_id,
+                    const hmi_apis::FunctionID::eType));
   MOCK_METHOD1(CheckPersistenceFilesForResumption,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD2(CheckApplicationHash,
@@ -75,7 +86,9 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(OnAppActivated,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RemoveFromResumption, void(uint32_t app_id));
+  DEPRECATED
   MOCK_METHOD1(Init, bool(resumption::LastState& last_state));
+  MOCK_METHOD1(Init, bool(resumption::LastStateWrapperPtr last_state));
   MOCK_METHOD2(OnAppRegistrationStart,
                void(const std::string& policy_app_id,
                     const std::string& device_id));
@@ -83,7 +96,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_CONST_METHOD2(GetSavedAppHmiLevel,
                      int32_t(const std::string&, const std::string&));
   MOCK_METHOD1(RestoreAppHMIState,
-               bool(application_manager::ApplicationSharedPtr application));
+               void(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(SetupDefaultHMILevel,
                bool(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(StartAppHmiStateResumption,
@@ -94,6 +107,12 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                     bool check_policy));
   MOCK_CONST_METHOD0(LaunchTime, time_t());
 
+  MOCK_METHOD2(StartWaitingForDisplayCapabilitiesUpdate,
+               void(application_manager::ApplicationSharedPtr application,
+                    const bool is_resume_app));
+  MOCK_METHOD0(resumption_data_processor,
+               resumption::ResumptionDataProcessor&());
+
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
                void(std::shared_ptr<resumption::ResumptionData> mock_storage));
@@ -101,7 +120,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
 #endif  // BUILD_TESTS
 };
 
-}  // namespace resumprion_test
+}  // namespace resumption_test
 }  // namespace components
 }  // namespace test
 

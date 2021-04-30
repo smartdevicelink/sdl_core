@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include <list>
-#include "utils/macro.h"
 #include "protocol/common.h"
 #include "transport_manager/common.h"
+#include "utils/macro.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -61,58 +61,6 @@ class ProtocolPacket {
     ~ProtocolData();
     uint8_t* data;
     uint32_t totalDataBytes;
-  };
-
-  /**
-   * \class ProtocolVersion
-   * \brief Used for storing the full protocol version of a service
-   *        (major.minor.patch).
-   */
-  class ProtocolVersion {
-   public:
-    ProtocolVersion();
-    ProtocolVersion(uint8_t majorVersion,
-                    uint8_t minorVersion,
-                    uint8_t patchVersion);
-    ProtocolVersion(ProtocolVersion& other);
-    ProtocolVersion(std::string versionString);
-    uint8_t majorVersion;
-    uint8_t minorVersion;
-    uint8_t patchVersion;
-    static inline int16_t cmp(const ProtocolVersion& version1,
-                              const ProtocolVersion& version2) {
-      int16_t diff =
-          static_cast<int16_t>(version1.majorVersion - version2.majorVersion);
-      if (diff == 0) {
-        diff =
-            static_cast<int16_t>(version1.minorVersion - version2.minorVersion);
-        if (diff == 0) {
-          diff = static_cast<int16_t>(version1.patchVersion -
-                                      version2.patchVersion);
-        }
-      }
-      return diff;
-    }
-    inline bool operator==(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) == 0;
-    }
-    inline bool operator<(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) < 0;
-    }
-    bool operator>(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) > 0;
-    }
-    inline bool operator<=(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) <= 0;
-    }
-    bool operator>=(const ProtocolVersion& other) {
-      return ProtocolVersion::cmp(*this, other) >= 0;
-    }
-    static inline ProtocolVersion* min(ProtocolVersion& version1,
-                                       ProtocolVersion& version2) {
-      return (version1 < version2) ? &version1 : &version2;
-    }
-    std::string to_string();
   };
 
   /**
@@ -155,12 +103,15 @@ class ProtocolPacket {
     void set_max_rpc_payload_size(const size_t max_payload_size);
     void set_max_audio_payload_size(const size_t max_payload_size);
     void set_max_video_payload_size(const size_t max_payload_size);
+    void set_max_protocol_version_supported(
+        const uint16_t max_protocol_version_supported);
 
     size_t max_payload_size() const;
     size_t max_control_payload_size() const;
     size_t max_rpc_payload_size() const;
     size_t max_audio_payload_size() const;
     size_t max_video_payload_size() const;
+    uint16_t max_protocol_version_supported() const;
 
     size_t max_payload_size_by_service_type(const ServiceType type) const;
 
@@ -175,6 +126,7 @@ class ProtocolPacket {
     size_t max_rpc_payload_size_;
     size_t max_audio_payload_size_;
     size_t max_video_payload_size_;
+    uint16_t max_protocol_version_supported_;
   };
 
   /**
@@ -327,8 +279,8 @@ class ProtocolPacket {
   /*End of Deserialization*/
 
   /**
-    * \brief Getter for Connection Identifier
-    */
+   * \brief Getter for Connection Identifier
+   */
   ConnectionID connection_id() const;
 
   /**
@@ -337,13 +289,13 @@ class ProtocolPacket {
   void set_connection_id(ConnectionID connection_id);
 
   /**
-    * \brief Getter for data payload size
-    */
+   * \brief Getter for data payload size
+   */
   uint32_t payload_size() const;
 
   /**
-    * \brief Getter for full header information
-    */
+   * \brief Getter for full header information
+   */
   const ProtocolHeader& packet_header() const;
 
  private:
@@ -363,9 +315,9 @@ class ProtocolPacket {
   uint32_t payload_size_;
 
   /**
-    * \brief Connection Identifier
-    * Obtained from connection_handler
-    */
+   * \brief Connection Identifier
+   * Obtained from connection_handler
+   */
   ConnectionID connection_id_;
 
   DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
