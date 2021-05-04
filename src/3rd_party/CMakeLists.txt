@@ -236,8 +236,8 @@ if (NOT ${Boost_FOUND})
   include(ExternalProject)
   ExternalProject_Add(
     Boost
-    URL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
-    URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f
+    URL https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
+    URL_HASH SHA1=668c29007e5380d71fac8a39ecba6a02cb0086d5
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
