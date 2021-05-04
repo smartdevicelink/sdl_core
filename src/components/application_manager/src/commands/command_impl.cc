@@ -267,6 +267,18 @@ struct DisallowedParamsInserter {
 
 void CommandImpl::AddDisallowedParameters(
     smart_objects::SmartObject& response) {
+  const mobile_apis::FunctionID::eType id =
+      static_cast<mobile_apis::FunctionID::eType>(function_id());
+
+  if (!helpers::
+          Compare<mobile_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+              id,
+              mobile_apis::FunctionID::SubscribeVehicleDataID,
+              mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+    SDL_LOG_INFO("The function id: " << id << " is not supported.");
+    return;
+  }
+
   DisallowedParamsInserter disallowed_inserter(
       response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
   std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
