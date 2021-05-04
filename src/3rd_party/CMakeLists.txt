@@ -235,7 +235,8 @@ if (NOT ${Boost_FOUND})
   include(ExternalProject)
   ExternalProject_Add(
     Boost
-    URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
+    URL https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/boost_1_66_0.tar.gz
+    URL_HASH SHA256=bd0df411efd9a585e5a2212275f8762079fed8842264954675a4fddc46cfcf60
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
