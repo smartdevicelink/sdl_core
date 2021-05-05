@@ -24,6 +24,12 @@ Currently supported:
 ## Getting Started
 See the [Getting Started](https://smartdevicelink.com/en/guides/core/getting-started/install-and-run/) guide in the developer portal for instructions on how to build and start SDL Core.
 
+Note: An additional step may be required if running into python errors during the build process. A manual install of the xmlschema package is required.
+
+```
+python3 -m pip install xmlschema==1.1.2
+```
+
 ## Connect a Web HMI
 After setting up SDL Core, you will need to connect it to an external HMI. The HMI component of SDL needs to be developed separately from this project, and should be tailored to your specific head unit. Several sample browser-based HMIs are available for testing purposes:
 
