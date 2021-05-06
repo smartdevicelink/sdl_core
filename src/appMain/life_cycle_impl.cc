@@ -264,14 +264,14 @@ void LifeCycleImpl::StopComponents() {
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
 
-  DCHECK_OR_RETURN_VOID(connection_handler_);
-  connection_handler_->set_connection_handler_observer(NULL);
-
   DCHECK_OR_RETURN_VOID(protocol_handler_);
   protocol_handler_->RemoveProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
+
+  DCHECK_OR_RETURN_VOID(connection_handler_);
+  connection_handler_->set_connection_handler_observer(NULL);
 
   SDL_LOG_INFO("Stopping Protocol Handler");
   DCHECK_OR_RETURN_VOID(protocol_handler_);
