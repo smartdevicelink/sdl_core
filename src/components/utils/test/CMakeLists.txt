@@ -93,7 +93,12 @@ set(LIBRARIES
 create_test(utils_test "${SOURCES}" "${LIBRARIES}")
 
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+  file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+  file(COPY boostlogconfig.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(test_generator)
