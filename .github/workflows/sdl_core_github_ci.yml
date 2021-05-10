@@ -31,8 +31,8 @@ jobs:
       run: cmake ../sdl_core -DBUILD_TESTS=ON
     - name: build
       run: make install-3rd_party && make -j `nproc` install
-    - name: ldconfig
-      run: sudo ldconfig
+    - name: Set Library Path
+      run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
     # run tests
     - name: run test 1
       run: make test
