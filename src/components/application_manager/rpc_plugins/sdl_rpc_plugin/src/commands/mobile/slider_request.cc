@@ -153,21 +153,6 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
   SmartObject response_msg_params = message[strings::msg_params];
 
-  const bool is_timeout_aborted = Compare<Common_Result::eType, EQ, ONE>(
-      response_code, Common_Result::TIMED_OUT, Common_Result::ABORTED);
-
-  if (is_timeout_aborted) {
-    if (message[strings::params][strings::data].keyExists(
-            strings::slider_position)) {
-      // Copy slider_position info to msg_params section
-      response_msg_params[strings::slider_position] =
-          message[strings::params][strings::data][strings::slider_position];
-    } else {
-      SDL_LOG_ERROR(strings::slider_position << " field is absent"
-                                                " in response.");
-      response_msg_params[strings::slider_position] = 0;
-    }
-  }
   std::string response_info;
   GetInfo(message, response_info);
   const bool is_response_success = PrepareResultForMobileResponse(
