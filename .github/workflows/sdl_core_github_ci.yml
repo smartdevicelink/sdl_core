@@ -28,7 +28,7 @@ jobs:
       id: core-3rd-party
       uses: actions/cache@v2
       with:
-        path: ${{ github.workspace }}../core_3rd_party
+        path: ${{ github.workspace }}/../core_3rd_party
         key: ${{ runner.os }}-core-3rd-party
     - name: Configure
       run: cmake ../sdl_core -DBUILD_TESTS=ON
