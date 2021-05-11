@@ -1,7 +1,8 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/)
-[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/badge/icon?subject=Smoke%20tests)](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/)
-[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/badge/icon?subject=Coding%20style)](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/)
+[![Github Actions Build Status](https://github.com/smartdevicelink/sdl_core/actions/workflows/sdl_core_github_ci.yml/badge.svg)](https://github.com/smartdevicelink/sdl_core/actions/workflows/sdl_core_github_ci.yml)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/badge/icon?subject=Smoke%20tests)](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/badge/icon?subject=Coding%20style)](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/)
 
 # SmartDeviceLink (SDL)
 
