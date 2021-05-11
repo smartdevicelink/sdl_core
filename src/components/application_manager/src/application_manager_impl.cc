@@ -2772,8 +2772,16 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
           json::ttsName)) {
     SDL_LOG_DEBUG("Get ttsName from " << cur_vr_lang << " language");
-    ttsName =
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
         app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
+
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::ttsName)) {
+    SDL_LOG_DEBUG("Get ttsName from default language");
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
+        app_data[json::languages][default_idx][json::default_][json::ttsName];
   } else {
     SDL_LOG_DEBUG("No data for ttsName for " << cur_vr_lang << " language");
   }
@@ -2783,6 +2791,11 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
     SDL_LOG_DEBUG("Get vrSynonyms from " << cur_vr_lang << " language");
     vrSynonym =
         app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::vrSynonyms)) {
+    SDL_LOG_DEBUG("Get vrSynonyms from default language");
+    vrSynonym = app_data[json::languages][default_idx][json::default_]
+                        [json::vrSynonyms];
   } else {
     SDL_LOG_DEBUG("No data for vrSynonyms for " << cur_vr_lang << " language");
   }
