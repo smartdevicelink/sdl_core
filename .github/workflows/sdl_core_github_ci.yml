@@ -1,21 +1,24 @@
-name: GitHub Actions Demo
+name: SDL Core Build
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: submodules
+    - name: Init Submodules
       run: git -C ${{ github.workspace }} submodule update --init --recursive
-    # install dependencies
-    - name: install-dependencies
+    # Install Dependencies
+    - name: Apt Get Dependencies
       run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools && sudo apt-get install -f clang-format-6.0
-    - name: Setup cmake
+    - name: Setup CMAKE
       uses: jwlawson/actions-setup-cmake@v1.8
       with:
         cmake-version: '3.16.3'
-    # build project
-    - name: mkdir-and-cd
+    # Check Style
+    - name: Check Style
+      run: ${{ github.workspace }}/tools/infrastructure/check_style.sh
+    # Build Project
+    - name: Make Directories
       run: cd ${{ github.workspace }} && cd ../ && mkdir core_3rd_party && mkdir build && cd build
     - name: Set 3rd Party Path
       run: echo "THIRD_PARTY_INSTALL_PREFIX=$(echo $(cd ../core_3rd_party && pwd))" >> $GITHUB_ENV
@@ -27,12 +30,12 @@ jobs:
       with:
         path: ${{ github.workspace }}../core_3rd_party
         key: ${{ runner.os }}-core-3rd-party
-    - name: cmake
+    - name: Configure
       run: cmake ../sdl_core -DBUILD_TESTS=ON
-    - name: build
+    - name: Build
       run: make install-3rd_party && make -j `nproc` install
     - name: Set Library Path
       run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
     # run tests
-    - name: run test 1
+    - name: Unit Tests
       run: make test
