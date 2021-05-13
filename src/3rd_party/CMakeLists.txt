@@ -94,11 +94,13 @@ if(ENABLE_LOG)
                                if [ \\$$? == 0 ]\; then
                                  VAR1=\\$$\( readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 2>/dev/null\)\;
                                  VAR1=\\$$\(echo \\$$VAR1 | awk '{print \\$$NF}'\)\;
+                                 echo "VAR1 ${VAR1}"
                                  VAR2=-1\;
                                  cd ${CMAKE_CURRENT_SOURCE_DIR}\;
                                  git log . 1>/dev/null 2>&1\;
                                  if [ \\$$? == 0 ]; then
                                      VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/apache-log4cxx-0.10.0\)\;
+                                     echo "VAR2 ${VAR2}"
                                  fi\;
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
                                    echo " Need to rebuild logger. 1" \;
