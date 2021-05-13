@@ -101,14 +101,14 @@ if(ENABLE_LOG)
                                      VAR2=\\$$\(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/apache-log4cxx-0.10.0\)\;
                                  fi\;
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
-                                   echo " Need to rebuild logger. " \;
+                                   echo " Need to rebuild logger. 1" \;
                                    cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                    make\;
                                  else
                                    echo " Logger is actual. " \;
                                  fi\;
                                else
-                                 echo " Need to build logger. " \;
+                                 echo " Need to build logger. 2" \;
                                  cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                  make\;
                                fi\"
