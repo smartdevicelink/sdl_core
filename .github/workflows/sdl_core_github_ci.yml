@@ -24,10 +24,13 @@ jobs:
       with:
         path: ${{ github.workspace }}/core_3rd_party
         key: ${{ runner.os }}-core-3rd-party
+    - name: Make 3rd Party Directory
+      if: steps.core-3rd-party.outputs.cache-hit != 'true'
+      run: mkdir ${{ github.workspace }}/core_3rd_party
     - name: List 3rd Party Files
       run: find ${{ github.workspace }}/core_3rd_party
     - name: Make Directories
-      run: cd ${{ github.workspace }} && mkdir core_3rd_party && cd ../ && mkdir build && cd build
+      run: cd ${{ github.workspace }} && cd ../ && mkdir build && cd build
     - name: Set 3rd Party Path
       run: echo "THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
     - name: Set 3rd Party ARCH Path
