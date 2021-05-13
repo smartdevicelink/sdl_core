@@ -25,7 +25,7 @@ jobs:
         path: ${{ github.workspace }}/core_3rd_party
         key: ${{ runner.os }}-core-3rd-party
     - name: List 3rd Party Files
-    - run: find ${{ github.workspace }}/core_3rd_party
+      run: find ${{ github.workspace }}/core_3rd_party
     - name: Make Directories
       run: cd ${{ github.workspace }} && mkdir core_3rd_party && cd ../ && mkdir build && cd build
     - name: Set 3rd Party Path
