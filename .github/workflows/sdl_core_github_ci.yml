@@ -36,7 +36,7 @@ jobs:
     - name: Set 3rd Party ARCH Path
       run: echo "THIRD_PARTY_INSTALL_PREFIX_ARCH=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
     - name: Configure
-      run: cmake ../sdl_core -DBUILD_TESTS=ON
+      run: cmake ../sdl_core -DBUILD_TESTS=ON -DLOGGER_NAME=BOOST
     - name: Build
       run: make install-3rd_party && make -j `nproc` install
     - name: Set Library Path
