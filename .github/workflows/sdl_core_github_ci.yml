@@ -23,7 +23,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.workspace }}/core_3rd_party
-        key: ${{ runner.os }}-core-3rd-party
+        key: ${{ runner.os }}-core-3rd-party-v1
     - name: Make 3rd Party Directory
       if: steps.core-3rd-party.outputs.cache-hit != 'true'
       run: mkdir ${{ github.workspace }}/core_3rd_party
