@@ -44,6 +44,7 @@
 #include "media_manager/media_manager_settings.h"
 #include "policy/policy_settings.h"
 #include "protocol_handler/protocol_handler_settings.h"
+#include "smart_objects/smart_object.h"
 #include "transport_manager/transport_manager_settings.h"
 #include "utils/macro.h"
 
@@ -825,6 +826,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_transport_change_timer_addition() const OVERRIDE;
 
   /**
+   * @brief Parses values in config_file_name_ to config_obj_ smart object
+   */
+  void ParseConfiguration();
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -989,6 +995,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   size_t maximum_audio_payload_size_;
   size_t maximum_video_payload_size_;
   std::string config_file_name_;
+  smart_objects::SmartObject config_obj_;
   std::string server_address_;
   uint16_t server_port_;
   uint16_t video_streaming_port_;
@@ -1114,6 +1121,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int iap2_hub_connect_attempts_;
   int iap_hub_connection_wait_timeout_;
   uint16_t tts_global_properties_timeout_;
+  size_t maximum_payload_size_;
+  size_t message_frequency_count_;
+  size_t message_frequency_time_;
+  bool malformed_message_filtering_;
+  size_t malformed_frequency_count_;
+  size_t malformed_frequency_time_;
+  uint32_t multiframe_waiting_timeout_;
   uint16_t attempts_to_open_policy_db_;
   uint16_t open_attempt_timeout_ms_;
   uint32_t resumption_delay_before_ign_;

@@ -679,6 +679,7 @@ TEST_F(ProfileTest, CheckVectorContainer) {
   std::vector<int> diagmodes_list =
       profile_.ReadIntContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
+
   // Compare with result of ReadIntContainer
   ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
   bool isEqual = true;

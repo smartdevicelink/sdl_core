@@ -40,6 +40,9 @@ namespace profile_test {
 
 using namespace ::profile;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
@@ -324,6 +327,8 @@ TEST(IniFileTest, ParseLineWithComment) {
   EXPECT_EQ(INI_REMARK, result);
   EXPECT_STREQ(line, res);
 }
+
+#pragma GCC diagnostic pop
 
 }  // namespace profile_test
 }  // namespace components

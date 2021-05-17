@@ -60,8 +60,8 @@ class MediaManagerImpl : public MediaManager,
                    const MediaManagerSettings& settings);
   virtual ~MediaManagerImpl();
 
-  virtual void PlayA2DPSource(int32_t application_key);
-  virtual void StopA2DPSource(int32_t application_key);
+  DEPRECATED virtual void PlayA2DPSource(int32_t application_key);
+  DEPRECATED virtual void StopA2DPSource(int32_t application_key);
 
   DEPRECATED virtual void StartMicrophoneRecording(
       int32_t application_key,

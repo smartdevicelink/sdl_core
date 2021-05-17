@@ -55,6 +55,9 @@
 
 namespace profile {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 SDL_CREATE_LOG_VARIABLE("Profile")
 
 char* ini_write_inst(const char* fname, uint8_t flag) {
@@ -415,4 +418,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
   return INI_NOTHING;
 }
+
+#pragma GCC diagnostic pop
+
 }  // namespace profile
