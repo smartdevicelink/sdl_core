@@ -51,19 +51,21 @@ namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
 SMember::SMember()
-    : mSchemaItem(CAlwaysFalseSchemaItem::create())
-    , mIsMandatory(true)
-    , mIsDeprecated(false)
-    , mIsRemoved(false) {}
+    : mIsMandatory(true), mIsDeprecated(false), mIsRemoved(false) {
+  mSchemaItemShared = CAlwaysFalseSchemaItem::create();
+  mSchemaItem = mSchemaItemShared.get();
+}
 
-SMember::SMember(const ISchemaItemPtr SchemaItem,
+SMember::SMember(ISchemaItem* SchemaItem,
                  const bool IsMandatory,
                  const std::string& Since,
                  const std::string& Until,
                  const bool IsDeprecated,
                  const bool IsRemoved,
                  const std::vector<SMember>& history_vector)
-    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
+    : mSchemaItem(SchemaItem)
+    , mSchemaItemShared(nullptr)
+    , mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
     if (since_struct.isValid()) {
@@ -79,6 +81,23 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
   mIsDeprecated = IsDeprecated;
   mIsRemoved = IsRemoved;
   mHistoryVector = history_vector;
+}
+
+SMember::SMember(const ISchemaItemPtr SchemaItem,
+                 const bool IsMandatory,
+                 const std::string& Since,
+                 const std::string& Until,
+                 const bool IsDeprecated,
+                 const bool IsRemoved,
+                 const std::vector<SMember>& history_vector)
+    : SMember(SchemaItem.get(),
+              IsMandatory,
+              Since,
+              Until,
+              IsDeprecated,
+              IsRemoved,
+              history_vector) {
+  mSchemaItemShared = SchemaItem;
 }
 
 bool SMember::CheckHistoryFieldVersion(

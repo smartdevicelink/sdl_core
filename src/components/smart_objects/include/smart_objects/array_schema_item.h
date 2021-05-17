@@ -63,6 +63,13 @@ class CArraySchemaItem : public ISchemaItem {
       const TSchemaItemParameter<size_t>& MaxSize =
           TSchemaItemParameter<size_t>());
 
+  static std::shared_ptr<CArraySchemaItem> create(
+      ISchemaItem* ElementSchemaItem,
+      const TSchemaItemParameter<size_t>& MinSize =
+          TSchemaItemParameter<size_t>(),
+      const TSchemaItemParameter<size_t>& MaxSize =
+          TSchemaItemParameter<size_t>());
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
@@ -131,10 +138,16 @@ class CArraySchemaItem : public ISchemaItem {
                    const TSchemaItemParameter<size_t>& MinSize,
                    const TSchemaItemParameter<size_t>& MaxSize);
 
+  CArraySchemaItem(ISchemaItem* ElementSchemaItem,
+                   const TSchemaItemParameter<size_t>& MinSize,
+                   const TSchemaItemParameter<size_t>& MaxSize);
+
   /**
    * @brief SchemaItem for array elements.
    **/
-  const ISchemaItemPtr mElementSchemaItem;
+  ISchemaItem* mElementSchemaItem;
+  const ISchemaItemPtr mElementSchemaItemShared;
+
   /**
    * @brief Minimum allowed size.
    **/
