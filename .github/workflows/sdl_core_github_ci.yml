@@ -38,7 +38,7 @@ jobs:
     - name: Configure
       run: cmake ../sdl_core -DBUILD_TESTS=ON -DLOGGER_NAME=BOOST
     - name: Build
-      run: make install-3rd_party && make -j `nproc` install
+      run: make install-3rd_party && make install
     - name: Set Library Path
       run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
     # run tests
