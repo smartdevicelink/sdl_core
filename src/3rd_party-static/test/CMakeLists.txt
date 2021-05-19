@@ -33,6 +33,10 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  include_directories ( ${BOOST_INCLUDE_DIR} )
+endif()
+
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(LIBRARIES
