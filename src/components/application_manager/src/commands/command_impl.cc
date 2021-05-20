@@ -159,6 +159,12 @@ bool CommandImpl::CheckAllowedParameters(const Command::CommandSource source) {
         "There is no registered application with "
         "connection key '"
         << connection_key() << "'");
+
+    rpc_service_.SendMessageToMobile(MessageHelper::CreateNegativeResponse(
+        connection_key(),
+        function_id(),
+        correlation_id(),
+        mobile_apis::Result::APPLICATION_NOT_REGISTERED));
     return false;
   }
 

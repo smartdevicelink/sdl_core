@@ -363,6 +363,9 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
+  MessageSharedPtr dummy_msg(CreateMessage());
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(dummy_msg));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
