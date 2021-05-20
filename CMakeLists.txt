@@ -444,6 +444,11 @@ if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
 endif()
 
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST" AND NOT(${3RD_PARTY_INSTALL_PREFIX} STREQUAL ""))
+  message(STATUS "Including boost")
+  include_directories ( ${BOOST_INCLUDE_DIR} )
+endif()
+
 if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
   set(SecurityManagerLibrary SecurityManager)
