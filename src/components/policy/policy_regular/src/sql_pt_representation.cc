@@ -519,9 +519,13 @@ void SQLPTRepresentation::GatherModuleConfig(
   } else {
     while (endpoint_properties.Next()) {
       const std::string& service = endpoint_properties.GetString(0);
-      const std::string& version = endpoint_properties.GetString(1);
       auto& ep_properties = (*config->endpoint_properties);
-      *ep_properties[service].version = version;
+      if (!endpoint_properties.IsNull(1)) {
+        const std::string& version = endpoint_properties.GetString(1);
+        *ep_properties[service].version = version;
+      } else {
+        ep_properties[service].version = rpc::Optional<rpc::String<0, 100> >();
+      }
     }
   }
 
@@ -1546,7 +1550,9 @@ bool SQLPTRepresentation::SaveServiceEndpointProperties(
 
   for (auto& endpoint_property : endpoint_properties) {
     query.Bind(0, endpoint_property.first);
-    query.Bind(1, endpoint_property.second.version);
+    endpoint_property.second.version.is_initialized()
+        ? query.Bind(1, *endpoint_property.second.version)
+        : query.Bind(1);
 
     if (!query.Exec() || !query.Reset()) {
       SDL_LOG_WARN(
