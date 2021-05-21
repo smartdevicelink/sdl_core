@@ -5101,7 +5101,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HM
     return;
   }
 
-
   const auto old_hmi_state =
       app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   if (old_hmi_state->hmi_level() != level) {
