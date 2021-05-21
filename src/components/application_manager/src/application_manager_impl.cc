@@ -5092,7 +5092,8 @@ std::vector<std::string> ApplicationManagerImpl::devices(
   return devices;
 }
 
-void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level) {
+void ApplicationManagerImpl::ChangeAppsHMILevel(
+    uint32_t app_id, mobile_apis::HMILevel::eType level) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("AppID to change: " << app_id << " -> " << level);
   ApplicationSharedPtr app = application(app_id);
