@@ -138,6 +138,9 @@ const char* minutes = "minutes";
 const char* seconds = "seconds";
 const char* update_mode = "updateMode";
 const char* audioStreamingIndicator = "audioStreamingIndicator";
+const char* seek_time = "seekTime";
+const char* forward_seek_indicator = "forwardSeekIndicator";
+const char* back_seek_indicator = "backSeekIndicator";
 const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
@@ -194,6 +197,8 @@ const char* policy_type = "policyType";
 const char* property = "property";
 const char* displays = "displays";
 const char* seat_location = "seatLocation";
+const char* app_capability = "appCapability";
+const char* app_capability_type = "appCapabilityType";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -263,6 +268,7 @@ const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
 const char* fuel_range = "fuelRange";
 const char* cloud_app_vehicle_id = "cloudAppVehicleID";
+const char* climate_data = "climateData";
 const char* external_temp = "externalTemperature";
 const char* turn_signal = "turnSignal";
 const char* vin = "vin";
@@ -303,11 +309,13 @@ const char* video_streaming = "videoStreaming";
 const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
+const char* system_hardware_version = "systemHardwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";
 const char* window_status = "windowStatus";
 const char* hands_off_steering = "handsOffSteering";
+const char* seat_occupancy = "seatOccupancy";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";
@@ -439,10 +447,13 @@ const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
 const char* const diagonal_screen_size = "diagonalScreenSize";
 const char* const pixel_per_inch = "pixelPerInch";
 const char* const scale = "scale";
+const char* const additional_video_streaming_capabilities =
+    "additionalVideoStreamingCapabilities";
 const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
+const char* const preferred_fps = "preferredFPS";
 }  // namespace strings
 
 namespace hmi_interface {
@@ -541,6 +552,8 @@ const char* method_name = "methodName";
 const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_list = "autoCompleteList";
+const char* mask_input_characters = "maskInputCharacters";
+const char* custom_keys = "customKeys";
 const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";
@@ -578,6 +591,9 @@ const char* image_capabilities = "imageCapabilities";
 const char* display_type = "displayType";
 const char* display_name = "displayName";
 const char* text_fields = "textFields";
+const char* keyboard_capabilities = "keyboardCapabilities";
+const char* supported_keyboards = "supportedKeyboards";
+const char* num_configurable_keys = "numConfigurableKeys";
 const char* media_clock_formats = "mediaClockFormats";
 const char* graphic_supported = "graphicSupported";
 const char* image_fields = "imageFields";

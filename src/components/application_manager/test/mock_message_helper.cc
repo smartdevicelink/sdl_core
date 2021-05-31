@@ -170,14 +170,16 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const policy::ExternalConsentStatus& external_consent_status,
 #endif  // EXTERNAL_PROPRIETARY_MODE
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
       permissions,
 #ifdef EXTERNAL_PROPRIETARY_MODE
       external_consent_status,
 #endif  // EXTERNAL_PROPRIETARY_MODE
       correlation_id,
-      app_mngr);
+      app_mngr,
+      success_flag);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
@@ -580,6 +582,14 @@ MessageHelper::CreateTTSResetGlobalPropertiesRequest(
     ApplicationSharedPtr application) {
   return MockMessageHelper::message_helper_mock()
       ->CreateTTSResetGlobalPropertiesRequest(reset_result, application);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateRCResetGlobalPropertiesRequest(reset_result, application);
 }
 
 smart_objects::SmartObjectList

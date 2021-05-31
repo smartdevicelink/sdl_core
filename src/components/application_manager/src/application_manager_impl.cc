@@ -145,10 +145,6 @@ struct PolicyAppIdComparator {
   const std::string& policy_app_id_;
 };
 
-uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
-uint32_t ApplicationManagerImpl::corelation_id_ = 0;
-const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
-
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
@@ -175,8 +171,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
-    , hmi_so_factory_(NULL)
-    , mobile_so_factory_(NULL)
+    , mobile_correlation_id_(0)
+    , correlation_id_(0)
+    , max_correlation_id_(UINT_MAX)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -230,19 +227,11 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   SDL_LOG_AUTO_TRACE();
 
-  is_stopping_.store(true);
+  InitiateStopping();
   SendOnSDLClose();
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
-  if (hmi_so_factory_) {
-    delete hmi_so_factory_;
-    hmi_so_factory_ = NULL;
-  }
-  if (mobile_so_factory_) {
-    delete mobile_so_factory_;
-    mobile_so_factory_ = NULL;
-  }
   protocol_handler_ = NULL;
   SDL_LOG_DEBUG("Destroying Policy Handler");
   RemovePolicyObserver(this);
@@ -625,7 +614,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   HmiStatePtr initial_state =
-      CreateRegularState(std::shared_ptr<Application>(application),
+      CreateRegularState(ApplicationSharedPtr(application),
                          mobile_apis::WindowType::MAIN,
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
@@ -1130,7 +1119,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
     // Delete the cloud device
     connection_handler().RemoveCloudAppDevice(app->device());
-    removed_app_count++;
+    ++removed_app_count;
   }
 
   // Update app list if disabled apps were removed
@@ -1374,23 +1363,23 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
 }
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
-  if (mobile_corelation_id_ < max_corelation_id_) {
-    mobile_corelation_id_++;
+  if (mobile_correlation_id_ < max_correlation_id_) {
+    ++mobile_correlation_id_;
   } else {
-    mobile_corelation_id_ = 0;
+    mobile_correlation_id_ = 0;
   }
 
-  return mobile_corelation_id_;
+  return mobile_correlation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
-  if (corelation_id_ < max_corelation_id_) {
-    corelation_id_++;
+  if (correlation_id_ < max_correlation_id_) {
+    ++correlation_id_;
   } else {
-    corelation_id_ = 0;
+    correlation_id_ = 0;
   }
 
-  return corelation_id_;
+  return correlation_id_;
 }
 
 bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
@@ -1608,6 +1597,58 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   RefreshCloudAppInformation();
 }
 
+bool ApplicationManagerImpl::WaitForHmiIsReady() {
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
+  if (!IsStopping() && !IsHMICooperating()) {
+    SDL_LOG_DEBUG("Waiting for the HMI cooperation...");
+    wait_for_hmi_condvar_.Wait(lock);
+  }
+
+  if (IsStopping()) {
+    SDL_LOG_WARN("System is terminating...");
+    return false;
+  }
+
+  return IsHMICooperating();
+}
+
+bool ApplicationManagerImpl::GetProtocolVehicleData(
+    connection_handler::ProtocolVehicleData& data) {
+  SDL_LOG_AUTO_TRACE();
+  using namespace protocol_handler::strings;
+
+  if (!WaitForHmiIsReady()) {
+    SDL_LOG_ERROR("Failed to wait for HMI readiness");
+    return false;
+  }
+
+  const auto vehicle_type_ptr = hmi_capabilities_->vehicle_type();
+  if (vehicle_type_ptr) {
+    if (vehicle_type_ptr->keyExists(vehicle_make)) {
+      data.vehicle_make = vehicle_type_ptr->getElement(vehicle_make).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_model)) {
+      data.vehicle_model =
+          vehicle_type_ptr->getElement(vehicle_model).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_model_year)) {
+      data.vehicle_year =
+          vehicle_type_ptr->getElement(vehicle_model_year).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_trim)) {
+      data.vehicle_trim = vehicle_type_ptr->getElement(vehicle_trim).asString();
+    }
+  }
+
+  data.vehicle_system_software_version = hmi_capabilities_->ccpu_version();
+  data.vehicle_system_hardware_version = hmi_capabilities_->hardware_version();
+
+  return true;
+}
+
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   SDL_LOG_DEBUG("Starting application list update timer");
@@ -1807,7 +1848,7 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
     return false;
   } else {
     // check all AppHMITypes that the app has
-    for (size_t i = 0; i < app_types_array->length(); i++) {
+    for (size_t i = 0; i < app_types_array->length(); ++i) {
       std::string app_type_string =
           EnumToString(static_cast<mobile_apis::AppHMIType::eType>(
               app_types_array->getElement(i).asUInt()));
@@ -2547,7 +2588,7 @@ bool ApplicationManagerImpl::Init(
 
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
-  is_stopping_.store(true);
+  InitiateStopping();
   application_list_update_timer_.Stop();
   try {
     if (unregister_reason_ ==
@@ -2673,25 +2714,16 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 }
 
 hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
-  if (!hmi_so_factory_) {
-    hmi_so_factory_ = new hmi_apis::HMI_API;
-    if (!hmi_so_factory_) {
-      SDL_LOG_ERROR("Out of memory");
-      NOTREACHED();
-    }
-  }
-  return *hmi_so_factory_;
+  return hmi_so_factory_;
 }
 
 mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
-  if (!mobile_so_factory_) {
-    mobile_so_factory_ = new mobile_apis::MOBILE_API;
-    if (!mobile_so_factory_) {
-      SDL_LOG_ERROR("Out of memory");
-      NOTREACHED();
-    }
-  }
-  return *mobile_so_factory_;
+  return mobile_so_factory_;
+}
+
+ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+ApplicationManagerImpl::mobile_v4_protocol_so_factory() {
+  return mobile_v4_protocol_so_factory_;
 }
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
@@ -2740,8 +2772,16 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
           json::ttsName)) {
     SDL_LOG_DEBUG("Get ttsName from " << cur_vr_lang << " language");
-    ttsName =
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
         app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
+
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::ttsName)) {
+    SDL_LOG_DEBUG("Get ttsName from default language");
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
+        app_data[json::languages][default_idx][json::default_][json::ttsName];
   } else {
     SDL_LOG_DEBUG("No data for ttsName for " << cur_vr_lang << " language");
   }
@@ -2751,6 +2791,11 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
     SDL_LOG_DEBUG("Get vrSynonyms from " << cur_vr_lang << " language");
     vrSynonym =
         app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::vrSynonyms)) {
+    SDL_LOG_DEBUG("Get vrSynonyms from default language");
+    vrSynonym = app_data[json::languages][default_idx][json::default_]
+                        [json::vrSynonyms];
   } else {
     SDL_LOG_DEBUG("No data for vrSynonyms for " << cur_vr_lang << " language");
   }
@@ -2971,7 +3016,7 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   SDL_LOG_AUTO_TRACE();
-  is_stopping_.store(true);
+  InitiateStopping();
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       SDL_LOG_TRACE("Performing MASTER_RESET");
@@ -3009,10 +3054,13 @@ void ApplicationManagerImpl::HeadUnitReset(
 void ApplicationManagerImpl::ClearAppsPersistentData() {
   SDL_LOG_AUTO_TRACE();
   typedef std::vector<std::string> FilesList;
-  const std::string apps_info_storage_file = get_settings().app_info_storage();
-  file_system::DeleteFile(apps_info_storage_file);
-
   const std::string storage_folder = get_settings().app_storage_folder();
+
+  const std::string apps_info_storage_file =
+      !storage_folder.empty()
+          ? storage_folder + "/" + get_settings().app_info_storage()
+          : get_settings().app_info_storage();
+  file_system::DeleteFile(apps_info_storage_file);
 
   FilesList files = file_system::ListFiles(storage_folder);
   FilesList::iterator element_to_skip =
@@ -3223,6 +3271,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
   ApplicationSharedPtr app_to_remove;
   connection_handler::DeviceHandle handle = 0;
+
   {
     sync_primitives::AutoLock lock(applications_list_lock_ptr_);
     auto it_app = applications_.begin();
@@ -3235,63 +3284,64 @@ void ApplicationManagerImpl::UnregisterApplication(
         ++it_app;
       }
     }
-    if (!app_to_remove) {
-      SDL_LOG_ERROR("Cant find application with app_id = " << app_id);
-
-      // Just to terminate RAI in case of connection is dropped (rare case)
-      // App won't be unregistered since RAI has not been started yet
-      SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
-      request_ctrl_.terminateAppRequests(app_id);
-
-      return;
-    }
-
-    if (is_resuming) {
-      resume_controller().SaveApplication(app_to_remove);
-    } else {
-      resume_controller().RemoveApplicationFromSaved(app_to_remove);
-    }
-
-    if (IsAppSubscribedForWayPoints(app_id)) {
-      UnsubscribeAppFromWayPoints(app_id, true);
-      if (!IsAnyAppSubscribedForWayPoints()) {
-        SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
-        auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
-            GetNextHMICorrelationID());
-        rpc_service_->ManageHMICommand(request);
-      }
-    }
-
-    (hmi_capabilities_->get_hmi_language_handler())
-        .OnUnregisterApplication(app_id);
-
-    if (connection_handler().GetDeviceID(app_to_remove->mac_address(),
-                                         &handle)) {
-      AppV4DevicePredicate finder(handle);
-      ApplicationSharedPtr app = FindApp(applications(), finder);
-      if (!app) {
-        SDL_LOG_DEBUG(
-            "There is no more SDL4 apps with device handle: " << handle);
-
-        RemoveAppsWaitingForRegistration(handle);
-      }
-    }
-
-    MessageHelper::SendOnAppUnregNotificationToHMI(
-        app_to_remove, is_unexpected_disconnect, *this);
-    commands_holder_->Clear(app_to_remove);
-
-    const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
-    if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
-      SDL_LOG_DEBUG(
-          "Enabled local app has been unregistered. Re-create "
-          "pending application");
-      CreatePendingLocalApplication(app_to_remove->policy_app_id());
-    }
-
-    RefreshCloudAppInformation();
-    SendUpdateAppList();
   }
+  if (!app_to_remove) {
+    SDL_LOG_ERROR("Cant find application with app_id = " << app_id);
+
+    // Just to terminate RAI in case of connection is dropped (rare case)
+    // App won't be unregistered since RAI has not been started yet
+    SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
+    request_ctrl_.terminateAppRequests(app_id);
+
+    return;
+  }
+
+  resume_controller().RemoveFromResumption(app_id);
+
+  if (is_resuming) {
+    resume_controller().SaveApplication(app_to_remove);
+  } else {
+    resume_controller().RemoveApplicationFromSaved(app_to_remove);
+  }
+
+  if (IsAppSubscribedForWayPoints(app_id)) {
+    UnsubscribeAppFromWayPoints(app_id, true);
+    if (!IsAnyAppSubscribedForWayPoints()) {
+      SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
+      auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
+          GetNextHMICorrelationID());
+      rpc_service_->ManageHMICommand(request);
+    }
+  }
+
+  (hmi_capabilities_->get_hmi_language_handler())
+      .OnUnregisterApplication(app_id);
+
+  if (connection_handler().GetDeviceID(app_to_remove->mac_address(), &handle)) {
+    AppV4DevicePredicate finder(handle);
+    ApplicationSharedPtr app = FindApp(applications(), finder);
+    if (!app) {
+      SDL_LOG_DEBUG(
+          "There is no more SDL4 apps with device handle: " << handle);
+
+      RemoveAppsWaitingForRegistration(handle);
+    }
+  }
+
+  MessageHelper::SendOnAppUnregNotificationToHMI(
+      app_to_remove, is_unexpected_disconnect, *this);
+  commands_holder_->Clear(app_to_remove);
+
+  const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+  if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
+    SDL_LOG_DEBUG(
+        "Enabled local app has been unregistered. Re-create "
+        "pending application");
+    CreatePendingLocalApplication(app_to_remove->policy_app_id());
+  }
+
+  RefreshCloudAppInformation();
+  SendUpdateAppList();
 
   if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
@@ -3572,6 +3622,27 @@ void ApplicationManagerImpl::ForbidStreaming(
   }
 
   EndNaviServices(app_id);
+}
+
+void ApplicationManagerImpl::OnAppStreaming(
+    uint32_t app_id, protocol_handler::ServiceType service_type, bool state) {
+  SDL_LOG_AUTO_TRACE();
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    SDL_LOG_DEBUG(
+        " There is no navi or projection application with id: " << app_id);
+    return;
+  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+
+  if (state) {
+    state_ctrl_.OnVideoStreamingStarted(app);
+    media_manager_->StartStreaming(app_id, service_type);
+  } else {
+    media_manager_->StopStreaming(app_id, service_type);
+    state_ctrl_.OnVideoStreamingStopped(app);
+  }
 }
 
 void ApplicationManagerImpl::OnAppStreaming(
@@ -4124,7 +4195,17 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 }
 
 void ApplicationManagerImpl::SetHMICooperating(const bool hmi_cooperating) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
   hmi_cooperating_ = hmi_cooperating;
+  wait_for_hmi_condvar_.Broadcast();
+}
+
+void ApplicationManagerImpl::InitiateStopping() {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
+  is_stopping_.store(true);
+  wait_for_hmi_condvar_.Broadcast();
 }
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
@@ -4258,6 +4339,10 @@ ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
         result.keyboard_properties = true;
         break;
       }
+      case mobile_apis::GlobalProperty::USER_LOCATION: {
+        result.user_location = true;
+        break;
+      }
       default: {
         SDL_LOG_TRACE("Unknown global property: " << global_property);
         break;
@@ -4308,7 +4393,9 @@ ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
   if (application->keyboard_props()) {
     (*global_properties)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
   }
-
+  if (!application->get_user_location().empty()) {
+    (*global_properties)[i++] = GlobalProperty::USER_LOCATION;
+  }
   return global_properties;
 }
 
@@ -4915,6 +5002,23 @@ bool ApplicationManagerImpl::IsSOStructValid(
 
   SDL_LOG_ERROR("Could not find struct id: " << struct_id);
   return false;
+}
+
+bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+    const commands::MessageSharedPtr response) {
+  using namespace mobile_apis;
+
+  const uint32_t connection_key =
+      (*response)[strings::params][strings::connection_key].asUInt();
+  const auto function_id = static_cast<FunctionID::eType>(
+      (*response)[strings::params][strings::function_id].asInt());
+
+  ApplicationSharedPtr app = application(connection_key);
+  DCHECK_OR_RETURN(app, false);
+  app->UnsubscribeFromSoftButtons(function_id);
+  SDL_LOG_DEBUG("Application has unsubscribed from softbuttons. FunctionID: "
+                << function_id << ", app_id:" << app->app_id());
+  return true;
 }
 
 #ifdef BUILD_TESTS

@@ -173,6 +173,7 @@
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_on_awake_sdl.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_request.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_response.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_on_app_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_request.h"
@@ -941,6 +942,10 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::UI_OnSubtleAlertPressed: {
       return factory.GetCreator<commands::OnUISubtleAlertPressedNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAppCapabilityUpdated: {
+      return factory
+          .GetCreator<commands::BCOnAppCapabilityUpdatedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

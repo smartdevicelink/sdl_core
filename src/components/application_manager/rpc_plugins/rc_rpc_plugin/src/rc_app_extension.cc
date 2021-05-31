@@ -88,7 +88,8 @@ void RCAppExtension::UnsubscribeFromInteriorVehicleData(
 void RCAppExtension::UnsubscribeFromInteriorVehicleDataOfType(
     const std::string& module_type) {
   bool unsubscribed = false;
-  for (auto& item : subscribed_interior_vehicle_data_) {
+  auto subscribed_ivi = subscribed_interior_vehicle_data_;
+  for (auto& item : subscribed_ivi) {
     if (module_type == item.first) {
       subscribed_interior_vehicle_data_.erase(item);
       unsubscribed = true;

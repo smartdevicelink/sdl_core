@@ -59,6 +59,7 @@ const std::string kCreateSchema =
     "  `ccpu_version` VARCHAR(45), "
     "  `language` VARCHAR(45), "
     "  `wers_country_code` VARCHAR(45), "
+    "  `hardware_version` VARCHAR(45), "
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
@@ -399,8 +400,8 @@ const std::string kCreateSchema =
     "  ON `endpoint`(`application_id` COLLATE NOCASE); "
     /*endpoint properties*/
     "CREATE TABLE IF NOT EXISTS `endpoint_properties`( "
-    "  `service` VARCHAR(100) NOT NULL, "
-    "  `version` VARCHAR(100) NOT NULL "
+    "  `service` VARCHAR(100) PRIMARY KEY NOT NULL, "
+    "  `version` VARCHAR(100) "
     ");"
     "CREATE TABLE IF NOT EXISTS `message`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "

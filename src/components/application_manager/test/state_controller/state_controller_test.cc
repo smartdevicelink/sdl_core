@@ -604,7 +604,8 @@ class StateControllerImplTest : public ::testing::Test {
       return APP_TYPE_NAVI;
     }
 
-    if (app->is_media_application()) {
+    if (app->is_media_application() ||
+        app->is_voice_communication_supported()) {
       return APP_TYPE_MEDIA;
     }
 

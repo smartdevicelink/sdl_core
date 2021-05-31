@@ -105,12 +105,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "navigationText",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "audioPassThruDisplayText1",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -135,12 +129,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "notificationText",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "menuName",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -154,6 +142,30 @@
                 },
                 {
                     "name": "tertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuCommandSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuCommandTertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuTertiaryText",
                     "characterSet": "UTF_8",
                     "width": 500,
                     "rows": 1
@@ -207,6 +219,20 @@
                 },
                 {
                     "name": "cmdIcon",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuCommandSecondaryImage",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuSubMenuSecondaryImage",
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -311,19 +337,106 @@
                 "dialNumberEnabled": true
             },
             "videoStreamingCapability": {
-                "preferredResolution": {
-                    "resolutionWidth": 800,
-                    "resolutionHeight": 350
+              "preferredResolution": {
+                "resolutionWidth": 800,
+                "resolutionHeight": 380
+              },
+              "maxBitrate": 20000,
+              "supportedFormats": [
+                {
+                  "protocol": "RAW",
+                  "codec": "H264"
                 },
-                "maxBitrate": 10000,
-                "supportedFormats": [{
-                    "protocol": "RAW",
-                    "codec": "H264"
-                }],
-                "hapticSpatialDataSupported": false,
-                "diagonalScreenSize": 8,
-                "pixelPerInch": 117,
-                "scale": 1
+                {
+                  "protocol": "RTP",
+                  "codec": "H264"
+                },
+                {
+                  "protocol": "RTSP",
+                  "codec": "Theora"
+                },
+                {
+                  "protocol": "RTMP",
+                  "codec": "VP8"
+                },
+                {
+                  "protocol": "WEBM",
+                  "codec": "VP9"
+                }
+              ],
+              "hapticSpatialDataSupported": true,
+              "diagonalScreenSize": 8,
+              "pixelPerInch": 96,
+              "scale": 1,
+              "preferredFPS": 15,
+              "additionalVideoStreamingCapabilities": [
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 800,
+                    "resolutionHeight": 380
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "scale": 1,
+                  "diagonalScreenSize": 8
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 320,
+                    "resolutionHeight": 200
+                  },
+                  "hapticSpatialDataSupported": false,
+                  "diagonalScreenSize": 3
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 480,
+                    "resolutionHeight": 320
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "diagonalScreenSize": 5
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 400,
+                    "resolutionHeight": 380
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "diagonalScreenSize": 4
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 800,
+                    "resolutionHeight": 240
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "diagonalScreenSize": 4
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 800,
+                    "resolutionHeight": 380
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "scale": 1.5,
+                  "diagonalScreenSize": 5
+                },
+                {
+                  "preferredResolution":
+                  {
+                    "resolutionWidth": 800,
+                    "resolutionHeight": 380
+                  },
+                  "hapticSpatialDataSupported": true,
+                  "scale": 2,
+                  "diagonalScreenSize": 4
+                }
+              ]
             },
             "driverDistractionCapability": {
                 "menuLength": 10,

@@ -103,7 +103,7 @@ void OnVehicleDataNotification::Run() {
     }
   }
 
-  for (size_t idx = 0; idx < notify_apps.size(); idx++) {
+  for (size_t idx = 0; idx < notify_apps.size(); ++idx) {
     CommandParametersPermissions params_permissions;
     application_manager_.CheckPolicyPermissions(
         notify_apps[idx],

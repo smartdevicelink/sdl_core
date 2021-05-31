@@ -59,6 +59,7 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
                                               << " has been already started");
     return;
   }
+  messages_.Reset();
 
   DCHECK(thread_);
   const size_t kStackSize = 16384;
@@ -86,7 +87,6 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
 
   DCHECK(streamer_);
   streamer_->exitThreadMain();
-  messages_.Reset();
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
@@ -150,7 +150,7 @@ void StreamerAdapter::Streamer::threadMain() {
       static int32_t messages_for_session = 0;
       ++messages_for_session;
 
-      SDL_LOG_DEBUG("Handling map streaming message. This is "
+      SDL_LOG_TRACE("Handling map streaming message. This is "
                     << messages_for_session << " message for "
                     << adapter_->current_application_);
       std::set<MediaListenerPtr>::iterator it =

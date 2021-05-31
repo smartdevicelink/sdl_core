@@ -171,16 +171,16 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   TransportAdapterController* controller_;
   threads::Thread* thread_;
-  bool shutdown_requested_;
+  std::atomic<bool> shutdown_requested_;
   bool ready_;
   bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;
+  sync_primitives::Lock terminate_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
   std::vector<bdaddr_t> paired_devices_;
 
   DeviceVector paired_devices_with_sdl_;
-  DeviceVector found_devices_with_sdl_;
 
   /**
    * @brief UUID of SmartDeviceLink service.

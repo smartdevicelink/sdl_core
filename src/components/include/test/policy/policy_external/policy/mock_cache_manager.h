@@ -207,7 +207,9 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
   MOCK_CONST_METHOD0(IsMetaInfoPresent, bool());
   MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

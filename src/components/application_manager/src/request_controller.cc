@@ -80,7 +80,7 @@ void RequestController::InitializeThreadpool() {
   // TODO(DK): Consider lazy loading threads instead of creating all at once
   pool_state_ = TPoolState::STARTED;
   char name[50];
-  for (uint32_t i = 0; i < pool_size_; i++) {
+  for (uint32_t i = 0; i < pool_size_; ++i) {
     snprintf(name, sizeof(name) / sizeof(name[0]), "AM Pool %u", i);
     pool_.push_back(threads::CreateThread(name, new Worker(this)));
     pool_[i]->Start();
@@ -96,7 +96,7 @@ void RequestController::DestroyThreadpool() {
     SDL_LOG_DEBUG("Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
   }
-  for (size_t i = 0; i < pool_.size(); i++) {
+  for (size_t i = 0; i < pool_.size(); ++i) {
     threads::Thread* thread = pool_[i];
     thread->Stop(threads::Thread::kThreadSoftStop);
     delete thread->GetDelegate();
@@ -246,7 +246,7 @@ void RequestController::TerminateRequest(const uint32_t correlation_id,
     AutoLock auto_lock(duplicate_message_count_lock_);
     auto dup_it = duplicate_message_count_.find(correlation_id);
     if (duplicate_message_count_.end() != dup_it) {
-      duplicate_message_count_[correlation_id]--;
+      --duplicate_message_count_[correlation_id];
       if (0 == duplicate_message_count_[correlation_id]) {
         duplicate_message_count_.erase(dup_it);
       }

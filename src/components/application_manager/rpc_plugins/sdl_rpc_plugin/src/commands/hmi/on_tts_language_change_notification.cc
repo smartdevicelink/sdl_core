@@ -92,7 +92,8 @@ void OnTTSLanguageChangeNotification::Run() {
       application_manager_.applications().GetData();
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it++;
+    ApplicationSharedPtr app = *it;
+    ++it;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 

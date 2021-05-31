@@ -111,7 +111,7 @@ void FromMicToFileRecorderThread::deinitArgs() {
   SDL_LOG_AUTO_TRACE();
 
   if (argv_) {
-    for (int32_t i = 0; i < argc_; i++) {
+    for (int32_t i = 0; i < argc_; ++i) {
       delete[] argv_[i];
     }
     delete[] argv_;
@@ -164,7 +164,7 @@ void FromMicToFileRecorderThread::threadMain() {
   // g_option_context_parse() modifies params, so keep argc_ and argv_
   int32_t argc = argc_;
   gchar** argv = new gchar*[argc];
-  for (int32_t i = 0; i < argc; i++) {
+  for (int32_t i = 0; i < argc; ++i) {
     argv[i] = argv_[i];
   }
 

@@ -91,8 +91,8 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
 ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(multiframes_map_lock_);
-  SDL_LOG_DEBUG("Current state is: " << multiframes_map_);
-  SDL_LOG_DEBUG("Current multiframe map size is: " << multiframes_map_.size());
+  SDL_LOG_TRACE("Current state is: " << multiframes_map_);
+  SDL_LOG_TRACE("Current multiframe map size is: " << multiframes_map_.size());
   ProtocolFramePtrList outpute_frame_list;
   for (MultiFrameMap::iterator connection_it = multiframes_map_.begin();
        connection_it != multiframes_map_.end();
@@ -115,7 +115,7 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
 
         if (frame && frame->frame_data() == FRAME_DATA_LAST_CONSECUTIVE &&
             frame->payload_size() > 0u) {
-          SDL_LOG_DEBUG("Ready frame: " << frame);
+          SDL_LOG_TRACE("Ready frame: " << frame);
           outpute_frame_list.push_back(frame);
           messageId_map.erase(messageId_it++);
           continue;
@@ -136,7 +136,7 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
       }  // iteration over messageId_map
     }    // iteration over session_map
   }      // iteration over multiframes_map_
-  SDL_LOG_DEBUG("Result frames count: " << outpute_frame_list.size());
+  SDL_LOG_TRACE("Result frames count: " << outpute_frame_list.size());
   return outpute_frame_list;
 }
 
@@ -164,8 +164,8 @@ RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
 RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_FIRST, RESULT_FAIL);
   sync_primitives::AutoLock lock(multiframes_map_lock_);
-  SDL_LOG_DEBUG("Waiting : " << multiframes_map_);
-  SDL_LOG_DEBUG("Handling FIRST frame: " << packet);
+  SDL_LOG_TRACE("Waiting : " << multiframes_map_);
+  SDL_LOG_TRACE("Handling FIRST frame: " << packet);
   if (packet->payload_size() != 0u) {
     SDL_LOG_ERROR("First frame shall have no data:" << packet);
     return RESULT_FAIL;
@@ -193,7 +193,7 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
     return RESULT_FAIL;
   }
 
-  SDL_LOG_DEBUG("Start waiting frames for connection_id: "
+  SDL_LOG_TRACE("Start waiting frames for connection_id: "
                 << connection_id
                 << ", session_id: " << static_cast<int>(session_id)
                 << ", message_id: " << message_id);
@@ -240,7 +240,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
 
   if (is_last_consecutive) {
     // TODO(EZamakhov): implement count of frames and result size verification
-    SDL_LOG_DEBUG("Last CONSECUTIVE frame");
+    SDL_LOG_TRACE("Last CONSECUTIVE frame");
   } else {
     uint8_t previous_frame_data = assembling_frame->frame_data();
     if (previous_frame_data == std::numeric_limits<uint8_t>::max()) {
@@ -275,8 +275,8 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     SDL_LOG_ERROR("Failed to append frame for multiframe message.");
     return RESULT_FAIL;
   }
-  SDL_LOG_INFO("Assembled frame with payload size: "
-               << assembling_frame->payload_size());
+  SDL_LOG_TRACE("Assembled frame with payload size: "
+                << assembling_frame->payload_size());
   frame_data.append_time = date_time::getCurrentTime();
   return RESULT_OK;
 }

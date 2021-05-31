@@ -42,8 +42,8 @@ namespace media_manager {
 
 class MediaManager {
  public:
-  virtual void PlayA2DPSource(int32_t application_key) = 0;
-  virtual void StopA2DPSource(int32_t application_key) = 0;
+  DEPRECATED virtual void PlayA2DPSource(int32_t application_key) = 0;
+  DEPRECATED virtual void StopA2DPSource(int32_t application_key) = 0;
 
   DEPRECATED virtual void StartMicrophoneRecording(
       int32_t application_key,
@@ -69,6 +69,14 @@ class MediaManager {
    * \return pointer to media manager settings class
    */
   virtual const MediaManagerSettings& settings() const = 0;
+
+  /**
+   * \brief Convert an amount of audio bytes to an estimated time in ms
+   * \param data_size number of bytes to be played
+   * \return milliseconds required to play <data_size> many bytes with
+   *          the current pcm stream capabilities
+   */
+  virtual uint32_t DataSizeToMilliseconds(uint64_t data_size) const = 0;
 
   virtual ~MediaManager() {}
 };

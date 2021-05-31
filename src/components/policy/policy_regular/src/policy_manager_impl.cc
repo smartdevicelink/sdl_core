@@ -112,7 +112,7 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
 
   if (reader.parse(json, &value)) {
     // For PT Update received from SDL Server.
-    if (value["data"].size() != 0) {
+    if (value.isObject() && value["data"].isArray() && !value["data"].empty()) {
       Json::Value data = value["data"];
       return std::make_shared<policy_table::Table>(&data[0]);
     } else {
@@ -1217,9 +1217,20 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
+void PolicyManagerImpl::SetHardwareVersion(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  cache_->SetHardwareVersion(hardware_version);
+}
+
 std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
   return cache_->GetCCPUVersionFromPT();
+}
+
+std::string PolicyManagerImpl::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  return cache_->GetHardwareVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(const std::string& priority,

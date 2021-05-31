@@ -74,7 +74,7 @@ endif()
 
 target_link_libraries("HMIMessageHandler" ${LIBRARIES})
 
-if(ENABLE_LOG)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   target_link_libraries("HMIMessageHandler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

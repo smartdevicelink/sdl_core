@@ -123,19 +123,19 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
 
   const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, session, _))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       RemoveSession(connection_, session)));
   times++;
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   connection_->StartHeartBeat(session);
 
-  EXPECT_TRUE(waiter.WaitFor(
+  EXPECT_TRUE(waiter->WaitFor(
       times,
       2 * timeout_ * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND));
 }
@@ -166,13 +166,13 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 
   const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, session, _))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       RemoveSession(connection_, session)));
   times++;
 
@@ -180,7 +180,7 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   usleep(timeout_);
   connection_->KeepAlive(session);
 
-  EXPECT_TRUE(waiter.WaitFor(
+  EXPECT_TRUE(waiter->WaitFor(
       times,
       2 * timeout_ * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND));
 }
@@ -203,28 +203,28 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   const uint32_t kSession2 =
       connection_->AddNewSession(kAnotherConnectionHandle);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession1, _))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       RemoveSession(connection_, kSession1)));
   times++;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession2, _))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       RemoveSession(connection_, kSession2)));
   times++;
 
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession1))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession2))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   connection_->StartHeartBeat(kSession1);
   connection_->StartHeartBeat(kSession2);
 
-  EXPECT_TRUE(waiter.WaitFor(
+  EXPECT_TRUE(waiter->WaitFor(
       times,
       2 * timeout_ * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND));
 }
@@ -256,21 +256,21 @@ TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   const uint32_t kSession =
       connection_->AddNewSession(kDefaultConnectionHandle);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession, _))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       RemoveSession(connection_, kSession)));
   times++;
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, kSession))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   const uint32_t new_timeout = timeout_ - kTime_offset;
   connection_->StartHeartBeat(kSession);
   connection_->SetHeartBeatTimeout(new_timeout, kSession);
 
-  EXPECT_TRUE(waiter.WaitFor(
+  EXPECT_TRUE(waiter->WaitFor(
       times,
       2 * timeout_ * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND));
 }

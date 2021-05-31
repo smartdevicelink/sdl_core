@@ -138,34 +138,6 @@ bool IsResultCodeWarning(const ResponseInfo& first,
   return first_is_ok_second_is_warn || both_warnings;
 }
 
-struct DisallowedParamsInserter {
-  DisallowedParamsInserter(smart_objects::SmartObject& response,
-                           mobile_apis::VehicleDataResultCode::eType code)
-      : response_(response), code_(code) {}
-
-  bool operator()(const std::string& param) {
-    smart_objects::SmartObjectSPtr disallowed_param =
-        std::make_shared<smart_objects::SmartObject>(
-            smart_objects::SmartType_Map);
-
-    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
-    auto vehicle_data = rpc_spec_vehicle_data.find(param);
-    auto vehicle_data_type =
-        vehicle_data == rpc_spec_vehicle_data.end()
-            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
-            : vehicle_data->second;
-
-    (*disallowed_param)[strings::data_type] = vehicle_data_type;
-    (*disallowed_param)[strings::result_code] = code_;
-    response_[strings::msg_params][param.c_str()] = *disallowed_param;
-    return true;
-  }
-
- private:
-  smart_objects::SmartObject& response_;
-  mobile_apis::VehicleDataResultCode::eType code_;
-};
-
 ResponseInfo::ResponseInfo()
     : result_code(hmi_apis::Common_Result::INVALID_ENUM)
     , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
@@ -305,15 +277,7 @@ void CommandRequestImpl::SendResponse(
   // appropriate reasons (VehicleData result codes)
   if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED &&
       result_code != mobile_apis::Result::INVALID_DATA) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
+    FormatResponse(response);
   }
 
   response[strings::msg_params][strings::success] = success;
@@ -719,59 +683,6 @@ bool CommandRequestImpl::CheckHMICapabilities(
 
   SDL_LOG_DEBUG("Button capabilities for " << button << " was not found");
   return false;
-}
-
-void CommandRequestImpl::AddDisallowedParameterToInfoString(
-    std::string& info, const std::string& param) const {
-  // prepare disallowed params enumeration for response info string
-  if (info.empty()) {
-    info = "\'" + param + "\'";
-  } else {
-    info = info + "," + " " + "\'" + param + "\'";
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParametersToInfo(
-    smart_objects::SmartObject& response) const {
-  std::string info;
-
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDisallowedParameterToInfoString(info, (*it));
-  }
-
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDisallowedParameterToInfoString(info, (*it));
-  }
-
-  if (!info.empty()) {
-    info += " disallowed by policies.";
-
-    if (!response[strings::msg_params][strings::info].asString().empty()) {
-      // If we already have info add info about disallowed params to it
-      response[strings::msg_params][strings::info] =
-          response[strings::msg_params][strings::info].asString() + " " + info;
-    } else {
-      response[strings::msg_params][strings::info] = info;
-    }
-  }
-}
-
-void CommandRequestImpl::AddDisallowedParameters(
-    smart_objects::SmartObject& response) {
-  DisallowedParamsInserter disallowed_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
-                removed_parameters_permissions_.disallowed_params.end(),
-                disallowed_inserter);
-
-  DisallowedParamsInserter undefined_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
-                removed_parameters_permissions_.undefined_params.end(),
-                undefined_inserter);
 }
 
 bool CommandRequestImpl::HasDisallowedParams() const {
