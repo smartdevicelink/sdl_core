@@ -40,6 +40,8 @@ namespace commands {
 
 namespace hmi {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnResetTimeoutNotification::OnResetTimeoutNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ OnResetTimeoutNotification::OnResetTimeoutNotification(
 OnResetTimeoutNotification::~OnResetTimeoutNotification() {}
 
 void OnResetTimeoutNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);

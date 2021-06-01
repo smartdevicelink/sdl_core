@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,12 +53,33 @@ VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
 VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::VR_GetCapabilities);
+    return;
+  }
 
-  hmi_capabilities.set_vr_capabilities(
-      (*message_)[strings::msg_params][strings::vr_capabilities]);
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  std::vector<std::string> sections_to_update;
+  if (msg_params.keyExists(strings::vr_capabilities)) {
+    sections_to_update.push_back(strings::vr_capabilities);
+    hmi_capabilities_.set_vr_capabilities(msg_params[strings::vr_capabilities]);
+  }
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_GetCapabilities);
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save VR.GetCapabilities response to cache");
+  }
 }
 
 }  // namespace commands

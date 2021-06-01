@@ -61,10 +61,9 @@ class TTSGetCapabilitiesRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual ~TTSGetCapabilitiesRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetCapabilitiesRequest);

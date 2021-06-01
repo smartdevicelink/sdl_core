@@ -38,6 +38,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCButtonPressRequest::RCButtonPressRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -50,7 +52,7 @@ RCButtonPressRequest::RCButtonPressRequest(
 RCButtonPressRequest::~RCButtonPressRequest() {}
 
 void RCButtonPressRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
 }
 

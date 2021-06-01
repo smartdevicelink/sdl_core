@@ -55,7 +55,10 @@
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 char* ini_write_inst(const char* fname, uint8_t flag) {
   FILE* fp = 0;
@@ -118,7 +121,7 @@ char* ini_read_value(const char* fname,
     return NULL;
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (uint32_t i = 0; i < strlen(tag); i++) {
+  for (uint32_t i = 0; i < strlen(tag); ++i) {
     tag[i] = toupper(tag[i]);
   }
 
@@ -130,7 +133,7 @@ char* ini_read_value(const char* fname,
         chapter_found = true;
 
         snprintf(tag, INI_LINE_LEN, "%s", item);
-        for (uint32_t i = 0; i < strlen(tag); i++)
+        for (uint32_t i = 0; i < strlen(tag); ++i)
           tag[i] = toupper(tag[i]);
       }
     } else {
@@ -152,13 +155,15 @@ char* ini_read_value(const char* fname,
   return NULL;
 }
 
+#ifdef BUILD_TESTS
+// cppcheck-suppress unusedFunction //Used in unit tests
 char ini_write_value(const char* fname,
                      const char* chapter,
                      const char* item,
                      const char* value,
                      uint8_t flag) {
   FILE *rd_fp, *wr_fp = 0;
-  uint16_t i, cr_count;
+  uint16_t cr_count;
   int32_t wr_result;
   bool chapter_found = false;
   bool value_written = false;
@@ -186,11 +191,9 @@ char ini_write_value(const char* fname,
 #if USE_MKSTEMP
   {
     const char* temp_str = "./";
-    int32_t fd = -1;
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
-
-      fd = mkstemp(temp_fname);
+      int32_t fd = mkstemp(temp_fname);
       if (-1 == fd) {
         fclose(rd_fp);
         return FALSE;
@@ -216,7 +219,7 @@ char ini_write_value(const char* fname,
 #endif  // #else #if USE_MKSTEMP
 
   snprintf(tag, INI_LINE_LEN, "%s", chapter);
-  for (uint32_t i = 0; i < strlen(tag); i++)
+  for (uint32_t i = 0; i < strlen(tag); ++i)
     tag[i] = toupper(tag[i]);
 
   wr_result = 1;
@@ -231,7 +234,7 @@ char ini_write_value(const char* fname,
           chapter_found = true;
           // coding style
           snprintf(tag, INI_LINE_LEN, "%s", item);
-          for (uint32_t i = 0; i < strlen(tag); i++)
+          for (uint32_t i = 0; i < strlen(tag); ++i)
             tag[i] = toupper(tag[i]);
         }
       } else {
@@ -244,7 +247,7 @@ char ini_write_value(const char* fname,
              first chapter is significant */
           value_written = true;
         } else if (result == INI_RIGHT_ITEM) {
-          for (i = 0; i < cr_count; i++)
+          for (uint16_t i = 0; i < cr_count; ++i)
             fprintf(wr_fp, "\n");
           cr_count = 0;
           wr_result = fprintf(wr_fp, "%s=%s\n", item, value);
@@ -255,9 +258,9 @@ char ini_write_value(const char* fname,
     } /* if (!value_written) */
 
     if (0 == strcmp(val, "\n")) {
-      cr_count++;
+      ++cr_count;
     } else {
-      for (uint32_t i = 0; i < cr_count; i++)
+      for (uint32_t i = 0; i < cr_count; ++i)
         fprintf(wr_fp, "\n");
       cr_count = 0;
       wr_result = fprintf(wr_fp, "%s", line);
@@ -278,18 +281,18 @@ char ini_write_value(const char* fname,
 
   if (0 != rename(temp_fname, fname)) {
     if (0 != remove(temp_fname)) {
-      LOG4CXX_WARN_WITH_ERRNO(
-          logger_, "Unable to remove temp file: " << std::string(temp_fname));
+      SDL_LOG_WARN_WITH_ERRNO(
+          "Unable to remove temp file: " << std::string(temp_fname));
     }
     return FALSE;
   }
 
   return (value_written);
 }
+#endif  // BUILD_TESTS
 
 Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   const char* line_ptr;
-  char* temp_ptr;
   char temp_str[INI_LINE_LEN] = "";
   *temp_str = '\0';
 
@@ -297,11 +300,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
   /* cut leading spaces */
   line_ptr = line;
-  for (uint32_t i = 0; i < strlen(line); i++) {
+  for (uint32_t i = 0; i < strlen(line); ++i) {
     if ((line[i] == ' ') || (line[i] == 9) ||  // TAB
         (line[i] == 10) ||                     // LF
         (line[i] == 13)) {                     // CR
-      line_ptr++;
+      ++line_ptr;
     } else {
       break;
     }
@@ -315,15 +318,15 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     return INI_REMARK;
 
   if (*line_ptr == '[' && strrchr(line_ptr, ']') != NULL) {
-    line_ptr++;
+    ++line_ptr;
 
     /* cut leading stuff */
     uint16_t len = strlen(line_ptr);
-    for (int32_t i = 0; i < len; i++) {
+    for (int32_t i = 0; i < len; ++i) {
       if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
           (*line_ptr == 10) ||                       // LF
           (*line_ptr == 13)) {                       // CR
-        line_ptr++;
+        ++line_ptr;
       } else {
         break;
       }
@@ -332,7 +335,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       return INI_NOTHING;
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
-    temp_ptr = strrchr(temp_str, ']');
+    char* temp_ptr = strrchr(temp_str, ']');
     if (NULL == temp_ptr) {
       return INI_NOTHING;
     } else {
@@ -340,7 +343,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     }
 
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; --i) {
       if ((temp_str[i] == ' ') || (temp_str[i] == 9) ||  // TAB
           (temp_str[i] == 10) ||                         // LF
           (temp_str[i] == 13)) {                         // CR
@@ -352,7 +355,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
-    for (uint32_t i = 0; i < strlen(temp_str); i++)
+    for (uint32_t i = 0; i < strlen(temp_str); ++i)
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0)
       return INI_RIGHT_CHAPTER;
@@ -363,7 +366,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   if (NULL != strchr(line_ptr, '=')) {
     strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (int32_t i = strlen(temp_str) - 1; i > 0; --i) {
       if ((temp_str[i] == '=') || (temp_str[i] == ' ') ||
           (temp_str[i] == 9) ||   // TAB
           (temp_str[i] == 10) ||  // LF
@@ -376,17 +379,17 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
 
-    for (uint32_t i = 0; i < strlen(temp_str); i++)
+    for (uint32_t i = 0; i < strlen(temp_str); ++i)
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
       uint16_t len = strlen(line_ptr);
       /* cut trailing stuff */
-      for (uint32_t i = 0; i < len; i++) {
+      for (uint32_t i = 0; i < len; ++i) {
         if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
             (*line_ptr == 10) ||                       // LF
             (*line_ptr == 13)) {                       // CR
-          line_ptr++;
+          ++line_ptr;
         } else {
           break;
         }
@@ -396,7 +399,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
       if (value[0] != '\0') {
         /* cut trailing stuff */
-        for (int32_t i = strlen(value) - 1; i > 0; i--) {
+        for (int32_t i = strlen(value) - 1; i > 0; --i) {
           if ((value[i] == ' ') || (value[i] == ';') ||
               (value[i] == 9) ||   // TAB
               (value[i] == 10) ||  // LF
@@ -415,4 +418,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
 
   return INI_NOTHING;
 }
+
+#pragma GCC diagnostic pop
+
 }  // namespace profile

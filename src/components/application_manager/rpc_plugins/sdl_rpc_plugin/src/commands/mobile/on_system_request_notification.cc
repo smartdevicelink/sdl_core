@@ -48,6 +48,8 @@ namespace commands {
 
 namespace mobile {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemRequestNotification::OnSystemRequestNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -63,7 +65,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
   using namespace mobile_apis;
   using namespace helpers;
@@ -71,8 +73,7 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection key " << connection_key()
+    SDL_LOG_ERROR("Application with connection key " << connection_key()
                                                      << " is not registered.");
     return;
   }
@@ -88,8 +89,7 @@ void OnSystemRequestNotification::Run() {
 
   if (!policy_handler.IsRequestTypeAllowed(
           app->device(), app->policy_app_id(), request_type)) {
-    LOG4CXX_WARN(logger_,
-                 "Request type " << stringified_request_type
+    SDL_LOG_WARN("Request type " << stringified_request_type
                                  << " is not allowed by policies");
     return;
   }
@@ -101,25 +101,16 @@ void OnSystemRequestNotification::Run() {
         (*message_)[strings::msg_params][strings::request_subtype].asString();
     if (!policy_handler.IsRequestSubTypeAllowed(app->policy_app_id(),
                                                 request_subtype)) {
-      LOG4CXX_ERROR(logger_,
-                    "Request subtype: " << request_subtype
+      SDL_LOG_ERROR("Request subtype: " << request_subtype
                                         << " is DISALLOWED by policies");
       return;
     }
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Processing Request type : " << stringified_request_type);
-
-  const bool binary_data_is_required =
-      Compare<mobile_apis::RequestType::eType, EQ, ONE>(
-          request_type,
-          mobile_apis::RequestType::PROPRIETARY,
-          mobile_apis::RequestType::OEM_SPECIFIC);
+  SDL_LOG_DEBUG("Processing Request type : " << stringified_request_type);
 
   BinaryMessage binary_data;
-  if (binary_data_is_required &&
-      (*message_)[strings::msg_params].keyExists(strings::file_name)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
     file_system::ReadBinaryFile(filename, binary_data);
@@ -128,20 +119,13 @@ void OnSystemRequestNotification::Run() {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
   }
 
-  if (mobile_apis::RequestType::OEM_SPECIFIC == request_type) {
-    (*message_)[strings::params][strings::binary_data] = binary_data;
-  } else if (mobile_apis::RequestType::PROPRIETARY == request_type) {
+  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
-        If the requestType = HTTP, add to mobile API fileType = BINARY"
-       Also we don't save the PT to file - we put it directly in binary_data */
+        If the requestType = HTTP, add to mobile API fileType = BINARY" */
 
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
-#endif  // PROPRIETARY_MODE
-
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
-    (*message_)[strings::params][strings::binary_data] = binary_data;
 #endif  // PROPRIETARY_MODE
 
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
@@ -152,20 +136,27 @@ void OnSystemRequestNotification::Run() {
           policy_handler.TimeoutExchangeSec();
     }
   } else if (mobile_apis::RequestType::LOCK_SCREEN_ICON_URL == request_type) {
-    if (!(*message_)[strings::msg_params].keyExists(strings::url) ||
-        (*message_)[strings::msg_params][strings::url].empty()) {
-      LOG4CXX_ERROR(logger_,
-                    "discarding LOCK_SCREEN_ICON_URL request without URL");
+    if (binary_data.empty() &&
+        (!(*message_)[strings::msg_params].keyExists(strings::url) ||
+         (*message_)[strings::msg_params][strings::url].empty())) {
+      SDL_LOG_ERROR(
+          "discarding LOCK_SCREEN_ICON_URL request with no URL or data");
       return;
     }
   }
+
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+  if (!binary_data.empty()) {
+    (*message_)[strings::params][strings::binary_data] = binary_data;
+  }
+#endif  // PROPRIETARY_MODE
 
   SendNotification();
 }
 
 #ifdef PROPRIETARY_MODE
 void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const uint32_t timeout = policy_handler_.TimeoutExchangeSec();
 
   size_t content_length;
@@ -176,7 +167,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   }
 
   char timeout_str[24];
-  if (0 > sprintf(timeout_str, "%d", timeout)) {
+  if (0 > sprintf(timeout_str, "%u", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
 
@@ -223,8 +214,8 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   message.clear();
   message.assign(header.begin(), header.end());
 
-  LOG4CXX_DEBUG(
-      logger_, "Header added: " << std::string(message.begin(), message.end()));
+  SDL_LOG_DEBUG(
+      "Header added: " << std::string(message.begin(), message.end()));
 }
 
 size_t OnSystemRequestNotification::ParsePTString(
@@ -237,7 +228,7 @@ size_t OnSystemRequestNotification::ParsePTString(
     if (pt_string[i] == '\"' || pt_string[i] == '\\') {
       result += '\\';
     } else if (pt_string[i] == '\n') {
-      result_length--;  // contentLength is adjusted when this character is
+      --result_length;  // contentLength is adjusted when this character is
                         // not copied to result.
       continue;
     }

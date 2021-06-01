@@ -38,6 +38,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASAppServiceActivationRequest::ASAppServiceActivationRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ ASAppServiceActivationRequest::ASAppServiceActivationRequest(
 ASAppServiceActivationRequest::~ASAppServiceActivationRequest() {}
 
 void ASAppServiceActivationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppServiceManager& service_manager =
       application_manager_.GetAppServiceManager();
   smart_objects::SmartObject params = (*message_)[strings::msg_params];

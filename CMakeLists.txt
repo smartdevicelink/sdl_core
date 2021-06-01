@@ -59,6 +59,12 @@ option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" OFF)
 
+set(LOGGER_NAME "LOG4CXX" CACHE STRING "Logging library to use (BOOST, LOG4CXX)")
+set_property(CACHE LOGGER_NAME PROPERTY STRINGS BOOST LOG4CXX)
+if(LOGGER_NAME STREQUAL "")
+  set(LOGGER_NAME "LOG4CXX")
+endif()
+
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
 if(EXTENDED_POLICY STREQUAL "")
@@ -185,6 +191,12 @@ get_property(cType CACHE ENABLE_SECURITY PROPERTY TYPE)
 get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE LOGGER_NAME PROPERTY HELPSTRING)
+get_property(cType CACHE LOGGER_NAME PROPERTY TYPE)
+get_property(cValue CACHE LOGGER_NAME PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "LOGGER_NAME:${cType}=${cValue}\n\n")
 
 get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
 get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
@@ -376,6 +388,14 @@ else()
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
+if(${LOGGER_NAME} STREQUAL "LOG4CXX")
+  add_definitions(-DLOG4CXX_LOGGER)
+  message(STATUS "Selected the apache log4cxx logging library")
+else()
+  add_definitions(-DBOOST_LOGGER)
+  message(STATUS "Selected the boost logging library")
+endif()
+
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 
@@ -419,8 +439,14 @@ include_directories(
 add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
 find_package(OpenSSL REQUIRED)
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
+  message(STATUS "Including log4cxx")
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
+endif()
+
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  message(STATUS "Including boost")
+  include_directories ( ${BOOST_INCLUDE_DIR} )
 endif()
 
 if(ENABLE_SECURITY)

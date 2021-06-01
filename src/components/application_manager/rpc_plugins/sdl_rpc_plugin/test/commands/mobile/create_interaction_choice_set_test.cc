@@ -44,6 +44,8 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
@@ -184,6 +186,11 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   req_vr->onTimeOut();
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),
@@ -207,7 +214,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
 
-  smart_objects::SmartObject* null_obj = NULL;
+  smart_objects::SmartObject null_obj(smart_objects::SmartType_Null);
   ON_CALL(*mock_app_, FindChoiceSet(_)).WillByDefault(Return(null_obj));
 
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
@@ -219,9 +226,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
   am::event_engine::Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*msg);
 
-  smart_objects::SmartObject* ptr = NULL;
-  ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(ptr));
-  EXPECT_EQ(NULL, ptr);
+  smart_objects::SmartObject invalid_command(smart_objects::SmartType_Null);
+  ON_CALL(*mock_app_, FindCommand(kCmdId))
+      .WillByDefault(Return(invalid_command));
 
   am::CommandsMap commands_map;
   ON_CALL(*mock_app_, commands_map())
@@ -293,9 +300,9 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* invalid_choice_set_id =
-      &((*message_)[am::strings::msg_params]
-                   [am::strings::interaction_choice_set_id]);
+  smart_objects::SmartObject invalid_choice_set_id =
+      (*message_)[am::strings::msg_params]
+                 [am::strings::interaction_choice_set_id];
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(invalid_choice_set_id));
   EXPECT_CALL(app_mngr_, GenerateGrammarID()).Times(0);
@@ -329,7 +336,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -358,7 +365,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillRepeatedly(Return(choice_set_id));
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app_));
@@ -435,7 +442,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -478,7 +485,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -511,7 +518,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_WithoutVrCommands_SUCCESS) {
   EXPECT_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
       .WillOnce(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::NONE));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -549,7 +556,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
       .WillOnce(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::MIXED));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -598,7 +605,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_ValidVrNoError_SUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -635,7 +642,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -673,7 +680,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -704,7 +711,12 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
                   am::commands::Command::SOURCE_SDL));
 
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+
   command_->onTimeOut();
 }
 
@@ -724,7 +736,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -748,7 +760,12 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(kChoiceSetId));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
+
   command_->onTimeOut();
 }
 
@@ -769,7 +786,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -794,6 +811,11 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_)).Times(0);
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   command_->onTimeOut();
 }
 
@@ -813,7 +835,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::SUCCESS));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -832,7 +854,11 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   FillMessageFieldsItem2(message_);
 
-  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
 
   Event event(hmi_apis::FunctionID::VR_AddCommand);
@@ -889,7 +915,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _))
       .WillRepeatedly(Return(mobile_apis::Result::GENERIC_ERROR));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*mock_app_, FindChoiceSet(kChoiceSetId))
       .WillRepeatedly(Return(choice_set_id));
 

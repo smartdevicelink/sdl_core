@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppUnregisteredNotification::OnAppUnregisteredNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,13 +56,13 @@ OnAppUnregisteredNotification::OnAppUnregisteredNotification(
 OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {}
 
 bool OnAppUnregisteredNotification::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Replacement of hmi id is skipped.");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Replacement of hmi id is skipped.");
   return true;
 }
 
 void OnAppUnregisteredNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // sending event for delete VRCommand on PerformInteraction
   event_engine::Event event(

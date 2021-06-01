@@ -40,7 +40,7 @@
 #include "utils/timer_task_impl.h"
 
 namespace app_launch {
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
+SDL_CREATE_LOG_VARIABLE("AppLaunch")
 
 AppLaunchCtrlImpl::AppLaunchCtrlImpl(
     AppLaunchData& data,
@@ -57,7 +57,7 @@ AppLaunchCtrlImpl::AppLaunchCtrlImpl(
 
 void AppLaunchCtrlImpl::OnAppRegistered(
     const application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   // TODO (AKutsan) : get device mac
   ApplicationDataPtr app_data = std::make_shared<ApplicationData>(
       app.policy_app_id(), app.bundle_id(), app.mac_address());
@@ -82,7 +82,7 @@ bool HmiLevelSorter(const std::pair<int32_t, ApplicationDataPtr>& lval,
 }
 
 void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::vector<ApplicationDataPtr> apps_on_device =
       app_launch_data_.GetApplicationDataByDevice(device_mac);
   std::vector<std::pair<int32_t, ApplicationDataPtr> > apps_hmi_levels;
@@ -104,12 +104,12 @@ void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
   if (apps_on_device.size() > 0) {
     device_apps_launcher_.LaunchAppsOnDevice(device_mac, apps_on_device);
   } else {
-    LOG4CXX_DEBUG(logger_, "No apps in saved for device " << device_mac);
+    SDL_LOG_DEBUG("No apps in saved for device " << device_mac);
   }
 }
 
 void AppLaunchCtrlImpl::OnMasterReset() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_launch_data_.Clear();
 }
 }  // namespace app_launch

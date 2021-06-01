@@ -62,8 +62,8 @@ using testing::ReturnRef;
 namespace {
 const uint32_t kCorrelationID = 1u;
 const uint32_t kAppID = 2u;
-const std::string kLanguageDe = "de-de";
-const std::string kLanguageEn = "en-gb";
+const std::string kLanguageDe = "DE-DE";
+const std::string kLanguageEn = "EN-GB";
 const std::string kMessageCodes = "messageCodes";
 const hmi_apis::Common_Language::eType kLanguage =
     hmi_apis::Common_Language::EN_GB;
@@ -102,8 +102,6 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageSet_SUCCESS) {
   std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
-      .WillOnce(Return(kLanguageEn));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
@@ -129,8 +127,6 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_LanguageNotSet_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_, active_ui_language())
       .WillOnce(Return(kLanguage));
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(kLanguage))
-      .WillOnce(Return(kLanguageEn));
   std::vector<std::string> msg_codes;
   msg_codes.push_back(kLanguageDe);
   msg_codes.push_back(kLanguageEn);
@@ -149,7 +145,6 @@ TEST_F(SDLGetUserFriendlyMessageRequestTest, Run_NoMsgCodes_Canceled) {
   std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
   command->Init();
@@ -181,7 +176,6 @@ TEST_F(
   std::shared_ptr<SDLGetUserFriendlyMessageRequest> command(
       CreateCommand<SDLGetUserFriendlyMessageRequest>(msg));
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_)).Times(0);
   EXPECT_CALL(mock_policy_handler_, OnGetUserFriendlyMessage(_, _, _)).Times(0);
 
   command->Init();

@@ -122,7 +122,8 @@ class PolicyHandler : public PolicyHandlerInterface,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
 
-  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority,
+                                  const bool is_subtle = false) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
@@ -384,6 +385,14 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnGetSystemInfo(const std::string& ccpu_version,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
+
+  void OnHardwareVersionReceived(const std::string& hardware_version) OVERRIDE;
+
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -698,7 +707,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
 #ifdef BUILD_TESTS
   void SetPolicyManager(std::shared_ptr<PolicyManager> pm) {
-    policy_manager_ = pm;
+    ExchangePolicyManager(pm);
   }
 #endif  // BUILD_TESTS
 
@@ -807,6 +816,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void LinkAppsToDevice();
 
+  void SetHeartBeatTimeout(const std::string& policy_app_id,
+                           const uint32_t app_id);
+
   typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
 
   /**
@@ -868,19 +880,21 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
-   * @return consolidated permissions list or empty list if no
-   * applications/devices currently present
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+  bool CollectRegisteredAppsPermissions(
+      std::vector<FunctionalGroupPermission>& out_permissions);
 
   /**
    * @brief Collects permissions for application with certain connection key
    * @param connection_key Connection key of application to look for
-   * @return list of application permissions or empty list if no such
-   * application found
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectAppPermissions(
-      const uint32_t connection_key);
+  bool CollectAppPermissions(
+      const uint32_t connection_key,
+      std::vector<policy::FunctionalGroupPermission>& out_permissions);
 
  private:
   static const std::string kLibrary;
@@ -896,8 +910,28 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
+  /**
+   * @brief Load policy manager
+   * This method is thread safe
+   * @return Pointer to the policy manager instance or null if not inited
+   */
+  std::shared_ptr<PolicyManager> LoadPolicyManager() const;
+
+  /**
+   * @brief Exchange a policy manager
+   * This method is thread safe
+   * @param policy_manager - new policy manager
+   */
+  void ExchangePolicyManager(std::shared_ptr<PolicyManager> policy_manager);
+
   mutable sync_primitives::RWLock policy_manager_lock_;
-  std::shared_ptr<PolicyManager> policy_manager_;
+
+  /**
+   * @brief Policy manager
+   * @note Use atomic_policy_manager_ only with
+   * LoadPolicyManager and ExchangePolicyManager methods!
+   */
+  std::shared_ptr<PolicyManager> atomic_policy_manager_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 
@@ -912,8 +946,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Contains device handles, which were sent for user consent to HMI
    */
   DeviceHandles pending_device_handles_;
-
-  inline bool CreateManager();
 
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;

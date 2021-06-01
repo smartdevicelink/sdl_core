@@ -63,6 +63,12 @@ MATCHER_P(CheckDisplayCapabilities, display_capabilities, "") {
                [strings::display_capabilities];
 }
 
+MATCHER_P(CheckVideoStreamCapability, video_streaming_capability, "") {
+  return video_streaming_capability ==
+         (*arg)[strings::msg_params][strings::system_capability]
+               [strings::video_streaming_capability];
+}
+
 class OnSystemCapabilityUpdatedNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  protected:
@@ -183,6 +189,10 @@ TEST_F(
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
 
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
   std::shared_ptr<sdl_rpc_plugin::SystemCapabilityAppExtension>
@@ -197,7 +207,7 @@ TEST_F(
       DataAccessor<application_manager::ApplicationSet>(apps, apps_lock_));
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_data));
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
   ON_CALL(*mock_app_, display_capabilities()).WillByDefault(Return(nullptr));
   ON_CALL(*mock_app_,
           QueryInterface(sdl_rpc_plugin::SystemCapabilityAppExtension::
@@ -224,6 +234,43 @@ TEST_F(
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_data));
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(OnSystemCapabilityUpdatedNotificationTest,
+       Run_VideoSteamingCapability_AppIdIsAbsent_SendMessageToMobile) {
+  (*message_)[am::strings::msg_params][strings::system_capability]
+             [am::strings::system_capability_type] =
+                 mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
+
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message_, false));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(OnSystemCapabilityUpdatedNotificationTest,
+       Run_VideoSteamingCapability_AppIdExistsInMessage_SendMessageToMobile) {
+  (*message_)[strings::msg_params][strings::system_capability]
+             [strings::system_capability_type] =
+                 mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
+  (*message_)[strings::msg_params][strings::app_id] = kAppId;
+  (*message_)[strings::msg_params][strings::system_capability]
+             [strings::video_streaming_capability] =
+                 new smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  auto& video_streaming_capability =
+      (*message_)[strings::msg_params][strings::system_capability]
+                 [strings::video_streaming_capability];
+
+  FillVideoStreamingCapability(video_streaming_capability);
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      SendMessageToMobile(
+          CheckVideoStreamCapability(video_streaming_capability), false));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();

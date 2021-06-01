@@ -43,6 +43,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SliderRequest::SliderRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -70,20 +72,20 @@ bool SliderRequest::Init() {
 }
 
 void SliderRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
       (*message_)[strings::msg_params][strings::position].asInt()) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    SDL_LOG_ERROR("INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -92,7 +94,7 @@ void SliderRequest::Run() {
     if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
       if ((*message_)[strings::msg_params][strings::num_ticks].asUInt() !=
           (*message_)[strings::msg_params][strings::slider_footer].length()) {
-        LOG4CXX_ERROR(logger_, "INVALID_DATA");
+        SDL_LOG_ERROR("INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
@@ -100,14 +102,12 @@ void SliderRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "Incoming slider has contains \t\n \\t \\n");
+    SDL_LOG_ERROR("Incoming slider has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->app_id();
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -124,7 +124,7 @@ void SliderRequest::Run() {
 }
 
 void SliderRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
   using namespace smart_objects;
   using namespace hmi_apis;
@@ -132,34 +132,19 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
+
   if (event_id != FunctionID::UI_Slider) {
-    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
+  SDL_LOG_DEBUG("Received UI_Slider event");
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   const Common_Result::eType response_code = static_cast<Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 
   SmartObject response_msg_params = message[strings::msg_params];
 
-  const bool is_timeout_aborted = Compare<Common_Result::eType, EQ, ONE>(
-      response_code, Common_Result::TIMED_OUT, Common_Result::ABORTED);
-
-  if (is_timeout_aborted) {
-    if (message[strings::params][strings::data].keyExists(
-            strings::slider_position)) {
-      // Copy slider_position info to msg_params section
-      response_msg_params[strings::slider_position] =
-          message[strings::params][strings::data][strings::slider_position];
-    } else {
-      LOG4CXX_ERROR(logger_,
-                    strings::slider_position << " field is absent"
-                                                " in response.");
-      response_msg_params[strings::slider_position] = 0;
-    }
-  }
   std::string response_info;
   GetInfo(message, response_info);
   const bool is_response_success = PrepareResultForMobileResponse(
@@ -172,12 +157,12 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SliderRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const char* str = NULL;
+  SDL_LOG_AUTO_TRACE();
 
-  str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::slider_header].asCharArray();
   if (!CheckSyntax(str)) {
-    LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");
+    SDL_LOG_ERROR("Invalid slider_header value syntax check failed");
     return true;
   }
 
@@ -191,7 +176,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
     for (; it_sf != it_sf_end; ++it_sf) {
       str = (*it_sf).asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid slider_footer syntax check failed");
+        SDL_LOG_ERROR("Invalid slider_footer syntax check failed");
         return true;
       }
     }

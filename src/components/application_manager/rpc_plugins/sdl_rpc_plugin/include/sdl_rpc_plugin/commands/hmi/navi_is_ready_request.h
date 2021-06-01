@@ -72,6 +72,8 @@ class NaviIsReadyRequest : public app_mngr::commands::RequestToHMI,
    **/
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
+  void onTimeOut() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviIsReadyRequest);
 };

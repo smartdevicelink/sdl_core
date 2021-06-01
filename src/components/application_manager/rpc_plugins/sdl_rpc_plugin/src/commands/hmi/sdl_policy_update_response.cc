@@ -37,6 +37,9 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLPolicyUpdateResponse::SDLPolicyUpdateResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +55,7 @@ SDLPolicyUpdateResponse::SDLPolicyUpdateResponse(
 SDLPolicyUpdateResponse::~SDLPolicyUpdateResponse() {}
 
 void SDLPolicyUpdateResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
@@ -62,7 +65,7 @@ void SDLPolicyUpdateResponse::Run() {
                        helpers::ALL>(code,
                                      hmi_apis::Common_Result::SUCCESS,
                                      hmi_apis::Common_Result::WARNINGS)) {
-    LOG4CXX_ERROR(logger_, "Error is returned. PTU won't be started.");
+    SDL_LOG_ERROR("Error is returned. PTU won't be started.");
     return;
   }
 

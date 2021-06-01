@@ -152,6 +152,18 @@ class PTRepresentation {
   virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
 
   /**
+   * @brief Records mandatory information about head unit system to PT
+   * @return bool Success of operation
+   */
+  virtual bool SetMetaInfo(const std::string& ccpu_version) = 0;
+
+  /**
+   * @brief Records information about hardware version to PT
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
+
+  /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application

@@ -33,6 +33,7 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/smart_objects/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
@@ -44,6 +45,7 @@ set(PATHS
 )
 
 set(LIBRARIES
+  SmartObjects
   Utils
 )
 

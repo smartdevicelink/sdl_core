@@ -216,7 +216,7 @@ class SecurityManagerImpl : public SecurityManager,
 
   void ProcessFailedPTU() OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify listeners that
    * certificate decryption failed in the external flow
@@ -241,12 +241,12 @@ class SecurityManagerImpl : public SecurityManager,
    * \brief Parse SecurityMessage as HandshakeData request
    * \param inMessage SecurityMessage with binary data of handshake
    */
-  bool ProccessHandshakeData(const SecurityMessage& inMessage);
+  bool ProcessHandshakeData(const SecurityMessage& inMessage);
   /**
    * \brief Parse InternalError from mobile side
    * \param inMessage SecurityMessage with binary data of handshake
    */
-  bool ProccessInternalError(const SecurityMessage& inMessage);
+  bool ProcessInternalError(const SecurityMessage& inMessage);
 
   /**
    * \brief Sends security query

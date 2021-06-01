@@ -40,6 +40,8 @@
 #include "policy/policy_types.h"
 #include "utils/logger.h"
 
+#include <algorithm>
+
 namespace application_manager {
 
 /**
@@ -50,6 +52,20 @@ struct CommandParametersPermissions {
   RPCParams allowed_params;
   RPCParams disallowed_params;
   RPCParams undefined_params;
+
+  bool AreDisallowedParamsIncluded(const RPCParams& parameters) {
+    return std::includes(disallowed_params.begin(),
+                         disallowed_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
+
+  bool AreUndefinedParamsIncluded(const RPCParams& parameters) {
+    return std::includes(undefined_params.begin(),
+                         undefined_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
 };
 
 namespace commands {
@@ -122,6 +138,10 @@ class CommandImpl : public Command {
    */
   WindowID window_id() const OVERRIDE;
 
+  void set_warning_info(const std::string info) OVERRIDE;
+
+  std::string warning_info() const OVERRIDE;
+
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
@@ -179,6 +199,29 @@ class CommandImpl : public Command {
   bool CheckAllowedParameters(const Command::CommandSource source);
 
   /**
+   * @brief Adds disallowed parameters back to response with appropriate
+   * reasons
+   * @param response Response message, which should be extended with blocked
+   * parameters reasons
+   */
+  void AddDisallowedParameters(smart_objects::SmartObject& response);
+
+  /**
+   * @brief Adds disallowed parameters to response info
+   * @param response Response message, which info should be extended
+   */
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
+
+  /**
+   * @brief Adds param to disallowed parameters enumeration
+   * @param info string with disallowed params enumeration
+   * @param param disallowed param
+   */
+  void AddDisallowedParameterToInfoString(std::string& info,
+                                          const std::string& param) const;
+
+  /**
    * @brief Remove from current message parameters disallowed by policy table
    */
   void RemoveDisallowedParameters();
@@ -197,6 +240,13 @@ class CommandImpl : public Command {
    */
   bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
 
+  /**
+   * @brief Adds disallowed parameters to info string, sets result codes if
+   * necessary
+   * @param response Command smart object
+   */
+  void FormatResponse(smart_objects::SmartObject& response);
+
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
@@ -205,12 +255,14 @@ class CommandImpl : public Command {
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
 
+  /**
+   * @brief warning_info_ Defines a warning message to send in the case of a
+   * successful response
+   */
+  std::string warning_info_;
+
   CommandParametersPermissions parameters_permissions_;
   CommandParametersPermissions removed_parameters_permissions_;
-
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);

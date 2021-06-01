@@ -137,9 +137,9 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      void(const uint32_t service_type,
                           EndpointUrls& out_end_points));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
-  MOCK_METHOD1(
-      GetNotificationsNumber,
-      policy_table::NumberOfNotificationsType(const std::string& priority));
+  MOCK_METHOD2(GetNotificationsNumber,
+               policy_table::NumberOfNotificationsType(
+                   const std::string& priority, const bool is_subtle));
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string& priority));
@@ -202,10 +202,14 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(SetUserPermissionsForApp,
                bool(const PermissionConsent& permissions,
                     bool* out_app_permissions_changed));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(SetMetaInfo,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
   MOCK_CONST_METHOD0(IsMetaInfoPresent, bool());
   MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

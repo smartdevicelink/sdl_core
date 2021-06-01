@@ -94,7 +94,7 @@ inline const Json::Value* ValueMember(const Json::Value* value,
   if (value && value->isObject() && value->isMember(member_name)) {
     return &(*value)[member_name];
   }
-  return NULL;
+  return nullptr;
 }
 
 template <class T>

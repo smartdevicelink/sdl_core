@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIGetCapabilitiesRequest::UIGetCapabilitiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,11 +54,16 @@ UIGetCapabilitiesRequest::UIGetCapabilitiesRequest(
 UIGetCapabilitiesRequest::~UIGetCapabilitiesRequest() {}
 
 void UIGetCapabilitiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
+void UIGetCapabilitiesRequest::onTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetCapabilities);
+}
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

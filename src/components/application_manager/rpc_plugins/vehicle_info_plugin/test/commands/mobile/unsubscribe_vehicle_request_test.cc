@@ -88,6 +88,8 @@ class UnsubscribeVehicleRequestTest
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, GetRPCHandler())
         .WillByDefault(ReturnRef(mock_rpc_handler_));
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
 
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,

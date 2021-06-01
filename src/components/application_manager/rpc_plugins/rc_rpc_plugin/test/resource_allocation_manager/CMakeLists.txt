@@ -45,6 +45,7 @@ ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/interior_dat
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/resource_allocation_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_rpc_plugin.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_app_extension.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_pending_resumption_handler.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_consent_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_capabilities_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_command_factory.cc
@@ -70,7 +71,7 @@ set(LIBRARIES
   dl
 )
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})

@@ -42,7 +42,7 @@
 namespace application_manager {
 namespace rpc_service {
 
-CREATE_LOGGERPTR_LOCAL(logger_, "RPCServiceImpl")
+SDL_CREATE_LOG_VARIABLE("RPCServiceImpl")
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 namespace plugin_names = application_manager::plugin_manager::plugin_names;
@@ -70,7 +70,7 @@ RPCServiceImpl::RPCServiceImpl(
 RPCServiceImpl::~RPCServiceImpl() {}
 
 void RPCServiceImpl::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   messages_to_mobile_.Shutdown();
   messages_to_hmi_.Shutdown();
@@ -80,7 +80,7 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
     const smart_objects::SmartObject& message,
     std::shared_ptr<Application> app,
     const bool is_rpc_service_secure) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto function_id =
       message[strings::params][strings::function_id].asUInt();
   const auto correlation_id =
@@ -113,19 +113,25 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
              ? EncryptionFlagCheckResult::kSuccess_Protected
              : EncryptionFlagCheckResult::kSuccess_NotProtected;
 }
-
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
     commands::Command::CommandSource source) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  return ManageMobileCommand(message, source, std::string());
+}
+
+bool RPCServiceImpl::ManageMobileCommand(
+    const commands::MessageSharedPtr message,
+    commands::Command::CommandSource source,
+    const std::string warning_info) {
+  SDL_LOG_AUTO_TRACE();
 
   if (!message) {
-    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    SDL_LOG_WARN("Null-pointer message received.");
     return false;
   }
 
   if (app_manager_.IsLowVoltage()) {
-    LOG4CXX_WARN(logger_, "Low Voltage is active");
+    SDL_LOG_WARN("Low Voltage is active");
     return false;
   }
 
@@ -160,7 +166,7 @@ bool RPCServiceImpl::ManageMobileCommand(
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     app = app_manager_.application(connection_key);
     if (!app) {
-      LOG4CXX_ERROR(logger_, "RET APPLICATION_NOT_REGISTERED");
+      SDL_LOG_ERROR("RET APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObjectSPtr response =
           MessageHelper::CreateNegativeResponse(
               connection_key,
@@ -192,7 +198,7 @@ bool RPCServiceImpl::ManageMobileCommand(
   auto plugin =
       app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
   if (!plugin) {
-    LOG4CXX_WARN(logger_, "Failed to find plugin : " << plugin.error());
+    SDL_LOG_WARN("Failed to find plugin : " << plugin.error());
     CheckSourceForUnsupportedRequest(message, source);
     return false;
   }
@@ -200,7 +206,7 @@ bool RPCServiceImpl::ManageMobileCommand(
   auto command = factory.CreateCommand(message, source);
 
   if (!command) {
-    LOG4CXX_WARN(logger_, "Failed to create mobile command from smart object");
+    SDL_LOG_WARN("Failed to create mobile command from smart object");
     return false;
   }
 
@@ -238,7 +244,6 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   if (message_type == mobile_apis::messageType::request &&
       source == commands::Command::CommandSource::SOURCE_MOBILE) {
-    // commands will be launched from requesr_ctrl
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
     if (app) {
@@ -246,18 +251,18 @@ bool RPCServiceImpl::ManageMobileCommand(
           app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     }
 
-    // commands will be launched from request_ctrl
+    command->set_warning_info(warning_info);
 
+    // commands will be launched from request_ctrl
     const request_controller::RequestController::TResult result =
         request_ctrl_.AddMobileRequest(command, app_hmi_level);
 
-    if (request_controller::RequestController::TResult::SUCCESS == result) {
-      LOG4CXX_DEBUG(logger_, "Perform request");
-    } else if (request_controller::RequestController::TResult::
-                   TOO_MANY_PENDING_REQUESTS == result) {
-      LOG4CXX_ERROR(logger_,
-                    "RET  Unable top perform request: "
-                        << "TOO_MANY_PENDING_REQUESTS");
+    if (result == request_controller::RequestController::SUCCESS) {
+      SDL_LOG_DEBUG("Perform request");
+    } else if (result == request_controller::RequestController::
+                             TOO_MANY_PENDING_REQUESTS) {
+      SDL_LOG_ERROR("RET  Unable top perform request: "
+                    << "TOO_MANY_PENDING_REQUESTS");
 
       smart_objects::SmartObjectSPtr response =
           MessageHelper::CreateNegativeResponse(
@@ -273,11 +278,10 @@ bool RPCServiceImpl::ManageMobileCommand(
 
       SendMessageToMobile(response);
       return false;
-    } else if (request_controller::RequestController::TResult::
-                   TOO_MANY_REQUESTS == result) {
-      LOG4CXX_ERROR(logger_,
-                    "RET  Unable to perform request: "
-                        << "TOO_MANY_REQUESTS");
+    } else if (result ==
+               request_controller::RequestController::TOO_MANY_REQUESTS) {
+      SDL_LOG_ERROR("RET  Unable to perform request: "
+                    << "TOO_MANY_REQUESTS");
 
       ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -294,11 +298,10 @@ bool RPCServiceImpl::ManageMobileCommand(
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
       }
       return false;
-    } else if (request_controller::RequestController::TResult::
-                   NONE_HMI_LEVEL_MANY_REQUESTS == result) {
-      LOG4CXX_ERROR(logger_,
-                    "RET  Unable to perform request: "
-                        << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
+    } else if (result == request_controller::RequestController::
+                             NONE_HMI_LEVEL_MANY_REQUESTS) {
+      SDL_LOG_ERROR("RET  Unable to perform request: "
+                    << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
 
       ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -315,27 +318,33 @@ bool RPCServiceImpl::ManageMobileCommand(
           connection_key, mobile_apis::Result::INVALID_ENUM, false);
       return false;
     } else {
-      LOG4CXX_ERROR(logger_, "RET  Unable to perform request: Unknown case");
+      SDL_LOG_ERROR("RET  Unable to perform request: Unknown case");
       return false;
     }
     return true;
   }
 
-  LOG4CXX_ERROR(logger_, "RET  UNKNOWN MESSAGE TYPE " << message_type);
+  SDL_LOG_ERROR("RET  UNKNOWN MESSAGE TYPE " << message_type);
   return false;
 }
 
 bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
                                       commands::Command::CommandSource source) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  return ManageHMICommand(message, source, std::string());
+}
+
+bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
+                                      commands::Command::CommandSource source,
+                                      const std::string warning_info) {
+  SDL_LOG_AUTO_TRACE();
 
   if (!message) {
-    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    SDL_LOG_WARN("Null-pointer message received.");
     return false;
   }
 
   if (app_manager_.IsLowVoltage()) {
-    LOG4CXX_WARN(logger_, "Low Voltage is active");
+    SDL_LOG_WARN("Low Voltage is active");
     return false;
   }
 
@@ -345,7 +354,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
   auto plugin =
       app_manager_.GetPluginManager().FindPluginToProcess(function_id, source);
   if (!plugin) {
-    LOG4CXX_WARN(logger_, "Filed to find plugin : " << plugin.error());
+    SDL_LOG_WARN("Filed to find plugin : " << plugin.error());
     return false;
   }
 
@@ -353,7 +362,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
   auto command = factory.CreateCommand(message, source);
 
   if (!command) {
-    LOG4CXX_WARN(logger_, "Failed to create command from smart object");
+    SDL_LOG_WARN("Failed to create command from smart object");
     return false;
   }
 
@@ -375,13 +384,17 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
       (*(message.get()))[strings::params][strings::message_type].asInt();
 
   if (kRequest == message_type) {
-    LOG4CXX_DEBUG(logger_, "ManageHMICommand");
-    request_ctrl_.AddHMIRequest(command);
+    SDL_LOG_DEBUG("ManageHMICommand");
+    command->set_warning_info(warning_info);
+    request_ctrl_.addHMIRequest(command);
   }
 
   if (command->Init()) {
     command->Run();
-    if (kResponse == message_type) {
+    if (helpers::Compare<int32_t, helpers::EQ, helpers::ONE>(
+            message_type, kResponse, kErrorResponse) &&
+        message->getElement(strings::params)
+            .keyExists(strings::correlation_id)) {
       const uint32_t correlation_id =
           (*(message.get()))[strings::params][strings::correlation_id].asUInt();
       const int32_t function_id =
@@ -394,21 +407,20 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToHmi message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!hmi_handler_) {
-    LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
+    SDL_LOG_ERROR("Observer is not set for HMIMessageHandler");
     return;
   }
 
   hmi_handler_->SendMessageToHMI(message);
-  LOG4CXX_INFO(logger_, "Message for HMI given away");
+  SDL_LOG_INFO("Message for HMI given away");
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!protocol_handler_) {
-    LOG4CXX_WARN(logger_,
-                 "Protocol Handler is not set; cannot send message to mobile.");
+    SDL_LOG_WARN("Protocol Handler is not set; cannot send message to mobile.");
     return;
   }
 
@@ -416,7 +428,7 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
       MobileMessageHandler::HandleOutgoingMessageProtocol(message));
 
   if (!rawMessage) {
-    LOG4CXX_ERROR(logger_, "Failed to create raw message.");
+    SDL_LOG_ERROR("Failed to create raw message.");
     return;
   }
 
@@ -446,9 +458,9 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
                                                                correlation_id);
 
   if (needs_encryption && !is_service_secure) {
-    LOG4CXX_WARN(logger_,
-                 "Unable to send rpc that requires encryption without secure "
-                 "rpc service");
+    SDL_LOG_WARN(
+        "Unable to send rpc that requires encryption without secure "
+        "rpc service");
     return;
   };
 
@@ -456,27 +468,27 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
       rawMessage, needs_encryption, is_final);
   rpc_protection_manager_->RemoveFromEncryptionNeededCache(app_id,
                                                            correlation_id);
-  LOG4CXX_INFO(logger_, "Message for mobile given away");
+  SDL_LOG_INFO("Message for mobile given away");
 
   if (close_session) {
-    app_manager_.connection_handler().CloseSession(message->connection_key(),
-                                                   connection_handler::kCommon);
+    app_manager_.connection_handler().CloseSession(
+        message->connection_key(), connection_handler::kFinalMessage);
   }
 }
 
 void RPCServiceImpl::SendMessageToMobile(
     const application_manager::commands::MessageSharedPtr message,
     bool final_message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    SDL_LOG_ERROR("Null-pointer message received.");
     NOTREACHED();
     return;
   }
 
   if (!protocol_handler_) {
-    LOG4CXX_WARN(logger_, "No Protocol Handler set");
+    SDL_LOG_WARN("No Protocol Handler set");
     return;
   }
 
@@ -488,7 +500,7 @@ void RPCServiceImpl::SendMessageToMobile(
   bool allow_unknown_parameters = false;
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with connection key");
+    SDL_LOG_ERROR("No application associated with connection key");
     if (is_result_code_exists &&
         ((*message)[strings::msg_params][strings::result_code] ==
          ns_smart_device_link_rpc::V1::Result::UNSUPPORTED_VERSION)) {
@@ -520,9 +532,8 @@ void RPCServiceImpl::SendMessageToMobile(
   if (IsAppServiceRPC(function_id,
                       commands::Command::CommandSource::SOURCE_SDL) ||
       rpc_passing) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Allowing unknown parameters for response function " << function_id);
+    SDL_LOG_DEBUG("Allowing unknown parameters for response function "
+                  << function_id);
     allow_unknown_parameters = true;
   }
 
@@ -540,13 +551,12 @@ void RPCServiceImpl::SendMessageToMobile(
       (*message)[strings::params][strings::function_id].asUInt());
 
   mobile_so_factory().attachSchema(*message, false);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "Attached schema to message, result if valid: " << message->isValid());
 
   if (!ConvertSOtoMessage(
           (*message), (*message_to_send), allow_unknown_parameters)) {
-    LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
+    SDL_LOG_WARN("Can't send msg to Mobile: failed to create string");
     return;
   }
 
@@ -570,7 +580,7 @@ void RPCServiceImpl::SendMessageToMobile(
 
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
-          LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
+          SDL_LOG_INFO("Request's param: " << iter->first);
           params.insert(iter->first);
         }
       }
@@ -581,8 +591,7 @@ void RPCServiceImpl::SendMessageToMobile(
         app_manager_.CheckPolicyPermissions(
             app, window_id, string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
-      LOG4CXX_WARN(logger_,
-                   "Function \"" << string_functionID << "\" (#"
+      SDL_LOG_WARN("Function \"" << string_functionID << "\" (#"
                                  << api_function_id
                                  << ") not allowed by policy");
       return;
@@ -600,8 +609,7 @@ void RPCServiceImpl::SendMessageToMobile(
   }
 
   if (message_to_send->binary_data()) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Binary data size: " << message_to_send->binary_data()->size());
   }
   messages_to_mobile_.PostMessage(
@@ -610,15 +618,15 @@ void RPCServiceImpl::SendMessageToMobile(
 
 void RPCServiceImpl::SendMessageToHMI(
     const commands::MessageSharedPtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!message) {
-    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    SDL_LOG_WARN("Null-pointer message received.");
     NOTREACHED();
     return;
   }
 
   if (!hmi_handler_) {
-    LOG4CXX_WARN(logger_, "No HMI Handler set");
+    SDL_LOG_WARN("No HMI Handler set");
     return;
   }
 
@@ -627,28 +635,25 @@ void RPCServiceImpl::SendMessageToHMI(
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
   if (!message_to_send) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
+    SDL_LOG_ERROR("Null pointer");
     return;
   }
 
   hmi_so_factory().attachSchema(*message, false);
-  LOG4CXX_INFO(
-      logger_,
+  SDL_LOG_INFO(
       "Attached schema to message, result if valid: " << message->isValid());
 
   if (IsAppServiceRPC((*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt(),
                       commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Allowing unknown parameters for response function "
-                      << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+    SDL_LOG_DEBUG("Allowing unknown parameters for response function "
+                  << (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
 
     allow_unknown_parameters = true;
   }
 
   if (!ConvertSOtoMessage(
           *message, *message_to_send, allow_unknown_parameters)) {
-    LOG4CXX_WARN(logger_,
-                 "Cannot send message to HMI: failed to create string");
+    SDL_LOG_WARN("Cannot send message to HMI: failed to create string");
     return;
   }
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
@@ -704,16 +709,15 @@ bool RPCServiceImpl::ConvertSOtoMessage(
     const ns_smart_device_link::ns_smart_objects::SmartObject& message,
     Message& output,
     const bool allow_unknown_parameters) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (smart_objects::SmartType_Null == message.getType() ||
       smart_objects::SmartType_Invalid == message.getType()) {
-    LOG4CXX_WARN(logger_, "Invalid smart object received.");
+    SDL_LOG_WARN("Invalid smart object received.");
     return false;
   }
 
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "Message with protocol: " << message.getElement(jhs::S_PARAMS)
                                        .getElement(jhs::S_PROTOCOL_TYPE)
                                        .asInt());
@@ -730,7 +734,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       if (protocol_version == 1) {
         if (!formatters::CFormatterJsonSDLRPCv1::toString(
                 message, output_string, !allow_unknown_parameters)) {
-          LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+          SDL_LOG_WARN("Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
@@ -738,7 +742,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       } else {
         if (!formatters::CFormatterJsonSDLRPCv2::toString(
                 message, output_string, !allow_unknown_parameters)) {
-          LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+          SDL_LOG_WARN("Failed to serialize smart object");
           return false;
         }
         output.set_protocol_version(
@@ -751,7 +755,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
     case 1: {
       if (!formatters::FormatterJsonRpc::ToString(
               message, output_string, !allow_unknown_parameters)) {
-        LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+        SDL_LOG_WARN("Failed to serialize smart object");
         return false;
       }
       output.set_protocol_version(
@@ -763,7 +767,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
       return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "Conversion result: " << output_string);
+  SDL_LOG_DEBUG("Conversion result: " << output_string);
 
   output.set_connection_key(message.getElement(jhs::S_PARAMS)
                                 .getElement(strings::connection_key)
@@ -798,7 +802,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
     output.set_binary_data(&binaryData);
   }
 
-  LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
+  SDL_LOG_DEBUG("Successfully parsed smart object into message");
   return true;
 }
 

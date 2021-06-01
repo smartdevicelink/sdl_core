@@ -100,8 +100,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const policy::PTString& rpc,
                     const application_manager::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));
-  MOCK_CONST_METHOD1(GetNotificationsNumber,
-                     uint32_t(const std::string& priority));
+  MOCK_CONST_METHOD2(GetNotificationsNumber,
+                     uint32_t(const std::string& priority,
+                              const bool is_subtle));
   MOCK_CONST_METHOD1(GetUserConsentForDevice,
                      policy::DeviceConsent(const std::string& device_id));
   MOCK_CONST_METHOD3(GetDefaultHmi,
@@ -180,10 +181,15 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                std::string(const transport_manager::DeviceHandle& device_handle,
                            const std::string& policy_app_id));
   MOCK_METHOD1(OnSystemInfoChanged, void(const std::string& language));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(OnGetSystemInfo,
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(OnHardwareVersionReceived,
+               void(const std::string& hardware_version));
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
   MOCK_METHOD0(OnVIIsReady, void());
   MOCK_METHOD1(OnVehicleDataUpdated,
                void(const smart_objects::SmartObject& message));

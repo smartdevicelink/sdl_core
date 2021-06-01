@@ -31,11 +31,14 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/navi_subscribe_way_points_request.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 NaviSubscribeWayPointsRequest::NaviSubscribeWayPointsRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -52,9 +55,17 @@ NaviSubscribeWayPointsRequest::NaviSubscribeWayPointsRequest(
 NaviSubscribeWayPointsRequest::~NaviSubscribeWayPointsRequest() {}
 
 void NaviSubscribeWayPointsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
+}
+
+void NaviSubscribeWayPointsRequest::onTimeOut() {
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace commands

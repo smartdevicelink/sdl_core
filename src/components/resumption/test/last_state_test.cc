@@ -50,12 +50,15 @@ class LastStateTest : public ::testing::Test {
  protected:
   LastStateTest()
       : empty_dictionary_("null\n")
-      , app_info_dat_file_("app_info.dat")
+      , app_info_dat_file_(kAppStorageFolder + "/" + kAppInfoStorageFile)
       , last_state_(kAppStorageFolder, kAppInfoStorageFile) {}
 
   static void SetUpTestCase() {
-    file_system::DeleteFile(kAppInfoStorageFile);
+    const std::string storage_file =
+        kAppStorageFolder + "/" + kAppInfoStorageFile;
+    file_system::DeleteFile(storage_file);
     file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::CreateDirectoryRecursively(kAppStorageFolder);
   }
 
   void SetUp() OVERRIDE {

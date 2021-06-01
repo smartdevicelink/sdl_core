@@ -59,7 +59,7 @@ MessageTypeMap message_types = {std::make_pair(kRequest, "Request"),
                                 std::make_pair(kResponse, "Response"),
                                 std::make_pair(kNotification, "Notification")};
 }  // namespace
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocol(
@@ -68,41 +68,40 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   application_manager::Message* out_message = NULL;
   switch (message->protocol_version()) {
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1:
-      LOG4CXX_DEBUG(logger_, "Protocol version - V1");
+      SDL_LOG_DEBUG("Protocol version - V1");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
       break;
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2:
-      LOG4CXX_DEBUG(logger_, "Protocol version - V2");
+      SDL_LOG_DEBUG("Protocol version - V2");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3:
-      LOG4CXX_DEBUG(logger_, "Protocol version - V3");
+      SDL_LOG_DEBUG("Protocol version - V3");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4:
-      LOG4CXX_DEBUG(logger_, "Protocol version - V4");
+      SDL_LOG_DEBUG("Protocol version - V4");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5:
-      LOG4CXX_DEBUG(logger_, "Protocol version - V5");
+      SDL_LOG_DEBUG("Protocol version - V5");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
       break;
     default:
-      LOG4CXX_WARN(logger_, "Can't recognise protocol version");
+      SDL_LOG_WARN("Can't recognise protocol version");
       out_message = NULL;
       break;
   }
   if (out_message == NULL) {
-    LOG4CXX_WARN(logger_, "Message is NULL");
+    SDL_LOG_WARN("Message is NULL");
     return NULL;
   }
-  LOG4CXX_DEBUG(logger_,
-                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
+  SDL_LOG_DEBUG("Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
                                       << ", "
                                       << message_types[out_message->type()]
                                       << ", " << out_message->function_id()
@@ -114,8 +113,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
-  LOG4CXX_DEBUG(logger_,
-                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
+  SDL_LOG_DEBUG("Outgoing RPC_INFO: " << (message->connection_key() >> 16)
                                       << ", " << message_types[message->type()]
                                       << ", " << message->function_id() << ", "
                                       << message->correlation_id() << ", "
@@ -136,7 +134,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
     const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   application_manager::Message* outgoing_message =
       new application_manager::Message(
           protocol_handler::MessagePriority::FromServiceType(
@@ -165,7 +163,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
     const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   utils::BitStream message_bytestream(message->data(), message->data_size());
   protocol_handler::ProtocolPayloadV2 payload;
   protocol_handler::Extract(
@@ -173,8 +171,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 
   // Silently drop message if it wasn't parsed correctly
   if (message_bytestream.IsBad()) {
-    LOG4CXX_WARN(
-        logger_,
+    SDL_LOG_WARN(
         "Drop ill-formed message from mobile, partially parsed: " << payload);
     return NULL;
   }
@@ -207,10 +204,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV1(
     const MobileMessage& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::string message_string = message->json_message();
   if (message_string.length() == 0) {
-    LOG4CXX_WARN(logger_, "Drop ill-formed message from mobile");
+    SDL_LOG_WARN("Drop ill-formed message from mobile");
     return NULL;
   }
 
@@ -230,9 +227,9 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV2(
     const MobileMessage& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (message->json_message().length() == 0) {
-    LOG4CXX_ERROR(logger_, "json string is empty.");
+    SDL_LOG_ERROR("json string is empty.");
   }
   uint32_t json_size = message->json_message().length();
   uint32_t binary_size = 0;

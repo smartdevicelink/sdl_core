@@ -1,0 +1,44 @@
+name: SDL Core Build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Init Submodules
+      run: git -C ${{ github.workspace }} submodule update --init --recursive
+    # Install Dependencies
+    - name: Apt Get Dependencies
+      run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools && sudo apt-get install -f clang-format-6.0
+    - name: Setup CMAKE
+      uses: jwlawson/actions-setup-cmake@v1.8
+      with:
+        cmake-version: '3.16.3'
+    # Check Style
+    - name: Check Style
+      run: ${{ github.workspace }}/tools/infrastructure/check_style.sh
+    # Build Project
+    - name: Cache 3rd Party
+      id: core-3rd-party
+      uses: actions/cache@v2
+      with:
+        path: ${{ github.workspace }}/core_3rd_party
+        key: ${{ runner.os }}-core-3rd-party-v3
+    - name: Make 3rd Party Directory
+      if: steps.core-3rd-party.outputs.cache-hit != 'true'
+      run: mkdir ${{ github.workspace }}/core_3rd_party
+    - name: Make Directories
+      run: cd ${{ github.workspace }} && cd ../ && mkdir build && cd build
+    - name: Set 3rd Party Path
+      run: echo "THIRD_PARTY_INSTALL_PREFIX=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
+    - name: Set 3rd Party ARCH Path
+      run: echo "THIRD_PARTY_INSTALL_PREFIX_ARCH=${{ github.workspace }}/core_3rd_party" >> $GITHUB_ENV
+    - name: Configure
+      run: cmake ../sdl_core -DBUILD_TESTS=ON -DLOGGER_NAME=BOOST
+    - name: Build
+      run: make install-3rd_party && make -j `nproc` install
+    - name: Set Library Path
+      run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
+    # run tests
+    - name: Unit Tests
+      run: make test

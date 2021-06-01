@@ -38,6 +38,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASGetAppServiceDataResponseToHMI::ASGetAppServiceDataResponseToHMI(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ ASGetAppServiceDataResponseToHMI::ASGetAppServiceDataResponseToHMI(
 ASGetAppServiceDataResponseToHMI::~ASGetAppServiceDataResponseToHMI() {}
 
 void ASGetAppServiceDataResponseToHMI::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   rpc_service_.SendMessageToHMI(message_);
 }
 

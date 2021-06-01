@@ -69,20 +69,23 @@ if(NOT BUILD_BACKTRACE_SUPPORT)
   )
 endif()
 
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES
-	log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
-    apr-1 -L${APR_LIBS_DIRECTORY}
-    aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
-	ConfigProfile
-  )
+if (ENABLE_LOG)
+  if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+    list(APPEND LIBRARIES
+    log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
+      apr-1 -L${APR_LIBS_DIRECTORY}
+      aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
+    ConfigProfile
+    )
+  else()
+    list(APPEND EXCLUDE_PATHS
+      logger/log4cxxlogger.cc
+    )
+  endif()
 else()
   list(APPEND EXCLUDE_PATHS
-    push_log.cc
-    log_message_loop_thread.cc
-    logger_status.cc
     auto_trace.cc
-    logger.cc
+    logger/log4cxxlogger.cc
   )
 endif()
 
@@ -124,12 +127,21 @@ list(APPEND LIBRARIES boost_system -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_thread -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_date_time -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_filesystem -L${BOOST_LIBS_DIRECTORY})
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  list(APPEND LIBRARIES boost_log_setup -L${BOOST_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES boost_log -L${BOOST_LIBS_DIRECTORY})
+endif ()
+list(APPEND LIBRARIES boost_regex -L${BOOST_LIBS_DIRECTORY})
 target_link_libraries("Utils" ${LIBRARIES})
 add_dependencies("Utils" Boost)
 
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" install-3rd_party_logger Boost)
+  if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+    add_dependencies("Utils" install-3rd_party_logger Boost)
+  else()
+    add_dependencies("Utils" Boost)
+  endif()
 endif()
 
 if(BUILD_TESTS)

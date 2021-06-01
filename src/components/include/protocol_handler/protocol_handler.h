@@ -134,16 +134,35 @@ class ProtocolHandler {
    * @param rejected_params list of parameters name that are rejected.
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
+   * @param err_reason string with NACK reason. Only valid when
+   * generated_session_id is 0.
    */
+  DEPRECATED
   virtual void NotifySessionStarted(
       const SessionContext& context,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string err_reason = std::string()) = 0;
+
+  /**
+   * @brief Called by connection handler to notify the context of
+   * OnSessionStartedCallback().
+   * @param context reference to structure with started session data
+   * @param rejected_params list of parameters name that are rejected.
+   * Only valid when generated_session_id is 0. Note, even if
+   * generated_session_id is 0, the list may be empty.
+   * @param err_reason string with NACK reason. Only valid when
+   * generated_session_id is 0.
+   */
+  virtual void NotifySessionStarted(
+      SessionContext& context,
+      std::vector<std::string>& rejected_params,
+      const std::string err_reason = std::string()) = 0;
 
   virtual bool IsRPCServiceSecure(const uint32_t connection_key) const = 0;
 
   virtual void ProcessFailedPTU() = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow

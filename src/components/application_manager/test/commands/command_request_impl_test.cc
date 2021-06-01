@@ -363,6 +363,9 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
+  MessageSharedPtr dummy_msg(CreateMessage());
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(dummy_msg));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
@@ -454,7 +457,9 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  MessageSharedPtr msg;
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::SubscribeVehicleDataID;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
@@ -543,8 +548,8 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
@@ -564,8 +569,8 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -583,8 +588,8 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = false;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = false;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -602,8 +607,8 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));

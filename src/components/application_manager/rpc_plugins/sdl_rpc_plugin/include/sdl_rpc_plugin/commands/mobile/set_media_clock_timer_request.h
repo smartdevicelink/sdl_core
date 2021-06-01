@@ -74,7 +74,7 @@ class SetMediaClockRequest : public app_mngr::commands::CommandRequestImpl {
   void on_event(const app_mngr::event_engine::Event& event);
 
  private:
-  bool isDataValid();
+  bool isDataValid(std::string& info);
 
   DISALLOW_COPY_AND_ASSIGN(SetMediaClockRequest);
 };

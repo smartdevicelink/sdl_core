@@ -43,6 +43,8 @@ namespace commands {
 
 namespace mobile {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnButtonEventNotification::OnButtonEventNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -58,7 +60,7 @@ OnButtonEventNotification::OnButtonEventNotification(
 OnButtonEventNotification::~OnButtonEventNotification() {}
 
 void OnButtonEventNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const uint32_t btn_id = static_cast<uint32_t>(
       (*message_)[strings::msg_params][hmi_response::button_name].asInt());
@@ -71,7 +73,7 @@ void OnButtonEventNotification::Run() {
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
     if (!is_app_id_exists) {
-      LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
+      SDL_LOG_ERROR("CUSTOM_BUTTON OnButtonEvent without app_id.");
       return;
     }
 
@@ -81,13 +83,12 @@ void OnButtonEventNotification::Run() {
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
     if (false == (*message_)[strings::msg_params].keyExists(
                      hmi_response::custom_button_id)) {
-      LOG4CXX_ERROR(logger_,
-                    "CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
+      SDL_LOG_ERROR("CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
       return;
     }
 
     if (!app) {
-      LOG4CXX_ERROR(logger_, "Application doesn't exist.");
+      SDL_LOG_ERROR("Application doesn't exist.");
       return;
     }
 
@@ -97,8 +98,7 @@ void OnButtonEventNotification::Run() {
             .asUInt();
 
     if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
-      LOG4CXX_ERROR(logger_,
-                    "Application doesn't subscribed to this custom_button_id.");
+      SDL_LOG_ERROR("Application doesn't subscribed to this custom_button_id.");
       return;
     }
 
@@ -106,9 +106,9 @@ void OnButtonEventNotification::Run() {
     (*message_)[strings::msg_params][strings::window_id] = window_id;
     const auto window_hmi_level = app->hmi_level(window_id);
     if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
-      LOG4CXX_WARN(logger_,
-                   "CUSTOM_BUTTON OnButtonEvent notification is not allowed in "
-                   "NONE hmi level");
+      SDL_LOG_WARN(
+          "CUSTOM_BUTTON OnButtonEvent notification is not allowed in "
+          "NONE hmi level");
       return;
     }
 
@@ -124,7 +124,7 @@ void OnButtonEventNotification::Run() {
   for (; subscribed_apps.end() != it; ++it) {
     ApplicationSharedPtr subscribed_app = *it;
     if (!subscribed_app) {
-      LOG4CXX_WARN(logger_, "Null pointer to subscribed app.");
+      SDL_LOG_WARN("Null pointer to subscribed app.");
       continue;
     }
 
@@ -134,13 +134,14 @@ void OnButtonEventNotification::Run() {
             mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
         (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
-      LOG4CXX_WARN(logger_,
-                   "OnButtonEvent notification is allowed only"
-                       << "in FULL or LIMITED hmi level");
+      SDL_LOG_WARN("OnButtonEvent notification is allowed only"
+                   << "in FULL or LIMITED hmi level");
       continue;
     }
-    // if "app_id" absent send notification only in HMI_FULL mode
-    if (is_app_id_exists || subscribed_app->IsFullscreen()) {
+    // if OK button and "app_id" absent send notification only in HMI_FULL mode
+    // otherwise send to subscribed apps in limited
+    if (is_app_id_exists || hmi_apis::Common_ButtonName::OK != btn_id ||
+        subscribed_app->IsFullscreen()) {
       SendButtonEvent(subscribed_app);
     }
   }
@@ -148,7 +149,7 @@ void OnButtonEventNotification::Run() {
 
 void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
   if (!app) {
-    LOG4CXX_ERROR(logger_, "OnButtonEvent NULL pointer");
+    SDL_LOG_ERROR("OnButtonEvent NULL pointer");
     return;
   }
 
@@ -156,7 +157,7 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
       std::make_shared<smart_objects::SmartObject>();
 
   if (!on_btn_event) {
-    LOG4CXX_ERROR(logger_, "OnButtonEvent NULL pointer");
+    SDL_LOG_ERROR("OnButtonEvent NULL pointer");
     return;
   }
 
