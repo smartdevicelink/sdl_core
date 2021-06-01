@@ -383,7 +383,7 @@ class StateControllerImplTest : public ::testing::Test {
       case APP_TYPE_NON_MEDIA: {
         PrepareCommonStateResults(result_hmi_state);
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_FULL,
+            createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
@@ -416,22 +416,22 @@ class StateControllerImplTest : public ::testing::Test {
       case APP_TYPE_NAVI: {
         PrepareCommonStateResults(result_hmi_state);
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_BACKGROUND,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
