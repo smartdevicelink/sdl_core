@@ -366,7 +366,7 @@ void FromMicToFileRecorderThread::exitThreadMain() {
 
   if (sleepThread_) {
     SDL_LOG_DEBUG("Stop sleep thread\n");
-    sleepThread_->stop();
+    sleepThread_->Stop(threads::Thread::kThreadStopDelegate);
   }
 
   SDL_LOG_TRACE("Set should be stopped flag\n");
