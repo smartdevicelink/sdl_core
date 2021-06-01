@@ -243,28 +243,28 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace mobile_apis;
-  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
+  if (HMILevel::INVALID_ENUM == parent_hmi_level() ||
+      HMILevel::HMI_NONE == parent_hmi_level()) {
     return parent_hmi_level();
   }
-  return std::max(parent_hmi_level(), max_hmi_level());
-}
-
-mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
-  using namespace helpers;
-  using namespace mobile_apis;
 
   if (WindowType::WIDGET == window_type()) {
     return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
-  auto expected = HMILevel::HMI_FULL;
+  auto expected = HMILevel::HMI_BACKGROUND;
   if (is_navi_app() || is_mobile_projection_app()) {
-    expected = HMILevel::HMI_LIMITED;
-  } else if (is_media_app() || is_voice_communication_app()) {
-    expected = HMILevel::HMI_BACKGROUND;
+    if (VideoStreamingState::STREAMABLE == video_streaming_state()) {
+      expected = HMILevel::HMI_LIMITED;
+    }
   }
 
   return std::max(expected, parent_max_hmi_level());
+}
+
+mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
+  using namespace mobile_apis;
+  return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
 }
 
 SafetyModeHmiState::SafetyModeHmiState(std::shared_ptr<Application> app,
