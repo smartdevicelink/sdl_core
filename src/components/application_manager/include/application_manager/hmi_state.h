@@ -440,7 +440,6 @@ class PhoneCallHmiState : public HmiState {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 
-  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
       const OVERRIDE {
     return audio_streaming_state();

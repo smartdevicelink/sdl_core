@@ -243,8 +243,7 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace mobile_apis;
-  if (HMILevel::INVALID_ENUM == parent_hmi_level() ||
-      HMILevel::HMI_NONE == parent_hmi_level()) {
+  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
     return parent_hmi_level();
   }
 
@@ -259,12 +258,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
     }
   }
 
-  return std::max(expected, parent_max_hmi_level());
-}
-
-mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
-  using namespace mobile_apis;
-  return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
+  return std::max(expected, parent_hmi_level());
 }
 
 SafetyModeHmiState::SafetyModeHmiState(std::shared_ptr<Application> app,
