@@ -34,7 +34,7 @@
 #include "application_manager/message_helper.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestTimeoutHandler")
+SDL_CREATE_LOG_VARIABLE("RequestTimeoutHandler")
 
 namespace application_manager {
 namespace request_controller {
@@ -53,7 +53,7 @@ void RequestTimeoutHandlerImpl::AddRequest(const uint32_t hmi_correlation_id,
 
 void RequestTimeoutHandlerImpl::RemoveRequest(
     const uint32_t hmi_correlation_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(requests_lock_);
   auto it = requests_.find(hmi_correlation_id);
   if (it != requests_.end()) {
@@ -74,29 +74,28 @@ bool RequestTimeoutHandlerImpl::IsTimeoutUpdateRequired(
       return true;
     }
 
-    LOG4CXX_WARN(logger_,
-                 "New timeout value is less than the time remaining from "
-                 "the current timeout. OnResetTimeout will be ignored");
+    SDL_LOG_WARN(
+        "New timeout value is less than the time remaining from "
+        "the current timeout. OnResetTimeout will be ignored");
     return false;
   }
 
-  LOG4CXX_WARN(logger_, "Method name does not match the hmi function id");
+  SDL_LOG_WARN("Method name does not match the hmi function id");
   return false;
 }
 
 void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto event_id = event.id();
   if (hmi_apis::FunctionID::BasicCommunication_OnResetTimeout == event_id) {
     const smart_objects::SmartObject& message = event.smart_object();
-    const auto method_name = MessageHelper::HMIFunctionIDFromString(
+    const auto method_name = StringToEnum<hmi_apis::FunctionID::eType>(
         message[strings::msg_params][strings::method_name].asString());
 
     if (hmi_apis::FunctionID::INVALID_ENUM == method_name) {
-      LOG4CXX_WARN(
-          logger_,
+      SDL_LOG_WARN(
           "Wrong method name received: "
-              << message[strings::msg_params][strings::method_name].asString());
+          << message[strings::msg_params][strings::method_name].asString());
       return;
     }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
@@ -115,8 +114,7 @@ void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
             request.connection_key_, request.mob_correlation_id_, timeout);
       }
     } else {
-      LOG4CXX_WARN(logger_,
-                   "Timeout reset failed by " << hmi_corr_id
+      SDL_LOG_WARN("Timeout reset failed by " << hmi_corr_id
                                               << ", no such mobile command");
     }
   }

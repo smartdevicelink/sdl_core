@@ -257,9 +257,9 @@ bool RPCServiceImpl::ManageMobileCommand(
     const request_controller::RequestController::TResult result =
         request_ctrl_.AddMobileRequest(command, app_hmi_level);
 
-    if (result == request_controller::RequestController::SUCCESS) {
+    if (result == request_controller::RequestController::TResult::SUCCESS) {
       SDL_LOG_DEBUG("Perform request");
-    } else if (result == request_controller::RequestController::
+    } else if (result == request_controller::RequestController::TResult::
                              TOO_MANY_PENDING_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable top perform request: "
                     << "TOO_MANY_PENDING_REQUESTS");
@@ -278,8 +278,8 @@ bool RPCServiceImpl::ManageMobileCommand(
 
       SendMessageToMobile(response);
       return false;
-    } else if (result ==
-               request_controller::RequestController::TOO_MANY_REQUESTS) {
+    } else if (result == request_controller::RequestController::TResult::
+                             TOO_MANY_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable to perform request: "
                     << "TOO_MANY_REQUESTS");
 
@@ -298,7 +298,7 @@ bool RPCServiceImpl::ManageMobileCommand(
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
       }
       return false;
-    } else if (result == request_controller::RequestController::
+    } else if (result == request_controller::RequestController::TResult::
                              NONE_HMI_LEVEL_MANY_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable to perform request: "
                     << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
@@ -386,7 +386,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
   if (kRequest == message_type) {
     SDL_LOG_DEBUG("ManageHMICommand");
     command->set_warning_info(warning_info);
-    request_ctrl_.addHMIRequest(command);
+    request_ctrl_.AddHMIRequest(command);
   }
 
   if (command->Init()) {

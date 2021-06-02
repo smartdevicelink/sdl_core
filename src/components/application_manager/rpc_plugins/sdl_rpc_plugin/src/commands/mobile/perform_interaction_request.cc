@@ -346,7 +346,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
     }
 
     SDL_LOG_DEBUG("Update timeout for UI");
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
 
         connection_key(), correlation_id(), default_timeout_);
     return false;
@@ -373,7 +373,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
     SDL_LOG_DEBUG("Update timeout for UI");
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout_);
   }
 

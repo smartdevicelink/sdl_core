@@ -133,9 +133,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
       CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_,
-          IsAppSubscribedForWayPoints(
-              ::testing::Matcher<application_manager::ApplicationSharedPtr>(_)))
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(false));
@@ -155,9 +153,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
-  EXPECT_CALL(*mock_message_helper_,
-              HMIFunctionIDFromString(kMethodNameSubscribeWayPoints))
-      .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
 
@@ -178,13 +173,12 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
   // RequestTimeoutHandler works with all the commands.
   // But just for testing, only SubscribeWayPointsRequest was chosen in current
   // test.
+
   std::unique_ptr<SubscribeWayPointsRequest> command =
       CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_,
-          IsAppSubscribedForWayPoints(
-              ::testing::Matcher<application_manager::ApplicationSharedPtr>(_)))
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(false));
@@ -203,9 +197,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
-  EXPECT_CALL(*mock_message_helper_,
-              HMIFunctionIDFromString(kMethodNameSubscribeWayPoints))
-      .WillOnce(Return(hmi_apis::FunctionID::Navigation_SubscribeWayPoints));
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
   EXPECT_CALL(
@@ -225,30 +216,25 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
 
 TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
   // RequestTimeoutHandler works with all the commands.
-  // But just for testing, only UnsubscribeWayPointsRequest was chosen in
+  // But just for testing, only SubscribeWayPointsRequest was chosen in
   // current test.
-  std::unique_ptr<UnsubscribeWayPointsRequest> command =
-      CreateCommand<UnsubscribeWayPointsRequest>();
+  std::unique_ptr<SubscribeWayPointsRequest> command =
+      CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
-
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<application_manager::ApplicationSharedPtr>(
-                      mock_app)))
-      .WillOnce(Return(true));
-
-  const std::set<uint32_t> subscribed_apps{kConnectionKey};
-
-  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
-      .WillOnce(Return(subscribed_apps));
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kRequestId));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
   notification_msg[msg_params][timeout_period_for_reset] = kTimeout;
-  notification_msg[msg_params][method_name] = kMethodNameUnsubscribeWayPoints;
-  notification_msg[msg_params][request_id] = kRequestId;
+  notification_msg[msg_params][method_name] = kMethodNameSubscribeWayPoints;
+  notification_msg[msg_params][request_id] = 0u;
   event.set_smart_object(notification_msg);
 
   ON_CALL(app_mngr_, get_settings())
@@ -256,9 +242,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
-  EXPECT_CALL(*mock_message_helper_,
-              HMIFunctionIDFromString(kMethodNameUnsubscribeWayPoints))
-      .WillOnce(Return(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints));
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
   EXPECT_CALL(mock_request_controller_, IsRequestTimeoutUpdateRequired(_, _, _))
@@ -272,29 +255,25 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
 
 TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
   // RequestTimeoutHandler works with all the commands.
-  // But just for testing, only UnsubscribeWayPointsRequest was chosen in
+  // But just for testing, only SubscribeWayPointsRequest was chosen in
   // current test.
-  std::unique_ptr<UnsubscribeWayPointsRequest> command =
-      CreateCommand<UnsubscribeWayPointsRequest>();
+  std::unique_ptr<SubscribeWayPointsRequest> command =
+      CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
-  EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<application_manager::ApplicationSharedPtr>(
-                      mock_app)))
-      .WillOnce(Return(true));
-
-  const std::set<uint32_t> subscribed_apps{kConnectionKey};
-
-  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
-      .WillOnce(Return(subscribed_apps));
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
+      .WillByDefault(Return(false));
+  ON_CALL(app_mngr_, GetNextHMICorrelationID())
+      .WillByDefault(Return(kRequestId));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
   notification_msg[msg_params][timeout_period_for_reset] = kTimeout;
   notification_msg[msg_params][method_name] = " ";
-  notification_msg[msg_params][request_id] = 0u;
+  notification_msg[msg_params][request_id] = kRequestId;
   event.set_smart_object(notification_msg);
 
   ON_CALL(app_mngr_, get_settings())
@@ -302,8 +281,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
 
-  EXPECT_CALL(*mock_message_helper_, HMIFunctionIDFromString(" "))
-      .WillOnce(Return(hmi_apis::FunctionID::INVALID_ENUM));
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
   EXPECT_CALL(mock_request_controller_, IsRequestTimeoutUpdateRequired(_, _, _))

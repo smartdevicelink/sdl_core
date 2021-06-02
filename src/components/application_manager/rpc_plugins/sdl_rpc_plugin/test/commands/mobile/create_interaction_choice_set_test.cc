@@ -854,7 +854,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   FillMessageFieldsItem2(message_);
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));

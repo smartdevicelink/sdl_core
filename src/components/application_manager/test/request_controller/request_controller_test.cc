@@ -289,7 +289,7 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
 
   auto waiter = TestAsyncWaiter::createInstance();
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));

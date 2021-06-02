@@ -110,7 +110,6 @@ class RCGetInteriorVehicleDataConsentTest
       , command_holder(app_mngr_)
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array))
-      , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
       , request_controller(mock_request_controler,

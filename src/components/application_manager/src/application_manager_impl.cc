@@ -3295,7 +3295,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     // Just to terminate RAI in case of connection is dropped (rare case)
     // App won't be unregistered since RAI has not been started yet
     SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
-    request_ctrl_.terminateAppRequests(app_id);
+    request_ctrl_->TerminateAppRequests(app_id);
 
     return;
   }

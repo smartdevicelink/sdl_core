@@ -114,7 +114,7 @@ RequestControllerImpl::TResult RequestControllerImpl::CheckPosibilitytoAdd(
   SDL_LOG_AUTO_TRACE();
   if (!CheckPendingRequestsAmount(settings_.pending_requests_amount())) {
     SDL_LOG_ERROR("Too many pending request");
-    return RequestController::TOO_MANY_PENDING_REQUESTS;
+    return RequestController::TResult::TOO_MANY_PENDING_REQUESTS;
   }
 
   const TrackResult track_result =
@@ -122,17 +122,17 @@ RequestControllerImpl::TResult RequestControllerImpl::CheckPosibilitytoAdd(
 
   if (TrackResult::kNoneLevelMaxRequestsExceeded == track_result) {
     SDL_LOG_ERROR("Too many application requests in hmi level NONE");
-    return RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
+    return RequestController::TResult::NONE_HMI_LEVEL_MANY_REQUESTS;
   }
 
   if (TrackResult::kMaxRequestsExceeded == track_result) {
     SDL_LOG_ERROR("Too many application requests");
-    return RequestController::TOO_MANY_REQUESTS;
+    return RequestController::TResult::TOO_MANY_REQUESTS;
   }
 
   if (IsLowVoltage()) {
     SDL_LOG_ERROR("Impossible to add request due to Low Voltage is active");
-    return RequestController::INVALID_DATA;
+    return RequestController::TResult::INVALID_DATA;
   }
 
   return TResult::SUCCESS;
@@ -161,7 +161,7 @@ bool RequestControllerImpl::IsRequestTimeoutUpdateRequired(
     const uint32_t app_id,
     const uint32_t correlation_id,
     const uint32_t new_timeout) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto request_info = waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
     date_time::TimeDuration current_time = date_time::getCurrentTime();
@@ -202,7 +202,7 @@ RequestController::TResult RequestControllerImpl::AddHMIRequest(
 
   if (request.use_count() == 0) {
     SDL_LOG_ERROR("HMI request pointer is invalid");
-    return RequestController::INVALID_DATA;
+    return RequestController::TResult::INVALID_DATA;
   }
   SDL_LOG_DEBUG(" correlation_id : " << request->correlation_id());
 
@@ -219,7 +219,7 @@ RequestController::TResult RequestControllerImpl::AddHMIRequest(
 
   if (IsLowVoltage()) {
     SDL_LOG_ERROR("Impossible to add request due to Low Voltage is active");
-    return RequestController::INVALID_DATA;
+    return RequestController::TResult::INVALID_DATA;
   }
 
   waiting_for_response_.Add(request_info_ptr);
@@ -229,7 +229,7 @@ RequestController::TResult RequestControllerImpl::AddHMIRequest(
   return RequestController::TResult::SUCCESS;
 }
 
-void RequestControllerImpl::addNotification(const RequestPtr ptr) {
+void RequestControllerImpl::AddNotification(const RequestPtr ptr) {
   SDL_LOG_AUTO_TRACE();
 
   if (IsLowVoltage()) {
@@ -318,7 +318,7 @@ void RequestControllerImpl::OnHMIResponse(const uint32_t correlation_id,
 }
 
 void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
-    const uint32_t& app_id) {
+    const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("app_id: " << app_id << "Waiting for execution"
                            << mobile_request_list_.size());
@@ -336,14 +336,14 @@ void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
 }
 
 void RequestControllerImpl::TerminateWaitingForResponseAppRequests(
-    const uint32_t& app_id) {
+    const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
   waiting_for_response_.RemoveByConnectionKey(app_id);
   SDL_LOG_DEBUG(
       "Waiting for response count : " << waiting_for_response_.Size());
 }
 
-void RequestControllerImpl::TerminateAppRequests(const uint32_t& app_id) {
+void RequestControllerImpl::TerminateAppRequests(const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("app_id : " << app_id
                             << "Requests waiting for execution count : "
@@ -356,7 +356,7 @@ void RequestControllerImpl::TerminateAppRequests(const uint32_t& app_id) {
   NotifyTimer();
 }
 
-void RequestControllerImpl::terminateAllHMIRequests() {
+void RequestControllerImpl::TerminateAllHMIRequests() {
   SDL_LOG_AUTO_TRACE();
   TerminateWaitingForResponseAppRequests(RequestInfo::HmiConnectionKey);
 }
@@ -456,8 +456,8 @@ void RequestControllerImpl::TimeoutThread() {
                  << " request id: " << probably_expired->requestId()
                  << " connection_key: " << probably_expired->app_id()
                  << " is expired");
-    const uint32_t experied_request_id = probably_expired->requestId();
-    const uint32_t experied_app_id = probably_expired->app_id();
+    const uint32_t expired_request_id = probably_expired->requestId();
+    const uint32_t expired_app_id = probably_expired->app_id();
 
     probably_expired->request()->onTimeOut();
     if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
@@ -469,8 +469,8 @@ void RequestControllerImpl::TimeoutThread() {
     }
     probably_expired = waiting_for_response_.FrontWithNotNullTimeout();
     if (probably_expired) {
-      if (experied_request_id == probably_expired->requestId() &&
-          experied_app_id == probably_expired->app_id()) {
+      if (expired_request_id == probably_expired->requestId() &&
+          expired_app_id == probably_expired->app_id()) {
         SDL_LOG_DEBUG("Expired request wasn't removed");
         break;
       }

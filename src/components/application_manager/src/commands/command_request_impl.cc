@@ -464,7 +464,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
     bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -901,9 +901,9 @@ void CommandRequestImpl::AddRequestToTimeoutHandler(
           function_id,
           hmi_apis::FunctionID::BasicCommunication_DialNumber,
           hmi_apis::FunctionID::INVALID_ENUM)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Current RPC is DialNumber or Invalid, OnResetTimeout "
-                  "logic is not applicable in this case");
+    SDL_LOG_DEBUG(
+        "Current RPC is DialNumber or Invalid, OnResetTimeout "
+        "logic is not applicable in this case");
     return;
   }
   // If soft buttons are present in Alert RPC, SDL will not use timeout tracking
@@ -912,9 +912,9 @@ void CommandRequestImpl::AddRequestToTimeoutHandler(
     if (request_to_hmi.keyExists(strings::msg_params)) {
       if (request_to_hmi[strings::msg_params].keyExists(
               strings::soft_buttons)) {
-        LOG4CXX_DEBUG(logger_,
-                      "Soft buttons are present in Alert RPC, OnResetTimeout "
-                      "logic is not applicable in this case");
+        SDL_LOG_DEBUG(
+            "Soft buttons are present in Alert RPC, OnResetTimeout "
+            "logic is not applicable in this case");
         return;
       }
     }
