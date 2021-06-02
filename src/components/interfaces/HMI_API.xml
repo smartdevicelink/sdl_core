@@ -4783,7 +4783,7 @@
     </function>
     <function name="DialNumber" messagetype="response">
     </function>
-    <function name="OnResetTimeout" messagetype="notification" since="6.2">
+    <function name="OnResetTimeout" messagetype="notification">
       <description>
         HMI must send this notification to SDL for method instance for which timeout needs to be reset
       </description>
@@ -5337,18 +5337,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="OnResetTimeout" messagetype="notification" deprecated="true" since="6.2">
-    <description>
-      Sender: HMI->SDL. HMI must send this notification every 10 sec. in case the 'methodName'
-      results long processing on HMI
-    </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that concerns the 'methodName'.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>The name of the method, the renew of timeout is required for</description>
-    </param>
   </function>
 </interface>
 
@@ -6048,15 +6036,6 @@
   </function>
   <function name="ClosePopUp" messagetype="response">
     <description>Provides the result of operation.</description>
-  </function>
-  <function name="OnResetTimeout" messagetype="notification" deprecated="true" since="6.2">
-    <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that invoked notifcation.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>Currently used method name on which was triggered action</description>
-    </param>
   </function>
   <function name="OnRecordStart" messagetype="notification">
     <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
