@@ -136,6 +136,18 @@ class ApplicationImpl : public virtual Application,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
+  /**
+   * @brief set_seek_enabled Set seek enabled for application
+   * @param seek_enabled
+   */
+  void set_seek_enabled(bool seek_enabled) OVERRIDE;
+
+  /**
+   * @brief seek_enabled
+   * @return true if seek enabled
+   */
+  bool seek_enabled() const OVERRIDE;
+
   bool SetVideoConfig(protocol_handler::ServiceType service_type,
                       const smart_objects::SmartObject& params);
   void StartStreaming(protocol_handler::ServiceType service_type);
@@ -570,6 +582,7 @@ class ApplicationImpl : public virtual Application,
   bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
   bool webengine_projection_enabled_;
+  bool seek_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;

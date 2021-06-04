@@ -89,6 +89,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_permissions_change_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_seek_media_clock_timer_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
@@ -470,6 +471,10 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnSeekMediaClockTimerID: {
+      return factory
+          .GetCreator<commands::mobile::OnSeekMediaClockTimerNotification>();
     }
     case mobile_apis::FunctionID::OnUpdateFileID: {
       return factory.GetCreator<commands::OnUpdateFileNotification>();

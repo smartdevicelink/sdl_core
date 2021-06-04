@@ -443,7 +443,11 @@
                             "LIMITED",
                             "BACKGROUND"
                         ]
+                    },
+                    "OnSeekMediaClockTimer": {
+                        "hmi_levels": ["FULL"]
                     }
+
                 }
             },
             "Location-1": {

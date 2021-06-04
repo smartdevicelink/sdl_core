@@ -107,6 +107,7 @@ ApplicationImpl::ApplicationImpl(
     , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
     , webengine_projection_enabled_(false)
+    , seek_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
     , video_streaming_allowed_(false)
@@ -307,6 +308,14 @@ void ApplicationImpl::set_webengine_projection_enabled(const bool option) {
 
 bool ApplicationImpl::webengine_projection_enabled() const {
   return webengine_projection_enabled_;
+}
+
+void ApplicationImpl::set_seek_enabled(bool seek_enabled) {
+  seek_enabled_ = seek_enabled;
+}
+
+bool ApplicationImpl::seek_enabled() const {
+  return seek_enabled_;
 }
 
 struct StateIDComparator {

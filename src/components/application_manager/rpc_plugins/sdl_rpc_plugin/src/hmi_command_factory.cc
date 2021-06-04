@@ -62,6 +62,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_put_file_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_resume_audio_source_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_consent_needed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_seek_media_clock_timer_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_start_device_discovery.h"
 #include "sdl_rpc_plugin/commands/hmi/on_status_update_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
@@ -687,6 +688,10 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::SDL_OnSDLConsentNeeded: {
       return factory.GetCreator<commands::OnSDLConsentNeededNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnSeekMediaClockTimer: {
+      return factory
+          .GetCreator<commands::hmi::OnSeekMediaClockTimerNotification>();
     }
     case hmi_apis::FunctionID::SDL_UpdateSDL: {
       return hmi_apis::messageType::request == message_type

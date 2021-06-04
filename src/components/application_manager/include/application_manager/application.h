@@ -634,6 +634,18 @@ class Application : public virtual InitialApplicationData,
   virtual void set_audio_streaming_allowed(bool state) = 0;
 
   /**
+   * @brief set_seek_enabled Set seek enabled for application
+   * @param seek_enabled
+   */
+  virtual void set_seek_enabled(bool seek_enabled) = 0;
+
+  /**
+   * @brief seek_enabled
+   * @return true if seek enabled
+   */
+  virtual bool seek_enabled() const = 0;
+
+  /**
    * @brief Sends SetVideoConfig request to HMI to configure streaming
    * @param service_type Type of streaming service, should be kMobileNav
    * @param params parameters of video streaming in key-value format

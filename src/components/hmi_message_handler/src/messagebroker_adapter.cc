@@ -147,6 +147,7 @@ void MessageBrokerAdapter::SubscribeTo() {
       "BasicCommunication.OnSystemCapabilityUpdated");
   MessageBrokerController::subscribeTo("UI.OnUpdateFile");
   MessageBrokerController::subscribeTo("UI.OnUpdateSubMenu");
+  MessageBrokerController::subscribeTo("UI.OnSeekMediaClockTimer");
 
   SDL_LOG_INFO("Subscribed to notifications.");
 }
