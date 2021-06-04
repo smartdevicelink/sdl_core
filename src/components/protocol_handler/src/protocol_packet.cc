@@ -325,21 +325,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
     }
     case FRAME_TYPE_SINGLE:
-      if (header.frameData != FRAME_DATA_SINGLE) {
-        SDL_LOG_WARN("FRAME_TYPE_SINGLE - Invalide frame data "
-                     << static_cast<int>(header.frameData));
-        return RESULT_FAIL;
-      }
-      break;
     case FRAME_TYPE_FIRST:
-      if (header.frameData != FRAME_DATA_FIRST) {
-        SDL_LOG_WARN("FRAME_TYPE_FIRST - Invalide frame data "
-                     << static_cast<int>(header.frameData));
-        return RESULT_FAIL;
-      }
-      break;
     case FRAME_TYPE_CONSECUTIVE:
-      // Could have any FrameInfo value
       break;
     default:
       SDL_LOG_WARN("Unknown frame type " << static_cast<int>(header.frameType));
