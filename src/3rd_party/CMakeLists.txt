@@ -186,7 +186,7 @@ find_package(PkgConfig)
 pkg_check_modules(BSON libbson)
 message (STATUS "bson installed in " ${BSON_LIBDIR} ", " ${BSON_INCLUDEDIR})
 
-if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.0"))
+if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.5"))
   message (STATUS "Building bson required")
   set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib CACHE INTERNAL "Sources of bson library" FORCE)
   set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of bson libraries" FORCE)
