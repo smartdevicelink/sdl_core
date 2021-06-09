@@ -46,6 +46,11 @@ class ButtonPressRequest : public RCCommandRequest {
       const RCCommandParams& params);
 
   /**
+   * @brief Init command command
+   */
+  bool Init() FINAL;
+
+  /**
    * @brief Execute command
    * send HMI request if message contains appropriate
    * button name and module type

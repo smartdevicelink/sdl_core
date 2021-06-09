@@ -220,10 +220,6 @@ void SetInteriorVehicleDataRequest::Execute() {
       }
     }
 
-    const auto default_timeout =
-        application_manager_.get_settings().default_timeout();
-    application_manager_.UpdateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout);
     (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
                [message_params::kModuleId] = module_id;
     SendHMIRequest(hmi_apis::FunctionID::RC_SetInteriorVehicleData,

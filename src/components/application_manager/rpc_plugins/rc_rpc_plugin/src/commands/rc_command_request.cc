@@ -278,7 +278,12 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
   SDL_LOG_AUTO_TRACE();
   if (is_allowed) {
     SetResourceState(module_type, ResourceState::BUSY);
+    const auto default_timeout =
+        application_manager_.get_settings().default_timeout();
+    application_manager_.UpdateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout);
     Execute();  // run child's logic
+
   } else {
     resource_allocation_manager_.OnDriverDisallowed(
         module_type, module_id, app_id);
