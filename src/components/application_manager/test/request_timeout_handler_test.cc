@@ -44,6 +44,7 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_request_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/request_info.h"
 #include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_request.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
@@ -163,6 +164,9 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               UpdateRequestTimeout(
                   mock_app->app_id(), command->correlation_id(), kTimeout));
+  EXPECT_CALL(app_mngr_,
+              UpdateRequestTimeout(
+                  RequestInfo::HmiConnectionKey, kRequestId, kTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -208,6 +212,9 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
       app_mngr_,
       UpdateRequestTimeout(
           mock_app->app_id(), command->correlation_id(), kDefaultTimeout));
+  EXPECT_CALL(app_mngr_,
+              UpdateRequestTimeout(
+                  RequestInfo::HmiConnectionKey, kRequestId, kDefaultTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
