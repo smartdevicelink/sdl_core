@@ -906,19 +906,26 @@ void CommandRequestImpl::AddRequestToTimeoutHandler(
         "logic is not applicable in this case");
     return;
   }
-  // If soft buttons are present in Alert RPC, SDL will not use timeout tracking
-  // for response, so the OnResetTimeout logic is not applicable in this case*/
-  if (hmi_apis::FunctionID::UI_Alert == function_id) {
+
+  // If soft buttons are present in Alert or SubtleAlert RPC, SDL will not use
+  // timeout tracking for response, so the OnResetTimeout logic is not
+  // applicable in this case
+  if (helpers::Compare<hmi_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+          function_id,
+          hmi_apis::FunctionID::UI_Alert,
+          hmi_apis::FunctionID::UI_SubtleAlert)) {
     if (request_to_hmi.keyExists(strings::msg_params)) {
       if (request_to_hmi[strings::msg_params].keyExists(
               strings::soft_buttons)) {
-        SDL_LOG_DEBUG(
-            "Soft buttons are present in Alert RPC, OnResetTimeout "
-            "logic is not applicable in this case");
+        SDL_LOG_DEBUG("Soft buttons are present in "
+                      << EnumToString(function_id)
+                      << " RPC, OnResetTimeout "
+                         "logic is not applicable in this case");
         return;
       }
     }
   }
+
   const application_manager::request_controller::Request request{
       correlation_id(), connection_key(), static_cast<uint32_t>(function_id)};
   application_manager_.get_request_timeout_handler().AddRequest(
