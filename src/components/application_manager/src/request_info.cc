@@ -42,7 +42,7 @@ namespace request_controller {
 
 SDL_CREATE_LOG_VARIABLE("RequestController")
 
-uint32_t RequestInfo::HmiConnectionKey = 0;
+constexpr uint32_t RequestInfo::HmiConnectionKey;
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, timeout_msec) {
@@ -132,13 +132,13 @@ bool RequestInfoSet::Add(RequestInfoPtr request_info) {
                                         << request_info->requestId());
   sync_primitives::AutoLock lock(pending_requests_lock_);
   CheckSetSizes();
-  const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_resilt =
+  const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_result =
       hash_sorted_pending_requests_.insert(request_info);
-  if (insert_resilt.second == true) {
-    const std::pair<TimeSortedRequestInfoSet::iterator, bool>& insert_resilt =
+  if (insert_result.second == true) {
+    const std::pair<TimeSortedRequestInfoSet::iterator, bool>& insert_result =
         time_sorted_pending_requests_.insert(request_info);
-    DCHECK(insert_resilt.second);
-    if (!insert_resilt.second) {
+    DCHECK(insert_result.second);
+    if (!insert_result.second) {
       return false;
     }
     CheckSetSizes();

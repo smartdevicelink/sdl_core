@@ -32,6 +32,7 @@
 
 #include "application_manager/request_timeout_handler_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/request_info.h"
 #include "utils/logger.h"
 
 SDL_CREATE_LOG_VARIABLE("RequestTimeoutHandler")
@@ -112,6 +113,8 @@ void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
       if (IsTimeoutUpdateRequired(request, timeout, method_name)) {
         application_manager_.UpdateRequestTimeout(
             request.connection_key_, request.mob_correlation_id_, timeout);
+        application_manager_.UpdateRequestTimeout(
+            RequestInfo::HmiConnectionKey, hmi_corr_id, timeout);
       }
     } else {
       SDL_LOG_WARN("Timeout reset failed by " << hmi_corr_id
