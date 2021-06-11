@@ -293,7 +293,7 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params][strings::result_code] =
         mobile_apis::Result::GENERIC_ERROR;
     response[strings::msg_params][strings::info] =
-        "Invalid message received from vehicle";
+        "Invalid result received from vehicle";
   } else {
     response[strings::msg_params][strings::result_code] = result_code;
   }
