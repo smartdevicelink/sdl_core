@@ -62,6 +62,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 #include "formatters/CFormatterJsonBase.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
@@ -3477,6 +3478,44 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
     }
   }
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
+void MessageHelper::AddDefaultParamsToTireStatus(
+    ApplicationSharedPtr app, smart_objects::SmartObject& response_from_hmi) {
+  const utils::SemanticVersion max_version_with_mandatory_params(7, 1, 0);
+
+  if (!app) {
+    SDL_LOG_ERROR("Application not found");
+    return;
+  }
+
+  if (app->msg_version() > max_version_with_mandatory_params) {
+    SDL_LOG_DEBUG(
+        "Tire status parameters are "
+        "non-mandatory for this app version, no need in default values");
+    return;
+  }
+
+  smart_objects::SmartObject& tire_status =
+      response_from_hmi[strings::msg_params][strings::tire_pressure];
+
+  if (!tire_status.keyExists(strings::pressure_telltale)) {
+    tire_status[strings::pressure_telltale] =
+        mobile_apis::WarningLightStatus::WLS_NOT_USED;
+  }
+
+  const std::vector<std::string> tires{strings::left_front,
+                                       strings::right_front,
+                                       strings::left_rear,
+                                       strings::right_rear,
+                                       strings::inner_left_rear,
+                                       strings::inner_right_rear};
+  for (const std::string& tire : tires) {
+    if (!tire_status.keyExists(tire)) {
+      tire_status[tire][strings::status] =
+          mobile_apis::ComponentVolumeStatus::CVS_UNKNOWN;
+    }
+  }
 }
 
 }  //  namespace application_manager

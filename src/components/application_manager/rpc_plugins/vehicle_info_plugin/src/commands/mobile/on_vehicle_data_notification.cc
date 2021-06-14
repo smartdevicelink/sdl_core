@@ -89,16 +89,22 @@ void OnVehicleDataNotification::Run() {
         SDL_LOG_ERROR("NULL pointer");
         continue;
       }
+
+      smart_objects::SmartObject output_message = *message_;
+      if (strings::tire_pressure == name) {
+        MessageHelper::AddDefaultParamsToTireStatus(app, output_message);
+      }
+
       notified_app_it = find(notify_apps.begin(), notify_apps.end(), app);
       if (notified_app_it == notify_apps.end()) {
         notify_apps.push_back(app);
         smart_objects::SmartObject msg_param =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_param[name] = (*message_)[strings::msg_params][name];
+        msg_param[name] = output_message[strings::msg_params][name];
         appSO.push_back(msg_param);
       } else {
         size_t idx = std::distance(notify_apps.begin(), notified_app_it);
-        appSO[idx][name] = (*message_)[strings::msg_params][name];
+        appSO[idx][name] = output_message[strings::msg_params][name];
       }
     }
   }
