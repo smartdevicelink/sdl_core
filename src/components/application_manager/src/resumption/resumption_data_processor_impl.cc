@@ -307,6 +307,14 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
 
 void ResumptionDataProcessorImpl::FinalizeResumption(
     const ResumeCtrl::ResumptionCallBack& callback, const uint32_t app_id) {
+  auto app = application_manager_.application(app_id);
+  if (!app) {
+    SDL_LOG_ERROR("App " << app_id
+                         << " is not registered, erasing resumption data");
+    EraseAppResumptionData(app_id);
+    return;
+  } 
+  
   if (IsResumptionSuccessful(app_id)) {
     SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
@@ -314,7 +322,7 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
   } else {
     SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    RevertRestoredData(app);
     application_manager_.state_controller().DropPostponedWindows(app_id);
   }
   EraseAppResumptionData(app_id);
