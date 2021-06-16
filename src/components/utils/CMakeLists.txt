@@ -71,6 +71,9 @@ endif()
 
 if (ENABLE_LOG)
   if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+    list(APPEND EXCLUDE_PATHS
+      logger/boostlogger.cc
+    )
     list(APPEND LIBRARIES
     log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
       apr-1 -L${APR_LIBS_DIRECTORY}
