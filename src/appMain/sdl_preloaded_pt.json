@@ -3618,14 +3618,14 @@
                             "type": "WarningLightStatus",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "pressureTelltale",
                             "key": "OEM_REF_PRES_TEL",
                             "type": "WarningLightStatus",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "leftFront",
@@ -3657,7 +3657,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "leftFront",
@@ -3688,7 +3688,7 @@
                             "key": "OEM_REF_LEFT_FR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "rightFront",
@@ -3720,7 +3720,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "rightFront",
@@ -3751,7 +3751,7 @@
                             "key": "OEM_REF_RIGHT_FR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "leftRear",
@@ -3783,7 +3783,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "leftRear",
@@ -3814,7 +3814,7 @@
                             "key": "OEM_REF_LEFT_REAR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "rightRear",
@@ -3846,7 +3846,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "rightRear",
@@ -3877,7 +3877,7 @@
                             "key": "OEM_REF_RIGHT_REAR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "innerLeftRear",
@@ -3909,7 +3909,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "innerLeftRear",
@@ -3940,7 +3940,7 @@
                             "key": "OEM_REF_IN_LEFT_REAR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         },
                         {
                             "name": "innerRightRear",
@@ -3972,7 +3972,7 @@
                             "type": "Struct",
                             "mandatory": true,
                             "since": "2.0",
-                            "until": "7.1"
+                            "until": "8.0"
                         },
                         {
                             "name": "innerRightRear",
@@ -4003,7 +4003,7 @@
                             "key": "OEM_REF_IN_RIGHT_REAR",
                             "type": "Struct",
                             "mandatory": false,
-                            "since": "7.1"
+                            "since": "8.0"
                         }
                     ],
                     "key": "OEM_REF_TIRE_PRES",
