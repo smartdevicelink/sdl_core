@@ -42,6 +42,7 @@ namespace application_manager_test {
 class MockRequestController
     : public application_manager::request_controller::RequestController {
  public:
+  MOCK_METHOD0(Stop, void());
   MOCK_METHOD0(InitializeThreadpool, void());
   MOCK_METHOD0(DestroyThreadpool, void());
   MOCK_METHOD2(
