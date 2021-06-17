@@ -89,6 +89,7 @@ else()
   list(APPEND EXCLUDE_PATHS
     auto_trace.cc
     logger/log4cxxlogger.cc
+    logger/boostlogger.cc
   )
 endif()
 
