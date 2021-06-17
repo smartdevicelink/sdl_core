@@ -313,8 +313,8 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
                          << " is not registered, erasing resumption data");
     EraseAppResumptionData(app_id);
     return;
-  } 
-  
+  }
+
   if (IsResumptionSuccessful(app_id)) {
     SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
