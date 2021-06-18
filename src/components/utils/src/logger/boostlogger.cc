@@ -138,6 +138,7 @@ logging::trivial::severity_level getBoostLogLevel(LogLevel log_level) {
       return logging::trivial::severity_level::fatal;
     default:
       assert(false);
+      return logging::trivial::severity_level::trace;
   }
 }
 
