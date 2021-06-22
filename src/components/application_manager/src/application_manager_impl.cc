@@ -2606,7 +2606,7 @@ bool ApplicationManagerImpl::Stop() {
   } catch (...) {
     SDL_LOG_ERROR("An error occurred during unregistering applications.");
   }
-  request_ctrl_->DestroyThreadpool();
+  request_ctrl_->Stop();
 
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   SDL_LOG_DEBUG("Unloading policy library.");

@@ -73,6 +73,11 @@ class RequestController {
   virtual ~RequestController() {}
 
   /**
+   * @brief Stop request controller internal activities
+   */
+  virtual void Stop() = 0;
+
+  /**
    * @brief Initialize thread pool
    */
   virtual void InitializeThreadpool() = 0;

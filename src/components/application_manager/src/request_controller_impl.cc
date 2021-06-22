@@ -67,15 +67,24 @@ RequestControllerImpl::RequestControllerImpl(
 
 RequestControllerImpl::~RequestControllerImpl() {
   SDL_LOG_AUTO_TRACE();
+  Stop();
+}
+
+void RequestControllerImpl::Stop() {
+  SDL_LOG_AUTO_TRACE();
+
   {
     sync_primitives::AutoLock auto_lock(timer_lock);
     timer_stop_flag_ = true;
     timer_condition_.Broadcast();
   }
-  timer_.Stop();
+
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
   }
+
+  SDL_LOG_DEBUG("Stopping timeout tracker");
+  timer_.Stop();
 }
 
 void RequestControllerImpl::InitializeThreadpool() {
@@ -420,6 +429,12 @@ bool RequestControllerImpl::IsLowVoltage() {
 
 void RequestControllerImpl::TimeoutThread() {
   SDL_LOG_AUTO_TRACE();
+
+  if (TPoolState::STOPPED == pool_state_) {
+    SDL_LOG_DEBUG("Thread pool has been stopped. Skipping timer restart");
+    return;
+  }
+
   SDL_LOG_DEBUG(
       "ENTER Waiting fore response count: " << waiting_for_response_.Size());
   sync_primitives::AutoLock auto_lock(timer_lock);

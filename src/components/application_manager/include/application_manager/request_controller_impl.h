@@ -68,6 +68,8 @@ class RequestControllerImpl : public RequestController {
 
   ~RequestControllerImpl();
 
+  void Stop() OVERRIDE;
+
   void InitializeThreadpool() OVERRIDE;
 
   void DestroyThreadpool() OVERRIDE;
