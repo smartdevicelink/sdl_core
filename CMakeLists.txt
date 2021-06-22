@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0054 NEW)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -510,7 +511,11 @@ add_subdirectory(./src/appMain)
 add_subdirectory(./src/plugins)
 
 add_dependencies(${PROJECT} Policy)
-add_dependencies(${PROJECT} copy_policy_library)
+if(EXTENDED_POLICY STREQUAL "EXTERNAL_PROPRIETARY")
+  add_dependencies(${PROJECT} copy_library_Policy)
+else()
+  add_dependencies(${PROJECT} copy_policy_library)
+endif()
 
 # Building documentation
 
