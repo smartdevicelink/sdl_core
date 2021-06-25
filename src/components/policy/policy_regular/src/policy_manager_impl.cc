@@ -87,7 +87,7 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   update_status_manager_.set_listener(listener);
 }
 
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
+#ifdef PROPRIETARY_MODE
 
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
@@ -330,7 +330,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   SDL_LOG_DEBUG(
       "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
+#ifdef PROPRIETARY_MODE
   // Assuemes Policy Table was parsed, formatted, and/or decrypted by
   // the HMI after system request before calling OnReceivedPolicyUpdate
   // Parse message into table struct

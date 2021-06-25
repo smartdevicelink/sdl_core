@@ -873,7 +873,7 @@ class PolicyManagerImpl : public PolicyManager {
   void ResetTimeout() OVERRIDE;
 
  protected:
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
+#ifdef PROPRIETARY_MODE
   /**
    * @brief Parse policy table content and convert to PT object
    * @param pt_content binary content of PT
