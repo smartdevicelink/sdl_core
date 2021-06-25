@@ -388,13 +388,23 @@ void RequestControllerImpl::UpdateRequestTimeout(const uint32_t app_id,
   SDL_LOG_DEBUG("app_id : " << app_id
                             << " mobile_correlation_id : " << correlation_id
                             << " new_timeout : " << new_timeout);
-  SDL_LOG_DEBUG(
-      "New_timeout is NULL. RequestCtrl will "
-      "not manage this request any more");
+
+  if (new_timeout == 0) {
+    SDL_LOG_DEBUG(
+        "New_timeout is NULL. RequestCtrl will "
+        "not manage this request any more");
+  }
 
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
+    if (0 == request_info->timeout_msec()) {
+      SDL_LOG_INFO(
+          "Request with zero timeout is not updating, "
+          "manual control is assumed");
+      return;
+    }
+
     waiting_for_response_.RemoveRequest(request_info);
     request_info->updateTimeOut(new_timeout);
     waiting_for_response_.Add(request_info);
