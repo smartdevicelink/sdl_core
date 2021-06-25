@@ -373,8 +373,8 @@ INSTANTIATE_TEST_CASE_P(
     CorrectProtocol,
     SSLHandshakeTest,
     ::testing::Values(
-        Protocol(security_manager::TLSv1, security_manager::TLSv1),
-        Protocol(security_manager::TLSv1_1, security_manager::TLSv1_1),
+        // Protocol(security_manager::TLSv1, security_manager::TLSv1),
+        // Protocol(security_manager::TLSv1_1, security_manager::TLSv1_1),
         Protocol(security_manager::TLSv1_2, security_manager::TLSv1_2),
         Protocol(security_manager::DTLSv1, security_manager::DTLSv1)));
 

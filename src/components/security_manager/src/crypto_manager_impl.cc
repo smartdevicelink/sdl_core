@@ -165,44 +165,17 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
-#ifdef OPENSSL_NO_SSL3
       SDL_LOG_WARN("OpenSSL does not support SSL3 protocol");
       return false;
-#else
-      SDL_LOG_DEBUG("SSLv3 is used");
-      method = is_server ? SSLv3_server_method() : SSLv3_client_method();
-      SSL_CTX_set_max_proto_version(context_, SSL3_VERSION);
-      break;
-#endif
     case TLSv1:
-      SDL_LOG_DEBUG("TLSv1 is used");
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
-      method = is_server ? TLS_server_method() : TLS_client_method();
-      SSL_CTX_set_max_proto_version(context_, TLS1_VERSION);
-#endif
-      break;
+      SDL_LOG_DEBUG("Protocol TLSv1 is unsupported");
+      return false;
     case TLSv1_1:
-      SDL_LOG_DEBUG("TLSv1_1 is used");
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      SDL_LOG_WARN(
-          "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
-#else
-      method = is_server ? TLS_server_method() : TLS_client_method();
-      SSL_CTX_set_max_proto_version(context_, TLS1_1_VERSION);
-#endif
-      break;
+      SDL_LOG_DEBUG("Protocol TLSv1_1 is unsupported");
+      return false;
     case TLSv1_2:
       SDL_LOG_DEBUG("TLSv1_2 is used");
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      SDL_LOG_WARN(
-          "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();

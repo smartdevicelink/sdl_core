@@ -193,9 +193,9 @@ TEST_F(CryptoManagerTest, CorrectInit) {
       security_manager::CLIENT, security_manager::TLSv1_2, kFordCipher);
   EXPECT_TRUE(crypto_manager_->Init());
 
-  SetInitialValues(
-      security_manager::CLIENT, security_manager::TLSv1_1, kFordCipher);
-  EXPECT_TRUE(crypto_manager_->Init());
+//   SetInitialValues(
+//       security_manager::CLIENT, security_manager::TLSv1_1, kFordCipher);
+//   EXPECT_TRUE(crypto_manager_->Init());
 
   SetInitialValues(
       security_manager::CLIENT, security_manager::DTLSv1, kFordCipher);
