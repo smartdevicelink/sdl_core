@@ -172,20 +172,6 @@ class RequestController {
   virtual void UpdateRequestTimeout(const uint32_t app_id,
                                     const uint32_t mobile_correlation_id,
                                     const uint32_t new_timeout) = 0;
-
-  /**
-   * @brief IsRequestTimeoutUpdateRequired check is update timeout required.
-   * @param app_id Connection key of application
-   * @param correlation_id Correlation ID of the mobile request
-   * @param new_timeout New timeout value which should be compared with the
-   * remaining time of specified request
-   * @return true if the new timeout value is greater than the time remaining
-   * from the current timeout, otherwise - false
-   */
-  virtual bool IsRequestTimeoutUpdateRequired(
-      const uint32_t app_id,
-      const uint32_t correlation_id,
-      const uint32_t new_timeout) const = 0;
   /**
    * @brief Function Should be called when Low Voltage is occured
    */

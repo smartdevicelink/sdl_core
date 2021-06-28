@@ -66,23 +66,18 @@ bool RequestTimeoutHandlerImpl::IsTimeoutUpdateRequired(
     const Request& request,
     const uint32_t timeout,
     const hmi_apis::FunctionID::eType method_name) {
-  if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) ==
-      method_name) {
-    if (application_manager_.get_request_controller()
-            .IsRequestTimeoutUpdateRequired(request.connection_key_,
-                                            request.mob_correlation_id_,
-                                            timeout)) {
-      return true;
-    }
-
-    SDL_LOG_WARN(
-        "New timeout value is less than the time remaining from "
-        "the current timeout. OnResetTimeout will be ignored");
+  if (0 == timeout) {
+    SDL_LOG_WARN("Zero timeout ignored");
     return false;
   }
 
-  SDL_LOG_WARN("Method name does not match the hmi function id");
-  return false;
+  if (static_cast<hmi_apis::FunctionID::eType>(request.hmi_function_id_) !=
+      method_name) {
+    SDL_LOG_WARN("Method name does not match the hmi function id");
+    return false;
+  }
+
+  return true;
 }
 
 void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {

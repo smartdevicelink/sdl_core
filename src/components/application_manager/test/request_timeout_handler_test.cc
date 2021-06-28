@@ -157,10 +157,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
 
-  EXPECT_CALL(mock_request_controller_,
-              IsRequestTimeoutUpdateRequired(
-                  mock_app->app_id(), command->correlation_id(), kTimeout))
-      .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_,
               UpdateRequestTimeout(
                   mock_app->app_id(), command->correlation_id(), kTimeout));
@@ -204,11 +200,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
   EXPECT_CALL(
-      mock_request_controller_,
-      IsRequestTimeoutUpdateRequired(
-          mock_app->app_id(), command->correlation_id(), kDefaultTimeout))
-      .WillOnce(Return(true));
-  EXPECT_CALL(
       app_mngr_,
       UpdateRequestTimeout(
           mock_app->app_id(), command->correlation_id(), kDefaultTimeout));
@@ -251,8 +242,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
-  EXPECT_CALL(mock_request_controller_, IsRequestTimeoutUpdateRequired(_, _, _))
-      .Times(0);
   EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());
@@ -290,8 +279,6 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
-  EXPECT_CALL(mock_request_controller_, IsRequestTimeoutUpdateRequired(_, _, _))
-      .Times(0);
   EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
 
   ASSERT_TRUE(command->Init());

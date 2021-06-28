@@ -166,23 +166,6 @@ bool RequestControllerImpl::CheckPendingRequestsAmount(
   return true;
 }
 
-bool RequestControllerImpl::IsRequestTimeoutUpdateRequired(
-    const uint32_t app_id,
-    const uint32_t correlation_id,
-    const uint32_t new_timeout) const {
-  SDL_LOG_AUTO_TRACE();
-  auto request_info = waiting_for_response_.Find(app_id, correlation_id);
-  if (request_info) {
-    date_time::TimeDuration current_time = date_time::getCurrentTime();
-    const date_time::TimeDuration end_time = request_info->end_time();
-    date_time::AddMilliseconds(current_time, new_timeout);
-    if (date_time::getmSecs(current_time) > date_time::getmSecs(end_time)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 RequestController::TResult RequestControllerImpl::AddMobileRequest(
     const RequestPtr request, const mobile_apis::HMILevel::eType& hmi_level) {
   SDL_LOG_AUTO_TRACE();

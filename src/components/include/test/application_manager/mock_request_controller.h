@@ -76,10 +76,6 @@ class MockRequestController
                void(const uint32_t app_id,
                     const uint32_t mobile_correlation_id,
                     const uint32_t new_timeout));
-  MOCK_CONST_METHOD3(IsRequestTimeoutUpdateRequired,
-                     bool(const uint32_t app_id,
-                          const uint32_t correlation_id,
-                          const uint32_t new_timeout));
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
   MOCK_METHOD0(IsLowVoltage, bool());
