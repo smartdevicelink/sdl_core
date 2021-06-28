@@ -873,7 +873,6 @@ class PolicyManagerImpl : public PolicyManager {
   void ResetTimeout() OVERRIDE;
 
  protected:
-#ifdef PROPRIETARY_MODE
   /**
    * @brief Parse policy table content and convert to PT object
    * @param pt_content binary content of PT
@@ -881,15 +880,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   virtual std::shared_ptr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
-#else
-  /**
-   * @brief Parse policy table content and convert to PT object
-   * @param pt_content binary content of PT
-   * @return pointer to converted PT
-   */
-  virtual std::shared_ptr<policy_table::Table> ParseArray(
-      const BinaryMessage& pt_content);
-#endif
 
   /**
    * @brief Getter for policy settings
