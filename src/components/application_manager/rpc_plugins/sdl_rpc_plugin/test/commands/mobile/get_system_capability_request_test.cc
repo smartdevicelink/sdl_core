@@ -117,6 +117,39 @@ TEST_F(
   command_->Run();
 }
 
+TEST_F(GetSystemCapabilityRequestTest, Run_GetSystemDisplayCapabilities_AppNotRegistered) {
+    EXPECT_CALL(app_mngr_, application(kConnectionKey))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(mock_rpc_service_,
+            ManageMobileCommand(
+                MobileResultCodeIs(mobile_apis::Result::APPLICATION_NOT_REGISTERED),
+                Command::CommandSource::SOURCE_SDL));
+    ASSERT_TRUE(command_->Init());
+    command_->Run();
+}
+
+TEST_F(
+    GetSystemCapabilityRequestTest,
+    Run_GetSystemDisplayCapabilities_NAVIGATION_SUCCESSResultCode) {
+  (*message_)[strings::msg_params][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::NAVIGATION;
+
+  smart_objects::SmartObjectSPtr system_navigation_capabilities(
+      std::make_shared<smart_objects::SmartObject>());
+
+  ON_CALL(mock_hmi_capabilities_, navigation_capability())
+      .WillByDefault(Return(system_navigation_capabilities));
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+                          Command::CommandSource::SOURCE_SDL));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+
 }  // namespace get_system_capability_request_test
 }  // namespace mobile_commands_test
 }  // namespace commands_test
