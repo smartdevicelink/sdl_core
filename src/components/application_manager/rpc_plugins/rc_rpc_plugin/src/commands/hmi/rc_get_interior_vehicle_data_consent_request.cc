@@ -45,10 +45,7 @@ RCGetInteriorVehicleDataConsentRequest::RCGetInteriorVehicleDataConsentRequest(
                                                   params.application_manager_,
                                                   params.rpc_service_,
                                                   params.hmi_capabilities_,
-                                                  params.policy_handler_) {
-  // Increase default timeout for user interaction.
-  default_timeout_ = default_timeout_ * 2;
-}
+                                                  params.policy_handler_) {}
 
 RCGetInteriorVehicleDataConsentRequest::
     ~RCGetInteriorVehicleDataConsentRequest() {}
