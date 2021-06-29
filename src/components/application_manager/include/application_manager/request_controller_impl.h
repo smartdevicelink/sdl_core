@@ -106,11 +106,6 @@ class RequestControllerImpl : public RequestController {
                             const uint32_t mobile_correlation_id,
                             const uint32_t new_timeout) OVERRIDE;
 
-  bool IsRequestTimeoutUpdateRequired(
-      const uint32_t app_id,
-      const uint32_t correlation_id,
-      const uint32_t new_timeout) const OVERRIDE;
-
   void OnLowVoltage() OVERRIDE;
 
   void OnWakeUp() OVERRIDE;

@@ -47,11 +47,6 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
       const RCCommandParams& params);
 
   /**
-   * @brief Init command
-   */
-  bool Init() FINAL;
-
-  /**
    * @brief Execute command
    */
   void Execute() FINAL;
