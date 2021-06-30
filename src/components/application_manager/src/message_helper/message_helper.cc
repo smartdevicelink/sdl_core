@@ -1158,6 +1158,27 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
 }
 
 smart_objects::SmartObjectSPtr
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button_name,
+    const hmi_apis::FunctionID::eType function_id,
+    application_manager::ApplicationManager& app_mngr) {
+  using namespace smart_objects;
+  SDL_LOG_AUTO_TRACE();
+
+  SmartObjectSPtr request_ptr = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+
+  SmartObject& request = *request_ptr;
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::button_name] = button_name;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::msg_params] = msg_params;
+  return request_ptr;
+}
+
+smart_objects::SmartObjectSPtr
 MessageHelper::CreateOnButtonSubscriptionNotification(
     uint32_t app_id,
     hmi_apis::Common_ButtonName::eType button,

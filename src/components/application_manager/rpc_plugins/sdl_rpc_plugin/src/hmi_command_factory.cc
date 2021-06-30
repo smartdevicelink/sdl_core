@@ -77,6 +77,8 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "sdl_rpc_plugin/commands/hmi/subscribe_button_request.h"
+#include "sdl_rpc_plugin/commands/hmi/subscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_change_registration_response.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_request.h"
@@ -680,6 +682,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::ButtonGetCapabilitiesRequest>()
                  : factory
                        .GetCreator<commands::ButtonGetCapabilitiesResponse>();
+    }
+    case hmi_apis::FunctionID::Buttons_SubscribeButton: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::hmi::SubscribeButtonRequest>()
+                 : factory.GetCreator<commands::hmi::SubscribeButtonResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       return factory

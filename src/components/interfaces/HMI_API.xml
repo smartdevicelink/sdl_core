@@ -4546,6 +4546,30 @@
             </description>
         </param>
     </function>
+    <function name="SubscribeButton" messagetype="request">
+      <description>
+        Subscribes to buttons.
+      </description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>The ID of the application requesting this button subscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to subscribe.</description>
+      </param>
+    </function>
+    <function name="SubscribeButton" messagetype="response"> </function>
+    <function name="UnsubscribeButton" messagetype="request">
+      <description>
+        Unsubscribes from buttons.
+      </description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>The ID of the application requesting this button unsubscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to unsubscribe from.</description>
+      </param>
+    </function>
+    <function name="UnsubscribeButton" messagetype="response"></function>
     <function name="OnButtonSubscription" messagetype="notification">
       <description>
         Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application

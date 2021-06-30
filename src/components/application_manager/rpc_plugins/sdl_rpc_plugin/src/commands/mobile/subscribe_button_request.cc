@@ -32,6 +32,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_request.h"
+#include "application_manager/message_helper.h"
 #include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
@@ -104,16 +105,64 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-  SendSubscribeButtonNotification();
-
-  const bool is_succeeded = true;
-  SendResponse(is_succeeded, mobile_apis::Result::SUCCESS);
+  (*message_)[str::msg_params][str::app_id] = app->app_id();
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
+  SendHMIRequest(hmi_apis::FunctionID::Buttons_SubscribeButton,
+                 &(*message_)[app_mngr::strings::msg_params],
+                 true);
 }
 
 bool SubscribeButtonRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
   return true;
+}
+
+void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
+  SDL_LOG_AUTO_TRACE();
+
+  const smart_objects::SmartObject& message = event.smart_object();
+
+  if (hmi_apis::FunctionID::Buttons_SubscribeButton != event.id()) {
+    SDL_LOG_ERROR("Received unknown event.");
+    return;
+  }
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
+  ApplicationSharedPtr app =
+      application_manager_.application(CommandRequestImpl::connection_key());
+
+  if (!app) {
+    SDL_LOG_ERROR("NULL pointer.");
+    return;
+  }
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool result = PrepareResultForMobileResponse(
+      hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons);
+
+  mobile_apis::Result::eType result_code =
+      MessageHelper::HMIToMobileResult(hmi_result);
+
+  SendResponse(result,
+               result_code,
+               response_info.empty() ? nullptr : response_info.c_str(),
+               &(message[strings::msg_params]));
+}
+
+bool IsPresetButton(const mobile_apis::ButtonName::eType btn_id) {
+  return (mobile_apis::ButtonName::PRESET_0 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_1 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_2 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_3 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_4 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_5 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_6 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_7 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_8 == btn_id) ||
+         (mobile_apis::ButtonName::PRESET_9 == btn_id);
 }
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
@@ -123,7 +172,8 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
        (mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
        (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
        (mobile_apis::ButtonName::TUNEUP == btn_id) ||
-       (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
+       (mobile_apis::ButtonName::TUNEDOWN == btn_id) ||
+       IsPresetButton(btn_id))) {
     return false;
   }
 
@@ -147,19 +197,6 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
   }
 
   return true;
-}
-
-void SubscribeButtonRequest::SendSubscribeButtonNotification() {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-
-  // send OnButtonSubscription notification
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
-      (*message_)[strings::msg_params][strings::button_name].asUInt());
-  msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }
 
 }  // namespace commands

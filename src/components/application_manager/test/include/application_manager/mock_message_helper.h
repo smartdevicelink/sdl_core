@@ -201,6 +201,13 @@ class MockMessageHelper {
       smart_objects::SmartObjectSPtr(uint32_t app_id,
                                      hmi_apis::Common_ButtonName::eType button,
                                      bool is_subscribed));
+  MOCK_METHOD4(CreateButtonSubscriptionHandlingRequestToHmi,
+               smart_objects::SmartObjectSPtr(
+                   const uint32_t app_id,
+                   const hmi_apis::Common_ButtonName::eType button_name,
+                   const hmi_apis::FunctionID::eType function_id,
+                   application_manager::ApplicationManager& app_mngr));
+
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,

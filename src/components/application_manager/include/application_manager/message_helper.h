@@ -320,6 +320,21 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const ButtonSubscriptions& button_subscriptions);
 
+  /**
+   * @brief Creates button subscription request to hmi
+   * @param app_id id of application for which request should be created
+   * @param button_name button to be subscribed
+   * @param function_id function ID
+   * @param app_mngr reference to application manager
+   * @return Smart object with fulfilled request
+   */
+  static smart_objects::SmartObjectSPtr
+  CreateButtonSubscriptionHandlingRequestToHmi(
+      const uint32_t app_id,
+      const hmi_apis::Common_ButtonName::eType button_name,
+      const hmi_apis::FunctionID::eType function_id,
+      ApplicationManager& app_mngr);
+
   static void SendAppDataToHMI(ApplicationConstSharedPtr app,
                                ApplicationManager& app_man);
   static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,

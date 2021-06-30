@@ -608,6 +608,17 @@ MessageHelper::CreateOnButtonSubscriptionNotification(
       ->CreateOnButtonSubscriptionNotification(app_id, button, is_subscribed);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button_name,
+    const hmi_apis::FunctionID::eType function_id,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonSubscriptionHandlingRequestToHmi(
+          app_id, button_name, function_id, app_mngr);
+}
+
 smart_objects::SmartObjectList
 MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
     ApplicationConstSharedPtr application,
