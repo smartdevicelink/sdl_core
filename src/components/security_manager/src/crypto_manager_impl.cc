@@ -168,10 +168,10 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN("OpenSSL does not support SSL3 protocol");
       return false;
     case TLSv1:
-      SDL_LOG_DEBUG("Protocol TLSv1 is unsupported");
+      SDL_LOG_WARN("Protocol TLSv1 is unsupported");
       return false;
     case TLSv1_1:
-      SDL_LOG_DEBUG("Protocol TLSv1_1 is unsupported");
+      SDL_LOG_WARN("Protocol TLSv1_1 is unsupported");
       return false;
     case TLSv1_2:
       SDL_LOG_DEBUG("TLSv1_2 is used");
