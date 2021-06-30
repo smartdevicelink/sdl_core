@@ -3412,7 +3412,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
         break;
       }
-      default: { continue; }
+      default: {
+        continue;
+      }
     }
 
     soft_buttons[j++] = request_soft_buttons[i];

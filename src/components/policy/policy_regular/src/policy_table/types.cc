@@ -19,7 +19,9 @@ std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
     case PT_SNAPSHOT: {
       return "PT_SNAPSHOT";
     }
-    default: { return "INVALID_PT_TYPE"; }
+    default: {
+      return "INVALID_PT_TYPE";
+    }
   }
 }
 

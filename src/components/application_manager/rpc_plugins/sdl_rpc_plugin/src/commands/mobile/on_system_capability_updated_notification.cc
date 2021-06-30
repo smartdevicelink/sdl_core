@@ -239,7 +239,9 @@ void OnSystemCapabilityUpdatedNotification::Run() {
         msg_params[strings::system_capability][strings::display_capabilities] =
             *capabilities;
       } break;
-      default: { SDL_LOG_ERROR("Unknown system capability type"); }
+      default: {
+        SDL_LOG_ERROR("Unknown system capability type");
+      }
     }
 
     SDL_LOG_INFO("Sending OnSystemCapabilityUpdated " << capability_type_string
