@@ -40,8 +40,6 @@
 #include "resumption/last_state_wrapper_impl.h"
 #include "smart_objects/smart_object.h"
 
-#include "application_manager/mock_app_service_manager.h"
-
 namespace test {
 namespace components {
 namespace commands_test {
@@ -85,7 +83,6 @@ class GetSystemCapabilityRequestTest
   GetSystemCapabilityRequestPtr command_;
   MessageSharedPtr message_;
   MockAppPtr mock_app_;
-  MockApplicationManager app_manager_mock_;
   std::shared_ptr<MockAppServiceManager> mock_app_service_mngr_;
   resumption::LastStateWrapperPtr last_state_;
 };
@@ -227,6 +224,22 @@ TEST_F(GetSystemCapabilityRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+                          Command::CommandSource::SOURCE_SDL));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(GetSystemCapabilityRequestTest,
+       Run_GetSystemDisplayCapabilities_REMOTECONTROL_DISALLOWEDResultCode) {
+  (*message_)[strings::msg_params][strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::REMOTE_CONTROL;
+
+  EXPECT_CALL(*mock_app_, is_remote_control_supported())
+      .WillOnce(Return(false));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::DISALLOWED),
                           Command::CommandSource::SOURCE_SDL));
 
   ASSERT_TRUE(command_->Init());
