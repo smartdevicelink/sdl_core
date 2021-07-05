@@ -201,6 +201,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , keyboard_props_(nullptr)
     , menu_title_(nullptr)
     , menu_icon_(nullptr)
+    , menu_layout_(nullptr)
     , tbt_show_command_(nullptr)
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
@@ -349,6 +350,11 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
   return menu_icon_;
 }
 
+const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_layout()
+    const {
+  return menu_layout_;
+}
+
 smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme()
     const {
   using namespace mobile_apis::PredefinedWindows;
@@ -467,6 +473,8 @@ void DynamicApplicationDataImpl::load_global_properties(
 
   SetGlobalProperties(properties_so.getElement(strings::menu_icon),
                       &DynamicApplicationData::set_menu_icon);
+  SetGlobalProperties(properties_so.getElement(strings::menu_layout),
+                      &DynamicApplicationData::set_menu_layout);
 }
 
 void DynamicApplicationDataImpl::set_help_prompt(
@@ -558,6 +566,14 @@ void DynamicApplicationDataImpl::set_menu_icon(
     delete menu_icon_;
   }
   menu_icon_ = new smart_objects::SmartObject(menu_icon);
+}
+
+void DynamicApplicationDataImpl::set_menu_layout(
+    const smart_objects::SmartObject& menu_layout) {
+  if (menu_layout_) {
+    delete menu_layout_;
+  }
+  menu_layout_ = new smart_objects::SmartObject(menu_layout);
 }
 
 void DynamicApplicationDataImpl::set_day_color_scheme(

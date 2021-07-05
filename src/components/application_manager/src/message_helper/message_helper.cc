@@ -1313,6 +1313,9 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       if (app->menu_icon()) {
         ui_msg_params[strings::menu_icon] = (*app->menu_icon());
       }
+      if (app->menu_layout()) {
+        ui_msg_params[strings::menu_layout] = (*app->menu_layout());
+      }
       ui_msg_params[strings::app_id] = app->app_id();
 
       (*ui_global_properties)[strings::msg_params] = ui_msg_params;
@@ -1994,6 +1997,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
     if ((*i->second).keyExists(strings::parent_id)) {
       msg_params[strings::menu_params][strings::parent_id] =
           (*i->second)[strings::parent_id];
+    }
+    if ((*i->second).keyExists(strings::menu_layout)) {
+      msg_params[strings::menu_layout] = (*i->second)[strings::menu_layout];
     }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
