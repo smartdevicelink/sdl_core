@@ -290,6 +290,16 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
+   * @brief Creates button subscription request to mobile
+   * @param app shared pointer to application instance
+   * @param source_message source message
+   * @return Smart object with fulfilled request
+   */
+  static smart_objects::SmartObjectSPtr CreateButtonNotificationToMobile(
+      ApplicationSharedPtr app,
+      const smart_objects::SmartObject& source_message);
+
+  /**
    * @brief Creates button subscription request to hmi
    * @param app_id id of application for which request should be created
    * @param button_name button to be subscribed

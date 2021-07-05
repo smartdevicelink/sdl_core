@@ -1072,6 +1072,58 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!app) {
+    SDL_LOG_ERROR("application NULL pointer");
+    return std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Null);
+  }
+
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& ref = *msg;
+  ref[strings::params][strings::connection_key] = app->app_id();
+
+  mobile_apis::ButtonName::eType btn_id = mobile_apis::ButtonName::INVALID_ENUM;
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][hmi_response::button_name].asInt());
+
+  } else if (source_message[strings::msg_params].keyExists(
+                 strings::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][strings::button_name].asInt());
+  }
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() <= utils::base_rpc_version) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  ref[strings::msg_params][strings::button_name] = btn_id;
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::custom_button_id)) {
+    ref[strings::msg_params][strings::custom_button_id] =
+        source_message[strings::msg_params][strings::custom_button_id];
+  }
+
+  if (source_message[strings::msg_params].keyExists(strings::window_id)) {
+    ref[strings::msg_params][strings::window_id] =
+        source_message[strings::msg_params][strings::window_id];
+  }
+
+  return msg;
+}
+
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
     const uint32_t app_id,

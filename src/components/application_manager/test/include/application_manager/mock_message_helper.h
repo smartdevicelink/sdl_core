@@ -201,6 +201,11 @@ class MockMessageHelper {
                    const hmi_apis::FunctionID::eType function_id,
                    application_manager::ApplicationManager& app_mngr));
 
+  MOCK_METHOD2(CreateButtonNotificationToMobile,
+               smart_objects::SmartObjectSPtr(
+                   ApplicationSharedPtr app,
+                   const smart_objects::SmartObject& source_message));
+
   MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
                void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestsToHMI,

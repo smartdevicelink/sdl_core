@@ -605,6 +605,13 @@ MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
           app_id, button_name, function_id, app_mngr);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonNotificationToMobile(app, source_message);
+}
+
 smart_objects::SmartObjectList
 MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
     ApplicationConstSharedPtr app,
