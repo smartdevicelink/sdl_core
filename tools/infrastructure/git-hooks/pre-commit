@@ -72,7 +72,7 @@ if [ "$?" -ne "0" ]; then
     exit 1
 fi
 
-# Auto update c++ files with clang-format-10
+# Auto update c++ files with clang-format-8
 CLANG_FORMAT=clang-format-8
 # Verify clang-format
 CLANG_FORMAT_REQUIRED_VERSION=8.0
