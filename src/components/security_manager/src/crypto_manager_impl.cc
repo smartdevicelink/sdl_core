@@ -51,7 +51,6 @@
 #include "utils/scope_guard.h"
 
 #define OPENSSL1_1_VERSION 0x1010000fL
-#define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
 namespace security_manager {
@@ -175,21 +174,13 @@ bool CryptoManagerImpl::Init() {
       return false;
     case TLSv1_2:
       SDL_LOG_DEBUG("TLSv1_2 is used");
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
-#else
       method = is_server ? TLS_server_method() : TLS_client_method();
       SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
-#endif
       break;
     case DTLSv1:
       SDL_LOG_DEBUG("DTLSv1 is used");
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
-#else
       method = is_server ? DTLS_server_method() : DTLS_client_method();
       SSL_CTX_set_max_proto_version(context_, DTLS1_VERSION);
-#endif
       break;
     default:
       SDL_LOG_ERROR("Unknown protocol: "
