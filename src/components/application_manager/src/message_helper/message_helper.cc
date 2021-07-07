@@ -1206,16 +1206,15 @@ MessageHelper::CreateOnButtonSubscriptionNotification(
 }
 
 smart_objects::SmartObjectList
-MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
     ApplicationConstSharedPtr app,
-    ApplicationManager& app_mngr,
-    const ButtonSubscriptions& button_subscriptions) {
-  using namespace smart_objects;
+    const ButtonSubscriptions& button_subscriptions,
+    const hmi_apis::FunctionID::eType function_id,
+    ApplicationManager& app_mngr) {
   using namespace hmi_apis;
-  using namespace mobile_apis;
   SDL_LOG_AUTO_TRACE();
 
-  SmartObjectList button_subscription_requests;
+  smart_objects::SmartObjectList button_subscription_requests;
 
   if (app.use_count() == 0) {
     SDL_LOG_ERROR("Invalid application pointer ");
@@ -1227,7 +1226,8 @@ MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
         static_cast<Common_ButtonName::eType>(it);
 
     button_subscription_requests.push_back(
-        CreateOnButtonSubscriptionNotification(app->hmi_app_id(), btn, true));
+        CreateButtonSubscriptionHandlingRequestToHmi(
+            app->app_id(), btn, function_id, app_mngr));
   }
 
   return button_subscription_requests;

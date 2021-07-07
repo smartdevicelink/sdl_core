@@ -125,11 +125,12 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateHMIStatusNotification,
                smart_objects::SmartObjectSPtr(ApplicationSharedPtr application,
                                               const WindowID window_id));
-  MOCK_METHOD3(CreateOnButtonSubscriptionNotificationsForApp,
+  MOCK_METHOD4(CreateButtonSubscriptionsHandlingRequestsList,
                smart_objects::SmartObjectList(
                    ApplicationConstSharedPtr application,
-                   ApplicationManager& app_mngr,
-                   const ButtonSubscriptions& button_subscriptions));
+                   const ButtonSubscriptions& button_subscriptions,
+                   const hmi_apis::FunctionID::eType function_id,
+                   ApplicationManager& app_mngr));
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
                     const uint32_t timeout,

@@ -307,18 +307,21 @@ class MessageHelper {
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
   /**
-   * @brief Creates button subscription notifications for buttons
+   * @brief Creates button subscription requests for buttons
    * that application is subscribed on
-   * @param app shared pointer to application instance
-   * @param app_mngr reference to application manager
+   * @param app application to be subscribed for button
    * @param button_subscriptions collection of subscribed buttons
-   * @return list of notification messages in SmartObject format
+   * @param function_id function ID
+   * @param app_mngr reference to application manager
+   * @return list of all buttons subscription requests ready to be sent to hmi
+   * @note for every button separate request is created in the list
    */
   static smart_objects::SmartObjectList
-  CreateOnButtonSubscriptionNotificationsForApp(
+  CreateButtonSubscriptionsHandlingRequestsList(
       ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr,
-      const ButtonSubscriptions& button_subscriptions);
+      const ButtonSubscriptions& button_subscriptions,
+      const hmi_apis::FunctionID::eType function_id,
+      ApplicationManager& app_mngr);
 
   /**
    * @brief Creates button subscription request to hmi

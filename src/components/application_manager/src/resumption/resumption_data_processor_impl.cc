@@ -871,8 +871,11 @@ void ResumptionDataProcessorImpl::AddButtonsSubscriptions(
         GetButtonSubscriptionsToResume(application);
 
     ProcessMessagesToHMI(
-        MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
-            application, application_manager_, button_subscriptions));
+        MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
+            application,
+            button_subscriptions,
+            hmi_apis::FunctionID::Buttons_SubscribeButton,
+            application_manager_));
   }
 }
 
@@ -916,11 +919,13 @@ void ResumptionDataProcessorImpl::DeleteButtonsSubscriptions(
     if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
       continue;
     }
-    auto notification = MessageHelper::CreateOnButtonSubscriptionNotification(
-        application->hmi_app_id(), hmi_btn, false);
-    // is_subscribed = false
-    ProcessMessageToHMI(notification, false);
-    application->UnsubscribeFromButton(btn);
+    smart_objects::SmartObjectSPtr unsubscribe_request =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            application->app_id(),
+            hmi_btn,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            application_manager_);
+    ProcessMessageToHMI(unsubscribe_request, false);
   }
 }
 
