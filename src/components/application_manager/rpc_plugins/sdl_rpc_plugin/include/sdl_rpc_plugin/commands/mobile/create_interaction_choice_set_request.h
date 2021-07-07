@@ -162,56 +162,6 @@ class CreateInteractionChoiceSetRequest
       app_mngr::ApplicationConstSharedPtr app);
 
   /*
-   * @brief Predicate for using with CheckChoiceSet method to compare choice ID
-   *param
-   *
-   * return TRUE if there is coincidence of choice ID, otherwise FALSE
-   */
-  struct CoincidencePredicateChoiceID {
-    CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[app_mngr::strings::choice_id].asUInt() == newItem_;
-    }
-
-    const uint32_t newItem_;
-  };
-
-  /*
-   * @brief Predicate for using with CheckChoiceSet method to compare menu name
-   *param
-   *
-   * return TRUE if there is coincidence of menu name, otherwise FALSE
-   */
-  struct CoincidencePredicateMenuName {
-    CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[app_mngr::strings::menu_name].asString() == newItem_;
-    }
-
-    const std::string& newItem_;
-  };
-
-  /*
-   * @brief Predicate for using with CheckChoiceSet method to compare VR
-   *commands param
-   *
-   * return TRUE if there is coincidence of VR commands, otherwise FALSE
-   */
-  struct CoincidencePredicateVRCommands {
-    CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return compareStr(obj, newItem_);
-    }
-
-    const smart_objects::SmartObject& newItem_;
-  };
-
-  /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
    *
    * @param choice1  Choice to compare

@@ -45,6 +45,7 @@ ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/interior_dat
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/resource_allocation_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_rpc_plugin.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_app_extension.cc
+${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_pending_resumption_handler.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_consent_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_capabilities_manager_impl.cc
 ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/rc_command_factory.cc
@@ -54,7 +55,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/resource_allocation_manager_impl_test.cc
 
 set(RC_COMMANDS_TEST_SOURCE_DIR ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/test/commands)
 set(RC_COMMANDS_SOURCE_DIR ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/src/commands)
-collect_sources(COMMANDS_SOURCES "${RC_COMMANDS_TEST_DIR}" "${RC_COMMANDS_TEST_SOURCE_DIR}")
+collect_sources(COMMANDS_SOURCES "${RC_COMMANDS_SOURCE_DIR}" "${RC_COMMANDS_TEST_SOURCE_DIR}")
 
 set(LIBRARIES
   ApplicationManager
@@ -70,12 +71,14 @@ set(LIBRARIES
   dl
 )
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
-create_test("resource_allocation_manager_test" "${COMMANDS_SOURCES}" "${LIBRARIES}" "${RESOURCE_ALLOC_MANAGER_TEST_SOURCES}")
+list(APPEND COMMANDS_SOURCES ${RESOURCE_ALLOC_MANAGER_TEST_SOURCES})
+
+create_test("resource_allocation_manager_test" "${COMMANDS_SOURCES}" "${LIBRARIES}")
 

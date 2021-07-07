@@ -42,6 +42,8 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
 
   bool IsValidCustomVehicleDataName(const std::string& name) const OVERRIDE;
 
+  bool IsRemovedCustomVehicleDataName(const std::string& name) const OVERRIDE;
+
  private:
   class RPCParams {
    public:
@@ -82,6 +84,8 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
   void UpdateVehicleDataItems();
 
   const OptionalDataItem FindSchemaByNameNonRecursive(
+      const std::string& name) const;
+  const OptionalDataItem FindRemovedSchemaByNameNonRecursive(
       const std::string& name) const;
   const OptionalDataItem FindSchemaByKeyNonRecursive(
       const std::string& key) const;

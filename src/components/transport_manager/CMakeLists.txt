@@ -38,6 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/smart_objects/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -106,8 +107,20 @@ else()
   )
 endif()
 
-if(NOT BUILD_TESTS)
-  list (APPEND EXCLUDE_PATH
+if(NOT BUILD_WEBSOCKET_SERVER_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server
+  )
+elseif(NOT ENABLE_SECURITY)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server/websocket_secure_session.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server/websocket_secure_session.cc
+  )
+endif()
+
+if(NOT ENABLE_IAP2EMULATION)
+  list (APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
   )
@@ -133,7 +146,7 @@ list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})
 
-if(ENABLE_LOG)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   target_link_libraries("TransportManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

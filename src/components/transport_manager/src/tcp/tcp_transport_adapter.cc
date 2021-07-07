@@ -49,11 +49,11 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 TcpTransportAdapter::TcpTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           NULL,
@@ -63,14 +63,14 @@ TcpTransportAdapter::TcpTransportAdapter(
               port,
               true,
               settings.transport_manager_tcp_adapter_network_interface()),
-          last_state,
+          last_state_wrapper,
           settings) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {}
 
 void TcpTransportAdapter::TransportConfigUpdated(
     const TransportConfig& new_config) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   transport_config_ = new_config;
 
@@ -80,7 +80,7 @@ void TcpTransportAdapter::TransportConfigUpdated(
 }
 
 TransportConfig TcpTransportAdapter::GetTransportConfiguration() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return transport_config_;
 }
 
@@ -89,7 +89,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }
 
 void TcpTransportAdapter::Store() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   Json::Value tcp_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -131,20 +131,22 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = last_state().get_dictionary();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
+  accessor.GetMutableData().set_dictionary(dictionary);
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   bool errors_occurred = false;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   const Json::Value tcp_adapter_dictionary =
-      last_state().get_dictionary()["TransportManager"]["TcpAdapter"];
+      dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
-  for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end();
-       ++i) {
-    const Json::Value device_dictionary = *i;
+  for (const auto& tcp_adapter_device : devices_dictionary) {
+    const Json::Value device_dictionary = tcp_adapter_device;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     in_addr_t address = inet_addr(address_record.c_str());
@@ -153,10 +155,8 @@ bool TcpTransportAdapter::Restore() {
     AddDevice(device);
     const Json::Value applications_dictionary =
         device_dictionary["applications"];
-    for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end();
-         ++j) {
-      const Json::Value application_dictionary = *j;
+    for (const auto& application : applications_dictionary) {
+      const Json::Value application_dictionary = application;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
@@ -166,7 +166,7 @@ bool TcpTransportAdapter::Restore() {
     }
   }
   bool result = !errors_occurred;
-  LOG4CXX_DEBUG(logger_, "result " << std::boolalpha << result);
+  SDL_LOG_DEBUG("result " << std::boolalpha << result);
   return result;
 }
 

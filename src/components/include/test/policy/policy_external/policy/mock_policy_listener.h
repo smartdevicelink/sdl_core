@@ -71,7 +71,6 @@ class MockPolicyListener : public ::policy::PolicyListener {
   MOCK_METHOD2(OnCurrentDeviceIdUpdateRequired,
                std::string(const transport_manager::DeviceHandle& device_handle,
                            const std::string& policy_app_id));
-  MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
   MOCK_METHOD1(GetAppName,
                custom_str::CustomString(const std::string& policy_app_id));
   MOCK_METHOD0(OnUserRequestedUpdateCheckRequired, void());
@@ -94,6 +93,8 @@ class MockPolicyListener : public ::policy::PolicyListener {
                      void(const policy::AppPermissions& permissions,
                           const std::string& device_id,
                           const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(
       GetDevicesIds,
       std::vector<std::string>(const std::string& policy_app_id));

@@ -39,6 +39,7 @@
 #include "gtest/gtest.h"
 #include "json/json.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "smart_objects/smart_object.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
@@ -59,23 +60,24 @@ using namespace file_system;
 using namespace app_launch;
 
 const std::string kAppStorageFolder = "app_storage_folder";
-const std::string kAppStorageFile = "./app_info.dat";
 const std::string kAppInfoStorage = "app_info_storage";
 
 class AppLaunchDataJsonTest : public ::testing::Test {
  private:
   virtual void SetUp() {
-    ::file_system::DeleteFile(kAppStorageFile);
-    test_last_state_ = std::unique_ptr<resumption::LastState>(
-        new resumption::LastStateImpl(kAppStorageFolder, kAppInfoStorage));
-    ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
+    const std::string storage_file = kAppStorageFolder + "/" + kAppInfoStorage;
+    ::file_system::DeleteFile(storage_file);
+    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
+        std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                    kAppInfoStorage));
+    ASSERT_TRUE(::file_system::CreateFile(storage_file));
 
     NiceMock<app_launch_test::MockAppLaunchSettings> mock_app_launch_settings_;
     ON_CALL(mock_app_launch_settings_, max_number_of_ios_device())
         .WillByDefault(Return(15u));
 
     res_json_.reset(
-        new AppLaunchDataJson(mock_app_launch_settings_, *test_last_state_));
+        new AppLaunchDataJson(mock_app_launch_settings_, last_state_wrapper_));
   }
 
  public:
@@ -83,10 +85,14 @@ class AppLaunchDataJsonTest : public ::testing::Test {
     res_json_.get()->Clear();
   }
 
-  static void SetUpTestCase() {}
+  static void SetUpTestCase() {
+    ::file_system::RemoveDirectory(kAppStorageFolder);
+    ::file_system::CreateDirectoryRecursively(kAppStorageFolder);
+  }
 
   static void TearDownTestCase() {
-    ::file_system::DeleteFile(kAppStorageFile);
+    const std::string storage_file = kAppStorageFolder + "/" + kAppInfoStorage;
+    ::file_system::DeleteFile(storage_file);
     ::file_system::RemoveDirectory(kAppStorageFolder);
   }
 
@@ -101,7 +107,7 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   void GetApplicationData_EXPECT_FALSE(const ApplicationData& in_data);
   std::string AddCounter(const std::string& inp, int32_t val);
 
-  std::unique_ptr<resumption::LastState> test_last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   std::unique_ptr<AppLaunchDataJson> res_json_;
   void SetTimestamp(const ApplicationData& in_data,
                     date_time::TimeDuration& timestamp);
@@ -133,9 +139,11 @@ date_time::TimeDuration AppLaunchDataJsonTest::GetApplicationData_EXPECT_TRUE(
     const ApplicationData& in_data, ApplicationData& out_data) {
   uint32_t sizeBeforeGetting = res_json()->GetCurentNumberOfAppData();
 
+  Json::Value dictionary =
+      last_state_wrapper_->get_accessor().GetData().dictionary();
   int32_t index = NotFound;
   Json::Value& json_data_list =
-      res_json()->GetApplicationListAndIndex(in_data, index);
+      res_json()->GetApplicationListAndIndex(in_data, index, dictionary);
   EXPECT_FALSE(index == NotFound);
 
   uint32_t sizeAfterGetting = res_json()->GetCurentNumberOfAppData();
@@ -150,7 +158,8 @@ date_time::TimeDuration AppLaunchDataJsonTest::GetApplicationData_EXPECT_TRUE(
   // time stamp
   date_time::TimeDuration tmVal = date_time::seconds(
       json_data_list[index][am::strings::app_launch_last_session].asUInt64());
-
+  last_state_wrapper_->get_accessor().GetMutableData().set_dictionary(
+      dictionary);
   return tmVal;
 }
 
@@ -158,12 +167,15 @@ void AppLaunchDataJsonTest::GetApplicationData_EXPECT_FALSE(
     const ApplicationData& in_data) {
   uint32_t sizeBeforeGetting = res_json()->GetCurentNumberOfAppData();
 
+  Json::Value dictionary =
+      last_state_wrapper_->get_accessor().GetData().dictionary();
   int32_t index = NotFound;
-  res_json()->GetApplicationListAndIndex(in_data, index);
+  res_json()->GetApplicationListAndIndex(in_data, index, dictionary);
   EXPECT_TRUE(index == NotFound);
 
   uint32_t sizeAfterGetting = res_json()->GetCurentNumberOfAppData();
-
+  last_state_wrapper_->get_accessor().GetMutableData().set_dictionary(
+      dictionary);
   EXPECT_EQ(sizeBeforeGetting, sizeAfterGetting);
 }
 
@@ -172,8 +184,10 @@ void AppLaunchDataJsonTest::SetTimestamp(const ApplicationData& in_data,
   uint32_t sizeBeforeGetting = res_json()->GetCurentNumberOfAppData();
 
   int32_t index = NotFound;
+  Json::Value dictionary =
+      last_state_wrapper_->get_accessor().GetData().dictionary();
   Json::Value& json_data_list =
-      res_json()->GetApplicationListAndIndex(in_data, index);
+      res_json()->GetApplicationListAndIndex(in_data, index, dictionary);
   EXPECT_FALSE(index == NotFound);
 
   uint32_t sizeAfterGetting = res_json()->GetCurentNumberOfAppData();
@@ -184,6 +198,8 @@ void AppLaunchDataJsonTest::SetTimestamp(const ApplicationData& in_data,
   // time stamp
   json_data_list[index][am::strings::app_launch_last_session] =
       static_cast<Json::Value::UInt64>(date_time::getSecs(timestamp));
+  last_state_wrapper_->get_accessor().GetMutableData().set_dictionary(
+      dictionary);
 }
 
 std::string AppLaunchDataJsonTest::AddCounter(const std::string& inp,

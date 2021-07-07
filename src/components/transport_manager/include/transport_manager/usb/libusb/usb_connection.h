@@ -60,9 +60,9 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  void PopOutMessage();
+  TransportAdapter::Error PopOutMessage();
   bool PostInTransfer();
-  bool PostOutTransfer();
+  TransportAdapter::Error PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
   void Finalise();
@@ -86,7 +86,7 @@ class UsbConnection : public Connection {
 
   std::list<protocol_handler::RawMessagePtr> out_messages_;
   protocol_handler::RawMessagePtr current_out_message_;
-  sync_primitives::Lock out_messages_mutex_;
+  sync_primitives::RecursiveLock out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;
   bool waiting_in_transfer_cancel_;

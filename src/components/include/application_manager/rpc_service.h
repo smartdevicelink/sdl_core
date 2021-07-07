@@ -53,19 +53,31 @@ class RPCService {
   /**
    * @brief ManageMobileCommand convert message to mobile command and execute it
    * @param message pointer to received message
-   * @param origin origin of command
+   * @param source source of command
+   * @param warning_info warning message to send on a successful response. Only
+   * applies to requests from mobile.
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandSource source) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandSource source,
+                                   const std::string warning_info) = 0;
+
   /**
    * @brief ManageHMICommand convert message to HMI command and execute it
    * @param message pointer to received message
+   * @param source source of command
+   * @param warning_info warning message to send on a successful response. Only
+   * applies to requests from HMI.
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
                                 commands::Command::CommandSource source =
                                     commands::Command::SOURCE_HMI) = 0;
+  virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
+                                commands::Command::CommandSource source,
+                                const std::string warning_info) = 0;
 
   /**
    * @brief SendMessageToMobile Put message to the queue to be sent to mobile.
@@ -100,6 +112,11 @@ class RPCService {
       const hmi_apis::FunctionID::eType& function_id,
       const hmi_apis::messageType::eType& message_type,
       const std::map<std::string, SMember>& members) = 0;
+
+  /**
+   * @brief Stop RPC service by shutting down hmi and mobile message queues
+   */
+  virtual void Stop() = 0;
 
   /**
    * @brief set_protocol_handler

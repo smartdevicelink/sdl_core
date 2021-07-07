@@ -6,7 +6,7 @@ Defines JSONRPC format specific code generation rules.
 import string
 
 from generator.generators import SmartFactoryBase
-from generator import Model
+from model.enum_element import EnumElement
 
 
 class CodeGenerator(SmartFactoryBase.CodeGenerator):
@@ -40,7 +40,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
 
         code = u""
         for function in functions:
-            if unicode(function.message_type.primary_name) == u"response":
+            if function.message_type.primary_name == u"response":
                 code = u"".join(
                     [code, self._error_response_insert_template.substitute(
                         function_id=function.function_id.primary_name)])
@@ -66,7 +66,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         """
 
         if "response" in message_type.elements:
-            message_type.elements[u"error_response"] = Model.EnumElement(
+            message_type.elements[u"error_response"] = EnumElement(
                 name=u"error_response")
 
         return message_type
@@ -88,9 +88,9 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         return u"".join(
             [self._base_params,
              self._correlation_id_param
-                if unicode(message_type_name) != u"notification" else u"",
+                if message_type_name != u"notification" else u"",
              self._additional_response_params
-                if unicode(message_type_name) == u"response" else u""])
+                if message_type_name == u"response" else u""])
 
     _error_response_insert_template = string.Template(
         u'''functions_schemes_.insert(std::make_pair('''

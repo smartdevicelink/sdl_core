@@ -49,6 +49,12 @@ extern const char* tcp_ip_address;
 extern const char* tcp_port;
 extern const char* reason;
 extern const char* auth_token;
+extern const char* vehicle_make;
+extern const char* vehicle_model;
+extern const char* vehicle_model_year;
+extern const char* vehicle_trim;
+extern const char* vehicle_system_software_version;
+extern const char* vehicle_system_hardware_version;
 
 }  // namespace strings
 

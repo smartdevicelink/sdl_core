@@ -39,6 +39,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 #include "vehicle_info_plugin/commands/vi_command_request_test.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
@@ -78,13 +79,17 @@ class UnsubscribeVehicleRequestTest
       , vi_app_extension_ptr_(
             std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
                 vi_plugin_, *mock_app_))
-      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , mock_last_state_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption_test::MockLastState>())) {}
 
  protected:
   void UnsubscribeSuccessfully();
   void SetUp() OVERRIDE {
     ON_CALL(app_mngr_, GetRPCHandler())
         .WillByDefault(ReturnRef(mock_rpc_handler_));
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
 
     vi_plugin_.Init(app_mngr_,
                     mock_rpc_service_,
@@ -107,7 +112,7 @@ class UnsubscribeVehicleRequestTest
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
   application_manager_test::MockRPCHandler mock_rpc_handler_;
-  resumption_test::MockLastState mock_last_state_;
+  resumption::LastStateWrapperPtr mock_last_state_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {

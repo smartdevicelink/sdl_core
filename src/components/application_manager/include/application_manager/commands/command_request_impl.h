@@ -166,14 +166,6 @@ class CommandRequestImpl : public CommandImpl,
       const smart_objects::SmartObject* response_params = NULL,
       const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
 
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
-
   void SendProviderRequest(
       const mobile_apis::FunctionID::eType& mobile_function_id,
       const hmi_apis::FunctionID::eType& hmi_function_id,
@@ -236,8 +228,11 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
+   * @param source The source of the command (used to determine if a response
+   * should be sent on failure)
+   * @return true if the RPC is allowed, false otherwise
    */
-  bool CheckAllowedParameters();
+  bool CheckAllowedParameters(const Command::CommandSource source);
 
   /**
    * @brief Checks HMI capabilities for specified button support
@@ -246,19 +241,6 @@ class CommandRequestImpl : public CommandImpl,
    * otherwise returns false
    */
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
-
-  /**
-   * @brief Remove from current message parameters disallowed by policy table
-   */
-  void RemoveDisallowedParameters();
-
-  /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
-   */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
 
   /**
    * @brief Checks if any request param was marked as disallowed by policy
@@ -375,8 +357,6 @@ class CommandRequestImpl : public CommandImpl,
 
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
-  CommandParametersPermissions parameters_permissions_;
-  CommandParametersPermissions removed_parameters_permissions_;
 
   /**
    * @brief hash_update_mode_ Defines whether request must update hash value of
@@ -386,21 +366,6 @@ class CommandRequestImpl : public CommandImpl,
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
-  /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
 
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,

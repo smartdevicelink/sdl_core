@@ -162,14 +162,26 @@ class RPCHandlerImpl : public RPCHandler,
                      bool allow_unknown_parameters) OVERRIDE;
 
  private:
+  /**
+   * @brief Checks if message has to be sent to mobile or not
+   * update output message according to checks
+   * @param output - message to check
+   * @returns true if message type is response otherwise false
+   */
+  bool HandleWrongMessageType(smart_objects::SmartObject& output,
+                              rpc::ValidationReport report) const;
+
   void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
   void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
+
   bool ConvertMessageToSO(const Message& message,
                           smart_objects::SmartObject& output,
+                          std::string& out_warning_info,
                           const bool allow_unknown_parameters = false,
                           const bool validate_params = true);
   std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
+
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
 

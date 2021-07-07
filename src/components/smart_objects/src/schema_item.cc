@@ -37,7 +37,7 @@ namespace ns_smart_objects {
 
 errors::eType ISchemaItem::validate(
     const SmartObject& object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   return errors::ERROR;
@@ -48,6 +48,13 @@ bool ISchemaItem::setDefaultValue(SmartObject& Object) {
 }
 
 bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
+  return false;
+}
+
+bool ISchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
   return false;
 }
 
@@ -63,6 +70,10 @@ void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
 
 size_t ISchemaItem::GetMemberSize() {
   return 0;
+}
+
+TypeID ISchemaItem::GetType() {
+  return TYPE_NONE;
 }
 
 }  // namespace ns_smart_objects

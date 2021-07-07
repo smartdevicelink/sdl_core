@@ -53,6 +53,8 @@ typedef std::shared_ptr<utils::Callable> StatusNotifier;
 class PolicyManager : public usage_statistics::StatisticsManager,
                       public PolicyEncryptionFlagGetterInterface {
  public:
+  enum PtProcessingResult { kSuccess, kWrongPtReceived, kNewPtRequired };
+
   virtual ~PolicyManager() {}
 
   /**
@@ -76,10 +78,16 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * sent in snapshot and received Policy Table.
    * @param file name of file with update policy table
    * @param pt_content PTU as binary string
-   * @return true if successfully
+   * @return result of PT processing
    */
-  virtual bool LoadPT(const std::string& file,
-                      const BinaryMessage& pt_content) = 0;
+  virtual PtProcessingResult LoadPT(const std::string& file,
+                                    const BinaryMessage& pt_content) = 0;
+
+  /**
+   * @brief Performs finalizing actions after PT update was processed
+   * @param ptu_result result of last PT processing
+   */
+  virtual void OnPTUFinished(const PtProcessingResult ptu_result) = 0;
 
   /**
    * @brief Resets Policy Table
@@ -87,13 +95,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return true if successfully
    */
   virtual bool ResetPT(const std::string& file_name) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resource where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the initial
@@ -110,9 +111,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param out_end_points output vector of urls
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -407,6 +408,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemLanguage(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Set data from GetSystemInfo response to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code
@@ -415,6 +422,25 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemInfo(const std::string& ccpu_version,
                              const std::string& wers_country_code,
                              const std::string& language) = 0;
+
+  /**
+   * @brief Set hardware version from GetSystemInfo response to policy table, if
+   * present
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
+   * @brief Get information about last hardware version from PT
+   * @return hardware version from PT
+   */
+  virtual std::string GetHardwareVersionFromPT() const = 0;
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
@@ -464,19 +490,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
   /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
-   */
-  virtual void OnSystemReady() = 0;
-
-  /**
    * @brief Get number of notification by priority
    * @param priority Specified priority
+   * @param is_subtle If true, get the number of allowed subtle notifications
    * @return notification number
    */
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
 
   /**
    * @brief Allows to update Vehicle Identification Number in policy table.
@@ -515,6 +535,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param trigger_ptu contains true if PTU should be triggered
    */
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
+
+  /**
+   * @brief Change applications count ready for PTU
+   * @param new_app_count new applications count for PTU
+   */
+  virtual void UpdatePTUReadyAppsCount(const uint32_t new_app_count) = 0;
 
   /**
    * @brief Get state of request types for given application
@@ -556,10 +582,25 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       const = 0;
 
   /**
+   * @brief Gets removed vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
+
+  /**
    * @brief Gets copy of current policy table data
    * @return policy_table as json object
    */
   virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Get a list of policy app ids
+   * @return apps list filled with the policy app ids of each
+   * application
+   */
+  virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -569,29 +610,21 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
+   * @brief Get app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
+   */
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -743,6 +776,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
                                          const std::string& application_id) = 0;
 
   /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief Gets all allowed module types
    * @param policy_app_id unique identifier of application
    * @param modules list of allowed module types
@@ -770,6 +810,28 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
 
+  /**
+   * @brief OnLocalAppAdded triggers PTU
+   */
+  virtual void OnLocalAppAdded() = 0;
+
+  /**
+   * @brief Check if certain application already in policy db.
+   * @param policy application id.
+   * @return true if application presents false otherwise.
+   */
+  virtual bool IsNewApplication(const std::string& application_id) const = 0;
+
+  /**
+   * @brief Restart PTU timeout if PTU in UPDATING state
+   */
+  virtual void ResetTimeout() = 0;
+
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
+
  protected:
   /**
    * @brief Checks is PT exceeded IgnitionCycles
@@ -793,7 +855,8 @@ class PolicyManager : public usage_statistics::StatisticsManager,
 
 }  // namespace policy
 
-extern "C" policy::PolicyManager* CreateManager();
+extern "C" policy::PolicyManager* CreateManager(
+    logger::Logger* logger_instance);
 extern "C" void DeleteManager(policy::PolicyManager*);
 
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_MANAGER_H_

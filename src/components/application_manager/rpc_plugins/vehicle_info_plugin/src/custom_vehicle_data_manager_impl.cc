@@ -45,7 +45,7 @@
 #include "utils/helpers.h"
 #include "utils/optional.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
@@ -64,7 +64,7 @@ CustomVehicleDataManagerImpl::CustomVehicleDataManagerImpl(
 
 std::string CustomVehicleDataManagerImpl::GetVehicleDataItemType(
     const std::string& vehicle_data_item_name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& schema = FindSchemaByNameNonRecursive(vehicle_data_item_name);
 
   return schema.is_initialized() ? std::string(schema->type)
@@ -77,10 +77,16 @@ bool CustomVehicleDataManagerImpl::IsValidCustomVehicleDataName(
   return schema.is_initialized();
 }
 
+bool CustomVehicleDataManagerImpl::IsRemovedCustomVehicleDataName(
+    const std::string& name) const {
+  const auto& schema = FindRemovedSchemaByNameNonRecursive(name);
+  return schema.is_initialized();
+}
+
 void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
     smart_objects::SmartObject& msg_params) {
   using namespace application_manager;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   typedef std::function<smart_objects::SmartObject(
       const smart_objects::SmartObject& input_params,
@@ -99,17 +105,28 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
                         ? FindSchemaByKeyRecursive(key)
                         : FindSchemaByKeyNonRecursive(key);
       if (!schema.is_initialized()) {
-        LOG4CXX_DEBUG(logger_, "Schema for: " << key << " cannot be found");
+        SDL_LOG_DEBUG("Schema for: " << key << " cannot be found");
         continue;
       }
 
       const auto& item_name = schema->name;
       if (policy_table::VehicleDataItem::kStruct == std::string(schema->type)) {
-        const auto param =
-            fill_mobile_msg(input_params[key], SearchMethod::RECURSIVE);
-        if (!param.empty()) {
-          out_params[item_name] = param;
+        auto& input_param = input_params[key];
+        if (*schema->array &&
+            input_param.getType() == smart_objects::SmartType_Array) {
+          for (size_t i = 0; i < input_param.length(); ++i) {
+            const auto param =
+                fill_mobile_msg(input_param[i], SearchMethod::RECURSIVE);
+            out_params[item_name][i] = param;
+          }
           continue;
+        } else {
+          const auto param =
+              fill_mobile_msg(input_param, SearchMethod::RECURSIVE);
+          if (!param.empty()) {
+            out_params[item_name] = param;
+            continue;
+          }
         }
       }
 
@@ -144,7 +161,7 @@ smart_objects::SmartObject CustomVehicleDataManagerImpl::CreateHMIMessageParams(
       const policy_table::VehicleDataItem&)>
       ParamsConstructor;
 
-  auto fill_param = [](ParamsConstructor& constructor,
+  auto fill_param = [](const ParamsConstructor& constructor,
                        const policy_table::VehicleDataItem& param,
                        smart_objects::SmartObject* out_params) {
     DCHECK_OR_RETURN_VOID(out_params)
@@ -174,6 +191,12 @@ smart_objects::SmartObject CustomVehicleDataManagerImpl::CreateHMIMessageParams(
     auto schema = FindSchemaByNameNonRecursive(name);
     if (schema.is_initialized()) {
       fill_param(fill_hmi_params, *schema, &out_params);
+      continue;
+    }
+
+    auto removed_schema = FindRemovedSchemaByNameNonRecursive(name);
+    if (removed_schema.is_initialized()) {
+      fill_param(fill_hmi_params, *removed_schema, &out_params);
     }
   }
 
@@ -185,7 +208,7 @@ const OptionalDataItem FindSchema(
     const std::vector<policy_table::VehicleDataItem>& oem_items,
     SearchMethod search_method,
     Comparer comparer) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::vector<policy_table::VehicleDataItem> items;
   for (const auto& item : oem_items) {
@@ -271,10 +294,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
       case SMemberType::SMEMBER_VDR_MOBILE: {
         // valid since struct_schema_items is not used in
         // InitStructSchemaItem_VehicleDataResult
-        mobile_apis::MOBILE_API::TStructsSchemaItems mobile_struct_schema_items;
         auto member_schema =
-            mobile_apis::MOBILE_API::InitStructSchemaItem_VehicleDataResult(
-                mobile_struct_schema_items);
+            mobile_apis::MOBILE_API::InitStructSchemaItem_VehicleDataResult();
         return SMember(
             member_schema,
             false,  // root level items should not be mandatory
@@ -307,10 +328,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
       case SMemberType::SMEMBER_VDR_HMI: {
         // valid since struct_schema_items is not used in
         // InitStructSchemaItem_Common_VehicleDataResult
-        hmi_apis::HMI_API::TStructsSchemaItems hmi_struct_schema_items;
         auto member_schema =
-            hmi_apis::HMI_API::InitStructSchemaItem_Common_VehicleDataResult(
-                hmi_struct_schema_items);
+            hmi_apis::HMI_API::InitStructSchemaItem_Common_VehicleDataResult();
         return SMember(
             member_schema, false  // root level items should not be mandatory
         );
@@ -331,12 +350,14 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
   };
 
   auto get_vehicle_data_history =
-      [&vehicle_data_items](std::string name) -> std::vector<VehicleDataItem> {
+      [&vehicle_data_items](
+          const std::string& name) -> std::vector<VehicleDataItem> {
     std::vector<VehicleDataItem> result;
-    std::copy_if(vehicle_data_items.begin(),
-                 vehicle_data_items.end(),
-                 std::back_inserter(result),
-                 [&name](VehicleDataItem& item) { return item.name == name; });
+    std::copy_if(
+        vehicle_data_items.begin(),
+        vehicle_data_items.end(),
+        std::back_inserter(result),
+        [&name](const VehicleDataItem& item) { return item.name == name; });
 
     std::sort(result.begin(),
               result.end(),
@@ -472,7 +493,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
 void CustomVehicleDataManagerImpl::OnPolicyEvent(
     plugin_manager::PolicyEvent policy_event) {
   using namespace plugin_manager;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   switch (policy_event) {
     case kApplicationPolicyUpdated:
@@ -487,7 +508,7 @@ void CustomVehicleDataManagerImpl::OnPolicyEvent(
 const OptionalDataItem
 CustomVehicleDataManagerImpl::FindSchemaByNameNonRecursive(
     const std::string& name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
@@ -497,9 +518,24 @@ CustomVehicleDataManagerImpl::FindSchemaByNameNonRecursive(
   return FindSchema(oem_items, SearchMethod::NON_RECURSIVE, compare_by_name);
 }
 
+const OptionalDataItem
+CustomVehicleDataManagerImpl::FindRemovedSchemaByNameNonRecursive(
+    const std::string& name) const {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto& removed_oem_items =
+      vehicle_data_provider_.GetRemovedVehicleDataItems();
+  auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
+    return (name == std::string(item.name));
+  };
+
+  return FindSchema(
+      removed_oem_items, SearchMethod::NON_RECURSIVE, compare_by_name);
+}
+
 const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByNameRecursive(
     const std::string& name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
@@ -512,7 +548,7 @@ const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByNameRecursive(
 const OptionalDataItem
 CustomVehicleDataManagerImpl::FindSchemaByKeyNonRecursive(
     const std::string& key) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_key = [&key](const policy_table::VehicleDataItem& item) {
@@ -524,7 +560,7 @@ CustomVehicleDataManagerImpl::FindSchemaByKeyNonRecursive(
 
 const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByKeyRecursive(
     const std::string& key) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_key = [&key](const policy_table::VehicleDataItem& item) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,151 +33,103 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
+#include "utils/ilogger.h"
+
 #ifdef ENABLE_LOG
-#include <errno.h>
-#include <log4cxx/propertyconfigurator.h>
-#include <log4cxx/spi/loggingevent.h>
-#include <string.h>
 #include <sstream>
+#include <string>
+
 #include "utils/auto_trace.h"
-#include "utils/logger_status.h"
-#include "utils/push_log.h"
-#endif  // ENABLE_LOG
-
-#ifdef ENABLE_LOG
-
-#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
-  namespace {                                            \
-  CREATE_LOGGERPTR_LOCAL(logger_var, logger_name);       \
+#define SDL_CREATE_LOG_VARIABLE(component_name) \
+  namespace {                                   \
+  static std::string logger_(component_name);   \
   }
 
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
-  log4cxx::LoggerPtr logger_var =                       \
-      log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
+#define SDL_CREATE_LOCAL_LOG_VARIABLE(component_name) \
+  std::string logger_(component_name);
 
-#define INIT_LOGGER(file_name, logs_enabled)           \
-  log4cxx::PropertyConfigurator::configure(file_name); \
-  logger::set_logs_enabled(logs_enabled);
+// special macros to dump logs from queue
+// it's needed, for example, when crash happened
+#define SDL_FLUSH_LOGGER() logger::Logger::instance().Flush();
 
 // Logger deinitilization function and macro, need to stop log4cxx writing
 // without this deinitilization log4cxx threads continue using some instances
 // destroyed by exit()
-void deinit_logger();
-#define DEINIT_LOGGER() deinit_logger()
+#define SDL_DEINIT_LOGGER() logger::Logger::instance().DeInit();
 
-// Logger thread deinitilization macro that need to stop the thread of handling
-// messages for the log4cxx
-#define DELETE_THREAD_LOGGER(logger_var) \
-  logger::delete_log_message_loop_thread(logger_var)
-
-// special macros to dump logs from queue
-// it's need, for example, when crash happend
-#define FLUSH_LOGGER() logger::flush_logger()
-
-#define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
-
-log4cxx_time_t time_now();
-
-#define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent)                \
-  do {                                                               \
-    if (logger::logs_enabled()) {                                    \
-      if (logger::logger_status != logger::DeletingLoggerThread) {   \
-        if (loggerPtr->isEnabledFor(logLevel)) {                     \
-          std::stringstream accumulator;                             \
-          accumulator << logEvent;                                   \
-          logger::push_log(                                          \
-              loggerPtr,                                             \
-              logLevel,                                              \
-              accumulator.str(),                                     \
-              time_now(),                                            \
-              LOG4CXX_LOCATION,                                      \
-              ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
-        }                                                            \
-      }                                                              \
-    }                                                                \
+#define LOG_WITH_LEVEL(logLevel, logEvent)                               \
+  do {                                                                   \
+    if (logger::Logger::instance().IsEnabledFor(logger_, logLevel)) {    \
+      std::stringstream accumulator;                                     \
+      accumulator << logEvent;                                           \
+      logger::LogMessage message{                                        \
+          logger_,                                                       \
+          logLevel,                                                      \
+          accumulator.str(),                                             \
+          std::chrono::high_resolution_clock::now(),                     \
+          logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__}, \
+          std::this_thread::get_id()};                                   \
+      logger::Logger::instance().PushLog(message);                       \
+    }                                                                    \
   } while (false)
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
+#define SDL_LOG_TRACE(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::TRACE_LEVEL, logEvent)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
-  logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
-#define LOG4CXX_AUTO_TRACE(loggerPtr) \
-  LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
+#define SDL_LOG_AUTO_TRACE()    \
+  logger::AutoTrace auto_trace( \
+      logger_, logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__})
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
+#define SDL_LOG_DEBUG(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::DEBUG_LEVEL, logEvent)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
+#define SDL_LOG_INFO(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::INFO_LEVEL, logEvent)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
+#define SDL_LOG_WARN(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::WARNING_LEVEL, logEvent)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
+#define SDL_LOG_ERROR(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::ERROR_LEVEL, logEvent)
 
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(loggerPtr, logEvent) \
-  LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
+#define SDL_LOG_FATAL(logEvent) \
+  LOG_WITH_LEVEL(logger::LogLevel::FATAL_LEVEL, logEvent)
 
-#define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message) \
-  LOG4CXX_ERROR(                                     \
-      loggerPtr,                                     \
-      message << ", error code " << errno << " (" << strerror(errno) << ")")
+#define SDL_LOG_ERROR_WITH_ERRNO(message)                                      \
+  SDL_LOG_ERROR(message << ", error code " << errno << " (" << strerror(errno) \
+                        << ")")
 
-#define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message) \
-  LOG4CXX_WARN(                                     \
-      loggerPtr,                                    \
-      message << ", error code " << errno << " (" << strerror(errno) << ")")
+#define SDL_LOG_WARN_WITH_ERRNO(message)                                      \
+  SDL_LOG_WARN(message << ", error code " << errno << " (" << strerror(errno) \
+                       << ")")
 
 #else  // ENABLE_LOG is OFF
+#define SDL_CREATE_LOG_VARIABLE(x)
 
-#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
+#define SDL_CREATE_LOCAL_LOG_VARIABLE(x)
 
-#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+#define SDL_DEINIT_LOGGER()
 
-#define INIT_LOGGER(file_name, logs_enabled)
+#define SDL_FLUSH_LOGGER()
 
-#define DEINIT_LOGGER()
+#define SDL_LOG_TRACE(x)
 
-#define DELETE_THREAD_LOGGER(logger_var)
+#define SDL_LOG_AUTO_TRACE()
 
-#define FLUSH_LOGGER()
+#define SDL_LOG_DEBUG(x)
 
-#define LOG4CXX_IS_TRACE_ENABLED(logger) false
+#define SDL_LOG_INFO(x)
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(x, y)
+#define SDL_LOG_WARN(x)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-#define LOG4CXX_AUTO_TRACE(loggerPtr)
+#define SDL_LOG_ERROR(x)
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(x, y)
+#define SDL_LOG_ERROR_WITH_ERRNO(x)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(x, y)
+#define SDL_LOG_WARN_WITH_ERRNO(x)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(x, y)
+#define SDL_LOG_FATAL(x)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(x, y)
-
-#undef LOG4CXX_ERROR_WITH_ERRNO
-#define LOG4CXX_ERROR_WITH_ERRNO(x, y)
-
-#undef LOG4CXX_WARN_WITH_ERRNO
-#define LOG4CXX_WARN_WITH_ERRNO(x, y)
-
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(x, y)
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_

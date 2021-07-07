@@ -42,8 +42,7 @@ void Fail(char const* tag, boost::system::error_code ec) {
 namespace sample {
 namespace websocket {
 
-WSSession::WSServer::WSServer(tcp::socket&& socket)
-    : ws_(std::move(socket)), strand_(ws_.get_executor()) {}
+WSSession::WSServer::WSServer(tcp::socket&& socket) : ws_(std::move(socket)) {}
 
 void WSSession::WSServer::AddURLRoute(const std::string& target) {
   url_routes_.insert(ParseRouteFromTarget(target));
@@ -51,11 +50,12 @@ void WSSession::WSServer::AddURLRoute(const std::string& target) {
 
 void WSSession::WSServer::Run() {
   req_ = {};
-  http::async_read(
-      ws_.next_layer(),
-      buffer_,
-      req_,
-      std::bind(&WSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+  http::async_read(ws_.next_layer(),
+                   buffer_,
+                   req_,
+                   std::bind(&WSServer::OnWebsocketHandshake,
+                             shared_from_this(),
+                             std::placeholders::_1));
 }
 
 void WSSession::WSServer::OnWebsocketHandshake(
@@ -75,9 +75,8 @@ void WSSession::WSServer::OnWebsocketHandshake(
     // Accept the websocket handshake
     ws_.async_accept(
         req_,
-        boost::asio::bind_executor(
-            strand_,
-            std::bind(&WSServer::OnAccept, this, std::placeholders::_1)));
+        std::bind(
+            &WSServer::OnAccept, shared_from_this(), std::placeholders::_1));
   }
 }
 
@@ -112,7 +111,8 @@ std::string WSSession::WSServer::ParseRouteFromTarget(
 }
 
 WSSession::WSSession(const std::string& address, uint16_t port)
-    : address_(address)
+    : io_pool_(1)
+    , address_(address)
     , port_(port)
     , acceptor_(ioc_)
     , socket_(ioc_)
@@ -152,8 +152,10 @@ WSSession::WSSession(const std::string& address, uint16_t port)
 void WSSession::Run() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
-        socket_, std::bind(&WSSession::on_accept, this, std::placeholders::_1));
-    ioc_.run();
+        socket_,
+        std::bind(
+            &WSSession::on_accept, shared_from_this(), std::placeholders::_1));
+    boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
 
@@ -161,6 +163,7 @@ void WSSession::Stop() {
   try {
     ioc_.stop();
     acceptor_.close();
+    io_pool_.join();
   } catch (...) {
     std::cerr << "Failed to close connection" << std::endl;
   }
@@ -199,9 +202,10 @@ void WSSSession::WSSServer::AddURLRoute(const std::string& target) {
 }
 void WSSSession::WSSServer::Run() {
   // Perform the SSL handshake
-  wss_.next_layer().async_handshake(
-      ssl::stream_base::server,
-      std::bind(&WSSServer::OnSSLHandshake, this, std::placeholders::_1));
+  wss_.next_layer().async_handshake(ssl::stream_base::server,
+                                    std::bind(&WSSServer::OnSSLHandshake,
+                                              shared_from_this(),
+                                              std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
@@ -210,11 +214,12 @@ void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
   }
 
   req_ = {};
-  http::async_read(
-      wss_.next_layer(),
-      buffer_,
-      req_,
-      std::bind(&WSSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+  http::async_read(wss_.next_layer(),
+                   buffer_,
+                   req_,
+                   std::bind(&WSSServer::OnWebsocketHandshake,
+                             shared_from_this(),
+                             std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnWebsocketHandshake(
@@ -233,7 +238,9 @@ void WSSSession::WSSServer::OnWebsocketHandshake(
     }
     // Accept the websocket handshake
     wss_.async_accept(
-        req_, std::bind(&WSSServer::OnAccept, this, std::placeholders::_1));
+        req_,
+        std::bind(
+            &WSSServer::OnAccept, shared_from_this(), std::placeholders::_1));
   }
 }
 
@@ -271,7 +278,8 @@ WSSSession::WSSSession(const std::string& address,
                        uint16_t port,
                        const std::string& certificate,
                        const std::string& private_key)
-    : acceptor_(ioc_)
+    : io_pool_(1)
+    , acceptor_(ioc_)
     , socket_(ioc_)
     , ctx_(ssl::context::sslv23_server)
     , wss_(nullptr) {
@@ -336,6 +344,7 @@ void WSSSession::Stop() {
   try {
     ioc_.stop();
     acceptor_.close();
+    io_pool_.join();
   } catch (...) {
     std::cerr << "Failed to close connection" << std::endl;
   }
@@ -353,8 +362,9 @@ void WSSSession::do_accept() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
-        std::bind(&WSSSession::on_accept, this, std::placeholders::_1));
-    ioc_.run();
+        std::bind(
+            &WSSSession::on_accept, shared_from_this(), std::placeholders::_1));
+    boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
 

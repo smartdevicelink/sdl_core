@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2020, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,12 @@
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
 
 namespace rc_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule");
 
 namespace plugins = application_manager::plugin_manager;
 
@@ -52,7 +53,7 @@ bool RCRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
+    resumption::LastStateWrapperPtr last_state) {
   rc_consent_manager_.reset(new rc_rpc_plugin::RCConsentManagerImpl(
       last_state,
       app_manager,
@@ -76,11 +77,21 @@ bool RCRPCPlugin::Init(
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+  pending_resumption_handler_ = std::make_shared<RCPendingResumptionHandler>(
+      app_manager, *(interior_data_cache_.get()));
 
   // Check all saved consents and remove expired
   rc_consent_manager_->RemoveExpiredConsents();
 
   return true;
+}
+
+bool RCRPCPlugin::Init(application_manager::ApplicationManager&,
+                       application_manager::rpc_service::RPCService&,
+                       application_manager::HMICapabilities&,
+                       policy::PolicyHandlerInterface&,
+                       resumption::LastState&) {
+  return false;
 }
 
 bool RCRPCPlugin::IsAbleToProcess(
@@ -107,20 +118,22 @@ void RCRPCPlugin::OnPolicyEvent(
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
+  SDL_LOG_AUTO_TRACE();
   if (!application->is_remote_control_supported()) {
+    SDL_LOG_DEBUG(
+        "Remote control is not supported for application with app_id: "
+        << application->app_id());
     return;
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      auto extension =
-          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID));
-      application->AddExtension(extension);
+      auto extension = std::shared_ptr<RCAppExtension>(
+          new RCAppExtension(kRCPluginID, *this, *application));
+      DCHECK_OR_RETURN_VOID(application->AddExtension(extension));
       const auto driver_location =
           rc_capabilities_manager_
               ->GetDriverLocationFromSeatLocationCapability();
       extension->SetUserLocation(driver_location);
-      resource_allocation_manager_->SendOnRCStatusNotifications(
-          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     case plugins::kApplicationExit: {
@@ -139,9 +152,57 @@ void RCRPCPlugin::OnApplicationEvent(
       extension->SetUserLocation(user_location);
       break;
     }
+    case plugins::kRCStatusChanged: {
+      resource_allocation_manager_->SendOnRCStatusNotifications(
+          NotificationTrigger::APP_REGISTRATION, application);
+      break;
+    }
     default:
       break;
   }
+}
+
+void RCRPCPlugin::ProcessResumptionSubscription(
+    application_manager::Application& app, RCAppExtension& ext) {
+  SDL_LOG_AUTO_TRACE();
+
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
+}
+
+void RCRPCPlugin::RevertResumption(const std::set<ModuleUid>& subscriptions) {
+  SDL_LOG_AUTO_TRACE();
+
+  interior_data_manager_->OnResumptionRevert(subscriptions);
+  pending_resumption_handler_->OnResumptionRevert();
+}
+
+bool RCRPCPlugin::IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                                        const uint32_t app_id) {
+  auto get_subscriptions = [](application_manager::ApplicationSharedPtr app) {
+    std::set<ModuleUid> result;
+    auto rc_app_extension = RCHelpers::GetRCExtension(*app);
+    if (rc_app_extension) {
+      result = rc_app_extension->InteriorVehicleDataSubscriptions();
+    }
+    return result;
+  };
+
+  auto another_app_subscribed =
+      [app_id, module, &get_subscriptions](
+          application_manager::ApplicationSharedPtr app) {
+        if (app_id == app->app_id()) {
+          return false;
+        }
+        auto subscriptions = get_subscriptions(app);
+        auto it = subscriptions.find(module);
+        return subscriptions.end() != it;
+      };
+
+  auto accessor = app_mngr_->applications();
+  auto it = std::find_if(accessor.GetData().begin(),
+                         accessor.GetData().end(),
+                         another_app_subscribed);
+  return accessor.GetData().end() != it;
 }
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
@@ -151,11 +212,14 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
   ApplicationSet accessor = app_mngr.applications().GetData();
 
   std::vector<ApplicationSharedPtr> result;
-  for (const auto& it : accessor) {
-    if (it->is_remote_control_supported()) {
-      result.push_back(it);
-    }
-  }
+
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(result),
+               [](const ApplicationSharedPtr& app) {
+                 return app->is_remote_control_supported();
+               });
+
   return result;
 }
 
@@ -163,12 +227,12 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(rc_rpc_plugin::logger_);
 }

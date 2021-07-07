@@ -106,7 +106,8 @@ class RCGetInteriorVehicleDataConsentTest
   RCGetInteriorVehicleDataConsentTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
-      , rc_capabilities_(smart_objects::SmartType::SmartType_Array)
+      , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType::SmartType_Array))
       , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
@@ -118,13 +119,14 @@ class RCGetInteriorVehicleDataConsentTest
                      rpc_protection_manager_,
                      hmi_so_factory_,
                      mobile_so_factoy_)
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
+      , rc_app_extension_(
+            std::make_shared<RCAppExtension>(kPluginID, rc_plugin_, *mock_app_))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
       , rpc_plugin(mock_rpc_plugin)
       , optional_mock_rpc_plugin(mock_rpc_plugin) {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
-    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
+    (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
@@ -135,7 +137,7 @@ class RCGetInteriorVehicleDataConsentTest
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
-        .WillByDefault(Return(rc_app_extention_));
+        .WillByDefault(Return(rc_app_extension_));
     testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
         mock_interior_data_cache_;
     ON_CALL(app_mngr_, GetPolicyHandler())
@@ -143,7 +145,7 @@ class RCGetInteriorVehicleDataConsentTest
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(&rc_capabilities_));
+        .WillByDefault(Return(rc_capabilities_));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
@@ -209,14 +211,15 @@ class RCGetInteriorVehicleDataConsentTest
       mock_interior_data_cache_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
-  smart_objects::SmartObject rc_capabilities_;
+  smart_objects::SmartObjectSPtr rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
   std::shared_ptr<application_manager::MockRPCProtectionManager>
       rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
-  std::shared_ptr<RCAppExtension> rc_app_extention_;
+  RCRPCPlugin rc_plugin_;
+  std::shared_ptr<RCAppExtension> rc_app_extension_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;
   utils::Optional<RPCPlugin> rpc_plugin;
@@ -265,15 +268,17 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendINUSEModeToMobile) {
-  // Arrange
-  auto mobile_message = CreateBasicMessage();
-
   // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::IN_USE));
 
+  auto msg_ver = utils::SemanticVersion();
+  ON_CALL(*mock_app_, msg_version()).WillByDefault(ReturnRef(msg_ver));
+
   EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
+
+  auto mobile_message = CreateBasicMessage();
   auto rc_consent_response =
       CreateRCCommand<commands::RCGetInteriorVehicleDataConsentResponse>(
           mobile_message);

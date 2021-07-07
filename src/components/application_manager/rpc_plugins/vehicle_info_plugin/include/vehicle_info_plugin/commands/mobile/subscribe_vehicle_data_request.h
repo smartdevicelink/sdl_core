@@ -108,9 +108,8 @@ class SubscribeVehicleDataRequest
    * @param app Pointer to application sent subscribe request
    * @param msg_params 'message_parameters' response section reference
    */
-  bool SubscribePendingVehicleData(
-      app_mngr::ApplicationSharedPtr app,
-      const smart_objects::SmartObject& msg_params);
+  bool SubscribePendingVehicleData(app_mngr::ApplicationSharedPtr app,
+                                   smart_objects::SmartObject& msg_params);
 
   /**
    * @brief Checks if current application and other applications

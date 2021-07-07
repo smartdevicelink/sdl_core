@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -247,13 +248,16 @@ class ConnectionHandlerImpl
    * \param hashCode Hash used only in second version of SmartDeviceLink
    * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
-   * \return uint32_t 0 if operation fails, session key otherwise
+   * \param err_reason where to write reason for the End Session failure if the
+   * operation fails \return uint32_t 0 if operation fails, session key
+   * otherwise
    */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       uint32_t* hashCode,
-      const protocol_handler::ServiceType& service_type) OVERRIDE;
+      const protocol_handler::ServiceType& service_type,
+      std::string* err_reason = nullptr) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -268,6 +272,8 @@ class ConnectionHandlerImpl
    * \param connection_key  used by other components as application identifier
    */
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
+  void OnFinalMessageCallback(const uint32_t& connection_key) OVERRIDE;
 
   /**
    * @brief Converts connection handle to transport type string used in
@@ -460,6 +466,14 @@ class ConnectionHandlerImpl
   void SendEndService(uint32_t key, uint8_t service_type) OVERRIDE;
 
   /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  bool IsSessionHeartbeatTracked(const uint32_t connection_key) const OVERRIDE;
+
+  /**
    * \brief Start heartbeat for specified session
    *
    * \param connection_key pair of connection and session id
@@ -490,6 +504,17 @@ class ConnectionHandlerImpl
                                       uint8_t protocol_version) OVERRIDE;
 
   /**
+   * @brief binds protocol version with session
+   *
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) OVERRIDE;
+
+  /**
    * \brief returns TRUE if session supports sending HEART BEAT ACK to mobile
    * side
    * \param  connection_handle Connection identifier whithin which session
@@ -511,6 +536,19 @@ class ConnectionHandlerImpl
   bool ProtocolVersionUsed(uint32_t connection_id,
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
+
+  /**
+   * @brief find protocol version which application supports
+   * @param connection_id id of connection
+   * @param session_id id of session
+   * @param full_protocol_version where to write the full protocol version
+   * output
+   * @return TRUE if session and connection exist otherwise returns FALSE
+   */
+  bool ProtocolVersionUsed(
+      uint32_t connection_id,
+      uint8_t session_id,
+      utils::SemanticVersion& full_protocol_version) const OVERRIDE;
 
   /**
    * \brief information about given Connection Key.
@@ -579,10 +617,10 @@ class ConnectionHandlerImpl
    * \note This is invoked only once but can be invoked by multiple threads.
    * Also it can be invoked before OnServiceStartedCallback() returns.
    **/
-  virtual void NotifyServiceStartedResult(
-      uint32_t session_key,
-      bool result,
-      std::vector<std::string>& rejected_params);
+  void NotifyServiceStartedResult(uint32_t session_key,
+                                  bool result,
+                                  std::vector<std::string>& rejected_params,
+                                  const std::string& reason) OVERRIDE;
 
   /**
    * \brief Called when secondary transport with given session ID is established
@@ -606,6 +644,12 @@ class ConnectionHandlerImpl
       const transport_manager::ConnectionUID secondary_connection_handle)
       OVERRIDE;
 
+  const transport_manager::DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
+
+  void CreateWebEngineDevice() OVERRIDE;
+
+  bool GetProtocolVehicleData(ProtocolVehicleData& data) OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.
@@ -615,10 +659,23 @@ class ConnectionHandlerImpl
    **/
   void RemoveConnection(const ConnectionHandle connection_handle);
 
+  /**
+   * @brief Called when connection is closed.
+   * @param connection_id Connection unique identifier.
+   */
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
   const uint8_t GetSessionIdFromSecondaryTransport(
       transport_manager::ConnectionUID secondary_transport_id) const;
+
+  /**
+   * @brief Get pointer to the primary connection by connection handle
+   * @param connection_handle handle of the current connection
+   * @return pointer to the primary connection if current one is secondary
+   * otherwise returns pointer to the same connection
+   */
+  Connection* GetPrimaryConnection(
+      const ConnectionHandle connection_handle) const;
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -637,7 +694,7 @@ class ConnectionHandlerImpl
    * \brief List of devices
    */
   DeviceMap device_list_;
-
+  mutable sync_primitives::RWLock device_list_lock_;
   /**
    * @brief session/connection map
    */

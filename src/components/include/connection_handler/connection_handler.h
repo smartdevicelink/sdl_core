@@ -48,9 +48,27 @@
  */
 namespace connection_handler {
 
-enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
+enum CloseSessionReason {
+  kCommon = 0,
+  kFlood,
+  kMalformed,
+  kUnauthorizedApp,
+  kFinalMessage
+};
 
 class ConnectionHandlerObserver;
+
+/**
+ * @brief Helper structure to collect all required vehicle data
+ */
+struct ProtocolVehicleData {
+  std::string vehicle_make;
+  std::string vehicle_model;
+  std::string vehicle_year;
+  std::string vehicle_trim;
+  std::string vehicle_system_software_version;
+  std::string vehicle_system_hardware_version;
+};
 
 // The SessionConnectionMap keeps track of the primary and secondary transports
 // associated with a session ID
@@ -167,6 +185,15 @@ class ConnectionHandler {
   virtual void SendEndService(uint32_t key, uint8_t service_type) = 0;
 
   /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  virtual bool IsSessionHeartbeatTracked(
+      const uint32_t connection_key) const = 0;
+
+  /**
    * \brief Start heartbeat for specified session
    *
    * \param connection_key pair of connection and session id
@@ -204,6 +231,15 @@ class ConnectionHandler {
   virtual void BindProtocolVersionWithSession(uint32_t connection_key,
                                               uint8_t protocol_version) = 0;
 
+  /**
+   * @brief binds protocol version with session
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  virtual void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) = 0;
   /**
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
@@ -288,7 +324,8 @@ class ConnectionHandler {
   virtual void NotifyServiceStartedResult(
       uint32_t session_key,
       bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   /**
    * \brief Called when secondary transport with given session ID is established
@@ -311,6 +348,27 @@ class ConnectionHandler {
   virtual void OnSecondaryTransportEnded(
       const transport_manager::ConnectionUID primary_connection_handle,
       const transport_manager::ConnectionUID secondary_connection_handle) = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
+      const = 0;
+
+  /**
+   * @brief Collects all vehicle data required by a protocol layer
+   * @param data output structure to store received vehicle data
+   * @return true if data has been received successfully, otherwise returns
+   * false
+   */
+  virtual bool GetProtocolVehicleData(ProtocolVehicleData& data) = 0;
+
+  /**
+   * @brief Called when HMI cooperation is started,
+   * creates WebSocketDevice for WebEngine
+   */
+  virtual void CreateWebEngineDevice() = 0;
 
  protected:
   /**

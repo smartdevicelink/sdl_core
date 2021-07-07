@@ -34,8 +34,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
 
 #include "gmock/gmock.h"
-#include "protocol_handler/time_metric_observer.h"
-#include "utils/shared_ptr.h"
+#include "protocol_handler/telemetry_observer.h"
 
 namespace test {
 namespace components {
@@ -44,8 +43,9 @@ namespace protocol_handler_test {
 class MockPHTelemetryObserver : public ::protocol_handler::PHTelemetryObserver {
  public:
   MOCK_METHOD2(StartMessageProcess,
-               void(uint32_t, const date_time::TimeDuration&));
-  MOCK_METHOD2(EndMessageProcess, void(std::shared_ptr<MessageMetric>));
+               void(uint32_t message_id,
+                    const date_time::TimeDuration& start_time));
+  MOCK_METHOD1(EndMessageProcess, void(std::shared_ptr<MessageMetric> m));
 };
 
 }  // namespace protocol_handler_test

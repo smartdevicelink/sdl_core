@@ -55,6 +55,10 @@ bool CommandRequestToMobile::Init() {
   return true;
 }
 
+bool CommandRequestToMobile::CheckPermissions() {
+  return CheckAllowedParameters(Command::CommandSource::SOURCE_SDL);
+}
+
 bool CommandRequestToMobile::CleanUp() {
   return true;
 }

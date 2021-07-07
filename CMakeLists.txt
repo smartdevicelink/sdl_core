@@ -44,6 +44,7 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
+option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -51,11 +52,17 @@ option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
+option(ENABLE_IAP2EMULATION "IAP2 emulation via tcp" OFF)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" OFF)
+
+set(LOGGER_NAME "LOG4CXX" CACHE STRING "Logging library to use (BOOST, LOG4CXX)")
+set_property(CACHE LOGGER_NAME PROPERTY STRINGS BOOST LOG4CXX)
+if(LOGGER_NAME STREQUAL "")
+  set(LOGGER_NAME "LOG4CXX")
+endif()
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
@@ -184,6 +191,12 @@ get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
 
+get_property(cHelpString CACHE LOGGER_NAME PROPERTY HELPSTRING)
+get_property(cType CACHE LOGGER_NAME PROPERTY TYPE)
+get_property(cValue CACHE LOGGER_NAME PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "LOGGER_NAME:${cType}=${cValue}\n\n")
+
 get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
 get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
 get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
@@ -202,11 +215,12 @@ get_property(cValue CACHE HMI PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
 
-get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
-get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
-get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
+get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
+file(APPEND "${build_config_path}" "BUILD_WEBSOCKET_SERVER_SUPPORT:${cType}=${cValue}\n")
+
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
@@ -322,6 +336,11 @@ if (BUILD_CLOUD_APP_SUPPORT)
   message(STATUS "Cloud app websocket support enabled")
 endif()
 
+if (BUILD_WEBSOCKET_SERVER_SUPPORT)
+  add_definitions(-DWEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  message(STATUS "Web engine app websocket support enabled")
+endif()
+
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
   message(STATUS "Backtrace support enabled")
@@ -360,6 +379,14 @@ else()
     ${COMPONENTS_DIR}/include/policy/policy_regular/
     ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
+endif()
+
+if(${LOGGER_NAME} STREQUAL "LOG4CXX")
+  add_definitions(-DLOG4CXX_LOGGER)
+  message(STATUS "Selected the apache log4cxx logging library")
+else()
+  add_definitions(-DBOOST_LOGGER)
+  message(STATUS "Selected the boost logging library")
 endif()
 
 # TODO(AK): check current OS here
@@ -405,8 +432,14 @@ include_directories(
 add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
 find_package(OpenSSL REQUIRED)
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
+  message(STATUS "Including log4cxx")
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
+endif()
+
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  message(STATUS "Including boost")
+  include_directories ( ${BOOST_INCLUDE_DIR} )
 endif()
 
 if(ENABLE_SECURITY)
@@ -417,9 +450,9 @@ if(ENABLE_SECURITY)
   message(STATUS "Security enabled")
 endif()
 
-if(ENABLE_HMI_PTU_DECRYPTION)
-  add_definitions(-DUSE_HMI_PTU_DECRYPTION)
-  message(STATUS "HMI PTU decription enabled")
+if(ENABLE_IAP2EMULATION)
+  add_definitions(-DENABLE_IAP2EMULATION)
+  message(STATUS "IAP2 emulation enabled")
 endif()
 
 set(RTLIB rt)

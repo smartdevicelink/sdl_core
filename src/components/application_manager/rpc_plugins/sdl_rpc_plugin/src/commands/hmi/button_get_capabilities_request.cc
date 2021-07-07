@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,9 +55,15 @@ ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
 ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {}
 
 void ButtonGetCapabilitiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
+}
+
+void ButtonGetCapabilitiesRequest::onTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
 }
 
 }  // namespace commands

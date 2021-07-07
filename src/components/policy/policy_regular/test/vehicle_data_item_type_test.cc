@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include "gtest/gtest.h"
-#include "json/reader.h"
 #include "policy/policy_table/types.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 #include <type_traits>
 
@@ -123,6 +123,7 @@ class VehicleDataItemTypeTest : public ::testing::Test {
     str.AddField("until", "5.0");
     str.AddField("removed", true);
     str.AddField("deprecated", true);
+    str.AddField("defvalue", "TestStringVal");
     str.AddField("minvalue", 1);
     str.AddField("maxvalue", 2);
     str.AddField("minsize", 10);
@@ -139,11 +140,12 @@ class VehicleDataItemTypeTest : public ::testing::Test {
   }
 
   Json::Value json_;
-  Json::Reader reader_;
+  utils::JsonReader reader_;
 };
 
 TEST_F(VehicleDataItemTypeTest, Initialize_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   EXPECT_TRUE(vdi.is_initialized());
@@ -156,7 +158,8 @@ TEST_F(VehicleDataItemTypeTest, Initialize_Failed) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   EXPECT_TRUE((std::string)vdi.name == "VehicleDataItem");
@@ -169,6 +172,7 @@ TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
   EXPECT_TRUE((std::string)*vdi.until == "5.0");
   EXPECT_TRUE(*vdi.removed == true);
   EXPECT_TRUE(*vdi.deprecated == true);
+  EXPECT_TRUE(*vdi.defvalue == "TestStringVal");
   EXPECT_TRUE(*vdi.minvalue == 1);
   EXPECT_TRUE(*vdi.maxvalue == 2);
   EXPECT_TRUE(*vdi.minsize == 10);
@@ -178,7 +182,8 @@ TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckConvertFromVehicleDataItemToJson_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   auto jsonFrom = vdi.ToJsonValue();
@@ -193,35 +198,45 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_Failed) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_Success) {
-  reader_.parse(GetFullJsonString(GetFullJsonString()), json_);
+  std::string str = GetFullJsonString(GetFullJsonString());
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Struct";
+  vdi.defvalue = rpc::Optional<rpc::String<0, UINT32_MAX> >();
   EXPECT_TRUE(vdi.is_valid());
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_EmptyParams_Failed) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
+
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Struct";
+  vdi.defvalue = rpc::Optional<rpc::String<0, UINT32_MAX> >();
   EXPECT_FALSE(vdi.is_valid());
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_PODTypes_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
+
   VehicleDataItem vdi(&json_);
-
-  vdi.type = "Integer";
-  EXPECT_TRUE(vdi.is_valid());
-
-  vdi.type = "Float";
-  EXPECT_TRUE(vdi.is_valid());
 
   vdi.type = "String";
   EXPECT_TRUE(vdi.is_valid());
 
+  vdi.type = "Integer";
+  *vdi.defvalue = "1";
+  EXPECT_TRUE(vdi.is_valid());
+
+  vdi.type = "Float";
+  *vdi.defvalue = "1.1";
+  EXPECT_TRUE(vdi.is_valid());
+
   vdi.type = "Boolean";
+  *vdi.defvalue = "true";
   EXPECT_TRUE(vdi.is_valid());
 }
 
@@ -231,14 +246,16 @@ TEST_F(VehicleDataItemTypeTest, CheckEmptiness_True) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckEmptiness_False) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
 
   VehicleDataItem vdi(&json_);
   EXPECT_TRUE(vdi.struct_not_empty());
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckCopyConstructor) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
 
   VehicleDataItem vdi1(&json_);
   VehicleDataItem vdi2(vdi1);

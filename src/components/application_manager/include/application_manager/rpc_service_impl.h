@@ -118,11 +118,19 @@ class RPCServiceImpl : public RPCService,
                  mobile_apis::MOBILE_API& mobile_so_factory_);
   ~RPCServiceImpl();
 
+  void Stop() OVERRIDE;
+
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandSource source) OVERRIDE;
+  bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                           commands::Command::CommandSource source,
+                           const std::string warning_info) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message,
                         commands::Command::CommandSource source =
                             commands::Command::SOURCE_HMI) OVERRIDE;
+  bool ManageHMICommand(const commands::MessageSharedPtr message,
+                        commands::Command::CommandSource source,
+                        const std::string warning_info) OVERRIDE;
 
   // CALLED ON messages_to_hmi_ thread!
   void Handle(const impl::MessageToHmi message) OVERRIDE;

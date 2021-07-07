@@ -60,7 +60,6 @@ class PolicyListener {
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
-  virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(
@@ -107,6 +106,14 @@ class PolicyListener {
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
       const std::string& device_id,
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+
+  virtual void SendOnAppPropertiesChangeNotification(
       const std::string& policy_app_id) const = 0;
 
   /**

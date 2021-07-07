@@ -111,6 +111,12 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    */
   uint32_t connection_key() const;
 
+  /**
+   * @brief Get primary connection key of this handler
+   * @return primary connection key
+   */
+  uint32_t primary_connection_key() const;
+
  private:
   /**
    * @brief Performs related actions if handshake was successfully finished
@@ -124,8 +130,11 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @brief Performs related actions if handshake was failed
    * @param params set of params used in bson part of message
    * @param service_status - service status to be sent to HMI
+   * @param err_reason - Optional error description
    */
-  void ProcessFailedHandshake(BsonObject& params, ServiceStatus service_status);
+  void ProcessFailedHandshake(BsonObject& params,
+                              ServiceStatus service_status,
+                              std::string err_reason = std::string());
 
   /**
    * @brief Determines whether service can be protected

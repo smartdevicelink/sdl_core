@@ -147,21 +147,34 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_display_capabilities(
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
   void remove_window_capability(const WindowID window_id) OVERRIDE;
-  /*
-   * @brief Adds a command to the in application menu
+
+  /**
+   * @brief checks whether a specific menu layout is supported
+   * @param menu layout to check
    */
-  void AddCommand(uint32_t cmd_id, const smart_objects::SmartObject& command);
+  bool menu_layout_supported(
+      const mobile_apis::MenuLayout::eType layout) const OVERRIDE;
+
+  /*
+   * @brief Adds a command to the application menu
+   * @param[in] internal_id Internal consecutive command id
+   * @param[in] command Command to add
+   */
+  void AddCommand(const uint32_t internal_id,
+                  const smart_objects::SmartObject& command);
 
   /*
    * @brief Deletes all commands from the application menu with the specified
    * command id
+   * @param[in] cmd_id Command id
    */
-  void RemoveCommand(uint32_t cmd_id);
+  void RemoveCommand(const uint32_t cmd_id);
 
   /*
    * @brief Finds command with the specified command id
+   * @param[in] cmd_id Command id
    */
-  smart_objects::SmartObject* FindCommand(uint32_t cmd_id);
+  smart_objects::SmartObject FindCommand(const uint32_t cmd_id) OVERRIDE;
 
   /*
    * @brief Adds a menu to the application
@@ -176,12 +189,13 @@ class DynamicApplicationDataImpl : public virtual Application {
   /*
    * @brief Finds menu with the specified id
    */
-  smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const;
+  smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const OVERRIDE;
 
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  bool IsSubMenuNameAlreadyExist(const std::string& name);
+  bool IsSubMenuNameAlreadyExist(const std::string& name,
+                                 const uint32_t parent_id);
 
   void SetWindowInfo(const WindowID window_id,
                      const smart_objects::SmartObject& window_info) OVERRIDE;
@@ -209,7 +223,7 @@ class DynamicApplicationDataImpl : public virtual Application {
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id);
+  smart_objects::SmartObject FindChoiceSet(uint32_t choice_set_id) OVERRIDE;
 
   /*
    * @brief Adds perform interaction choice set to the application
@@ -316,14 +330,16 @@ class DynamicApplicationDataImpl : public virtual Application {
   CommandsMap commands_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock> commands_lock_ptr_;
   SubMenuMap sub_menu_;
-  mutable std::shared_ptr<sync_primitives::Lock> sub_menu_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> sub_menu_lock_ptr_;
   ChoiceSetMap choice_set_map_;
-  mutable std::shared_ptr<sync_primitives::Lock> choice_set_map_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      choice_set_map_lock_ptr_;
   PerformChoiceSetMap performinteraction_choice_set_map_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       performinteraction_choice_set_lock_ptr_;
   WindowParamsMap window_params_map_;
-  mutable std::shared_ptr<sync_primitives::Lock> window_params_map_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      window_params_map_lock_ptr_;
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;

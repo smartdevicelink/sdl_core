@@ -40,6 +40,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASUnpublishAppServiceRequest::ASUnpublishAppServiceRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ ASUnpublishAppServiceRequest::ASUnpublishAppServiceRequest(
 ASUnpublishAppServiceRequest::~ASUnpublishAppServiceRequest() {}
 
 void ASUnpublishAppServiceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_id].asString();

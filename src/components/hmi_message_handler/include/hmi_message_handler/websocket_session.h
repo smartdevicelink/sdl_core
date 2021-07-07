@@ -36,7 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/placeholders.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/make_shared.hpp>
@@ -83,13 +82,10 @@ typedef std::shared_ptr<std::string> Message;
 
 namespace hmi_message_handler {
 
-CREATE_LOGGERPTR_GLOBAL(ws_logger_, "HMIMessageHandler")
-
 class CMessageBrokerController;
 
 class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
   boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws_;
-  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::multi_buffer buffer_;
   boost::beast::multi_buffer send_buffer_;
   CMessageBrokerController* controller_;
@@ -108,7 +104,7 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
 
   void Recv(boost::system::error_code ec);
 
-  void Send(std::string& message, Json::Value& json_message);
+  void Send(const std::string& message, Json::Value& json_message);
 
   void SendFromQueue();
 
@@ -164,9 +160,8 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
 
   int mControllersIdCurrent;
 
-  Json::Reader m_reader;
-  Json::FastWriter m_writer;
-  Json::FastWriter m_receiverWriter;
+  Json::StreamWriterBuilder m_writer;
+  Json::StreamWriterBuilder m_receiver_writer;
 
   sync_primitives::Lock queue_lock_;
   sync_primitives::Lock message_queue_lock_;
@@ -192,7 +187,6 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
     WebsocketSession& handler_;
     sync_primitives::Lock queue_lock_;
     sync_primitives::ConditionalVariable queue_new_items_;
-    std::atomic_bool write_pending_;
     std::atomic_bool shutdown_;
 
     sync_primitives::Lock write_lock_;

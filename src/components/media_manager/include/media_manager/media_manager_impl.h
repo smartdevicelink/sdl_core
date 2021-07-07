@@ -33,8 +33,10 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
+#include <chrono>
 #include <map>
 #include <string>
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 #include "media_manager/media_manager.h"
@@ -58,12 +60,20 @@ class MediaManagerImpl : public MediaManager,
                    const MediaManagerSettings& settings);
   virtual ~MediaManagerImpl();
 
-  virtual void PlayA2DPSource(int32_t application_key);
-  virtual void StopA2DPSource(int32_t application_key);
+  DEPRECATED virtual void PlayA2DPSource(int32_t application_key);
+  DEPRECATED virtual void StopA2DPSource(int32_t application_key);
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration);
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration);
+  virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate,
+      mobile_apis::BitsPerSample::eType bits_per_sample,
+      mobile_apis::AudioType::eType audio_type);
   virtual void StopMicrophoneRecording(int32_t application_key);
 
   virtual void StartStreaming(int32_t application_key,
@@ -80,6 +90,8 @@ class MediaManagerImpl : public MediaManager,
   virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
   virtual const MediaManagerSettings& settings() const OVERRIDE;
+
+  virtual uint32_t DataSizeToMilliseconds(uint64_t data_size) const OVERRIDE;
 
 #ifdef BUILD_TESTS
   void set_mock_a2dp_player(MediaAdapter* media_adapter);
@@ -105,6 +117,12 @@ class MediaManagerImpl : public MediaManager,
 
   std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
   std::map<protocol_handler::ServiceType, MediaListenerPtr> streamer_listener_;
+
+  uint32_t bits_per_sample_;
+  uint32_t sampling_rate_;
+  uint64_t stream_data_size_;
+  std::chrono::time_point<std::chrono::system_clock>
+      socket_audio_stream_start_time_;
 
   application_manager::ApplicationManager& application_manager_;
 

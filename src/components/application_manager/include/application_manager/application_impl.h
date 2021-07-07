@@ -113,7 +113,7 @@ class ApplicationImpl : public virtual Application,
   inline bool is_navi() const {
     return is_navi_;
   }
-  void set_is_navi(bool allow);
+  void set_is_navi(bool option);
 
   virtual bool is_remote_control_supported() const;
 
@@ -122,6 +122,9 @@ class ApplicationImpl : public virtual Application,
   void set_mobile_projection_enabled(bool option);
 
   bool mobile_projection_enabled() const;
+
+  void set_webengine_projection_enabled(const bool option) OVERRIDE;
+  bool webengine_projection_enabled() const OVERRIDE;
 
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);
@@ -139,14 +142,16 @@ class ApplicationImpl : public virtual Application,
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);
   void SuspendStreaming(protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(protocol_handler::ServiceType service_type,
+                       uint32_t timer_len = 0);
 
   virtual bool is_voice_communication_supported() const;
-  virtual void set_voice_communication_supported(
-      bool is_voice_communication_supported);
+  virtual void set_voice_communication_supported(bool option);
   inline bool app_allowed() const;
   bool has_been_activated() const;
   bool set_activated(bool is_active);
+  bool is_ready() const;
+  bool set_is_ready(bool is_ready);
 
   const Version& version() const;
   void set_hmi_application_id(uint32_t hmi_app_id);
@@ -183,7 +188,7 @@ class ApplicationImpl : public virtual Application,
   bool keep_context();
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
-  void set_is_media_application(bool is_media);
+  void set_is_media_application(bool option);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
@@ -275,8 +280,8 @@ class ApplicationImpl : public virtual Application,
 
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
-  virtual void SubscribeToSoftButtons(int32_t cmd_id,
-                                      const SoftButtonID& softbuttons_id);
+  virtual void SubscribeToSoftButtons(
+      int32_t cmd_id, const WindowSoftButtons& window_softbuttons);
   virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
 
   virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
@@ -564,6 +569,7 @@ class ApplicationImpl : public virtual Application,
   bool is_navi_;
   bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
+  bool webengine_projection_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;
@@ -578,6 +584,7 @@ class ApplicationImpl : public virtual Application,
   bool is_app_allowed_;
   bool is_app_data_resumption_allowed_;
   bool has_been_activated_;
+  bool is_ready_;
   bool tts_properties_in_none_;
   bool tts_properties_in_full_;
   bool keep_context_;
@@ -600,6 +607,7 @@ class ApplicationImpl : public virtual Application,
   std::atomic_bool is_resuming_;
   mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
+  smart_objects::SmartObject user_location_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;
@@ -616,7 +624,6 @@ class ApplicationImpl : public virtual Application,
   std::string cloud_transport_type_;
   mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
-  smart_objects::SmartObject user_location_;
 
   /**
    * @brief Defines number per time in seconds limits
@@ -632,7 +639,7 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Defines id of SoftButton which is related from name of command
    */
-  typedef std::map<int32_t, SoftButtonID> CommandSoftButtonID;
+  typedef std::map<int32_t, SoftButtonIDs> CommandSoftButtonID;
   CommandNumberTimeLimit cmd_number_to_time_limits_;
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id

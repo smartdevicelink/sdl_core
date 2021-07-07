@@ -1,0 +1,125 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="interfaces" type="interfacesType">
+        <xs:annotation>
+            <xs:documentation>* Copyright (c) 2016, Ford Motor Company
+                * All rights reserved.
+                *
+                * Redistribution and use in source and binary forms, with or without
+                * modification, are permitted provided that the following conditions are met:
+                *
+                * Redistributions of source code must retain the above copyright notice, this
+                * list of conditions and the following disclaimer.
+                *
+                * Redistributions in binary form must reproduce the above copyright notice,
+                * this list of conditions and the following
+                * disclaimer in the documentation and/or other materials provided with the
+                * distribution.
+                *
+                * Neither the name of the Ford Motor Company nor the names of its contributors
+                * may be used to endorse or promote products derived from this software
+                * without specific prior written permission.
+                *
+                * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+                * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+                * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+                * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+                * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+                * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+                * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+                * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+                * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                * POSSIBILITY OF SUCH DAMAGE.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="elementType" mixed="true">
+        <xs:sequence>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:short" name="value" use="optional"/>
+        <xs:attribute type="xs:string" name="internal_name" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="enumType" mixed="true">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="xs:string" name="description"/>
+            <xs:element type="elementType" name="element">
+                <xs:annotation>
+                    <xs:documentation>Climate Buttons  Radio Buttons  Navigation Subscription Buttons  TO DO to be removed  Common Single Light 0~500  Exterior Lights by common function groups 501~800  Interior Lights by common function groups 801~900  Lights by location 901~1000</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="paramType" name="param"/>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="scope" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="paramType" mixed="true">
+        <xs:sequence>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:short" name="minvalue" use="optional"/>
+        <xs:attribute type="xs:float" name="maxvalue" use="optional"/>
+        <xs:attribute type="xs:string" name="type" use="optional"/>
+        <xs:attribute type="xs:string" name="mandatory" use="optional"/>
+        <xs:attribute type="xs:string" name="defvalue" use="optional"/>
+        <xs:attribute type="xs:int" name="maxlength" use="optional"/>
+        <xs:attribute type="xs:string" name="array" use="optional"/>
+        <xs:attribute type="xs:byte" name="minsize" use="optional"/>
+        <xs:attribute type="xs:int" name="maxsize" use="optional"/>
+        <xs:attribute type="xs:byte" name="minlength" use="optional"/>
+        <xs:attribute type="xs:string" name="scope" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="structType" mixed="true">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="xs:string" name="description" minOccurs="0"/>
+            <xs:element type="paramType" name="param"/>
+            <xs:element type="elementType" name="element">
+                <xs:annotation>
+                    <xs:documentation>Climate Buttons  Radio Buttons  Navigation Subscription Buttons  TO DO to be removed  Common Single Light 0~500  Exterior Lights by common function groups 501~800  Interior Lights by common function groups 801~900  Lights by location 901~1000</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="scope" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="interfaceType">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="enumType" name="enum"/>
+            <xs:element type="structType" name="struct"/>
+            <xs:element type="functionType" name="function">
+                <xs:annotation>
+                    <xs:documentation>Policies  SyncP RPC End of SyncP RPC Policies  End of Policies  / Ford Specific Data Items  / Ford Specific Data Items  / Ford Specific Data Items  / Ford Specific Data Items  / Ford Specific Data Items  / Ford Specific Data Items  / Ford Specific Data Items  SyncP RPC End of SyncP RPC</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="xs:string" name="description"/>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="version" use="optional"/>
+        <xs:attribute type="xs:date" name="date" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="functionType" mixed="true">
+        <xs:sequence>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="paramType" name="param" maxOccurs="unbounded" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Ford Specific Data Items  Ford Specific Data Items  Ford Specific Data Items  Ford Specific Data Items  Ford Specific Data Items  Ford Specific Data Items  Ford Specific Data Items</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="messagetype" use="optional"/>
+        <xs:attribute type="xs:string" name="functionID" use="optional"/>
+        <xs:attribute type="xs:string" name="scope" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="interfacesType">
+        <xs:sequence>
+            <xs:element type="interfaceType" name="interface" maxOccurs="unbounded" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Policies</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name"/>
+    </xs:complexType>
+</xs:schema>

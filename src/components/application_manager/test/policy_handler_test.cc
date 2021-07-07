@@ -31,6 +31,7 @@
  */
 
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 #include "gmock/gmock.h"
@@ -71,6 +72,9 @@
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "utils/test_async_waiter.h"
+
+#include "smart_objects/enum_schema_item.h"
 
 namespace test {
 namespace components {
@@ -90,9 +94,12 @@ using ::testing::SetArgReferee;
 
 typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
 
+namespace {
+const std::string kFakeNickname = "fake_nickname";
 const std::string kDummyData = "some_data";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}  // namespace
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
@@ -175,8 +182,9 @@ class PolicyHandlerTest : public ::testing::Test {
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
     ON_CALL(app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
-    std::string path = file_system::CreateDirectory("storage");
-    file_system::CreateFile(path + "/" + "certificate");
+    const std::string path("storage");
+    if (file_system::CreateDirectory(path))
+      file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
         std::make_shared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.use_count() != 0);
@@ -241,8 +249,6 @@ class PolicyHandlerTest : public ::testing::Test {
     EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
-    EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi_level))
-        .WillOnce(Return(hmi_level));
     ChangePolicyManagerToMock();
     const policy::EncryptionRequired require_encryption;
     EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
@@ -271,41 +277,24 @@ class PolicyHandlerTest : public ::testing::Test {
     hmi_types.push_back(hmi_type);
     return hmi_types;
   }
+
+  void SetExpectationsAndCheckCloudAppPropertiesStatus(
+      const policy::AppProperties& app_properties,
+      const smart_objects::SmartObject& properties,
+      const policy::PolicyHandlerInterface::AppPropertiesState&
+          app_properties_state) {
+    EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+    EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _));
+    EXPECT_EQ(
+        app_properties_state,
+        policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+  }
 };
 
-namespace {
-/**
- * @brief The WaitAsync class
- * can wait for a certain amount of function calls from different
- * threads, or a timeout expires.
- */
-class WaitAsync {
- public:
-  WaitAsync(const uint32_t count, const uint32_t timeout)
-      : count_(count), timeout_(timeout) {}
-
-  void Notify() {
-    count_--;
-    cond_var_.NotifyOne();
-  }
-
-  bool Wait(sync_primitives::AutoLock& auto_lock) {
-    while (count_ > 0) {
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          cond_var_.WaitFor(auto_lock, timeout_);
-      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        return false;
-      }
-    }
-    return true;
-  }
-
- private:
-  int count_;
-  const uint32_t timeout_;
-  sync_primitives::ConditionalVariable cond_var_;
-};
-}  // namespace
+ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
+  *arg3 = mac_adress;
+}
 
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
   // Check before policy enabled from ini file
@@ -392,16 +381,20 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
   ChangePolicyManagerToMock();
   std::string file_name("sdl_pt_update.json");
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();
   BinaryMessage msg(json.begin(), json.end());
   // Checks
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   policy_handler_.ReceiveMessageFromSDK("", msg);
 
   policy_table::AppServiceParameters app_service_params =
@@ -456,10 +449,12 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   ChangePolicyManagerToMock();
   std::string file_name("sdl_pt_update.json");
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
+
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();
@@ -468,7 +463,10 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID());
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _));
   EXPECT_CALL(*mock_policy_manager_, PTUpdatedAt(_, _));
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   EXPECT_CALL(*mock_policy_manager_, CleanupUnpairedDevices());
   policy_handler_.ReceiveMessageFromSDK("", msg);
 }
@@ -479,7 +477,11 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   BinaryMessage msg;
   // Checks
 
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kWrongPtReceived));
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      OnPTUFinished(PolicyManager::PtProcessingResult::kWrongPtReceived));
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID()).Times(0);
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _))
       .Times(0);
@@ -560,16 +562,13 @@ TEST_F(PolicyHandlerTest,
 TEST_F(PolicyHandlerTest,
        OnPermissionsUpdated_MethodWith3Parameters_FromNONE_ToFULL) {
   // Set hmi level from NONE to FULL
-  const std::string new_kHmiLevel_string = "HMI_FULL";
+  const std::string new_kHmiLevel_string = "FULL";
   mobile_apis::HMILevel::eType new_hmi_level = mobile_apis::HMILevel::HMI_FULL;
   // Check expectations
   EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
-      .WillOnce(Return(new_hmi_level));
-
   EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
   ChangePolicyManagerToMock();
@@ -592,7 +591,7 @@ TEST_F(PolicyHandlerTest,
 TEST_F(PolicyHandlerTest,
        OnPermissionsUpdated_MethodWith3Parameters_FromNONE_ToNotFull) {
   // Set hmi level from NONE to Limited
-  const std::string new_kHmiLevel_string = "HMI_LIMITED";
+  const std::string new_kHmiLevel_string = "LIMITED";
   mobile_apis::HMILevel::eType new_hmi_level =
       mobile_apis::HMILevel::HMI_LIMITED;
   // Check expectations
@@ -600,9 +599,6 @@ TEST_F(PolicyHandlerTest,
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
-      .WillOnce(Return(new_hmi_level));
-
   EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
   ChangePolicyManagerToMock();
@@ -625,15 +621,12 @@ TEST_F(PolicyHandlerTest,
 TEST_F(PolicyHandlerTest,
        OnPermissionsUpdated_MethodWith3Parameters_FromNotNONE) {
   // Set hmi level from LIMITED to FULL
-  std::string new_kHmiLevel_string = "HMI_FULL";
-  mobile_apis::HMILevel::eType new_hmi_level = mobile_apis::HMILevel::HMI_FULL;
+  std::string new_kHmiLevel_string = "FULL";
   // Check expectations
   EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
-  EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
-      .WillOnce(Return(new_hmi_level));
 
   EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_LIMITED));
@@ -683,8 +676,6 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
               CheckPermissions(
                   kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(mock_message_helper_, StringifiedHMILevel(hmi_level))
-      .WillOnce(Return(kHmiLevel_));
   EXPECT_CALL(mock_message_helper_, GetDeviceMacAddressForHandle(device, _))
       .WillOnce(Return(kDeviceId));
   // Act
@@ -696,9 +687,9 @@ TEST_F(PolicyHandlerTest, GetNotificationsNumber) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_));
+  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_, false));
   // Act
-  policy_handler_.GetNotificationsNumber(priority_);
+  policy_handler_.GetNotificationsNumber(priority_, false);
 }
 
 TEST_F(PolicyHandlerTest, GetUserConsentForDevice) {
@@ -780,15 +771,6 @@ TEST_F(PolicyHandlerTest, OnExceededTimeout) {
   EXPECT_CALL(*mock_policy_manager_, OnExceededTimeout());
   // Act
   policy_handler_.OnExceededTimeout();
-}
-
-TEST_F(PolicyHandlerTest, OnSystemReady) {
-  // Arrange
-  EnablePolicyAndPolicyManagerMock();
-  // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, OnSystemReady());
-  // Act
-  policy_handler_.OnSystemReady();
 }
 
 TEST_F(PolicyHandlerTest, PTUpdatedAt_method_UseCounter_KILOMETERS) {
@@ -915,8 +897,8 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
           _,
           _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
-
-  EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+  EXPECT_CALL(*application1, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_,
               GetAppPermissionsChanges(kMacAddr_, kPolicyAppId_))
       .WillOnce(Return(permissions));
@@ -1224,17 +1206,15 @@ TEST_F(PolicyHandlerTest, OnGetUserFriendlyMessage) {
   ChangePolicyManagerToMock();
   // Check expectations
   std::vector<std::string> message_codes;
-  const std::string language("ru-ru");
+  const std::string language("RU-RU");
   const uint32_t correlation_id = 2;
 #ifdef EXTERNAL_PROPRIETARY_MODE
   const hmi_apis::Common_Language::eType default_language =
       hmi_apis::Common_Language::EN_US;
-  const std::string default_language_string = "EN_US";
+  const std::string default_language_string = "EN-US";
   application_manager_test::MockHMICapabilities mock_hmi_capabilities;
   EXPECT_CALL(app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(mock_hmi_capabilities));
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(default_language))
-      .WillOnce(Return(default_language_string));
   EXPECT_CALL(mock_hmi_capabilities, active_ui_language())
       .WillOnce(Return(default_language));
   EXPECT_CALL(
@@ -1314,19 +1294,6 @@ TEST_F(PolicyHandlerTest, OnSystemInfoChanged) {
   policy_handler_.OnSystemInfoChanged(language);
 }
 
-TEST_F(PolicyHandlerTest, OnGetSystemInfo) {
-  // Arrange
-  ChangePolicyManagerToMock();
-  // Check expectations
-  const std::string ccpu_version("4.1.3.B_EB355B");
-  const std::string wers_country_code("WAEGB");
-  const std::string language("ru-ru");
-  EXPECT_CALL(*mock_policy_manager_,
-              SetSystemInfo(ccpu_version, wers_country_code, language));
-  // Act
-  policy_handler_.OnGetSystemInfo(ccpu_version, wers_country_code, language);
-}
-
 TEST_F(PolicyHandlerTest, IsApplicationRevoked) {
   // Arrange
   EnablePolicy();
@@ -1335,15 +1302,6 @@ TEST_F(PolicyHandlerTest, IsApplicationRevoked) {
   EXPECT_CALL(*mock_policy_manager_, IsApplicationRevoked(kPolicyAppId_));
   // Act
   policy_handler_.IsApplicationRevoked(kPolicyAppId_);
-}
-
-TEST_F(PolicyHandlerTest, OnSystemInfoUpdateRequired) {
-  // Arrange
-  ChangePolicyManagerToMock();
-  // Check expectations
-  EXPECT_CALL(mock_message_helper_, SendGetSystemInfoRequest(_));
-  // Act
-  policy_handler_.OnSystemInfoUpdateRequired();
 }
 
 TEST_F(PolicyHandlerTest, GetAppRequestTypes) {
@@ -1629,6 +1587,56 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions) {
               GetDataOnDeviceID(
                   testing::An<transport_manager::DeviceHandle>(), _, _, _, _));
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
+  policy_handler_.OnGetListOfPermissions(app_id, corr_id);
+}
+
+TEST_F(PolicyHandlerTest, OnGetListOfPermissions_CollectResult_false) {
+  // Arrange
+  EnablePolicyAndPolicyManagerMock();
+
+  const uint32_t app_id = 10u;
+  const uint32_t corr_id = 1u;
+  test_app.insert(mock_app_);
+
+  EXPECT_CALL(app_manager_, application(app_id))
+      .WillRepeatedly(Return(mock_app_));
+  EXPECT_CALL(conn_handler, get_session_observer())
+      .WillOnce(ReturnRef(mock_session_observer));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
+  EXPECT_CALL(mock_session_observer,
+              GetDataOnDeviceID(
+                  testing::An<transport_manager::DeviceHandle>(), _, _, _, _))
+      .WillRepeatedly(
+          DoAll(SetDeviceParamsMacAdress(std::string()), (Return(1u))));
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy::ExternalConsentStatus external_consent_status =
+      policy::ExternalConsentStatus();
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, false))
+      .WillOnce(Return());
+  EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
+      .WillOnce(Return(external_consent_status));
+#else
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(_, corr_id, _, false))
+      .WillOnce(Return());
+#endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
+
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
 }
 
@@ -1660,14 +1668,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_WithoutConnectionKey) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1736,14 +1744,14 @@ TEST_F(PolicyHandlerTest, OnGetListOfPermissions_GroupPermissions_SUCCESS) {
 #ifdef EXTERNAL_PROPRIETARY_MODE
   policy::ExternalConsentStatus external_consent_status =
       policy::ExternalConsentStatus();
-  EXPECT_CALL(
-      mock_message_helper_,
-      SendGetListOfPermissionsResponse(_, external_consent_status, corr_id, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendGetListOfPermissionsResponse(
+                  _, external_consent_status, corr_id, _, true));
   EXPECT_CALL(*mock_policy_manager_, GetExternalConsentStatus())
       .WillOnce(Return(external_consent_status));
 #else
   EXPECT_CALL(mock_message_helper_,
-              SendGetListOfPermissionsResponse(_, corr_id, _));
+              SendGetListOfPermissionsResponse(_, corr_id, _, true));
 #endif  // #ifdef EXTERNAL_PROPRIETARY_MODE
 
   policy_handler_.OnGetListOfPermissions(app_id, corr_id);
@@ -1844,7 +1852,9 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendPolicySnapshotNotification(
+                  _, testing::A<const std::vector<uint8_t>&>(), _, _));
   // Check expectations for get app id
   GetAppIDForSending();
   // Expectations
@@ -1913,7 +1923,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(
       *mock_policy_manager_,
@@ -1942,7 +1952,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentNotAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_policy_manager_,
               ReactOnUserDevConsentForApp(handle, kPolicyAppId_, is_allowed))
@@ -1974,7 +1984,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   // App does not have predate policy
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(false));
+      .WillRepeatedly(Return(false));
 
   EXPECT_CALL(
       *mock_policy_manager_,
@@ -2183,63 +2193,6 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
   EXPECT_EQ(app_in_none_id_1 || app_in_none_id_2, app_id);
 }
 
-TEST_F(PolicyHandlerTest,
-       SendMessageToSDK_SuitableAppPresent_ExpectedNotificationSending) {
-  BinaryMessage msg;
-  const std::string url = "test_url";
-  EnablePolicyAndPolicyManagerMock();
-  test_app.insert(mock_app_);
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillRepeatedly(Return(true));
-
-  const connection_handler::DeviceHandle test_device_id = 1u;
-  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(test_device_id));
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceAllowed));
-
-  // Act
-  EXPECT_CALL(mock_message_helper_,
-              SendPolicySnapshotNotification(kAppId1_, msg, url, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, url));
-}
-
-TEST_F(PolicyHandlerTest,
-       SendMessageToSDK_NoSuitableApp_ExpectedNotificationNotSent) {
-  BinaryMessage msg;
-  const std::string url = "test_url";
-  EnablePolicyAndPolicyManagerMock();
-  test_app.insert(mock_app_);
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillRepeatedly(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillRepeatedly(Return(true));
-
-  const connection_handler::DeviceHandle test_device_id = 1u;
-  EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(test_device_id));
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceDisallowed));
-
-  // Expected to get 0 as application id so SDL does not have valid application
-  // with such id
-  EXPECT_CALL(app_manager_, application(0))
-      .WillOnce(
-          Return(std::shared_ptr<application_manager_test::MockApplication>()));
-
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, url));
-}
-
 TEST_F(PolicyHandlerTest, CanUpdate) {
   GetAppIDForSending();
   EXPECT_TRUE(policy_handler_.CanUpdate());
@@ -2313,24 +2266,20 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
 
-  sync_primitives::Lock wait_hmi_lock_first;
-  sync_primitives::AutoLock auto_lock_first(wait_hmi_lock_first);
-  WaitAsync waiter_first(kCallsCount_, kTimeout_);
+  auto waiter_first = TestAsyncWaiter::createInstance();
 #ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
-      .WillOnce(NotifyAsync(&waiter_first));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 #else
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
-      .WillOnce(NotifyAsync(&waiter_first));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 #endif
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock_second;
-  sync_primitives::AutoLock auto_lock_second(wait_hmi_lock_second);
-  WaitAsync waiter_second(kCallsCount_, kTimeout_);
+  auto waiter_second = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
@@ -2341,9 +2290,9 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(kConnectionKey_, permissions);
 
 #endif
-  EXPECT_TRUE(waiter_first.Wait(auto_lock_first));
+  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter_second.Wait(auto_lock_second));
+  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
 #endif
 }
 
@@ -2364,9 +2313,7 @@ TEST_F(PolicyHandlerTest,
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(app_manager_, application(_)).Times(0);
 
@@ -2383,7 +2330,7 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  EXPECT_FALSE(waiter.Wait(auto_lock));
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2403,9 +2350,7 @@ TEST_F(PolicyHandlerTest,
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(app_manager_, application(_)).Times(0);
 
@@ -2424,11 +2369,7 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  EXPECT_FALSE(waiter.Wait(auto_lock));
-}
-
-ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
-  *arg3 = mac_adress;
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2476,13 +2417,11 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
-      .WillOnce(DoAll(NotifyAsync(&waiter), Return(true)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
@@ -2491,7 +2430,7 @@ TEST_F(PolicyHandlerTest,
 
   Mock::VerifyAndClearExpectations(mock_app_.get());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 #endif
 }
 
@@ -2540,9 +2479,7 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
@@ -2557,15 +2494,28 @@ TEST_F(PolicyHandlerTest,
 
   Mock::VerifyAndClearExpectations(mock_app_.get());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_FALSE(waiter.Wait(auto_lock));
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 #endif
+}
+
+ACTION_P(SetEndpoint, endpoint) {
+  arg1 = endpoint;
 }
 
 TEST_F(PolicyHandlerTest, GetLockScreenIconUrl_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(*mock_policy_manager_, GetLockScreenIconUrl());
 
-  policy_handler_.GetLockScreenIconUrl();
+  const std::string url_str = "test_icon_url";
+  EndpointData data(url_str);
+
+  EndpointUrls endpoints;
+  endpoints.push_back(data);
+
+  const std::string service_type = "lock_screen_icon_url";
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(service_type, _))
+      .WillOnce(SetEndpoint(endpoints));
+
+  EXPECT_EQ(url_str, policy_handler_.GetLockScreenIconUrl(kPolicyAppId_));
 }
 
 TEST_F(PolicyHandlerTest, RemoveListener_SUCCESS) {
@@ -2595,41 +2545,33 @@ TEST_F(PolicyHandlerTest, AddStatisticsInfo_UnknownStatistics_UNSUCCESS) {
 TEST_F(PolicyHandlerTest, AddStatisticsInfo_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   policy_handler_.AddStatisticsInfo(
       hmi_apis::Common_StatisticsType::iAPP_BUFFER_FULL);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter_first = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 
   policy_handler_.OnSystemError(hmi_apis::Common_SystemError::SYNC_REBOOTED);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
 
-  WaitAsync waiter1(kCallsCount_, kTimeout_);
+  auto waiter_second = TestAsyncWaiter::createInstance();
+
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter1));
-
+      .WillOnce(NotifyTestAsyncWaiter(waiter_second));
   policy_handler_.OnSystemError(
       hmi_apis::Common_SystemError::SYNC_OUT_OF_MEMMORY);
-  EXPECT_TRUE(waiter1.Wait(auto_lock));
-}
-
-ACTION_P(SetEndpoint, endpoint) {
-  arg1 = endpoint;
+  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest, RemoteAppsUrl_EndpointsEmpty_UNSUCCESS) {
@@ -2673,6 +2615,12 @@ TEST_F(PolicyHandlerTest, OnSetCloudAppProperties_AllProperties_SUCCESS) {
       mobile_apis::HybridAppPreference::CLOUD;
   std::string hybrid_app_preference_str = "CLOUD";
   std::string endpoint = "anEndpoint";
+  const policy::AppProperties app_properties(endpoint,
+                                             " ",
+                                             enabled,
+                                             auth_token,
+                                             cloud_transport_type,
+                                             hybrid_app_preference_str);
 
   StringArray nicknames_vec;
   nicknames_vec.push_back(app_name);
@@ -2706,9 +2654,8 @@ TEST_F(PolicyHandlerTest, OnSetCloudAppProperties_AllProperties_SUCCESS) {
   EXPECT_CALL(*mock_policy_manager_,
               SetHybridAppPreference(kPolicyAppId_, hybrid_app_preference_str));
   EXPECT_CALL(*mock_policy_manager_, SetAppEndpoint(kPolicyAppId_, endpoint));
-  EXPECT_CALL(*mock_policy_manager_,
-              GetCloudAppParameters(kPolicyAppId_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<4>(auth_token), Return(true)));
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
   EXPECT_CALL(app_manager_, RefreshCloudAppInformation());
   EXPECT_CALL(policy_handler_observer,
               OnAuthTokenUpdated(kPolicyAppId_, auth_token));
@@ -2726,38 +2673,546 @@ TEST_F(PolicyHandlerTest, GetCloudAppParameters_AllProperties_SUCCESS) {
   std::string hybrid_app_preference_str = "CLOUD";
   std::string endpoint = "anEndpoint";
 
+  const policy::AppProperties app_properties(endpoint,
+                                             certificate,
+                                             enabled,
+                                             auth_token,
+                                             cloud_transport_type,
+                                             hybrid_app_preference_str);
+
   application_manager_test::MockPolicyHandlerObserver policy_handler_observer;
   policy_handler_.add_listener(&policy_handler_observer);
 
-  EXPECT_CALL(*mock_policy_manager_,
-              GetCloudAppParameters(kPolicyAppId_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(enabled),
-                      SetArgReferee<2>(endpoint),
-                      SetArgReferee<3>(certificate),
-                      SetArgReferee<4>(auth_token),
-                      SetArgReferee<5>(cloud_transport_type),
-                      SetArgReferee<6>(hybrid_app_preference_str),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
-  bool enabled_out;
-  std::string endpoint_out;
-  std::string cert_out;
-  std::string auth_token_out;
-  std::string ctt_out;
-  std::string hap_out;
-  EXPECT_TRUE(policy_handler_.GetCloudAppParameters(kPolicyAppId_,
-                                                    enabled_out,
-                                                    endpoint_out,
-                                                    cert_out,
-                                                    auth_token_out,
-                                                    ctt_out,
-                                                    hap_out));
-  EXPECT_EQ(enabled, enabled_out);
-  EXPECT_EQ(endpoint, endpoint_out);
-  EXPECT_EQ(certificate, cert_out);
-  EXPECT_EQ(auth_token, auth_token_out);
-  EXPECT_EQ(cloud_transport_type, ctt_out);
-  EXPECT_EQ(hybrid_app_preference_str, hap_out);
+  policy::AppProperties out_app_properties;
+  EXPECT_TRUE(
+      policy_handler_.GetAppProperties(kPolicyAppId_, out_app_properties));
+  EXPECT_EQ(app_properties.enabled, out_app_properties.enabled);
+  EXPECT_EQ(app_properties.endpoint, out_app_properties.endpoint);
+  EXPECT_EQ(app_properties.certificate, out_app_properties.certificate);
+  EXPECT_EQ(app_properties.auth_token, out_app_properties.auth_token);
+  EXPECT_EQ(app_properties.transport_type, out_app_properties.transport_type);
+  EXPECT_EQ(app_properties.hybrid_app_preference,
+            out_app_properties.hybrid_app_preference);
+}
+
+TEST_F(PolicyHandlerTest, SendOnAppPropertiesChangeNotification_SUCCESS) {
+  using namespace smart_objects;
+  auto notification = std::make_shared<SmartObject>(SmartType_Null);
+
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+
+  EXPECT_CALL(mock_message_helper_,
+              CreateOnAppPropertiesChangeNotification(kPolicyAppId_, _))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(notification, commands::Command::SOURCE_HMI));
+
+  policy_handler_.SendOnAppPropertiesChangeNotification(kPolicyAppId_);
+}
+
+TEST_F(PolicyHandlerTest, GetApplicationPolicyIDs_GetEmptyIDsVector_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  std::vector<std::string> app_ids_vector;
+  ON_CALL(*mock_policy_manager_, GetApplicationPolicyIDs())
+      .WillByDefault(Return(app_ids_vector));
+
+  EXPECT_CALL(*mock_policy_manager_, GetApplicationPolicyIDs());
+  EXPECT_EQ(app_ids_vector, policy_handler_.GetApplicationPolicyIDs());
+}
+
+TEST_F(PolicyHandlerTest,
+       GetApplicationPolicyIDs_GetIDFromAppIDsVectorWithWrongIDs_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  std::vector<std::string> app_ids_vector = {policy::kDefaultId,
+                                             policy::kPreDataConsentId,
+                                             policy::kDeviceId,
+                                             kPolicyAppId_};
+  ON_CALL(*mock_policy_manager_, GetApplicationPolicyIDs())
+      .WillByDefault(Return(app_ids_vector));
+
+  EXPECT_CALL(*mock_policy_manager_, GetApplicationPolicyIDs());
+
+  auto policy_ids = policy_handler_.GetApplicationPolicyIDs();
+  EXPECT_NE(app_ids_vector, policy_ids);
+  EXPECT_EQ(1u, policy_ids.size());
+  EXPECT_EQ(kPolicyAppId_, policy_ids[0]);
+}
+
+TEST_F(PolicyHandlerTest, CheckCloudAppEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties out_app_properties;
+  out_app_properties.enabled = true;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(out_app_properties), Return(true)));
+  EXPECT_TRUE(policy_handler_.CheckCloudAppEnabled(kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, CheckCloudAppNotEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _));
+  EXPECT_FALSE(policy_handler_.CheckCloudAppEnabled(kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, OnLocalAppAdded_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded());
+  policy_handler_.OnLocalAppAdded();
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NoPropertiesChanged) {
+  ChangePolicyManagerToMock();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(Return(false));
+  EXPECT_EQ(policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest,
+       GetAppPropertiesStatus_EnableFlagSwitchChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties app_properties;
+  app_properties.enabled = false;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::enabled] = !app_properties.enabled;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::ENABLED_FLAG_SWITCH);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetAppPropertiesStatus_EnableFlagSwitchNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties app_properties;
+  app_properties.enabled = false;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::enabled] = app_properties.enabled;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_AuthTokenChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentToken = "kCurrentToken";
+  const std::string kNewToken = "kNewToken";
+
+  policy::AppProperties app_properties;
+  app_properties.auth_token = kCurrentToken;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::auth_token] = kNewToken;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::AUTH_TOKEN_CHANGED);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_AuthTokenNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentToken = "kCurrentToken";
+
+  policy::AppProperties app_properties;
+  app_properties.auth_token = kCurrentToken;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::auth_token] = app_properties.auth_token;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_TransportTypeChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentTransportType = "kCurrentTransportType";
+  const std::string kNewTransportType = "kNewTransportType";
+
+  policy::AppProperties app_properties;
+  app_properties.transport_type = kCurrentTransportType;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::cloud_transport_type] = kNewTransportType;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::
+          TRANSPORT_TYPE_CHANGED);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetAppPropertiesStatus_TransportTypeNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentTransportType = "kCurrentTransportType";
+
+  policy::AppProperties app_properties;
+  app_properties.transport_type = kCurrentTransportType;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::cloud_transport_type] = app_properties.transport_type;
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_EndPointChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentEndPoint = "kCurrentEndPoint";
+  const std::string kNewEndPoint = "kNewEndPoint";
+
+  policy::AppProperties app_properties;
+  app_properties.endpoint = kCurrentEndPoint;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::endpoint] = kNewEndPoint;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::ENDPOINT_CHANGED);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_EndPointNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentEndPoint = "kCurrentEndPoint";
+
+  policy::AppProperties app_properties;
+  app_properties.endpoint = kCurrentEndPoint;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::endpoint] = app_properties.endpoint;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  std::shared_ptr<policy::StringArray> nicknames =
+      std::make_shared<policy::StringArray>();
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NICKNAMES_CHANGED;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest,
+       GetAppPropertiesStatus_RemoveNickname_NicknamesChanged) {
+  ChangePolicyManagerToMock();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  auto nicknames = std::make_shared<policy::StringArray>(2, kFakeNickname);
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NICKNAMES_CHANGED;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  std::shared_ptr<policy::StringArray> nicknames =
+      std::make_shared<policy::StringArray>();
+  nicknames->push_back(kFakeNickname);
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_HybridAppChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const auto kCurrentHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::CLOUD;
+  const auto kNewHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::MOBILE;
+
+  policy::AppProperties app_properties;
+  smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::
+      EnumToString(kCurrentHybridAppProperties,
+                   &app_properties.hybrid_app_preference);
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::hybrid_app_preference] = kNewHybridAppProperties;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::
+          HYBRYD_APP_PROPERTIES_CHANGED);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_HybridAppNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const auto kCurrentHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::CLOUD;
+
+  policy::AppProperties app_properties;
+  smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::
+      EnumToString(kCurrentHybridAppProperties,
+                   &app_properties.hybrid_app_preference);
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::hybrid_app_preference] = kCurrentHybridAppProperties;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_PolicyDisabled_FAIL) {
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  policy_handler_.LoadPolicyLibrary();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES;
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, GetEnabledLocalApps_SUCCESS) {
+  ChangePolicyManagerToMock();
+  std::vector<std::string> enabled_local_apps;
+
+  EXPECT_CALL(*mock_policy_manager_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_local_apps));
+  EXPECT_EQ(enabled_local_apps, policy_handler_.GetEnabledLocalApps());
+
+  enabled_local_apps.push_back("local_app");
+  EXPECT_CALL(*mock_policy_manager_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_local_apps));
+  EXPECT_EQ(enabled_local_apps, policy_handler_.GetEnabledLocalApps());
+}
+
+TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  const uint32_t expected_apps_count = 1u;
+  EXPECT_CALL(*mock_policy_manager_,
+              UpdatePTUReadyAppsCount(expected_apps_count));
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  const uint32_t expected_apps_count = 0u;
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence());
+  policy_handler_.StopRetrySequence();
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  Json::Value expected_table_data(Json::objectValue);
+  expected_table_data["test_key"] = "test_value";
+  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData())
+      .WillOnce(Return(expected_table_data));
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyDisabled_FAIL) {
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+
+  policy_handler_.LoadPolicyLibrary();
+
+  Json::Value expected_table_data;
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyEnabled_SUCCESS) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  ChangePolicyManagerToMock();
+
+  std::vector<VehicleDataItem> expected_removed_items;
+  expected_removed_items.push_back(VehicleDataItem());
+
+  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems())
+      .WillOnce(Return(expected_removed_items));
+
+  const auto& actually_removed_items =
+      policy_handler_.GetRemovedVehicleDataItems();
+  ASSERT_EQ(expected_removed_items.size(), actually_removed_items.size());
+  EXPECT_TRUE(expected_removed_items[0] == actually_removed_items[0]);
+}
+
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyDisabled_FAIL) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_TRUE(policy_handler_.GetRemovedVehicleDataItems().empty());
+}
+
+TEST_F(PolicyHandlerTest, PopAppIdFromPTUQueue_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  ASSERT_EQ(1u, policy_handler_.applications_ptu_queue_.size());
+
+  policy_handler_.PopAppIdFromPTUQueue();
+  EXPECT_EQ(0u, policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, PopAppIdFromPTUQueue_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  const uint32_t expected_apps_count = 0u;
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_,
+              UpdatePTUReadyAppsCount(expected_apps_count))
+      .Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.PopAppIdFromPTUQueue();
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, OnLocalAppAdded_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded());
+  policy_handler_.OnLocalAppAdded();
+}
+
+TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
+      .WillOnce(Return(mock_app_));
+
+  const rpc::Optional<rpc::Boolean> encryption_requiered;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(encryption_requiered));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
+
+  Permissions app_permissions;
+  EXPECT_CALL(mock_message_helper_,
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
+  policy_handler_.OnPermissionsUpdated(
+      kDeviceId_, kPolicyAppId_, app_permissions);
+}
+
+TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyDisabled_FAIL) {
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_)).Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  Permissions app_permissions;
+  EXPECT_CALL(mock_message_helper_,
+              SendOnPermissionsChangeNotification(_, _, _, _))
+      .Times(0);
+  policy_handler_.OnPermissionsUpdated(
+      kDeviceId_, kPolicyAppId_, app_permissions);
+}
+
+TEST_F(PolicyHandlerTest, IsNewApplication_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(*mock_policy_manager_, IsNewApplication(kPolicyAppId_))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(policy_handler_.IsNewApplication(kPolicyAppId_));
 }
 
 }  // namespace policy_handler_test

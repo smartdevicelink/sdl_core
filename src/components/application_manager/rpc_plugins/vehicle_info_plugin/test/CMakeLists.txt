@@ -37,6 +37,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/vehicle_info_plugin/commands
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/include/test/application_manager/
+  ${COMPONENTS_DIR}/resumption/include/resumption/
   )
 set(COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
 
@@ -51,14 +52,15 @@ file(GLOB SOURCES
   ${COMMANDS_TEST_DIR}/mobile/*
   ${CMAKE_CURRENT_SOURCE_DIR}/custom_vehicle_data_manager_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_data_item_schema_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_info_pending_resumption_test.cc
   ${COMPONENTS_DIR}/application_manager/src/message.cc
   ${COMPONENTS_DIR}/application_manager/src/event_engine/*
+  ${COMPONENTS_DIR}/resumption/src/last_state_wrapper_impl.cc
 )
 
 set(LIBRARIES
   gmock
   Utils
-  SmartObjects
   HMI_API
   MOBILE_API
   connectionHandler

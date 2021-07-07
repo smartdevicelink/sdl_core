@@ -46,6 +46,7 @@ class MockConnectionHandlerObserver
   MOCK_METHOD1(OnDeviceListUpdated,
                void(const connection_handler::DeviceMap& device_list));
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
+  MOCK_METHOD0(OnWebEngineDeviceCreated, void());
   MOCK_METHOD1(RemoveDevice,
                void(const connection_handler::DeviceHandle& device_handle));
   MOCK_METHOD4(OnServiceStartedCallback,
@@ -82,6 +83,8 @@ class MockConnectionHandlerObserver
   MOCK_METHOD2(SetPendingApplicationState,
                void(const transport_manager::ConnectionUID connection_id,
                     const transport_manager::DeviceInfo& device_info));
+  MOCK_METHOD1(GetProtocolVehicleData,
+               bool(connection_handler::ProtocolVehicleData& data));
 };
 
 }  // namespace connection_handler_test

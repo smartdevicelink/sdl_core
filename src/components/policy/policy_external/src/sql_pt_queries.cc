@@ -59,6 +59,7 @@ const std::string kCreateSchema =
     "  `ccpu_version` VARCHAR(45), "
     "  `language` VARCHAR(45), "
     "  `wers_country_code` VARCHAR(45), "
+    "  `hardware_version` VARCHAR(45), "
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
@@ -113,6 +114,17 @@ const std::string kCreateSchema =
     "CREATE INDEX IF NOT EXISTS "
     "`notifications_by_priority.fk_notifications_by_priority_priority1_idx` "
     "  ON `notifications_by_priority`(`priority_value`); "
+    "CREATE TABLE IF NOT EXISTS `subtle_notifications_by_priority`( "
+    "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `value` INTEGER NOT NULL, "
+    "  CONSTRAINT `fk_subtle_notifications_by_priority_priority1` "
+    "    FOREIGN KEY(`priority_value`) "
+    "    REFERENCES `priority`(`value`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`subtle_notifications_by_priority.fk_subtle_notifications_by_priority_"
+    "priority1_idx` "
+    "  ON `subtle_notifications_by_priority`(`priority_value`); "
     "CREATE TABLE IF NOT EXISTS `language`( "
     "  `code` VARCHAR(25) PRIMARY KEY NOT NULL "
     "); "
@@ -388,8 +400,8 @@ const std::string kCreateSchema =
     "  ON `endpoint`(`application_id` COLLATE NOCASE); "
     /*endpoint properties*/
     "CREATE TABLE IF NOT EXISTS `endpoint_properties`( "
-    "  `service` VARCHAR(100) NOT NULL, "
-    "  `version` VARCHAR(100) NOT NULL "
+    "  `service` VARCHAR(100) PRIMARY KEY NOT NULL, "
+    "  `version` VARCHAR(100) "
     ");"
     "CREATE TABLE IF NOT EXISTS `message`( "
     "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -469,6 +481,7 @@ const std::string kCreateSchema =
     "  `until` VARCHAR(45), "
     "  `removed` BOOL, "
     "  `deprecated` BOOL, "
+    "  `defvalue` VARCHAR(65535), "
     "  `minvalue` INTEGER, "
     "  `maxvalue` INTEGER, "
     "  `minsize` INTEGER, "
@@ -623,6 +636,10 @@ const std::string kDropSchema =
     "DROP INDEX IF EXISTS "
     "`notifications_by_priority.fk_notifications_by_priority_priority1_idx`; "
     "DROP TABLE IF EXISTS `notifications_by_priority`; "
+    "DROP INDEX IF EXISTS "
+    "`subtle_notifications_by_priority.fk_subtle_notifications_by_priority_"
+    "priority1_idx`; "
+    "DROP TABLE IF EXISTS `subtle_notifications_by_priority`; "
     "DROP TABLE IF EXISTS `hmi_level`; "
     "DROP TABLE IF EXISTS `hybrid_app_preference`; "
     "DROP TABLE IF EXISTS `priority`; "
@@ -664,6 +681,7 @@ const std::string kDeleteData =
     "DELETE FROM `message_type`; "
     "DELETE FROM `language`; "
     "DELETE FROM `notifications_by_priority`; "
+    "DELETE FROM `subtle_notifications_by_priority`; "
     "DELETE FROM `hmi_level`; "
     "DELETE FROM `priority`; "
     "DELETE FROM `functional_group`; "
@@ -743,13 +761,14 @@ const std::string kInsertVehicleDataItem =
     "  `until`, "
     "  `removed`, "
     "  `deprecated`, "
+    "  `defvalue`, "
     "  `minvalue`, "
     "  `maxvalue`, "
     "  `minsize`, "
     "  `maxsize`, "
     "  `minlength`, "
     "  `maxlength`) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 const std::string kInsertVehicleDataItemParams =
     "INSERT INTO `vehicle_data_item_parameters` ("
@@ -780,9 +799,6 @@ const std::string kSetNotFirstRun =
 
 const std::string kSelectEndpoint =
     "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
-
-const std::string kSelectLockScreenIcon =
-    "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
 
 const std::string kInsertFunctionalGroup =
     "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`, "
@@ -878,6 +894,11 @@ const std::string kInsertNotificationsByPriority =
     "`value`) "
     "  VALUES (?, ?)";
 
+const std::string kInsertSubtleNotificationsByPriority =
+    "INSERT OR REPLACE INTO `subtle_notifications_by_priority` "
+    "(`priority_value`, `value`) "
+    "  VALUES (?, ?)";
+
 const std::string kInsertDeviceData =
     "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
 
@@ -924,6 +945,9 @@ const std::string kSelectEndpoints =
 
 const std::string kSelectNotificationsPerMin =
     "SELECT `priority_value`, `value` FROM notifications_by_priority";
+
+const std::string kSelectSubtleNotificationsPerMin =
+    "SELECT `priority_value`, `value` FROM subtle_notifications_by_priority";
 
 const std::string kSelectNotificationsPerPriority =
     "SELECT `value` FROM notifications_by_priority WHERE `priority_value` = ? ";

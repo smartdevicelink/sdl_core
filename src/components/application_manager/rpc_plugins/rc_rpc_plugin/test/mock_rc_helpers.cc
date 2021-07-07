@@ -34,6 +34,12 @@
 
 namespace rc_rpc_plugin {
 
+smart_objects::SmartObject RCHelpers::MergeModuleData(
+    const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2) {
+  return MockRCHelpers::rc_helpers_mock()->MergeModuleData(data1, data2);
+}
+
 const std::function<std::string(const std::string&)>
 rc_rpc_plugin::RCHelpers::GetModuleTypeToDataMapping() {
   return MockRCHelpers::rc_helpers_mock()->GetModuleTypeToDataMapping();
@@ -54,10 +60,12 @@ rc_rpc_plugin::RCAppExtensionPtr rc_rpc_plugin::RCHelpers::GetRCExtension(
 }
 
 smart_objects::SmartObjectSPtr
-rc_rpc_plugin::RCHelpers::CreateUnsubscribeRequestToHMI(
-    const ModuleUid& module, const uint32_t correlation_id) {
-  return MockRCHelpers::rc_helpers_mock()->CreateUnsubscribeRequestToHMI(
-      module, correlation_id);
+rc_rpc_plugin::RCHelpers::CreateGetInteriorVDRequestToHMI(
+    const ModuleUid& module,
+    const uint32_t correlation_id,
+    const RCHelpers::InteriorDataAction action) {
+  return MockRCHelpers::rc_helpers_mock()->CreateGetInteriorVDRequestToHMI(
+      module, correlation_id, action);
 }
 
 std::vector<application_manager::ApplicationSharedPtr>
@@ -122,6 +130,11 @@ void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
     smart_objects::SmartObject& msg_params) {
   return MockRCHelpers::rc_helpers_mock()->RemoveRedundantGPSDataFromIVDataMsg(
       msg_params);
+}
+
+bool RCHelpers::IsResponseSuccessful(
+    const smart_objects::SmartObject& response) {
+  return MockRCHelpers::rc_helpers_mock()->IsResponseSuccessful(response);
 }
 
 MockRCHelpers* MockRCHelpers::rc_helpers_mock() {

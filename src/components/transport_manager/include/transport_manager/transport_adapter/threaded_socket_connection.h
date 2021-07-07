@@ -74,6 +74,8 @@ class ThreadedSocketConnection : public Connection {
    */
   TransportAdapter::Error Disconnect();
 
+  void Terminate() OVERRIDE;
+
   /**
    * @brief Start thread creation.
    *

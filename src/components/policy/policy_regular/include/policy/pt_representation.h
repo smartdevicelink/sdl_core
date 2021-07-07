@@ -152,12 +152,16 @@ class PTRepresentation {
   virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * @brief Records mandatory information about head unit system to PT
+   * @return bool Success of operation
    */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual bool SetMetaInfo(const std::string& ccpu_version) = 0;
+
+  /**
+   * @brief Records information about hardware version to PT
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
 
   /**
    * @brief Get allowed number of notifications

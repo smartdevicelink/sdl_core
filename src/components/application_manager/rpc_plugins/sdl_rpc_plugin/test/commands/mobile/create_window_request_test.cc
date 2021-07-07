@@ -164,6 +164,9 @@ class CreateWindowRequestTest
     ON_CALL(*mock_app_, display_capabilities())
         .WillByDefault(Return(display_capabilities_));
 
+    ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+        .WillByDefault(Return(display_capabilities_));
+
     window_params_map_lock_ptr_ = std::make_shared<sync_primitives::Lock>();
 
     DataAccessor<am::WindowParamsMap> window_params_map(

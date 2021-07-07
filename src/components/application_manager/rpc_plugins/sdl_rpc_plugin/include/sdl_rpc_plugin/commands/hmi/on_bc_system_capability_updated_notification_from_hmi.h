@@ -87,6 +87,18 @@ class OnBCSystemCapabilityUpdatedNotificationFromHMI
   ProcessSystemDisplayCapabilitiesResult ProcessSystemDisplayCapabilities(
       const smart_objects::SmartObject& display_capabilities);
 
+  /**
+   * @brief ProcessVideoStreamingCapability processes provided video
+   * streaming capabilities according to its structure
+   * @param system_capability capabilities to process
+   * @return true if video streaming capabilities have been processed
+   * properly, otherwise returns false
+   */
+  bool ProcessVideoStreamingCapability(
+      const smart_objects::SmartObject& system_capability);
+
+  void RemoveAppIdFromNotification();
+
   DISALLOW_COPY_AND_ASSIGN(OnBCSystemCapabilityUpdatedNotificationFromHMI);
 };
 

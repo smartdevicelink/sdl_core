@@ -85,6 +85,7 @@ class VehicleDataItemSchemaTest : public ::testing::Test {
       schema.params->mark_initialized();
       schema.mandatory = true;
       *schema.array = false;
+      *schema.defvalue = "10";
       // default value bounds
       *schema.minvalue = 10;
       *schema.maxvalue = 100;
@@ -387,9 +388,10 @@ TEST_F(VehicleDataItemSchemaTest, ValidateUnknownType) {
   auto test_schema = PolicyDataItem(test_object_with_invalid_type.schema);
   auto result = VehicleDataItemSchema::create(
       test_schema, VehicleDataItemSchema::SchemaType::HMI);
-  EXPECT_EQ(ErrorCode::ERROR,
+  test_object_with_invalid_type.data = "CVS_NORMAL";
+  EXPECT_EQ(ErrorCode::OK,
             result->validate(test_object_with_invalid_type.data, &report));
-  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 }  // namespace vehicle_info_plugin_test

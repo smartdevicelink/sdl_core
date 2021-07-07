@@ -62,24 +62,27 @@ using ::testing::Return;
 class ConnectionTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    connection_handler_ = new ConnectionHandlerImpl(
-        mock_connection_handler_settings, transport_manager_mock);
+    connection_handler_.reset(new ConnectionHandlerImpl(
+        mock_connection_handler_settings, transport_manager_mock));
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0u;
     const uint32_t heart_beat = 10000u;
-    connection_ = new Connection(
-        connectionHandle, device_handle, connection_handler_, heart_beat);
+    connection_.reset(new Connection(connectionHandle,
+                                     device_handle,
+                                     connection_handler_.get(),
+                                     heart_beat));
   }
 
   void TearDown() OVERRIDE {
-    delete connection_;
-    delete connection_handler_;
+    connection_.reset();
+    connection_handler_.reset();
   }
   void StartSession() {
     StartDefaultSession();
     connection_->UpdateProtocolVersionSession(
         session_id, protocol_handler::PROTOCOL_VERSION_3);
   }
+
   void StartDefaultSession() {
     session_id = connection_->AddNewSession(kDefaultConnectionHandle);
     EXPECT_NE(session_id, 0u);
@@ -93,6 +96,7 @@ class ConnectionTest : public ::testing::Test {
     EXPECT_TRUE(found_result);
     EXPECT_EQ(connection_->primary_connection_handle(), 0);
   }
+
   void AddNewService(const ServiceType service_type,
                      const bool protection,
                      const bool expect_add_new_service_call_result,
@@ -124,6 +128,7 @@ class ConnectionTest : public ::testing::Test {
 #endif  // ENABLE_SECURITY
     }
   }
+
   void AddNewSecondaryService(const ServiceType service_type) {
     const bool result = connection_->AddNewService(
         session_id, service_type, false, kSecondaryConnectionHandle);
@@ -162,11 +167,11 @@ class ConnectionTest : public ::testing::Test {
     EXPECT_EQ(expect_exist_service, found_result);
   }
 
-  Connection* connection_;
+  std::shared_ptr<Connection> connection_;
   MockConnectionHandlerSettings mock_connection_handler_settings;
   testing::StrictMock<transport_manager_test::MockTransportManager>
       transport_manager_mock;
-  ConnectionHandlerImpl* connection_handler_;
+  std::shared_ptr<ConnectionHandlerImpl> connection_handler_;
   uint32_t session_id;
   static const transport_manager::ConnectionUID kDefaultConnectionHandle = 1;
   static const transport_manager::ConnectionUID kSecondaryConnectionHandle = 2;
@@ -191,19 +196,24 @@ TEST_F(ConnectionTest, Session_UpdateProtocolVersion) {
   EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_3), protocol_version);
 }
 
-TEST_F(ConnectionTest, HeartBeat_NotSupported) {
-  // Arrange
+TEST_F(ConnectionTest, SupportHeartBeat_WrongSessionId_Fail) {
+  uint8_t fake_id = 0u;
+  const SessionMap session_map = connection_->session_map();
+  EXPECT_TRUE(session_map.empty());
+
+  EXPECT_FALSE(connection_->SupportHeartBeat(fake_id));
+}
+
+TEST_F(ConnectionTest, SupportHeartBeat_NotSupported_Fail) {
   StartDefaultSession();
   uint8_t protocol_version;
   EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
   EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
 
-  // Assert
   EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Protocol3_Supported) {
-  // Arrange
+TEST_F(ConnectionTest, SupportHeartBeat_Protocol3_Success) {
   StartSession();
   // Check execution if protocol version is 3
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
@@ -211,8 +221,7 @@ TEST_F(ConnectionTest, HeartBeat_Protocol3_Supported) {
   EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Protocol4_PositiveHeartBeat_Supported) {
-  // Arrange
+TEST_F(ConnectionTest, SupportHeartBeat_Protocol4_PositiveHeartBeat_Success) {
   StartSession();
   // Check execution if protocol version is 4
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
@@ -220,16 +229,12 @@ TEST_F(ConnectionTest, HeartBeat_Protocol4_PositiveHeartBeat_Supported) {
   EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
-  // Correctc of connection (need connection with heartbeat=0)
-  delete connection_;
-  connection_ = 0;
-
+TEST_F(ConnectionTest, SupportHeartBeat_Protocol4_ZeroHeartBeat_Fail) {
   const ConnectionHandle connectionHandle = 0;
   const DeviceHandle device_handle = 0u;
   const uint32_t heart_beat = 0u;
-  connection_ = new Connection(
-      connectionHandle, device_handle, connection_handler_, heart_beat);
+  connection_.reset(new Connection(
+      connectionHandle, device_handle, connection_handler_.get(), heart_beat));
   StartSession();
   // Check execution if protocol version is 4
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
@@ -237,8 +242,7 @@ TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
   EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Protocol5_PositiveHeartBeat_Supported) {
-  // Arrange
+TEST_F(ConnectionTest, SupportHeartBeat_Protocol5_PositiveHeartBeat_Success) {
   StartSession();
   // Check execution if protocol version is 5
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_5);
@@ -246,16 +250,12 @@ TEST_F(ConnectionTest, HeartBeat_Protocol5_PositiveHeartBeat_Supported) {
   EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Protocol5_ZeroHeartBeat_NotSupported) {
-  // Correctc of connection (need connection with heartbeat=0)
-  delete connection_;
-  connection_ = 0;
-
+TEST_F(ConnectionTest, SupportHeartBeat_Protocol5_ZeroHeartBeat_Fail) {
   const ConnectionHandle connectionHandle = 0;
   const DeviceHandle device_handle = 0u;
   const uint32_t heart_beat = 0u;
-  connection_ = new Connection(
-      connectionHandle, device_handle, connection_handler_, heart_beat);
+  connection_.reset(new Connection(
+      connectionHandle, device_handle, connection_handler_.get(), heart_beat));
   StartSession();
   // Check execution if protocol version is 5
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_5);
@@ -302,6 +302,16 @@ TEST_F(ConnectionTest, Session_AddControlService) {
       kControl, PROTECTION_OFF, EXPECT_RETURN_FALSE, EXPECT_SERVICE_NOT_EXISTS);
   AddNewService(
       kControl, PROTECTION_ON, EXPECT_RETURN_FALSE, EXPECT_SERVICE_NOT_EXISTS);
+}
+
+TEST_F(ConnectionTest, AddNewService_NotSupported) {
+  StartDefaultSession();
+  uint8_t protocol_version;
+  EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
+  EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
+
+  EXPECT_FALSE(connection_->AddNewService(
+      session_id, kAudio, false, kDefaultConnectionHandle));
 }
 
 // Invalid Services couldnot be started anyway
@@ -358,13 +368,11 @@ TEST_F(ConnectionTest, Session_AddAllOtherService_Protected) {
 TEST_F(ConnectionTest, FindAddedService) {
   StartSession();
 
-  // Arrange
   SessionMap currentSessionMap = connection_->session_map();
   Service* sessionWithService =
       currentSessionMap.find(session_id)->second.FindService(kAudio);
   EXPECT_EQ(NULL, sessionWithService);
 
-  // Act
   AddNewService(
       kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE, EXPECT_SERVICE_EXISTS);
 
@@ -448,8 +456,8 @@ TEST_F(ConnectionTest, AddNewSession_VerifyAddSessionCalled) {
   ConnectionHandle connection_handle = 123;
   DeviceHandle device_handle = 0u;
   uint32_t heart_beat = 10000u;
-  Connection* connection = new Connection(
-      connection_handle, device_handle, &mock_connection_handler, heart_beat);
+  std::unique_ptr<Connection> connection(new Connection(
+      connection_handle, device_handle, &mock_connection_handler, heart_beat));
 
   transport_manager::ConnectionUID connection_handle_uid = 1;
   uint32_t mock_session_id = 2;
@@ -461,7 +469,6 @@ TEST_F(ConnectionTest, AddNewSession_VerifyAddSessionCalled) {
 
   EXPECT_CALL(mock_connection_handler, RemoveSession(mock_session_id))
       .WillOnce(Return(true));  // invoked by destructor of connection
-  delete connection;
 }
 
 TEST_F(ConnectionTest, RemoveSession_VerifyRemoveSessionCalled) {
@@ -470,8 +477,8 @@ TEST_F(ConnectionTest, RemoveSession_VerifyRemoveSessionCalled) {
   ConnectionHandle connection_handle = 123;
   DeviceHandle device_handle = 0u;
   uint32_t heart_beat = 10000u;
-  Connection* connection = new Connection(
-      connection_handle, device_handle, &mock_connection_handler, heart_beat);
+  std::unique_ptr<Connection> connection(new Connection(
+      connection_handle, device_handle, &mock_connection_handler, heart_beat));
 
   transport_manager::ConnectionUID connection_handle_uid = 1;
   uint32_t mock_session_id = 10;
@@ -486,7 +493,9 @@ TEST_F(ConnectionTest, RemoveSession_VerifyRemoveSessionCalled) {
   uint32_t ret = connection->RemoveSession(sid);
   EXPECT_EQ(sid, ret);
 
-  delete connection;
+  EXPECT_CALL(mock_connection_handler, RemoveSession(mock_session_id))
+      .WillOnce(Return(true));
+  EXPECT_EQ(0u, connection->RemoveSession(mock_session_id));
 }
 
 TEST_F(ConnectionTest, SecondarySessionTest) {
@@ -497,8 +506,8 @@ TEST_F(ConnectionTest, SecondarySessionTest) {
   const ConnectionHandle connectionHandle = 0;
   const DeviceHandle device_handle = 0u;
   const uint32_t heart_beat = 0u;
-  Connection* secondary_connection = new Connection(
-      connectionHandle, device_handle, connection_handler_, heart_beat);
+  std::unique_ptr<Connection> secondary_connection(new Connection(
+      connectionHandle, device_handle, connection_handler_.get(), heart_beat));
 
   secondary_connection->SetPrimaryConnectionHandle(kDefaultConnectionHandle);
   connection_handler::ConnectionHandle expected_primary_connection_handle =
@@ -508,8 +517,6 @@ TEST_F(ConnectionTest, SecondarySessionTest) {
 
   AddNewSecondaryService(kAudio);
   AddNewSecondaryService(kMobileNav);
-
-  delete secondary_connection;
 }
 
 TEST_F(ConnectionTest, RemoveSecondaryServices_SUCCESS) {
@@ -607,7 +614,7 @@ TEST_F(ConnectionTest, SetGetSSLContext) {
 
 TEST_F(ConnectionTest, SetProtectionFlagForRPC) {
   StartSession();
-  // Arrange
+
   SessionMap currentSessionMap = connection_->session_map();
   Service* service_rpc =
       currentSessionMap.find(session_id)->second.FindService(kRpc);
@@ -631,7 +638,7 @@ TEST_F(ConnectionTest, SetProtectionFlagForRPC) {
 
 TEST_F(ConnectionTest, SetProtectionFlagForBulk) {
   StartSession();
-  // Arrange
+
   SessionMap currentSessionMap = connection_->session_map();
   Service* service_rpc =
       currentSessionMap.find(session_id)->second.FindService(kRpc);

@@ -53,6 +53,7 @@
 
 #include "application_manager/mock_app_service_manager.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace test {
 namespace components {
@@ -95,6 +96,9 @@ const std::string kDisallowedParam2 = "disallowed_param2";
 const std::string kAllowedParam = "allowed_param";
 const std::string kUndefinedParam = "undefined_params";
 const std::string kMissedParam = "missed_param";
+const std::string kAppStorageFolder = "app_storage_folder";
+const std::string kAppStorageFile = "./app_info.dat";
+const std::string kAppInfoStorage = "app_info_storage";
 }  // namespace
 
 class CommandRequestImplTest
@@ -359,6 +363,9 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
+  MessageSharedPtr dummy_msg(CreateMessage());
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(dummy_msg));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
@@ -398,6 +405,8 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::message_type] =
+      mobile_apis::messageType::request;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
 
@@ -448,7 +457,9 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  MessageSharedPtr msg;
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::SubscribeVehicleDataID;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
 
@@ -537,8 +548,8 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
@@ -558,8 +569,8 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -577,8 +588,8 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = false;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = false;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -596,8 +607,8 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
@@ -607,8 +618,10 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
 }
 
 TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
-  resumption::LastStateImpl last_state("app_storage_folder",
-                                       "app_info_storage");
+  auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
+      std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                  kAppInfoStorage));
+
   MockAppServiceManager app_service_manager(app_mngr_, last_state);
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, GetAppServiceManager())
@@ -634,8 +647,10 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
 }
 
 TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
-  resumption::LastStateImpl last_state("app_storage_folder",
-                                       "app_info_storage");
+  auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
+      std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                  kAppInfoStorage));
+
   MockAppServiceManager app_service_manager(app_mngr_, last_state);
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, GetAppServiceManager())
@@ -661,8 +676,10 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
 }
 
 TEST_F(CommandRequestImplTest, SendProviderRequestToHMI_ByProviderID) {
-  resumption::LastStateImpl last_state("app_storage_folder",
-                                       "app_info_storage");
+  auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
+      std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                  kAppInfoStorage));
+
   MockAppServiceManager app_service_manager(app_mngr_, last_state);
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, GetAppServiceManager())

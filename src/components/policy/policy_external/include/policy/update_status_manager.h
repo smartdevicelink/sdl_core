@@ -92,6 +92,12 @@ class UpdateStatusManager {
   void OnUpdateTimeoutOccurs();
 
   /**
+   * @brief Update status for next in queue application
+   * after previous update been has finished
+   */
+  void OnUpdateForNextInQueue();
+
+  /**
    * @brief Update status handler for valid PTU receiving
    */
   void OnValidUpdateReceived();
@@ -150,6 +156,12 @@ class UpdateStatusManager {
   void ScheduleUpdate();
 
   /**
+   * @brief PendingUpdate will change state from Update_Needed
+   * to Update_Pending
+   */
+  void PendingUpdate();
+
+  /**
    * @brief ScheduleUpdate allows to schedule next update.
    * It will change state to Update_Needed, that's is
    * and will not send any notifications about updating to HMI
@@ -178,6 +190,8 @@ class UpdateStatusManager {
    * @return true, if in progress, otherwise - false
    */
   bool IsAppsSearchInProgress();
+
+  void ResetTimeout(uint32_t update_timeout);
 
 #ifdef BUILD_TESTS
   PolicyTableStatus GetLastUpdateStatus() const {
@@ -214,6 +228,7 @@ class UpdateStatusManager {
   UpdateEvent last_processed_event_;
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
+  bool last_update_was_failed_;
   sync_primitives::Lock apps_search_in_progress_lock_;
 
   class UpdateThreadDelegate : public threads::ThreadDelegate {

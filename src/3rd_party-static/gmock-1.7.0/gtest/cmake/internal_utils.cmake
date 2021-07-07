@@ -187,7 +187,7 @@ function(cxx_executable name dir libs)
 endfunction()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-find_package(PythonInterp)
+find_package(PythonInterp 3.5)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #

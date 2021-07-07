@@ -71,15 +71,14 @@ TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
-  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(A<am::ApplicationSharedPtr>()))
+  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*app)))
       .WillByDefault(Return(false));
-  ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
-      .WillByDefault(Return(true));
+  ON_CALL(app_mngr_, IsSubscribedToHMIWayPoints()).WillByDefault(Return(true));
 
   {
     InSequence dummy;
     EXPECT_CALL(app_mngr_,
-                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
+                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>(), false));
     EXPECT_CALL(*app, UpdateHash());
   }
 
@@ -112,7 +111,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
   {
     InSequence dummy;
     EXPECT_CALL(app_mngr_,
-                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>()));
+                SubscribeAppForWayPoints(A<am::ApplicationSharedPtr>(), true));
     EXPECT_CALL(mock_message_helper_, HMIToMobileResult(result_code))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
 

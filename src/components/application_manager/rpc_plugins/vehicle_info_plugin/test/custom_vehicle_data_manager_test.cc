@@ -60,6 +60,8 @@ class CustomVehicleDataManagerTest : public ::testing::Test {
 
     ON_CALL(mock_custom_vehicle_data_provider_, GetVehicleDataItems())
         .WillByDefault(Return(items));
+    ON_CALL(mock_custom_vehicle_data_provider_, GetRemovedVehicleDataItems())
+        .WillByDefault(Return(policy_table::VehicleDataItems()));
     custom_vd_manager_.reset(new CustomVehicleDataManagerImpl(
         mock_custom_vehicle_data_provider_, mock_rpc_service_));
   }

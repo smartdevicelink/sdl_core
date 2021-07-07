@@ -53,6 +53,7 @@ namespace components {
 namespace commands_test {
 
 namespace am = ::application_manager;
+namespace strings = am::strings;
 
 using ::testing::_;
 using ::testing::Mock;
@@ -179,6 +180,30 @@ class CommandsTest : public ::testing::Test {
     InitHMIToMobileResultConverter();
   }
 
+  void FillVideoStreamingCapability(
+      smart_objects::SmartObject& video_streaming_capability) {
+    video_streaming_capability[strings::preferred_resolution] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_width] = 800;
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_height] = 354;
+    video_streaming_capability[strings::max_bitrate] = 10000;
+    video_streaming_capability[strings::supported_formats] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    video_streaming_capability[strings::supported_formats][0] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::supported_formats][0]
+                              [strings::protocol] =
+                                  hmi_apis::Common_VideoStreamingProtocol::RAW;
+    video_streaming_capability[strings::supported_formats][0][strings::codec] =
+        hmi_apis::Common_VideoStreamingCodec::H264;
+    video_streaming_capability[strings::haptic_spatial_data_supported] = true;
+    video_streaming_capability[strings::diagonal_screen_size] = 7.47;
+    video_streaming_capability[strings::pixel_per_inch] = 117.f;
+    video_streaming_capability[strings::scale] = 1.f;
+  }
+
   void InitHMIToMobileResultConverter() {
     namespace MobileResult = mobile_apis::Result;
     namespace HMIResult = hmi_apis::Common_Result;
@@ -243,6 +268,21 @@ MATCHER_P(HMIResultCodeIs, result_code, "") {
                             (*arg)[application_manager::strings::params]
                                   [application_manager::strings::function_id]
                                       .asInt());
+}
+
+MATCHER_P3(
+    HMIMessageParametersAre, correlation_id, function_id, result_code, "") {
+  using namespace application_manager;
+
+  const bool corr_ids_eq =
+      correlation_id ==
+      (*arg)[strings::params][strings::correlation_id].asInt();
+  const bool func_ids_eq =
+      (*arg)[strings::params][strings::function_id].asInt() == function_id;
+  const bool res_codes_eq =
+      (*arg)[strings::params][hmi_response::code].asInt() == result_code;
+
+  return corr_ids_eq && func_ids_eq && res_codes_eq;
 }
 
 MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {

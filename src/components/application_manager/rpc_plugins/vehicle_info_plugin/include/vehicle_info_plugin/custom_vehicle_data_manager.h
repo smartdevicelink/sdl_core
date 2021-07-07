@@ -41,6 +41,15 @@ class CustomVehicleDataManager {
   virtual void OnPolicyEvent(plugin_manager::PolicyEvent policy_event) = 0;
 
   virtual bool IsValidCustomVehicleDataName(const std::string& name) const = 0;
+
+  /**
+   * @brief Checks whether custom vehicle data name was removed after the last
+   * PTU or not
+   * @param name vehicle item name to check
+   * @return true if vehicle data with this name was removed after the last PTU
+   */
+  virtual bool IsRemovedCustomVehicleDataName(
+      const std::string& name) const = 0;
 };
 }  // namespace vehicle_info_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_CUSTOM_VEHICLE_DATA_MANAGER_H_

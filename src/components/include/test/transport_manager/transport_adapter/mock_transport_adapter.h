@@ -72,12 +72,9 @@ class MockTransportAdapter
                          const ::transport_manager::DeviceUID& device_handle));
   MOCK_METHOD2(RunAppOnDevice, void(const std::string&, const std::string&));
   MOCK_CONST_METHOD0(IsClientOriginatedConnectSupported, bool());
-  MOCK_METHOD0(
-      StartClientListening,
-      ::transport_manager::transport_adapter::TransportAdapter::Error());
-  MOCK_METHOD0(
-      StopClientListening,
-      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD1(ChangeClientListening,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   ::transport_manager::TransportAction required_change));
   MOCK_METHOD2(RemoveFinalizedConnection,
                void(const ::transport_manager::DeviceUID& device_handle,
                     const ::transport_manager::ApplicationHandle& app_handle));
@@ -111,9 +108,16 @@ class MockTransportAdapter
                      transport_manager::transport_adapter::TransportConfig());
   MOCK_METHOD1(CreateDevice, void(const std::string& uid));
 
+  MOCK_METHOD1(AddDevice,
+               transport_manager::transport_adapter::DeviceSptr(
+                   transport_manager::transport_adapter::DeviceSptr device));
+
 #ifdef TELEMETRY_MONITOR
   MOCK_METHOD0(GetTelemetryObserver,
                ::transport_manager::TMTelemetryObserver*());
+  MOCK_METHOD1(SetTelemetryObserver,
+               void(::transport_manager::TMTelemetryObserver* observer));
+
 #endif  // TELEMETRY_MONITOR
 };
 
