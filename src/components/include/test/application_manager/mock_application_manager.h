@@ -68,10 +68,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(Init,
                bool(resumption::LastStateWrapperPtr last_state,
                     media_manager::MediaManager* media_manager));
-  DEPRECATED
-  MOCK_METHOD2(Init,
-               bool(resumption::LastState& last_state,
-                    media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
@@ -117,9 +113,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
-  MOCK_CONST_METHOD1(
-      application_by_name,
-      application_manager::ApplicationSharedPtr(const std::string& app_name));
   MOCK_CONST_METHOD1(pending_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
@@ -319,12 +312,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type,
                     bool state));
-  DEPRECATED
-  MOCK_METHOD3(
-      OnAppStreaming,
-      void(uint32_t app_id,
-           protocol_handler::ServiceType service_type,
-           const application_manager::Application::StreamingState new_state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
@@ -339,8 +326,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(CanAppStream,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  DEPRECATED
-  MOCK_METHOD1(ForbidStreaming, void(uint32_t app_id));
   MOCK_METHOD2(ForbidStreaming,
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type));

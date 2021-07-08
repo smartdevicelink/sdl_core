@@ -43,10 +43,6 @@ namespace resumption_test {
 
 class MockLastState : public resumption::LastState {
  public:
-  DEPRECATED
-  MOCK_METHOD0(SaveStateToFileSystem, void());
-  DEPRECATED
-  MOCK_METHOD0(get_dictionary, Json::Value&());
   MOCK_METHOD0(SaveToFileSystem, void());
   MOCK_METHOD0(RemoveFromFileSystem, void());
   MOCK_CONST_METHOD0(dictionary, Json::Value());
