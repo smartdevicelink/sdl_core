@@ -220,7 +220,8 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
   return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
-         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
+         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) ||
+         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_RC);
 }
 
 }  // namespace commands
