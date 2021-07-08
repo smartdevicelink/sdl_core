@@ -274,6 +274,22 @@ class CommandRequestImpl : public CommandImpl,
                                       ResponseInfo& out_second) const;
 
   /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   * * @param third contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                      ResponseInfo& out_second,
+                                      ResponseInfo& out_third) const;
+
+  /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
    * and create info.
@@ -295,6 +311,19 @@ class CommandRequestImpl : public CommandImpl,
    */
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& first,
+      const ResponseInfo& second,
+      const ResponseInfo& third);
 
   /**
    * @brief Resolves if the return code must be

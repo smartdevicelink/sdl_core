@@ -748,6 +748,16 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
   return result;
 }
 
+bool CommandRequestImpl::PrepareResultForMobileResponse(
+    ResponseInfo& out_first,
+    ResponseInfo& out_second,
+    ResponseInfo& out_third) const {
+  SDL_LOG_AUTO_TRACE();
+  bool result = PrepareResultForMobileResponse(out_first, out_second) ||
+                PrepareResultForMobileResponse(out_second, out_third);
+  return result;
+}
+
 void CommandRequestImpl::GetInfo(
     const smart_objects::SmartObject& response_from_hmi,
     std::string& out_info) {
@@ -785,6 +795,19 @@ mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
   return result_code;
+}
+
+mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
+    const ResponseInfo& first,
+    const ResponseInfo& second,
+    const ResponseInfo& third) {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto first_comparison = PrepareResultCodeForResponse(first, second);
+  const auto second_comparison = PrepareResultCodeForResponse(second, third);
+  const auto third_comparison = PrepareResultCodeForResponse(first, third);
+
+  return std::max({first_comparison, second_comparison, third_comparison});
 }
 
 const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
