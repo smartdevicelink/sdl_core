@@ -77,7 +77,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
   virtual bool ClearUserConsent() = 0;
-  
+
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
