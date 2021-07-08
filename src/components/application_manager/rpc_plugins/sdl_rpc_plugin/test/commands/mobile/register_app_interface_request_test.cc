@@ -349,12 +349,6 @@ class RegisterAppInterfaceRequestTest
                     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                 _))
         .WillByDefault(Return(true));
-    ON_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(
-            HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-            _))
-        .WillByDefault(Return(true));
   }
 
   void SetCommonPreconditionsToCheckWithPolicyData(MockAppPtr mock_app) {

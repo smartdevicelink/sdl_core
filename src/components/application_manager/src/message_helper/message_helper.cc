@@ -818,31 +818,6 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   }
 }
 
-void MessageHelper::SendUnsubscribeButtonNotification(
-    mobile_apis::ButtonName::eType button,
-    ApplicationSharedPtr application,
-    ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = application->app_id();
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = false;
-
-  SmartObjectSPtr message = CreateMessageForHMI(
-      hmi_apis::messageType::notification, app_mngr.GetNextHMICorrelationID());
-  DCHECK(message);
-
-  SmartObject& object = *message;
-  object[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-
-  object[strings::msg_params] = msg_params;
-
-  app_mngr.GetRPCService().ManageHMICommand(message);
-}
-
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
@@ -1097,66 +1072,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed,
-    ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-  SDL_LOG_AUTO_TRACE();
-
-  SmartObjectSPtr notification_ptr =
-      std::make_shared<SmartObject>(SmartType_Map);
-  if (!notification_ptr) {
-    SDL_LOG_ERROR("Memory allocation failed.");
-    return;
-  }
-  SmartObject& notification = *notification_ptr;
-
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = app_id;
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = is_subscribed;
-
-  notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  notification[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  notification[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  notification[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-  notification[strings::msg_params] = msg_params;
-
-  if (!app_mngr.GetRPCService().ManageHMICommand(notification_ptr)) {
-    SDL_LOG_ERROR("Unable to send HMI notification");
-  }
-}
-
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-  using namespace mobile_apis;
-  SDL_LOG_AUTO_TRACE();
-
-  if (app.use_count() == 0) {
-    SDL_LOG_ERROR("Invalid application pointer ");
-    return;
-  }
-
-  const ButtonSubscriptions subscriptions = app->SubscribedButtons().GetData();
-  ButtonSubscriptions::iterator it = subscriptions.begin();
-  for (; subscriptions.end() != it; ++it) {
-    SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(),
-        static_cast<Common_ButtonName::eType>(*it),
-        true,
-        app_mngr);
-  }
-}
-
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
     const uint32_t app_id,
@@ -1176,33 +1091,6 @@ MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
   request[strings::params][strings::function_id] = function_id;
   request[strings::msg_params] = msg_params;
   return request_ptr;
-}
-
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-  SDL_LOG_AUTO_TRACE();
-  SmartObjectSPtr notification_ptr =
-      std::make_shared<SmartObject>(SmartType_Map);
-  SmartObject& notification = *notification_ptr;
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = app_id;
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = is_subscribed;
-  notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  notification[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  notification[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  notification[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-  notification[strings::msg_params] = msg_params;
-  return notification_ptr;
 }
 
 smart_objects::SmartObjectList

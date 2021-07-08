@@ -211,7 +211,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_app_unregistered_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
@@ -778,10 +777,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       return factory.GetCreator<commands::hmi::OnButtonPressNotification>();
-    }
-    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
-      return factory
-          .GetCreator<commands::hmi::OnButtonSubscriptionNotification>();
     }
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {
       return factory.GetCreator<commands::OnNaviTBTClientStateNotification>();

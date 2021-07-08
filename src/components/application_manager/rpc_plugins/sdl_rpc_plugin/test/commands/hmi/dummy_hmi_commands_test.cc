@@ -97,7 +97,6 @@
 #include "hmi/on_audio_data_streaming_notification.h"
 #include "hmi/on_button_event_notification.h"
 #include "hmi/on_button_press_notification.h"
-#include "hmi/on_button_subscription_notification.h"
 #include "hmi/on_device_chosen_notification.h"
 #include "hmi/on_device_state_changed_notification.h"
 #include "hmi/on_driver_distraction_notification.h"
@@ -450,7 +449,6 @@ typedef Types<commands::NaviIsReadyResponse,
 
 typedef Types<commands::hmi::OnButtonEventNotification,
               commands::hmi::OnButtonPressNotification,
-              commands::hmi::OnButtonSubscriptionNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,

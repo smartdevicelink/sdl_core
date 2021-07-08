@@ -173,9 +173,6 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
-  MOCK_METHOD2(SendAllOnButtonSubscriptionNotificationsForApp,
-               void(ApplicationConstSharedPtr app,
-                    ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateUIResetGlobalPropertiesRequest,
                smart_objects::SmartObjectSPtr(
                    const ResetGlobalPropertiesResult& reset_result,
@@ -197,11 +194,6 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateSubscribeWayPointsMessageToHMI,
                smart_objects::SmartObjectSPtr(const uint32_t correlation_id));
 
-  MOCK_METHOD3(
-      CreateOnButtonSubscriptionNotification,
-      smart_objects::SmartObjectSPtr(uint32_t app_id,
-                                     hmi_apis::Common_ButtonName::eType button,
-                                     bool is_subscribed));
   MOCK_METHOD4(CreateButtonSubscriptionHandlingRequestToHmi,
                smart_objects::SmartObjectSPtr(
                    const uint32_t app_id,
@@ -359,10 +351,6 @@ class MockMessageHelper {
                     ApplicationManager& app_mngr));
   MOCK_METHOD2(SendResetPropertiesRequest,
                void(ApplicationSharedPtr application,
-                    ApplicationManager& app_mngr));
-  MOCK_METHOD3(SendUnsubscribeButtonNotification,
-               void(mobile_apis::ButtonName::eType button,
-                    ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
   MOCK_METHOD1(CreateAppServiceCapabilities,
                smart_objects::SmartObject(

@@ -273,40 +273,6 @@ class MessageHelper {
       const std::string& path_to_icon, uint32_t app_id);
 
   /**
-   * @brief Sends button subscription notification
-   * @param app_id Application ID
-   * @param button Enum with button name
-   * @param is_subscribed true if subscribed, false otherwise
-   * @param app_mngr reference to application manager
-   */
-  static void SendOnButtonSubscriptionNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ButtonName::eType button,
-      const bool is_subscribed,
-      ApplicationManager& app_mngr);
-
-  /**
-   * @brief Creates button subscription notification
-   * @param app_id Application ID
-   * @param button Enum with button name
-   * @param is_subscribed true if subscribed, false otherwise
-   * @return notification message in SmartObject format
-   */
-  static smart_objects::SmartObjectSPtr CreateOnButtonSubscriptionNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ButtonName::eType button,
-      const bool is_subscribed);
-
-  /**
-   * @brief Sends button subscription notifications for all buttons
-   * that application is subscribed on
-   * @param app shared pointer to application instance
-   * @param app_mngr reference to application manager
-   */
-  static void SendAllOnButtonSubscriptionNotificationsForApp(
-      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
-
-  /**
    * @brief Creates button subscription requests for buttons
    * that application is subscribed on
    * @param app application to be subscribed for button
@@ -1009,18 +975,6 @@ class MessageHelper {
    */
   static void SendResetPropertiesRequest(ApplicationSharedPtr application,
                                          ApplicationManager& app_mngr);
-
-  /**
-   * @brief SendUnsubscribeButtonNotification sends notification to HMI to
-   * remove button subscription for application
-   * @param button Button type
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeButtonNotification(
-      mobile_apis::ButtonName::eType button,
-      ApplicationSharedPtr application,
-      ApplicationManager& app_mngr);
 
   /**
    * @brief Sends HMI status notification to mobile
