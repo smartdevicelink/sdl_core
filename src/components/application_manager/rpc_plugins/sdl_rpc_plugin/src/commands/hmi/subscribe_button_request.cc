@@ -144,8 +144,8 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[strings::msg_params][strings::button_name].asInt());
 
-  if ((hmi_apis::Common_Result::SUCCESS == hmi_result ||
-       hmi_apis::Common_Result::WARNINGS == hmi_result) &&
+  if (CommandImpl::IsHMIResultSuccess(hmi_result,
+                                      HmiInterfaces::HMI_INTERFACE_Buttons) &&
       is_pending) {
     app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
     app->RemovePendingSubscriptionButton(correlation_id());

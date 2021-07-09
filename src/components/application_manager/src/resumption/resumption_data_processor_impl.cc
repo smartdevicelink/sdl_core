@@ -1012,7 +1012,7 @@ bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
       response[strings::params][application_manager::hmi_response::code]
           .asInt());
 
-  return commands::CommandRequestImpl::IsHMIResultSuccess(result_code) ||
+  return commands::IsHMIResultSuccess(result_code) ||
          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
