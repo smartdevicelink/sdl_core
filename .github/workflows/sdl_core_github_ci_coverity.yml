@@ -39,7 +39,9 @@ jobs:
     - name: Configure
       run: cmake ../sdl_core -DLOGGER_NAME=BOOST
     - name: Download Coverity
-      run: wget https://scan.coverity.com/download/linux64 --post-data "token=${{ secrets.COVERITY_TOKEN }}&project=smartdevicelink%2Fsdl_core" -O coverity_tool.tgz
+      env:
+        COVERITY_SECRET: ${{ secrets.COVERITY_TOKEN }}
+      run: wget https://scan.coverity.com/download/linux64 --post-data "token=${COVERITY_SECRET}&project=smartdevicelink%2Fsdl_core" -O coverity_tool.tgz
     - name: unzip
       run: tar zxvf coverity_tool.tgz 
     - name: Build
