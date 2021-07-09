@@ -518,6 +518,14 @@ class ApplicationImpl : public virtual Application,
 
   void RemovePendingSubscriptionButton(const int32_t correlation_id) OVERRIDE;
 
+  const ButtonSubscriptionsMap& PendingButtonUnsubscriptions() const OVERRIDE;
+
+  void AddPendingButtonUnsubscription(
+      const int32_t correlation_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+
+  void RemovePendingButtonUnsubscription(const int32_t correlation_id) OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -610,6 +618,7 @@ class ApplicationImpl : public virtual Application,
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   ButtonSubscriptionsMap pending_button_subscriptions_;
+  ButtonSubscriptionsMap pending_button_unsubscriptions_;
   UsageStatistics usage_report_;
   HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;

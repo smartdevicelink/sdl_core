@@ -139,6 +139,8 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_response.h"
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_request.h"
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_request.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
@@ -688,6 +690,14 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::hmi::SubscribeButtonRequest>()
                  : factory.GetCreator<commands::hmi::SubscribeButtonResponse>();
     }
+
+    case hmi_apis::FunctionID::Buttons_UnsubscribeButton: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::hmi::UnsubscribeButtonRequest>()
+                 : factory
+                       .GetCreator<commands::hmi::UnsubscribeButtonResponse>();
+    }
+
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       return factory
           .GetCreator<commands::OnAllowSDLFunctionalityNotification>();
