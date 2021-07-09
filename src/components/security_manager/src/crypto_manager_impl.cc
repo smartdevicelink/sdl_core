@@ -50,7 +50,6 @@
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
-#define OPENSSL1_1_VERSION 0x1010000fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
 namespace security_manager {
@@ -212,7 +211,7 @@ bool CryptoManagerImpl::Init() {
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
-#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
+
     auto sk = SSL_CTX_get_ciphers(context_);
     const char* p;
     for (int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
@@ -222,12 +221,9 @@ bool CryptoManagerImpl::Init() {
         break;
       SDL_LOG_DEBUG("Using Cipher: " << p);
     }
-#endif
   }
 
-#if OPENSSL_VERSION_NUMBER >= OPENSSL1_1_VERSION
   SSL_CTX_set_security_level(context_, get_settings().security_level());
-#endif
 
   if (get_settings().ca_cert_path().empty()) {
     SDL_LOG_WARN("Setting up empty CA certificate location");
