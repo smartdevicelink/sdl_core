@@ -4,6 +4,11 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
+    - shell: bash
+      env:
+        COVERITY_SECRET: ${{ secrets.COVERITY_TOKEN }}
+      run: |
+        echo "$COVERITY_SECRET"
     - uses: actions/checkout@v2
     - name: Init Submodules
       run: git -C ${{ github.workspace }} submodule update --init --recursive
