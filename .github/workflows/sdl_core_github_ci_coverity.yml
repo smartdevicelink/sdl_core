@@ -8,7 +8,7 @@ jobs:
       env:
         COVERITY_SECRET: ${{ secrets.COVERITY_TOKEN }}
       run: |
-        echo "$COVERITY_SECRET"
+        echo "$COVERITY_SECRET" && echo ${{ secrets.COVERITY_TOKEN }} && echo "end"
     - uses: actions/checkout@v2
     - name: Init Submodules
       run: git -C ${{ github.workspace }} submodule update --init --recursive
