@@ -73,8 +73,7 @@ class Logger {
   virtual void DeInit() = 0;
   virtual void Flush() = 0;
   virtual void PushLog(const LogMessage& log_message) = 0;
-  virtual void InitLoggerSettings(
-      std::unique_ptr<const LoggerSettings>& settings) = 0;
+  virtual void InitLoggerSettings(LoggerSettings* settings) = 0;
   virtual void InitFlushLogsTimePoint(const TimePoint& time_point) = 0;
   static Logger& instance(Logger* pre_init = nullptr);
 };

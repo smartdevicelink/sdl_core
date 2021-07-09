@@ -165,9 +165,7 @@ int32_t main(int32_t argc, char** argv) {
   }
 #endif
 
-  auto logger_settings =
-      std::unique_ptr<const logger::LoggerSettings>(&profile_instance);
-  logger_impl->InitLoggerSettings(logger_settings);
+  logger_impl->InitLoggerSettings(&profile_instance);
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 

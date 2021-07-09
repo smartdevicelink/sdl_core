@@ -37,7 +37,9 @@
 namespace logger {
 
 LoggerImpl::LoggerImpl(bool use_message_loop_thread)
-    : impl_(nullptr), use_message_loop_thread_(use_message_loop_thread) {}
+    : impl_(nullptr)
+    , settings_(nullptr)
+    , use_message_loop_thread_(use_message_loop_thread) {}
 
 void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
   assert(impl_ == nullptr);
@@ -123,9 +125,8 @@ void LogMessageLoopThread::Handle(const LogMessage message) {
   force_log_(message);
 }
 
-void LoggerImpl::InitLoggerSettings(
-    std::unique_ptr<const LoggerSettings>& settings) {
-  settings_ = std::move(settings);
+void LoggerImpl::InitLoggerSettings(LoggerSettings* settings) {
+  settings_ = settings;
 }
 
 void LoggerImpl::InitFlushLogsTimePoint(const TimePoint& time_point) {
