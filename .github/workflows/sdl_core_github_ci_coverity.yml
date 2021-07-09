@@ -2,6 +2,7 @@ name: SDL Core Build With Coverity
 on: [push, pull_request]
 jobs:
   build:
+    environment: Coverity
     runs-on: ubuntu-20.04
     steps:
     - shell: bash
