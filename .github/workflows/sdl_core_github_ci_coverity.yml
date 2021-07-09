@@ -37,8 +37,7 @@ jobs:
     - name: unzip
       run: tar zxvf coverity_tool.tgz 
     - name: Build
-      run: make install-3rd_party && ./cov-analysis-linux64-2020.09/bin
-/cov-build --dir cov-int make -j `nproc` install
+      run: make install-3rd_party && ./cov-analysis-linux64-2020.09/bin/cov-build --dir cov-int make -j `nproc` install
     - name: Set Library Path
       run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
     # run tests
