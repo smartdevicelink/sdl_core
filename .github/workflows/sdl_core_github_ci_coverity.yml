@@ -48,6 +48,10 @@ jobs:
       run: make install-3rd_party && ./cov-analysis-linux64-2020.09/bin/cov-build --dir cov-int make -j `nproc` install
     - name: Set Library Path
       run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
-    # run tests
-    - name: Unit Tests
-      run: make test
+    - name: Compress Coverity
+      run: tar czvf myproject.tgz cov-int
+    - name: Upload Coverity
+      env:
+        COVERITY_SECRET: ${{ secrets.COVERITY_TOKEN }}
+      run: curl --form token=${COVERITY_SECRET} --form email=jack@livio.io --form file=@myproject.tgz --form version="Version" --form description="Description" https://scan.coverity.com/builds?project=smartdevicelink%2Fsdl_core
+    
