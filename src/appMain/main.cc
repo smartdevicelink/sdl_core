@@ -165,6 +165,10 @@ int32_t main(int32_t argc, char** argv) {
   }
 #endif
 
+  auto logger_settings =
+      std::unique_ptr<const logger::LoggerSettings>(&profile_instance);
+  logger_impl->InitLoggerSettings(logger_settings);
+
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 
   SDL_LOG_INFO("Application started!");

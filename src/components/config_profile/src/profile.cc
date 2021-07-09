@@ -97,6 +97,7 @@ const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
 const char* kAppServicesSection = "AppServices";
 const char* kRCModuleConsentSection = "RCModuleConsent";
+const char* kLoggerSection = "Logger";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -307,6 +308,8 @@ const char* kMediaLowBandwidthResumptionLevelKey =
     "MediaLowBandwidthResumptionLevel";
 const char* kHMIOriginIDKey = "HMIOriginID";
 const char* kEmbeddedServicesKey = "EmbeddedServices";
+const char* kFlushLogMessagesBeforeShutdown = "FlushLogMessagesBeforeShutdown";
+const char* kMaxTimeBeforeShutdown = "MaxTimeBeforeShutdown";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -442,6 +445,9 @@ const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
 const char* kDefaultAOAFilterVersion = "1.0";
 const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
 const char* kDefaultAOAFilterSerialNumber = "N000000";
+
+const bool kDefaultFlushLogMessagesBeforeShutdown = false;
+const uint16_t kDefaultMaxTimeBeforeShutdown = 30;
 }  // namespace
 
 namespace profile {
@@ -571,7 +577,10 @@ Profile::Profile()
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
     , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
-    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration)
+    , flush_log_messages_before_shutdown_(
+          kDefaultFlushLogMessagesBeforeShutdown)
+    , max_time_before_shutdown_(kDefaultMaxTimeBeforeShutdown) {
 }
 
 Profile::~Profile() {}
@@ -1195,6 +1204,14 @@ const std::vector<std::string>& Profile::audio_service_transports() const {
 
 const std::vector<std::string>& Profile::video_service_transports() const {
   return video_service_transports_;
+}
+
+const bool Profile::flush_log_messages_before_shutdown() const {
+  return flush_log_messages_before_shutdown_;
+}
+
+const uint16_t Profile::max_time_before_shutdown() const {
+  return max_time_before_shutdown_;
 }
 
 const bool Profile::ErrorOccured() const {
@@ -2680,6 +2697,16 @@ void Profile::UpdateValues() {
                   kHMIOriginIDKey);
 
   LOG_UPDATED_VALUE(hmi_origin_id_, kHMIOriginIDKey, kAppServicesSection);
+
+  ReadBoolValue(&flush_log_messages_before_shutdown_,
+                kDefaultFlushLogMessagesBeforeShutdown,
+                kLoggerSection,
+                kFlushLogMessagesBeforeShutdown);
+
+  ReadUIntValue(&max_time_before_shutdown_,
+                kDefaultMaxTimeBeforeShutdown,
+                kLoggerSection,
+                kMaxTimeBeforeShutdown);
 
   {  // App Services map
     struct KeyPair {

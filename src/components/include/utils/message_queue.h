@@ -103,6 +103,12 @@ class MessageQueue {
   void WaitUntilEmpty();
 
   /**
+   * \brief Wait until message queue is empty for certain time
+   * \param seconds seconds to wait
+   */
+  void TimedWaitUntilEmpty(uint16_t seconds);
+
+  /**
    * \brief Shutdown the queue.
    * This leads to waking up everyone waiting on the queue
    * Queue being shut down can be drained ( with pop() )
@@ -150,6 +156,14 @@ void MessageQueue<T, Q>::WaitUntilEmpty() {
   while ((!shutting_down_) && !queue_.empty()) {
     queue_new_items_.Wait(auto_lock);
   }
+}
+
+template <typename T, class Q>
+void MessageQueue<T, Q>::TimedWaitUntilEmpty(uint16_t seconds) {
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  queue_new_items_.WaitFor(auto_lock, seconds, [this] {
+    return (queue_.empty() || shutting_down_);
+  });
 }
 
 template <typename T, class Q>

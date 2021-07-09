@@ -96,6 +96,12 @@ class MessageLoopThread {
    */
   void WaitDumpQueue();
 
+  /**
+   * \brief Wait until message queue is empty for certain time
+   * \param seconds seconds to wait
+   */
+  void TimedWaitDumpQueue(uint16_t seconds);
+
  private:
   /*
    * Implementation of ThreadDelegate that actually pumps the queue and is
@@ -166,6 +172,11 @@ void MessageLoopThread<Q>::Shutdown() {
 template <class Q>
 void MessageLoopThread<Q>::WaitDumpQueue() {
   message_queue_.WaitUntilEmpty();
+}
+
+template <class Q>
+void MessageLoopThread<Q>::TimedWaitDumpQueue(uint16_t seconds) {
+  message_queue_.TimedWaitUntilEmpty(seconds);
 }
 
 //////////

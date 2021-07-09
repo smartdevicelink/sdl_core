@@ -132,4 +132,24 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   return wait_status;
 }
 
+void ConditionalVariable::WaitFor(AutoLock& auto_lock,
+                                  uint16_t seconds,
+                                  std::function<bool()> predicate) {
+  try {
+    BaseLock& lock = auto_lock.GetLock();
+
+    lock.AssertTakenAndMarkFree();
+
+    cond_var_.timed_wait<boost::mutex>(dynamic_cast<Lock*>(&lock)->mutex_,
+                                       boost::posix_time::seconds(seconds),
+                                       predicate);
+
+    lock.AssertFreeAndMarkTaken();
+  } catch (const boost::exception& error) {
+    std::string error_string = boost::diagnostic_information(error);
+    SDL_LOG_FATAL(error_string);
+    NOTREACHED();
+  }
+}
+
 }  // namespace sync_primitives

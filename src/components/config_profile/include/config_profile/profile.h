@@ -46,6 +46,7 @@
 #include "protocol_handler/protocol_handler_settings.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/transport_manager_settings.h"
+#include "utils/logger/logger_settings.h"
 #include "utils/macro.h"
 
 namespace profile {
@@ -59,7 +60,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                 public media_manager::MediaManagerSettings,
                 public policy::PolicySettings,
                 public transport_manager::TransportManagerSettings,
-                public application_manager::ApplicationManagerSettings {
+                public application_manager::ApplicationManagerSettings,
+                public logger::LoggerSettings {
  public:
   // Methods section
 
@@ -589,6 +591,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const std::vector<std::string>& embedded_services() const OVERRIDE;
   const std::string hmi_origin_id() const OVERRIDE;
+
+  /**
+   * @brief  Returns true if writing all logs to file system before shutdown is
+   * enabled
+   */
+  const bool flush_log_messages_before_shutdown() const OVERRIDE;
+  /**
+   * @brief  Returns waximum time to wait for writing all data before exit SDL
+   * in seconds
+   */
+  const uint16_t max_time_before_shutdown() const OVERRIDE;
+
   /**
    * @brief Reads a string value from the profile
    *
@@ -1164,6 +1178,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int ignition_off_signal_offset_;
   uint32_t rpc_pass_through_timeout_;
   uint16_t period_for_consent_expiration_;
+  bool flush_log_messages_before_shutdown_;
+  uint16_t max_time_before_shutdown_;
 
   std::vector<std::string> embedded_services_;
 

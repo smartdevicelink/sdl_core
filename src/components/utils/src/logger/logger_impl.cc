@@ -71,9 +71,16 @@ void LoggerImpl::DeInit() {
 }
 
 void LoggerImpl::Flush() {
-  if (use_message_loop_thread_) {
-    if (loop_thread_) {
+  if (use_message_loop_thread_ && loop_thread_) {
+    if (0 == flush_logs_time_point_.time_since_epoch().count()) {
       loop_thread_->WaitDumpQueue();
+    } else if (settings_->flush_log_messages_before_shutdown()) {
+      // Calculate elapsed seconds since IGNITION_OFF
+      auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
+          std::chrono::high_resolution_clock::now() - flush_logs_time_point_);
+      uint16_t seconds_before_shutdown =
+          settings_->max_time_before_shutdown() - seconds.count();
+      loop_thread_->TimedWaitDumpQueue(seconds_before_shutdown);
     }
   }
 }
@@ -114,6 +121,15 @@ void LogMessageLoopThread::Push(const LogMessage& message) {
 
 void LogMessageLoopThread::Handle(const LogMessage message) {
   force_log_(message);
+}
+
+void LoggerImpl::InitLoggerSettings(
+    std::unique_ptr<const LoggerSettings>& settings) {
+  settings_ = std::move(settings);
+}
+
+void LoggerImpl::InitFlushLogsTimePoint(const TimePoint& time_point) {
+  flush_logs_time_point_ = time_point;
 }
 
 LogMessageLoopThread::~LogMessageLoopThread() {

@@ -74,10 +74,15 @@ class LoggerImpl : public Logger, public LoggerInitializer {
   bool IsEnabledFor(const std::string& component,
                     LogLevel log_level) const override;
   void PushLog(const LogMessage& log_message) override;
+  void InitLoggerSettings(
+      std::unique_ptr<const LoggerSettings>& settings) override;
+  void InitFlushLogsTimePoint(const TimePoint& time_point) override;
 
   std::unique_ptr<ThirdPartyLoggerInterface> impl_;
+  std::unique_ptr<const LoggerSettings> settings_;
   LoopThreadPtr<LogMessageLoopThread> loop_thread_;
   bool use_message_loop_thread_;
+  TimePoint flush_logs_time_point_;
 };
 
 }  // namespace logger
