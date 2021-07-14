@@ -3482,14 +3482,14 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
 
 void MessageHelper::AddDefaultParamsToTireStatus(
     ApplicationSharedPtr app, smart_objects::SmartObject& response_from_hmi) {
-  const utils::SemanticVersion max_version_with_mandatory_params(7, 1, 0);
+  const utils::SemanticVersion max_version_with_mandatory_params(8, 0, 0);
 
   if (!app) {
     SDL_LOG_ERROR("Application not found");
     return;
   }
 
-  if (app->msg_version() > max_version_with_mandatory_params) {
+  if (app->msg_version() >= max_version_with_mandatory_params) {
     SDL_LOG_DEBUG(
         "Tire status parameters are "
         "non-mandatory for this app version, no need in default values");
