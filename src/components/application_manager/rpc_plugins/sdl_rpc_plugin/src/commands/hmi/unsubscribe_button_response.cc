@@ -31,6 +31,7 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_response.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -56,6 +57,37 @@ UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
 void UnsubscribeButtonResponse::Run() {
   SDL_LOG_AUTO_TRACE();
+
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)
+              .getElement(strings::params)
+              .getElement(hmi_response::code)
+              .asInt());
+
+  const auto expired_request_data =
+      application_manager_.GetExpiredButtonRequestData(correlation_id());
+  if (expired_request_data) {
+    const uint32_t app_id = (*expired_request_data).app_id_;
+    const auto button_name = (*expired_request_data).button_name_;
+    application_manager_.DeleteExpiredButtonRequest(correlation_id());
+
+    if (!CommandImpl::IsHMIResultSuccess(
+            hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons)) {
+      return;
+    }
+
+    smart_objects::SmartObjectSPtr msg =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            app_id,
+            button_name,
+            hmi_apis::FunctionID::Buttons_SubscribeButton,
+            application_manager_);
+
+    rpc_service_.SendMessageToHMI(msg);
+    return;
+  }
+
   event_engine::Event event(hmi_apis::FunctionID::Buttons_UnsubscribeButton);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

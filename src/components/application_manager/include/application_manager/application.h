@@ -1164,52 +1164,6 @@ class Application : public virtual InitialApplicationData,
   virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
 
   /**
-   * @brief Get map of pending button subscription requests correlation ids
-   * to button names
-   * @return pending button subscriptions map
-   */
-  virtual const ButtonSubscriptionsMap& PendingButtonSubscriptions() const = 0;
-
-  /**
-   * @brief Add  pending button subscription request
-   * @param correlation_id - correlation id of subscription request
-   * @param button_name - enum value indicating button name
-   */
-  virtual void AddPendingButtonSubscription(
-      const int32_t correlation_id,
-      const hmi_apis::Common_ButtonName::eType button_name) = 0;
-
-  /**
-   * @brief Remove pending button subscription request
-   * @param correlation_id - correlation id of subscription request
-   */
-  virtual void RemovePendingSubscriptionButton(
-      const int32_t correlation_id) = 0;
-
-  /**
-   * @brief Get map of pending button unsubscription requests correlation ids
-   * to button names
-   * @return pending button unsubscriptions map
-   */
-  virtual const ButtonSubscriptionsMap& PendingButtonUnsubscriptions()
-      const = 0;
-
-  /**
-   * @brief Add  pending button unsubscription request
-   * @param correlation_id - correlation id of unsubscription request
-   * @param button_name - enum value indicating button name
-   */
-  virtual void AddPendingButtonUnsubscription(
-      const int32_t correlation_id,
-      const hmi_apis::Common_ButtonName::eType button_name) = 0;
-  /**
-   * @brief Remove pending button unsubscription request
-   * @param correlation_id - correlation id of unsubscription request
-   */
-  virtual void RemovePendingButtonUnsubscription(
-      const int32_t correlation_id) = 0;
-
-  /**
    * @brief Get cloud app endpoint for websocket connection
    * @return cloud app endpoint
    */

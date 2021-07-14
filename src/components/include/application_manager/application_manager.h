@@ -114,6 +114,11 @@ struct ApplicationsPolicyAppIdSorter {
   }
 };
 
+struct ExpiredButtonRequestData {
+  uint32_t app_id_;
+  hmi_apis::Common_ButtonName::eType button_name_;
+};
+
 typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
 
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
@@ -953,6 +958,35 @@ class ApplicationManager {
    */
   virtual bool UnsubscribeAppFromSoftButtons(
       const commands::MessageSharedPtr response_message) = 0;
+
+  /**
+   * @brief Save subscribe/unsubscribe button request after timeout to ensure
+   * possibility to align mobile subscription/unsubscription status with actual
+   * subscription/unsubscription status on HMI
+   * @param app_id Application id from request message
+   * @param corr_id Correlation id
+   * @param button_name name of button to subscribe/unsubscribe
+   */
+  virtual void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+
+  /**
+   * @brief Return optional structure with information regarding
+   * subscribe/unsubscribe button request data
+   * @param corr_id Correlation id
+   * @return optional structure with subscribe/unsubscribe button request data
+   */
+  virtual utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const = 0;
+
+  /**
+   * @brief Delete data about already processed expired subscribe/unsubscribe
+   * button request in case if HMI send response to expired request
+   * @param corr_id Correlation id
+   */
+  virtual void DeleteExpiredButtonRequest(const int32_t corr_id) = 0;
 };
 
 }  // namespace application_manager

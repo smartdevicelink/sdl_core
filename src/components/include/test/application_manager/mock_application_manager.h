@@ -405,6 +405,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));
+  MOCK_METHOD3(AddExpiredButtonRequest,
+               void(const uint32_t app_id,
+                    const int32_t corr_id,
+                    const hmi_apis::Common_ButtonName::eType button_name));
+  MOCK_CONST_METHOD1(
+      GetExpiredButtonRequestData,
+      utils::Optional<application_manager::ExpiredButtonRequestData>(
+          const int32_t corr_id));
+  MOCK_METHOD1(DeleteExpiredButtonRequest, void(const int32_t corr_id));
 };
 
 }  // namespace application_manager_test

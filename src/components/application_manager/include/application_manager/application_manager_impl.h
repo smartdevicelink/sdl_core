@@ -121,6 +121,9 @@ enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
 typedef std::map<protocol_handler::ServiceType, std::set<uint32_t> >
     ServiceStreamingStatusMap;
 
+typedef std::map<const int32_t, ExpiredButtonRequestData>
+    ExpiredButtonRequestsMap;
+
 struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
@@ -1544,6 +1547,16 @@ class ApplicationManagerImpl
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
 
+  void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+
+  utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const OVERRIDE;
+
+  void DeleteExpiredButtonRequest(const int32_t corr_id) OVERRIDE;
+
  private:
   const ApplicationManagerSettings& settings_;
   /**
@@ -1704,6 +1717,9 @@ class ApplicationManagerImpl
 
   ServiceStreamingStatusMap streaming_application_services_;
   sync_primitives::Lock streaming_services_lock_;
+
+  mutable sync_primitives::Lock expired_button_requests_lock_;
+  mutable ExpiredButtonRequestsMap expired_button_requests_;
 
 #ifdef BUILD_TESTS
  public:

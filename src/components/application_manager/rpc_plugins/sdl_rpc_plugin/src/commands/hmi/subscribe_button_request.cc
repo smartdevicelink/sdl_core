@@ -71,37 +71,16 @@ void SubscribeButtonRequest::Run() {
 
   subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
                      correlation_id());
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(application_id());
-
-  if (!app) {
-    SDL_LOG_ERROR("Application for connection key: " << application_id()
-                                                     << " was not found");
-    return;
-  }
-
-  app->AddPendingButtonSubscription(correlation_id(), button_name_);
-
   SendRequest();
 }
 
 void SubscribeButtonRequest::onTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
+  application_manager_.AddExpiredButtonRequest(
+      application_id(), correlation_id(), button_name_);
+
   auto& resume_ctrl = application_manager_.resume_controller();
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(application_id());
-
-  if (!app) {
-    SDL_LOG_ERROR("Application for app id: " << application_id()
-                                             << " was not found");
-    return;
-  }
-
-  app->RemovePendingSubscriptionButton(correlation_id());
-
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),
       static_cast<hmi_apis::FunctionID::eType>(function_id()));
@@ -133,44 +112,25 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-  const auto pending_button_subscriptions = app->PendingButtonSubscriptions();
-
-  const auto it =
-      pending_button_subscriptions.find(event.smart_object_correlation_id());
-
-  const bool is_pending = it != pending_button_subscriptions.end();
-
   const mobile_apis::ButtonName::eType btn_id =
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[strings::msg_params][strings::button_name].asInt());
 
   if (CommandImpl::IsHMIResultSuccess(hmi_result,
-                                      HmiInterfaces::HMI_INTERFACE_Buttons) &&
-      is_pending) {
+                                      HmiInterfaces::HMI_INTERFACE_Buttons)) {
     app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-    app->RemovePendingSubscriptionButton(correlation_id());
   } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
     app->UnsubscribeFromButton(
         static_cast<mobile_apis::ButtonName::eType>(btn_id));
-    app->RemovePendingSubscriptionButton(correlation_id());
-  } else if (!is_pending) {
-    smart_objects::SmartObjectSPtr msg =
-        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
-            application_id(),
-            static_cast<hmi_apis::Common_ButtonName::eType>(button_name_),
-            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
-            application_manager_);
-
-    rpc_service_.SendMessageToHMI(msg);
   }
 }
 
 bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
     const hmi_apis::Common_Result::eType hmi_result,
     const app_mngr::Application& app) const {
-  return (hmi_result != hmi_apis::Common_Result::SUCCESS &&
-          hmi_result != hmi_apis::Common_Result::WARNINGS) &&
-         (app.is_resuming());
+  return (!CommandImpl::IsHMIResultSuccess(
+              hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons) &&
+          app.is_resuming());
 }
 
 }  // namespace hmi
