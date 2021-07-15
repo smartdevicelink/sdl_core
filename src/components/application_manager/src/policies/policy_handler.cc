@@ -1237,12 +1237,6 @@ void PolicyHandler::OnPendingPermissionChange(
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
-  const uint32_t app_id = GetAppIdForSending();
-  return SendMessageToSDK(pt_string, url, app_id);
-}
-
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url,
                                      const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();

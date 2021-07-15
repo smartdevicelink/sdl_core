@@ -53,9 +53,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD0(InitPolicyTable, bool());
   MOCK_METHOD0(ResetPolicyTable, bool());
   MOCK_METHOD0(ClearUserConsent, bool());
-  MOCK_METHOD2(SendMessageToSDK,
-               bool(const policy::BinaryMessage& pt_string,
-                    const std::string& url));
   MOCK_METHOD2(ReceiveMessageFromSDK,
                bool(const std::string& file,
                     const policy::BinaryMessage& pt_string));

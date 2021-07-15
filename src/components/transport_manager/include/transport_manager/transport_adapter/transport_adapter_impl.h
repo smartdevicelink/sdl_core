@@ -85,13 +85,6 @@ class TransportAdapterImpl : public TransportAdapter,
                        resumption::LastStateWrapperPtr last_state_wrapper,
                        const TransportManagerSettings& settings);
 
-  DEPRECATED
-  TransportAdapterImpl(DeviceScanner* device_scanner,
-                       ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state,
-                       const TransportManagerSettings& settings) = delete;
-
   /**
    * @brief Destructor.
    **/
@@ -676,10 +669,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
-
-  resumption::LastState& last_state() const {
-    return last_state_wrapper_->get_accessor().GetMutableData();
-  }
 
   /**
    * @brief Pointer to the device scanner.
