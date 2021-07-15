@@ -392,22 +392,22 @@ class StateControllerImplTest : public ::testing::Test {
       case APP_TYPE_MEDIA: {
         PrepareCommonStateResults(result_hmi_state);
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_BACKGROUND,
+            createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_BACKGROUND,
+            createHmiState(HMILevel::HMI_LIMITED,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_BACKGROUND,
+            createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_BACKGROUND,
+            createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
@@ -426,12 +426,12 @@ class StateControllerImplTest : public ::testing::Test {
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));
         result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_LIMITED,
+            createHmiState(HMILevel::HMI_FULL,
                            AudioStreamingState::NOT_AUDIBLE,
                            VideoStreamingState::NOT_STREAMABLE,
                            SystemContext::SYSCTXT_MAIN));

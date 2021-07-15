@@ -434,13 +434,11 @@ class PhoneCallHmiState : public HmiState {
   PhoneCallHmiState(std::shared_ptr<Application> app,
                     const ApplicationManager& app_mngr);
 
-  mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 
-  mobile_apis::HMILevel::eType max_hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
       const OVERRIDE {
     return audio_streaming_state();
