@@ -140,7 +140,9 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
                     << module_type << " " << module_id);
       return AcquireResult::ALLOWED;
     }
-    default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
+    default: {
+      DCHECK_OR_RETURN(false, AcquireResult::IN_USE);
+    }
   }
 }
 

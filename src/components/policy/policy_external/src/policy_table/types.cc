@@ -19,7 +19,9 @@ std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
     case PT_SNAPSHOT: {
       return "PT_SNAPSHOT";
     }
-    default: { return "INVALID_PT_TYPE"; }
+    default: {
+      return "INVALID_PT_TYPE";
+    }
   }
 }
 
@@ -1641,7 +1643,7 @@ AppLevel::AppLevel(const Json::Value* value__)
           impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"))
     , count_of_removals_for_bad_behavior(
           impl::ValueMember(value__, "count_of_removals_for_bad_behavior"))
-    , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
+    , count_of_tls_errors(impl::ValueMember(value__, "count_of_TLS_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
 

@@ -2014,7 +2014,9 @@ void PolicyHandler::AddStatisticsInfo(int type) {
       ++count_of_iap_buffer_full;
       break;
     }
-    default: { SDL_LOG_WARN("Type of statistics is unknown"); }
+    default: {
+      SDL_LOG_WARN("Type of statistics is unknown");
+    }
   }
 }
 
@@ -2033,7 +2035,9 @@ void PolicyHandler::OnSystemError(int code) {
       ++count_sync_out_of_memory;
       break;
     }
-    default: { SDL_LOG_WARN("System error is unknown"); }
+    default: {
+      SDL_LOG_WARN("System error is unknown");
+    }
   }
 }
 

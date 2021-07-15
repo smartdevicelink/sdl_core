@@ -191,7 +191,9 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
       RemoveAppIdFromNotification();
       break;
     }
-    default: { SDL_LOG_ERROR("Unknown system capability type received"); }
+    default: {
+      SDL_LOG_ERROR("Unknown system capability type received");
+    }
   }
 
   SendNotificationToMobile(message_);

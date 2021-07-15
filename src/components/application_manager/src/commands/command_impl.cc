@@ -474,7 +474,9 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
         }
         break;
       }
-      default: { break; }
+      default: {
+        break;
+      }
     }
   }
 
@@ -523,7 +525,9 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
         }
         break;
       }
-      default: { break; }
+      default: {
+        break;
+      }
     }
   }
 

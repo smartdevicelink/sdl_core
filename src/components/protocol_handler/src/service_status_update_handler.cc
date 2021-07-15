@@ -19,7 +19,9 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     case SERVICE_TYPE_NAVI: {
       return Common_ServiceType::VIDEO;
     }
-    default: { return Common_ServiceType::INVALID_ENUM; }
+    default: {
+      return Common_ServiceType::INVALID_ENUM;
+    }
   }
 }
 

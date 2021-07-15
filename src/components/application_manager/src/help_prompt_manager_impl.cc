@@ -369,7 +369,9 @@ void HelpPromptManagerImpl::SetSendingType(
         }
         break;
       }
-      default: { break; }
+      default: {
+        break;
+      }
     }
     SDL_LOG_DEBUG(
         "Sending type set to:" << static_cast<uint32_t>(sending_type_));

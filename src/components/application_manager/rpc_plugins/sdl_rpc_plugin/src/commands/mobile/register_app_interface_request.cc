@@ -224,7 +224,8 @@ void RegisterAppInterfaceRequest::FillApplicationParams(
           application->set_webengine_projection_enabled(true);
           break;
         }
-        default: {}
+        default: {
+        }
       }
     }
   }
