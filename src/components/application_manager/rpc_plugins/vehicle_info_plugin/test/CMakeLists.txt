@@ -64,7 +64,7 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   connectionHandler
-  vehicle_info_plugin
+  vehicle_info_plugin_static
   SmartObjects
   formatters
   jsoncpp

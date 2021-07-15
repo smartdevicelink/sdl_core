@@ -3616,7 +3616,16 @@
                             "name": "pressureTelltale",
                             "key": "OEM_REF_PRES_TEL",
                             "type": "WarningLightStatus",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "pressureTelltale",
+                            "key": "OEM_REF_PRES_TEL",
+                            "type": "WarningLightStatus",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "leftFront",
@@ -3646,7 +3655,40 @@
                             ],
                             "key": "OEM_REF_LEFT_FR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "leftFront",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_LEFT_FR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_LEFT_FR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_LEFT_FR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_LEFT_FR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "rightFront",
@@ -3676,7 +3718,40 @@
                             ],
                             "key": "OEM_REF_RIGHT_FR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "rightFront",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_RIGHT_FR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_RIGHT_FR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_RIGHT_FR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_RIGHT_FR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "leftRear",
@@ -3706,7 +3781,40 @@
                             ],
                             "key": "OEM_REF_LEFT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "leftRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_LEFT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_LEFT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_LEFT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_LEFT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "rightRear",
@@ -3736,7 +3844,40 @@
                             ],
                             "key": "OEM_REF_RIGHT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "rightRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_RIGHT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_RIGHT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_RIGHT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_RIGHT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "innerLeftRear",
@@ -3766,7 +3907,40 @@
                             ],
                             "key": "OEM_REF_IN_LEFT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "innerLeftRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_IN_LEFT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_IN_LEFT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_IN_LEFT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_IN_LEFT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "innerRightRear",
@@ -3796,7 +3970,40 @@
                             ],
                             "key": "OEM_REF_IN_RIGHT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "innerRightRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_IN_RIGHT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         }
                     ],
                     "key": "OEM_REF_TIRE_PRES",

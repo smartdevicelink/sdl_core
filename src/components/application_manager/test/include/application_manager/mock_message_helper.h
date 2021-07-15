@@ -394,6 +394,10 @@ class MockMessageHelper {
                    application_manager::ApplicationManager& app_mngr,
                    const application_manager::WindowID window_id));
 
+  MOCK_METHOD2(AddDefaultParamsToTireStatus,
+               void(application_manager::ApplicationSharedPtr application,
+                    smart_objects::SmartObject& response_from_hmi));
+
   static MockMessageHelper* message_helper_mock();
 };
 
