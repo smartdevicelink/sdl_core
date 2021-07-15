@@ -614,7 +614,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   HmiStatePtr initial_state =
-      CreateRegularState(std::shared_ptr<Application>(application),
+      CreateRegularState(ApplicationSharedPtr(application),
                          mobile_apis::WindowType::MAIN,
                          mobile_apis::HMILevel::INVALID_ENUM,
                          mobile_apis::AudioStreamingState::INVALID_ENUM,
@@ -1119,7 +1119,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     }
     // Delete the cloud device
     connection_handler().RemoveCloudAppDevice(app->device());
-    removed_app_count++;
+    ++removed_app_count;
   }
 
   // Update app list if disabled apps were removed
@@ -1364,7 +1364,7 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
   if (mobile_correlation_id_ < max_correlation_id_) {
-    mobile_correlation_id_++;
+    ++mobile_correlation_id_;
   } else {
     mobile_correlation_id_ = 0;
   }
@@ -1374,7 +1374,7 @@ uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
   if (correlation_id_ < max_correlation_id_) {
-    correlation_id_++;
+    ++correlation_id_;
   } else {
     correlation_id_ = 0;
   }
@@ -1848,7 +1848,7 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
     return false;
   } else {
     // check all AppHMITypes that the app has
-    for (size_t i = 0; i < app_types_array->length(); i++) {
+    for (size_t i = 0; i < app_types_array->length(); ++i) {
       std::string app_type_string =
           EnumToString(static_cast<mobile_apis::AppHMIType::eType>(
               app_types_array->getElement(i).asUInt()));
@@ -2772,8 +2772,16 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
           json::ttsName)) {
     SDL_LOG_DEBUG("Get ttsName from " << cur_vr_lang << " language");
-    ttsName =
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
         app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
+
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::ttsName)) {
+    SDL_LOG_DEBUG("Get ttsName from default language");
+    ttsName = SmartObject(SmartType_Array);
+    ttsName[0] =
+        app_data[json::languages][default_idx][json::default_][json::ttsName];
   } else {
     SDL_LOG_DEBUG("No data for ttsName for " << cur_vr_lang << " language");
   }
@@ -2783,6 +2791,11 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
     SDL_LOG_DEBUG("Get vrSynonyms from " << cur_vr_lang << " language");
     vrSynonym =
         app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(
+                 json::vrSynonyms)) {
+    SDL_LOG_DEBUG("Get vrSynonyms from default language");
+    vrSynonym = app_data[json::languages][default_idx][json::default_]
+                        [json::vrSynonyms];
   } else {
     SDL_LOG_DEBUG("No data for vrSynonyms for " << cur_vr_lang << " language");
   }
@@ -3041,10 +3054,13 @@ void ApplicationManagerImpl::HeadUnitReset(
 void ApplicationManagerImpl::ClearAppsPersistentData() {
   SDL_LOG_AUTO_TRACE();
   typedef std::vector<std::string> FilesList;
-  const std::string apps_info_storage_file = get_settings().app_info_storage();
-  file_system::DeleteFile(apps_info_storage_file);
-
   const std::string storage_folder = get_settings().app_storage_folder();
+
+  const std::string apps_info_storage_file =
+      !storage_folder.empty()
+          ? storage_folder + "/" + get_settings().app_info_storage()
+          : get_settings().app_info_storage();
+  file_system::DeleteFile(apps_info_storage_file);
 
   FilesList files = file_system::ListFiles(storage_folder);
   FilesList::iterator element_to_skip =
@@ -4323,6 +4339,10 @@ ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
         result.keyboard_properties = true;
         break;
       }
+      case mobile_apis::GlobalProperty::USER_LOCATION: {
+        result.user_location = true;
+        break;
+      }
       default: {
         SDL_LOG_TRACE("Unknown global property: " << global_property);
         break;
@@ -4373,7 +4393,9 @@ ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
   if (application->keyboard_props()) {
     (*global_properties)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
   }
-
+  if (!application->get_user_location().empty()) {
+    (*global_properties)[i++] = GlobalProperty::USER_LOCATION;
+  }
   return global_properties;
 }
 

@@ -85,7 +85,8 @@ void OnUILanguageChangeNotification::Run() {
 
   ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it++;
+    ApplicationSharedPtr app = *it;
+    ++it;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 

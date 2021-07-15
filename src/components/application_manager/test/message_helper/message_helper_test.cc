@@ -963,7 +963,8 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager_);
+                                                  mock_application_manager_,
+                                                  true);
 
   ASSERT_TRUE(result.get());
 
@@ -1003,7 +1004,8 @@ TEST_F(MessageHelperTest,
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager_);
+                                                  mock_application_manager_,
+                                                  true);
 
   ASSERT_TRUE(result.get());
 

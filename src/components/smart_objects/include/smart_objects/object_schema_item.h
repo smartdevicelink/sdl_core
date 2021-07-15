@@ -69,6 +69,14 @@ struct SMember {
           const bool IsRemoved = false,
           const std::vector<SMember>& history_vector = {});
 
+  SMember(ISchemaItem* SchemaItem,
+          const bool IsMandatory = true,
+          const std::string& Since = "",
+          const std::string& Until = "",
+          const bool IsDeprecated = false,
+          const bool IsRemoved = false,
+          const std::vector<SMember>& history_vector = {});
+
   /**
    * @brief Checks the version a parameter was removed (until)
    * If the mobile's msg version is greater than or
@@ -79,7 +87,8 @@ struct SMember {
   /**
    * @brief Member schema item.
    **/
-  ISchemaItemPtr mSchemaItem;
+  ISchemaItem* mSchemaItem;
+  ISchemaItemPtr mSchemaItemShared;
   /**
    * @brief true if member is mandatory, false otherwise.
    **/

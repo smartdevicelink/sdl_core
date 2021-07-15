@@ -224,7 +224,8 @@ void RegisterAppInterfaceRequest::FillApplicationParams(
           application->set_webengine_projection_enabled(true);
           break;
         }
-        default: {}
+        default: {
+        }
       }
     }
   }
@@ -983,12 +984,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   smart_objects::SmartObject msg_params_copy = msg_params;
+  ApplicationManager& app_manager = application_manager_;
   const auto result_code = CalculateFinalResultCode();
 
   SendResponse(true, result_code, response_info_.c_str(), &response_params);
 
   FinishSendingResponseToMobile(
-      msg_params_copy, application_manager_, key, status_notifier);
+      msg_params_copy, app_manager, key, status_notifier);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(

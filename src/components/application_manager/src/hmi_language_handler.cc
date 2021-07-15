@@ -263,10 +263,11 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
 
   const ApplicationSet& accessor =
       application_manager_.applications().GetData();
+
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
-    ApplicationConstSharedPtr app = *it++;
-
+    ApplicationConstSharedPtr app = *it;
+    ++it;
     SDL_LOG_INFO("Application with app_id "
                  << app->app_id()
                  << " will be unregistered because of "

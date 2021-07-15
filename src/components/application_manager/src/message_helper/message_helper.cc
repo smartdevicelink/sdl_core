@@ -53,6 +53,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -421,6 +422,39 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
 }
 
 smart_objects::SmartObjectSPtr
+MessageHelper::CreateRCResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
+  namespace rc = rc_rpc_plugin;
+
+  smart_objects::SmartObjectSPtr rc_reset_global_prop_request =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  if (reset_result.user_location) {
+    smart_objects::SmartObject user_location =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    user_location[rc::strings::kGrid] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& grid = user_location[rc::strings::kGrid];
+    grid[rc::strings::kRow] = 0;
+    grid[rc::strings::kCol] = 0;
+    grid[rc::strings::kLevel] = 0;
+    grid[rc::strings::kRowspan] = 1;
+    grid[rc::strings::kColspan] = 1;
+    grid[rc::strings::kLevelspan] = 1;
+
+    (*rc_reset_global_prop_request)[strings::user_location] = user_location;
+    application->set_user_location(user_location);
+  }
+
+  (*rc_reset_global_prop_request)[strings::app_id] = application->app_id();
+
+  return rc_reset_global_prop_request;
+}
+
+smart_objects::SmartObjectSPtr
 MessageHelper::CreateDisplayCapabilityUpdateToMobile(
     const smart_objects::SmartObject& display_capabilities, Application& app) {
   SDL_LOG_AUTO_TRACE();
@@ -486,7 +520,7 @@ smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
         smart_objects::SmartType_Map);
     app_service_capability[strings::updated_app_service_record] = record;
     app_services[i] = app_service_capability;
-    i++;
+    ++i;
   }
 
   app_service_capabilities[strings::app_services] = app_services;
@@ -2256,13 +2290,11 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
-#ifdef EXTERNAL_PROPRIETARY_MODE
   const std::string tts = "ttsString";
   const std::string label = "label";
   const std::string line1 = "line1";
   const std::string line2 = "line2";
   const std::string textBody = "textBody";
-#endif  // EXTERNAL_PROPRIETARY_MODE
   const std::string message_code = "messageCode";
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
   std::vector<policy::UserFriendlyMessage>::const_iterator it_end = msg.end();
@@ -2272,7 +2304,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
-#ifdef EXTERNAL_PROPRIETARY_MODE
     if (!it->tts.empty()) {
       obj[tts] = it->tts;
     }
@@ -2288,7 +2319,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     if (!it->text_body.empty()) {
       obj[textBody] = it->text_body;
     }
-#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   app_mngr.GetRPCService().ManageHMICommand(message);
@@ -2299,7 +2329,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     const policy::ExternalConsentStatus& external_consent_status,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2311,7 +2342,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2341,7 +2373,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
     uint32_t correlation_id,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool success_flag) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -2353,7 +2386,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(
+      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -3374,7 +3408,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
         break;
       }
-      default: { continue; }
+      default: {
+        continue;
+      }
     }
 
     soft_buttons[j++] = request_soft_buttons[i];

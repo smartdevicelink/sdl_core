@@ -228,7 +228,7 @@ size_t OnSystemRequestNotification::ParsePTString(
     if (pt_string[i] == '\"' || pt_string[i] == '\\') {
       result += '\\';
     } else if (pt_string[i] == '\n') {
-      result_length--;  // contentLength is adjusted when this character is
+      --result_length;  // contentLength is adjusted when this character is
                         // not copied to result.
       continue;
     }

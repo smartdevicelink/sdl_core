@@ -430,7 +430,6 @@ void SystemRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
   const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
@@ -476,6 +475,15 @@ void SystemRequest::Run() {
   if (!CheckSyntax(file_name)) {
     SDL_LOG_ERROR("Incoming request contains \t\n \\t \\n or whitespace");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  const uint16_t query_apps_min_version = 4;
+
+  if (mobile_apis::RequestType::QUERY_APPS == request_type &&
+      application_manager_.get_settings().max_supported_protocol_version() <
+          query_apps_min_version) {
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 

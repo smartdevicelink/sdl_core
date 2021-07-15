@@ -1002,7 +1002,7 @@ uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) const {
   const uint32_t key = connection_handle | (session_id << 16);
-  SDL_LOG_DEBUG("Key for ConnectionHandle:"
+  SDL_LOG_TRACE("Key for ConnectionHandle:"
                 << static_cast<uint32_t>(connection_handle)
                 << " Session:" << static_cast<uint32_t>(session_id) << " is: 0x"
                 << std::hex << static_cast<uint32_t>(key));
@@ -1020,7 +1020,7 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  SDL_LOG_DEBUG("ConnectionHandle: "
+  SDL_LOG_TRACE("ConnectionHandle: "
                 << static_cast<int32_t>(*connection_handle)
                 << " Session: " << static_cast<int32_t>(*session_id)
                 << " for key: " << static_cast<int32_t>(key));
@@ -1472,6 +1472,10 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
     if (transport_manager::webengine_constants::kWebEngineDeviceName ==
         i->second.user_friendly_name()) {
       SDL_LOG_DEBUG("No need to connect to web engine device");
+      continue;
+    }
+    if ("CLOUD_WEBSOCKET" == i->second.connection_type()) {
+      SDL_LOG_DEBUG("No need to connect to cloud device");
       continue;
     }
     ConnectToDevice(i->first);

@@ -307,6 +307,14 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
 
 void ResumptionDataProcessorImpl::FinalizeResumption(
     const ResumeCtrl::ResumptionCallBack& callback, const uint32_t app_id) {
+  auto app = application_manager_.application(app_id);
+  if (!app) {
+    SDL_LOG_ERROR("App " << app_id
+                         << " is not registered, erasing resumption data");
+    EraseAppResumptionData(app_id);
+    return;
+  }
+
   if (IsResumptionSuccessful(app_id)) {
     SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
@@ -314,7 +322,7 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
   } else {
     SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    RevertRestoredData(app);
     application_manager_.state_controller().DropPostponedWindows(app_id);
   }
   EraseAppResumptionData(app_id);
@@ -810,6 +818,21 @@ void ResumptionDataProcessorImpl::DeleteGlobalProperties(
     (*msg)[strings::msg_params] = *msg_params;
     ProcessMessageToHMI(msg, false);
   }
+
+  if (result.HasRCPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::RC_SetGlobalProperties)) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(result,
+                                                            application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::RC_SetGlobalProperties;
+
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessMessageToHMI(msg, false);
+  }
 }
 
 void ResumptionDataProcessorImpl::AddSubscriptions(
@@ -960,7 +983,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
           smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
       module_data_so[index][message_params::kModuleId] = module.second;
-      index++;
+      ++index;
     }
   }
 

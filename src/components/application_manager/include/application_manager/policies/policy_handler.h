@@ -880,19 +880,21 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
-   * @return consolidated permissions list or empty list if no
-   * applications/devices currently present
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+  bool CollectRegisteredAppsPermissions(
+      std::vector<FunctionalGroupPermission>& out_permissions);
 
   /**
    * @brief Collects permissions for application with certain connection key
    * @param connection_key Connection key of application to look for
-   * @return list of application permissions or empty list if no such
-   * application found
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectAppPermissions(
-      const uint32_t connection_key);
+  bool CollectAppPermissions(
+      const uint32_t connection_key,
+      std::vector<policy::FunctionalGroupPermission>& out_permissions);
 
  private:
   static const std::string kLibrary;

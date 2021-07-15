@@ -138,7 +138,8 @@ void VehicleInfoAppExtension::SaveResumptionData(
   int i = 0;
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[strings::application_vehicle_info][i++] = subscription;
+    resumption_data[strings::application_vehicle_info][i] = subscription;
+    ++i;
   }
 }
 

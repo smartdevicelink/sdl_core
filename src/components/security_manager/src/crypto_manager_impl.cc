@@ -50,8 +50,6 @@
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
-#define OPENSSL1_1_VERSION 0x1010000fL
-#define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
 namespace security_manager {
@@ -91,7 +89,7 @@ CryptoManagerImpl::CryptoManagerImpl(
     : settings_(set), context_(NULL) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(instance_lock_);
-  instance_count_++;
+  ++instance_count_;
   if (instance_count_ == 1) {
     SDL_LOG_DEBUG("Openssl engine initialization");
     SSL_load_error_strings();
@@ -110,7 +108,7 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   } else {
     SSL_CTX_free(context_);
   }
-  instance_count_--;
+  --instance_count_;
   if (instance_count_ == 0) {
     SDL_LOG_DEBUG("Openssl engine deinitialization");
     EVP_cleanup();
@@ -165,58 +163,23 @@ bool CryptoManagerImpl::Init() {
 #endif
   switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
-#ifdef OPENSSL_NO_SSL3
       SDL_LOG_WARN("OpenSSL does not support SSL3 protocol");
       return false;
-#else
-      SDL_LOG_DEBUG("SSLv3 is used");
-      method = is_server ? SSLv3_server_method() : SSLv3_client_method();
-      SSL_CTX_set_max_proto_version(context_, SSL3_VERSION);
-      break;
-#endif
     case TLSv1:
-      SDL_LOG_DEBUG("TLSv1 is used");
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
-      method = is_server ? TLS_server_method() : TLS_client_method();
-      SSL_CTX_set_max_proto_version(context_, TLS1_VERSION);
-#endif
-      break;
+      SDL_LOG_WARN("Protocol TLSv1 is unsupported");
+      return false;
     case TLSv1_1:
-      SDL_LOG_DEBUG("TLSv1_1 is used");
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      SDL_LOG_WARN(
-          "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
-#else
-      method = is_server ? TLS_server_method() : TLS_client_method();
-      SSL_CTX_set_max_proto_version(context_, TLS1_1_VERSION);
-#endif
-      break;
+      SDL_LOG_WARN("Protocol TLSv1_1 is unsupported");
+      return false;
     case TLSv1_2:
       SDL_LOG_DEBUG("TLSv1_2 is used");
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
-      SDL_LOG_WARN(
-          "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
-      method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
-#else
       method = is_server ? TLS_server_method() : TLS_client_method();
       SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
-#endif
       break;
     case DTLSv1:
       SDL_LOG_DEBUG("DTLSv1 is used");
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
-      method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
-#else
       method = is_server ? DTLS_server_method() : DTLS_client_method();
       SSL_CTX_set_max_proto_version(context_, DTLS1_VERSION);
-#endif
       break;
     default:
       SDL_LOG_ERROR("Unknown protocol: "
@@ -248,18 +211,19 @@ bool CryptoManagerImpl::Init() {
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
-#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
+
     auto sk = SSL_CTX_get_ciphers(context_);
     const char* p;
-    for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+    for (int i = 0; i < sk_SSL_CIPHER_num(sk); ++i) {
       const SSL_CIPHER* c = sk_SSL_CIPHER_value(sk, i);
       p = SSL_CIPHER_get_name(c);
       if (p == NULL)
         break;
       SDL_LOG_DEBUG("Using Cipher: " << p);
     }
-#endif
   }
+
+  SSL_CTX_set_security_level(context_, get_settings().security_level());
 
   if (get_settings().ca_cert_path().empty()) {
     SDL_LOG_WARN("Setting up empty CA certificate location");

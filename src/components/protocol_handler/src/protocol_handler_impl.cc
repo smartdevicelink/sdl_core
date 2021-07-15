@@ -371,7 +371,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray secondaryTransportsArr;
           bson_array_initialize(&secondaryTransportsArr,
                                 secondaryTransports.size());
-          for (unsigned int i = 0; i < secondaryTransports.size(); i++) {
+          for (unsigned int i = 0; i < secondaryTransports.size(); ++i) {
             char secondaryTransport[255];
             strncpy(secondaryTransport,
                     secondaryTransports[i].c_str(),
@@ -389,7 +389,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray audioServiceTransportsArr;
           bson_array_initialize(&audioServiceTransportsArr,
                                 audioServiceTransports.size());
-          for (unsigned int i = 0; i < audioServiceTransports.size(); i++) {
+          for (unsigned int i = 0; i < audioServiceTransports.size(); ++i) {
             SDL_LOG_DEBUG("Adding " << audioServiceTransports[i]
                                     << " to audioServiceTransports parameter "
                                        "of StartSessionAck");
@@ -403,7 +403,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           BsonArray videoServiceTransportsArr;
           bson_array_initialize(&videoServiceTransportsArr,
                                 videoServiceTransports.size());
-          for (unsigned int i = 0; i < videoServiceTransports.size(); i++) {
+          for (unsigned int i = 0; i < videoServiceTransports.size(); ++i) {
             SDL_LOG_DEBUG("Adding " << videoServiceTransports[i]
                                     << " to videoServiceTransports parameter "
                                        "of StartSessionAck");
@@ -1021,7 +1021,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   }
 
   const uint32_t connection_key = tm_message->connection_key();
-  SDL_LOG_DEBUG("Received data from TM  with connection id "
+  SDL_LOG_TRACE("Received data from TM  with connection id "
                 << connection_key << " msg data_size "
                 << tm_message->data_size());
 
@@ -1030,7 +1030,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   const ProtocolFramePtrList protocol_frames =
       incoming_data_handler_.ProcessData(
           *tm_message, result, &malformed_occurs);
-  SDL_LOG_DEBUG("Processed " << protocol_frames.size() << " frames");
+  SDL_LOG_TRACE("Processed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       SDL_LOG_WARN("Malformed message occurs, connection id "
@@ -1464,7 +1464,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet, RESULT_UNKNOWN);
-  SDL_LOG_DEBUG("Handling message " << packet);
+  SDL_LOG_TRACE("Handling message " << packet);
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL:
       SDL_LOG_TRACE("FRAME_TYPE_CONTROL");
@@ -1488,7 +1488,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
     const ProtocolFramePtr packet) {
   SDL_LOG_AUTO_TRACE();
 
-  SDL_LOG_DEBUG(
+  SDL_LOG_TRACE(
       "FRAME_TYPE_SINGLE message of size "
       << packet->data_size() << "; message "
       << utils::ConvertBinaryDataToString(packet->data(), packet->data_size()));
@@ -2182,7 +2182,7 @@ void ProtocolHandlerImpl::PopValidAndExpiredMultiframes() {
 
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
-    SDL_LOG_DEBUG("Result frame" << frame << "for connection "
+    SDL_LOG_TRACE("Result frame" << frame << "for connection "
                                  << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
                                                   frame->protocol_version(),
@@ -2261,7 +2261,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
       }
     } break;
   }
-  SDL_LOG_DEBUG("Message : " << message.get());
+  SDL_LOG_TRACE("Message : " << message.get());
   const uint8_t c_id = message->connection_id();
   const uint32_t m_id = message->session_id();
 
@@ -2273,7 +2273,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||
       FRAME_TYPE_FIRST == message->frame_type()) {
-    SDL_LOG_DEBUG("Packet: dataSize " << message->data_size());
+    SDL_LOG_TRACE("Packet: dataSize " << message->data_size());
     HandleMessage(message);
     PopValidAndExpiredMultiframes();
   } else {
@@ -2448,7 +2448,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
 
 void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
                                            int32_t number_of_frames) {
-  SDL_LOG_DEBUG("SendFramesNumber MobileNaviAck for session "
+  SDL_LOG_TRACE("SendFramesNumber MobileNaviAck for session "
                 << connection_key);
 
   transport_manager::ConnectionUID connection_id = 0;

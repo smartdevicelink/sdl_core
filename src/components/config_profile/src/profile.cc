@@ -41,7 +41,6 @@
 
 #include <string>
 
-#include "config_profile/ini_file.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -63,6 +62,8 @@ namespace {
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
+
+#define INI_LINE_LEN 1024
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
@@ -140,6 +141,7 @@ const char* kSecurityKeyPathKey = "KeyPath";
 const char* kSecurityCipherListKey = "CipherList";
 const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
+const char* kSecurityLevel = "SecurityLevel";
 #endif
 
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
@@ -337,10 +339,11 @@ const char* kDefaultSecurityProtocol = "TLSv1.2";
 const char* kDefaultSSLMode = "CLIENT";
 const bool kDefaultVerifyPeer = false;
 const uint32_t kDefaultBeforeUpdateHours = 24;
+const uint32_t kDefaultSecurityLevel = 1;
 #endif  // ENABLE_SECURITY
 
 const uint32_t kDefaultHubProtocolIndex = 0;
-const uint32_t kDefaultHeartBeatTimeout = 0;
+const uint32_t kDefaultHeartBeatTimeout = 5000;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultWebSocketServerPort = 2020;
@@ -530,6 +533,13 @@ Profile::Profile()
     , iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts)
     , iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout)
     , tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout)
+    , maximum_payload_size_(kDefaultMaximumPayloadSize)
+    , message_frequency_count_(kDefaultFrequencyCount)
+    , message_frequency_time_(kDefaultFrequencyTime)
+    , malformed_message_filtering_(kDefaulMalformedMessageFiltering)
+    , malformed_frequency_count_(kDefaultMalformedFrequencyCount)
+    , malformed_frequency_time_(kDefaultMalformedFrequencyTime)
+    , multiframe_waiting_timeout_(kDefaultExpectedConsecutiveFramesTimeout)
     , attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB)
     , open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB)
     , resumption_delay_before_ign_(kDefaultResumptionDelayBeforeIgn)
@@ -562,9 +572,6 @@ Profile::Profile()
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
     , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
     , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
-  // SDL version
-  ReadStringValue(
-      &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
 }
 
 Profile::~Profile() {}
@@ -991,65 +998,30 @@ uint32_t Profile::iap_hub_connection_wait_timeout() const {
 }
 
 size_t Profile::maximum_payload_size() const {
-  size_t maximum_payload_size = 0;
-  ReadUIntValue(&maximum_payload_size,
-                kDefaultMaximumPayloadSize,
-                kProtocolHandlerSection,
-                kMaximumPayloadSizeKey);
-  return maximum_payload_size;
+  return maximum_payload_size_;
 }
 
 size_t Profile::message_frequency_count() const {
-  size_t message_frequency_count = 0;
-  ReadUIntValue(&message_frequency_count,
-                kDefaultFrequencyCount,
-                kProtocolHandlerSection,
-                kFrequencyCount);
-  return message_frequency_count;
+  return message_frequency_count_;
 }
 
 size_t Profile::message_frequency_time() const {
-  size_t message_frequency_time = 0;
-  ReadUIntValue(&message_frequency_time,
-                kDefaultFrequencyTime,
-                kProtocolHandlerSection,
-                kFrequencyTime);
-  return message_frequency_time;
+  return message_frequency_time_;
 }
 
 bool Profile::malformed_message_filtering() const {
-  bool malformed_message_filtering = 0;
-  ReadBoolValue(&malformed_message_filtering,
-                kDefaulMalformedMessageFiltering,
-                kProtocolHandlerSection,
-                kMalformedMessageFiltering);
-  return malformed_message_filtering;
+  return malformed_message_filtering_;
 }
 
 size_t Profile::malformed_frequency_count() const {
-  size_t malformed_frequency_count = 0;
-  ReadUIntValue(&malformed_frequency_count,
-                kDefaultMalformedFrequencyCount,
-                kProtocolHandlerSection,
-                kMalformedFrequencyCount);
-  return malformed_frequency_count;
+  return malformed_frequency_count_;
 }
 
 size_t Profile::malformed_frequency_time() const {
-  size_t malformed_frequency_time = 0;
-  ReadUIntValue(&malformed_frequency_time,
-                kDefaultMalformedFrequencyTime,
-                kProtocolHandlerSection,
-                kMalformedFrequencyTime);
-  return malformed_frequency_time;
+  return malformed_frequency_time_;
 }
 uint32_t Profile::multiframe_waiting_timeout() const {
-  uint32_t multiframe_waiting_timeout = 0;
-  ReadUIntValue(&multiframe_waiting_timeout,
-                kDefaultExpectedConsecutiveFramesTimeout,
-                kProtocolHandlerSection,
-                kExpectedConsecutiveFramesTimeout);
-  return multiframe_waiting_timeout;
+  return multiframe_waiting_timeout_;
 }
 
 uint16_t Profile::attempts_to_open_policy_db() const {
@@ -1116,6 +1088,10 @@ const std::vector<int>& Profile::force_protected_service() const {
 
 const std::vector<int>& Profile::force_unprotected_service() const {
   return force_unprotected_service_;
+}
+
+uint32_t Profile::security_level() const {
+  return security_level_;
 }
 #endif  // ENABLE_SECURITY
 
@@ -1244,8 +1220,80 @@ const std::string Profile::hmi_origin_id() const {
   return hmi_origin_id_;
 }
 
+void Profile::ParseConfiguration() {
+  FILE* config_file_ = fopen(config_file_name_.c_str(), "r");
+  config_obj_ = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  if (nullptr != config_file_) {
+    char line[INI_LINE_LEN] = "\0";
+    std::string chapter;
+
+    while (nullptr != fgets(line, INI_LINE_LEN, config_file_)) {
+      std::string line_str(line);
+      auto whitespace_len = line_str.find_first_not_of(" \t\r\n");
+      if (std::string::npos == whitespace_len) {
+        continue;
+      }
+      line_str.erase(0, whitespace_len);
+
+      if (';' == line_str[0] || '*' == line_str[0]) {
+        continue;
+      }
+
+      if ('[' == line_str[0] && std::string::npos != line_str.find(']')) {
+        line_str.erase(0, line_str.find_first_not_of("[ \t\r\n"));
+        line_str.erase(line_str.find_last_not_of(" \t\r\n]") + 1);
+
+        if (false == line_str.empty()) {
+          chapter = line_str;
+          config_obj_[chapter] =
+              smart_objects::SmartObject(smart_objects::SmartType_Map);
+        }
+
+        continue;
+      }
+
+      size_t equals_idx = line_str.find('=');
+      if (std::string::npos == equals_idx) {
+        continue;
+      }
+
+      std::string key(line_str.data(), equals_idx);
+      std::string value(line_str.data() + equals_idx + 1);
+
+      auto key_whitespace_len = key.find_first_not_of(" \t\r\n");
+      if (std::string::npos == key_whitespace_len) {
+        continue;
+      }
+      key.erase(0, key_whitespace_len);
+      key.erase(key.find_last_not_of(" \t\r\n") + 1);
+
+      if (true == config_obj_[chapter].keyExists(key)) {
+        continue;
+      }
+
+      auto val_whitespace_len = value.find_first_not_of(" \t\r\n");
+      if (std::string::npos == val_whitespace_len) {
+        value = "";
+      } else {
+        value.erase(0, value.find_first_not_of(" \t\r\n"));
+        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+      }
+
+      config_obj_[chapter][key] = value;
+    }
+  }
+
+  if (nullptr != config_file_) {
+    fclose(config_file_);
+    config_file_ = nullptr;
+  }
+}
+
 void Profile::UpdateValues() {
   SDL_LOG_AUTO_TRACE();
+
+  ParseConfiguration();
 
   // SDL version
   ReadStringValue(
@@ -1307,6 +1355,11 @@ void Profile::UpdateValues() {
                 kDefaultBeforeUpdateHours,
                 kSecuritySection,
                 kBeforeUpdateHours);
+
+  ReadUIntValue(&security_level_,
+                kDefaultSecurityLevel,
+                kSecuritySection,
+                kSecurityLevel);
 
 #endif  // ENABLE_SECURITY
 
@@ -2123,6 +2176,73 @@ void Profile::UpdateValues() {
     error_description_ = "PathToSnapshot has forbidden(non-portable) symbols";
   }
 
+  // Packet with payload bigger than this value will be marked as malformed
+  ReadUIntValue(&maximum_payload_size_,
+                kDefaultMaximumPayloadSize,
+                kProtocolHandlerSection,
+                kMaximumPayloadSizeKey);
+
+  LOG_UPDATED_VALUE(
+      maximum_payload_size_, kMaximumPayloadSizeKey, kProtocolHandlerSection);
+
+  // Check for apps sending too many messages
+  ReadUIntValue(&message_frequency_count_,
+                kDefaultFrequencyCount,
+                kProtocolHandlerSection,
+                kFrequencyCount);
+
+  LOG_UPDATED_VALUE(
+      message_frequency_count_, kFrequencyCount, kProtocolHandlerSection);
+
+  // Check for apps sending too many messages
+  ReadUIntValue(&message_frequency_time_,
+                kDefaultFrequencyTime,
+                kProtocolHandlerSection,
+                kFrequencyTime);
+
+  LOG_UPDATED_VALUE(
+      message_frequency_time_, kFrequencyTime, kProtocolHandlerSection);
+
+  // Enable filter malformed messages
+  ReadBoolValue(&malformed_message_filtering_,
+                kDefaulMalformedMessageFiltering,
+                kProtocolHandlerSection,
+                kMalformedMessageFiltering);
+
+  LOG_UPDATED_BOOL_VALUE(malformed_message_filtering_,
+                         kMalformedMessageFiltering,
+                         kProtocolHandlerSection);
+
+  // Count for malformed message detection
+  ReadUIntValue(&malformed_frequency_count_,
+                kDefaultMalformedFrequencyCount,
+                kProtocolHandlerSection,
+                kMalformedFrequencyCount);
+
+  LOG_UPDATED_VALUE(malformed_frequency_count_,
+                    kMalformedFrequencyCount,
+                    kProtocolHandlerSection);
+
+  // Time for malformed message detection
+  ReadUIntValue(&malformed_frequency_time_,
+                kDefaultMalformedFrequencyTime,
+                kProtocolHandlerSection,
+                kMalformedFrequencyTime);
+
+  LOG_UPDATED_VALUE(malformed_frequency_time_,
+                    kMalformedFrequencyTime,
+                    kProtocolHandlerSection);
+
+  // Timeout for waiting CONSECUTIVE frames of multiframe
+  ReadUIntValue(&multiframe_waiting_timeout_,
+                kDefaultExpectedConsecutiveFramesTimeout,
+                kProtocolHandlerSection,
+                kExpectedConsecutiveFramesTimeout);
+
+  LOG_UPDATED_VALUE(multiframe_waiting_timeout_,
+                    kExpectedConsecutiveFramesTimeout,
+                    kProtocolHandlerSection);
+
   // Attempts number for opening policy DB
   ReadUIntValue(&attempts_to_open_policy_db_,
                 kDefaultAttemptsToOpenPolicyDB,
@@ -2350,7 +2470,7 @@ void Profile::UpdateValues() {
                           entry->ini_key_name,
                           kTransportRequiredForResumptionSection);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2550,7 +2670,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 
@@ -2588,7 +2708,7 @@ void Profile::UpdateValues() {
         LOG_UPDATED_VALUE(
             list_with_comma, entry->ini_key_name, entry->ini_section_name);
       }
-      entry++;
+      ++entry;
     }
   }
 }
@@ -2599,18 +2719,18 @@ bool Profile::ReadValue(bool* value,
   DCHECK(value);
   bool ret = false;
 
-  char buf[INI_LINE_LEN + 1];
-  *buf = '\0';
-  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) &&
-      ('\0' != *buf)) {
-    const int32_t tmpVal = atoi(buf);
-    if ((0 == strcmp("true", buf)) || (0 != tmpVal)) {
+  if (config_obj_.keyExists(pSection) &&
+      config_obj_[pSection].keyExists(pKey)) {
+    auto val_str = config_obj_[pSection][pKey].asString();
+    const int32_t tmpVal = atoi(val_str.data());
+    if ((0 == strcmp("true", val_str.data())) || (0 != tmpVal)) {
       *value = true;
     } else {
       *value = false;
     }
     ret = true;
   }
+
   return ret;
 }
 
@@ -2627,10 +2747,9 @@ bool Profile::ReadValueEmpty(std::string* value,
   DCHECK(value);
   bool ret = false;
 
-  char buf[INI_LINE_LEN + 1];
-  *buf = '\0';
-  if (0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) {
-    *value = buf;
+  if (config_obj_.keyExists(pSection) &&
+      config_obj_[pSection].keyExists(pKey)) {
+    *value = config_obj_[pSection][pKey].asString();
     ret = true;
   }
 
