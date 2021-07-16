@@ -497,7 +497,7 @@ extern const char* const preferred_fps;
 
 // OnResetTimeout
 extern const char* const request_id;
-extern const char* const timeout_period_for_reset;
+extern const char* const reset_period;
 }  // namespace strings
 
 namespace hmi_interface {

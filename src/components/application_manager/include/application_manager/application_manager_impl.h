@@ -58,7 +58,6 @@
 #include "application_manager/rpc_service.h"
 #include "application_manager/state_controller_impl.h"
 
-#include "application_manager/request_timeout_handler.h"
 #include "application_manager/rpc_handler.h"
 
 #include "application_manager/policies/policy_handler_interface.h"
@@ -1001,11 +1000,13 @@ class ApplicationManagerImpl
 
   request_controller::RequestTimeoutHandler& get_request_timeout_handler()
       const OVERRIDE {
+    DCHECK(request_timeout_handler_);
     return *request_timeout_handler_;
   }
 
   request_controller::RequestController& get_request_controller()
       const OVERRIDE {
+    DCHECK(request_ctrl_);
     return *request_ctrl_;
   }
 

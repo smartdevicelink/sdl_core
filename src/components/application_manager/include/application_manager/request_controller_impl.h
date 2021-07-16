@@ -50,7 +50,6 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_info.h"
-#include "application_manager/request_timeout_handler_impl.h"
 #include "application_manager/request_tracker.h"
 
 namespace application_manager {

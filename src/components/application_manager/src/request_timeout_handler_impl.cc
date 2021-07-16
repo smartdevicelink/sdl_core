@@ -95,10 +95,8 @@ void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
       return;
     }
     uint32_t timeout = application_manager_.get_settings().default_timeout();
-    if (message[strings::msg_params].keyExists(
-            strings::timeout_period_for_reset)) {
-      timeout = message[strings::msg_params][strings::timeout_period_for_reset]
-                    .asUInt();
+    if (message[strings::msg_params].keyExists(strings::reset_period)) {
+      timeout = message[strings::msg_params][strings::reset_period].asUInt();
     }
     const auto hmi_corr_id =
         message[strings::msg_params][strings::request_id].asUInt();
@@ -109,7 +107,7 @@ void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
         application_manager_.UpdateRequestTimeout(
             request.connection_key_, request.mob_correlation_id_, timeout);
         application_manager_.UpdateRequestTimeout(
-            RequestInfo::HmiConnectionKey, hmi_corr_id, timeout);
+            RequestInfo::kHmiConnectionKey, hmi_corr_id, timeout);
       }
     } else {
       SDL_LOG_WARN("Timeout reset failed by " << hmi_corr_id

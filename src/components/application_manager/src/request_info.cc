@@ -42,12 +42,12 @@ namespace request_controller {
 
 SDL_CREATE_LOG_VARIABLE("RequestController")
 
-constexpr uint32_t RequestInfo::HmiConnectionKey;
+constexpr uint32_t RequestInfo::kHmiConnectionKey;
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectionKey;
+  app_id_ = RequestInfo::kHmiConnectionKey;
 }
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request,
@@ -55,7 +55,7 @@ HMIRequestInfo::HMIRequestInfo(RequestPtr request,
                                const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectionKey;
+  app_id_ = RequestInfo::kHmiConnectionKey;
 }
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
@@ -259,7 +259,7 @@ uint32_t RequestInfoSet::RemoveByConnectionKey(uint32_t connection_key) {
 uint32_t RequestInfoSet::RemoveMobileRequests() {
   SDL_LOG_AUTO_TRACE();
   return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual,
-                                          RequestInfo::HmiConnectionKey));
+                                          RequestInfo::kHmiConnectionKey));
 }
 
 const size_t RequestInfoSet::Size() {

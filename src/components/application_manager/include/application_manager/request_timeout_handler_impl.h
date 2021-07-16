@@ -52,6 +52,14 @@ class RequestTimeoutHandlerImpl : public event_engine::EventObserver,
   void on_event(const event_engine::Event& event) OVERRIDE;
 
  private:
+  /**
+   * @brief Checks whether specified request timeout should be updated or not
+   * @param request reference to request structure to check
+   * @param timeout new timeout to apply
+   * @param method_name name of method to check
+   * @return true if timeout update is required for this request, otherwise
+   * returns false
+   */
   bool IsTimeoutUpdateRequired(const Request& request,
                                const uint32_t timeout,
                                const hmi_apis::FunctionID::eType method_name);

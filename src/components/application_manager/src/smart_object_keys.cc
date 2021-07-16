@@ -457,7 +457,7 @@ const char* const preferred_fps = "preferredFPS";
 
 // OnResetTimeout
 const char* const request_id = "requestID";
-const char* const timeout_period_for_reset = "resetPeriod";
+const char* const reset_period = "resetPeriod";
 }  // namespace strings
 
 namespace hmi_interface {

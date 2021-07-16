@@ -306,7 +306,7 @@ void RequestControllerImpl::OnMobileResponse(
 void RequestControllerImpl::OnHMIResponse(const uint32_t correlation_id,
                                           const int32_t function_id) {
   SDL_LOG_AUTO_TRACE();
-  TerminateRequest(correlation_id, RequestInfo::HmiConnectionKey, function_id);
+  TerminateRequest(correlation_id, RequestInfo::kHmiConnectionKey, function_id);
 }
 
 void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
@@ -350,7 +350,7 @@ void RequestControllerImpl::TerminateAppRequests(const uint32_t app_id) {
 
 void RequestControllerImpl::TerminateAllHMIRequests() {
   SDL_LOG_AUTO_TRACE();
-  TerminateWaitingForResponseAppRequests(RequestInfo::HmiConnectionKey);
+  TerminateWaitingForResponseAppRequests(RequestInfo::kHmiConnectionKey);
 }
 
 void RequestControllerImpl::TerminateAllMobileRequests() {
@@ -468,7 +468,7 @@ void RequestControllerImpl::TimeoutThread() {
     const uint32_t expired_app_id = probably_expired->app_id();
 
     probably_expired->request()->onTimeOut();
-    if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
+    if (RequestInfo::kHmiConnectionKey == probably_expired->app_id()) {
       SDL_LOG_DEBUG("Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);
       if (RequestInfo::HMIRequest == probably_expired->request_type()) {

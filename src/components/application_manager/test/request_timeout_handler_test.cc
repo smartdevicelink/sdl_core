@@ -144,7 +144,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
-  notification_msg[msg_params][timeout_period_for_reset] = kTimeout;
+  notification_msg[msg_params][reset_period] = kTimeout;
   notification_msg[msg_params][request_id] = kRequestId;
   notification_msg[msg_params][method_name] = kMethodNameSubscribeWayPoints;
   event.set_smart_object(notification_msg);
@@ -162,7 +162,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
                   mock_app->app_id(), command->correlation_id(), kTimeout));
   EXPECT_CALL(app_mngr_,
               UpdateRequestTimeout(
-                  RequestInfo::HmiConnectionKey, kRequestId, kTimeout));
+                  RequestInfo::kHmiConnectionKey, kRequestId, kTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -205,7 +205,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
           mock_app->app_id(), command->correlation_id(), kDefaultTimeout));
   EXPECT_CALL(app_mngr_,
               UpdateRequestTimeout(
-                  RequestInfo::HmiConnectionKey, kRequestId, kDefaultTimeout));
+                  RequestInfo::kHmiConnectionKey, kRequestId, kDefaultTimeout));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -230,7 +230,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
-  notification_msg[msg_params][timeout_period_for_reset] = kTimeout;
+  notification_msg[msg_params][reset_period] = kTimeout;
   notification_msg[msg_params][method_name] = kMethodNameSubscribeWayPoints;
   notification_msg[msg_params][request_id] = 0u;
   event.set_smart_object(notification_msg);
@@ -267,7 +267,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
 
   Event event(hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
   smart_objects::SmartObject notification_msg;
-  notification_msg[msg_params][timeout_period_for_reset] = kTimeout;
+  notification_msg[msg_params][reset_period] = kTimeout;
   notification_msg[msg_params][method_name] = " ";
   notification_msg[msg_params][request_id] = kRequestId;
   event.set_smart_object(notification_msg);
