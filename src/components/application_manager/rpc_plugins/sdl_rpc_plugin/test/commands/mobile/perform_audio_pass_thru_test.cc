@@ -626,7 +626,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id));
   EXPECT_CALL(app_mngr_, StartAudioPassThruThread(_, _, _, _, _, _));
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
 
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
@@ -654,7 +654,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // First call on_event for setting result_tts_speak_ to UNSUPPORTED_RESOURCE
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   CallOnEvent caller_speak(*command_sptr_, event_speak);
   caller_speak();
 
@@ -691,31 +691,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       app_mngr_,
       StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
-  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  CallOnEvent caller(*command_sptr_, event);
-  caller();
-
-  EXPECT_EQ(kConnectionKey, msg_params_[am::strings::connection_key].asUInt());
-  EXPECT_EQ(kFunctionId, msg_params_[am::strings::function_id].asString());
-}
-
-TEST_F(PerformAudioPassThruRequestTest,
-       DISABLED_OnEvent_TTSOnResetTimeout_UpdateTimeout) {
-  am::event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-
-  msg_params_[am::strings::connection_key] = kConnectionKey;
-  msg_params_[am::strings::function_id] = kFunctionId;
-
-  uint32_t app_id = kConnectionKey;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
-
-  EXPECT_CALL(
-      app_mngr_,
-      StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   CallOnEvent caller(*command_sptr_, event);
@@ -729,7 +705,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnEvent_DefaultCase) {
   am::event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
   uint32_t app_id = kConnectionKey;
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);

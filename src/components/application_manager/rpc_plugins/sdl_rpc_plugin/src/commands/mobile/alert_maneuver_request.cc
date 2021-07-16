@@ -51,9 +51,7 @@ AlertManeuverRequest::AlertManeuverRequest(
                          hmi_capabilities,
                          policy_handler)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 AlertManeuverRequest::~AlertManeuverRequest() {}
 
@@ -179,13 +177,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       GetInfo(message, info_tts_);
       break;
     }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      SDL_LOG_INFO("Received TTS_OnResetTimeout event");
 
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     default: {
       SDL_LOG_ERROR("Received unknown event " << event.id());
       SendResponse(

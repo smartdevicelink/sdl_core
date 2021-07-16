@@ -241,18 +241,6 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
 }
 
 TEST_F(ScrollableMessageRequestTest,
-       OnEvent_ReceivedUIOnResetTimeoutEvent_SUCCESS) {
-  (*msg_)[params][connection_key] = kConnectionKey;
-  (*msg_)[params][correlation_id] = kCorrelationId;
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout_));
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
-  command_->on_event(event);
-}
-
-TEST_F(ScrollableMessageRequestTest,
        DISABLED_OnEvent_ReceivedUIScrollableMessage_SUCCESS) {
   (*msg_)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
 

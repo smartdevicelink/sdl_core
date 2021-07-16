@@ -70,6 +70,10 @@ class MockResourceAllocationManager
   MOCK_CONST_METHOD2(IsResourceFree,
                      bool(const std::string& module_type,
                           const std::string& module_id));
+  MOCK_METHOD3(IsResourceAllocated,
+               bool(const std::string& module_type,
+                    const std::string& module_id,
+                    const uint32_t app_id));
   MOCK_METHOD0(ResetAllAllocations, void());
   MOCK_METHOD2(SendOnRCStatusNotifications,
                void(rc_rpc_plugin::NotificationTrigger::eType,

@@ -454,6 +454,10 @@ const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
 const char* const preferred_fps = "preferredFPS";
+
+// OnResetTimeout
+const char* const request_id = "requestID";
+const char* const reset_period = "resetPeriod";
 }  // namespace strings
 
 namespace hmi_interface {
