@@ -84,6 +84,12 @@ void ButtonNotificationToMobile::HandleCustomButton(
     return;
   }
 
+  if (!app->IsSubscribedToButton(mobile_apis::ButtonName::CUSTOM_BUTTON)) {
+    SDL_LOG_ERROR("Application " << app->app_id()
+                                 << " is not subscribed on custom buttons");
+    return;
+  }
+
   const uint32_t custom_btn_id =
       (*message_)[msg_params][hmi_response::custom_button_id].asUInt();
 
@@ -111,22 +117,22 @@ void ButtonNotificationToMobile::HandleOKButton(
   using namespace application_manager;
   SDL_LOG_DEBUG("OK button received");
 
-  const auto subscribed_apps = SubscribedApps();
   if (app) {
-    const auto app_ptr =
-        std::find_if(subscribed_apps.begin(),
-                     subscribed_apps.end(),
-                     [&app](const ApplicationSharedPtr subscribed_app) {
-                       return app->app_id() == subscribed_app->app_id();
-                     });
-    if (app_ptr != subscribed_apps.end()) {
-      SDL_LOG_DEBUG(
-          "Sending button press for this app id: " << (*app_ptr)->app_id());
-      SendButtonNotification(*app_ptr);
-      return;
+    const auto btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+    if (app->IsSubscribedToButton(btn_id)) {
+      SendButtonNotification(app);
+    } else {
+      SDL_LOG_ERROR("Application " << app->app_id()
+                                   << " is not subscribed to button "
+                                   << btn_id);
     }
+
+    return;
   }
 
+  const auto subscribed_apps = SubscribedApps();
   const auto app_ptr =
       std::find_if(subscribed_apps.begin(),
                    subscribed_apps.end(),
@@ -156,21 +162,22 @@ void ButtonNotificationToMobile::HandleMediaButton(
   SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
-  const auto subscribed_apps = SubscribedApps();
-
   if (app) {
-    const auto app_ptr =
-        std::find_if(subscribed_apps.begin(),
-                     subscribed_apps.end(),
-                     [&app](const ApplicationSharedPtr subscribed_app) {
-                       return app->app_id() == subscribed_app->app_id();
-                     });
-    if (app_ptr != subscribed_apps.end()) {
-      SendButtonNotification(*app_ptr);
-      return;
+    const auto btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+    if (app->IsSubscribedToButton(btn_id)) {
+      SendButtonNotification(app);
+    } else {
+      SDL_LOG_ERROR("Application " << app->app_id()
+                                   << " is not subscribed to button "
+                                   << btn_id);
     }
+
+    return;
   }
 
+  const auto subscribed_apps = SubscribedApps();
   const auto app_ptr =
       std::find_if(subscribed_apps.begin(),
                    subscribed_apps.end(),
@@ -190,7 +197,6 @@ void ButtonNotificationToMobile::HandleMediaButton(
 
   if (app_ptr != subscribed_apps.end()) {
     SendButtonNotification(*app_ptr);
-    return;
   } else {
     SDL_LOG_ERROR("No application found");
   }
