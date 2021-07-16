@@ -53,8 +53,7 @@ SubscribeButtonRequest::SubscribeButtonRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {
+                   policy_handle) {
   hmi_apis::Common_ButtonName::eType button_name =
       static_cast<hmi_apis::Common_ButtonName::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -69,8 +68,6 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {}
 void SubscribeButtonRequest::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
-                     correlation_id());
   SendRequest();
 }
 
@@ -84,53 +81,6 @@ void SubscribeButtonRequest::onTimeOut() {
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),
       static_cast<hmi_apis::FunctionID::eType>(function_id()));
-}
-
-void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
-  SDL_LOG_AUTO_TRACE();
-  using namespace helpers;
-
-  const smart_objects::SmartObject& message = event.smart_object();
-
-  if (hmi_apis::FunctionID::Buttons_SubscribeButton != event.id()) {
-    SDL_LOG_ERROR("Received unknown event.");
-    return;
-  }
-
-  const uint32_t app_id =
-      (*message_)[strings::msg_params][strings::app_id].asUInt();
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(app_id);
-
-  if (!app) {
-    SDL_LOG_ERROR("NULL pointer.");
-    return;
-  }
-
-  hmi_apis::Common_Result::eType hmi_result =
-      static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-  const mobile_apis::ButtonName::eType btn_id =
-      static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[strings::msg_params][strings::button_name].asInt());
-
-  if (CommandImpl::IsHMIResultSuccess(hmi_result,
-                                      HmiInterfaces::HMI_INTERFACE_Buttons)) {
-    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-  } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
-    app->UnsubscribeFromButton(
-        static_cast<mobile_apis::ButtonName::eType>(btn_id));
-  }
-}
-
-bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
-    const hmi_apis::Common_Result::eType hmi_result,
-    const app_mngr::Application& app) const {
-  return (!CommandImpl::IsHMIResultSuccess(
-              hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons) &&
-          app.is_resuming());
 }
 
 }  // namespace hmi

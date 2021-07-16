@@ -45,8 +45,7 @@ namespace hmi {
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
-                               public app_mngr::event_engine::EventObserver {
+class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor
@@ -70,21 +69,8 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
 
   void onTimeOut() OVERRIDE;
 
-  void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
-
  private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
-
-  /**
-   * @brief Determines whether internal unsubscription must be performed
-   * and HMI UnsubscribeButton request should be sent
-   * @param hmi_result - result code received from HMI
-   * @param app - reference to application instance
-   * @return bool - true if app should unsubscribe internally
-   **/
-  bool ShouldUnsubscribeIntertally(
-      const hmi_apis::Common_Result::eType hmi_result,
-      const app_mngr::Application& app) const;
 
   hmi_apis::Common_ButtonName::eType button_name_;
 };
