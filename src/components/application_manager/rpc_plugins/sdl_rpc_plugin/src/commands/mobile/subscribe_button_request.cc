@@ -143,6 +143,11 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
   const bool result = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons);
 
+  if (result) {
+    const auto btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[str::msg_params][str::button_name].asInt());
+    app->SubscribeToButton(btn_id);
+  }
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result);
 

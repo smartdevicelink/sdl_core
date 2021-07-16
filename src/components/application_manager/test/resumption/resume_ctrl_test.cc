@@ -611,12 +611,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
 
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
-  for (uint32_t i = 0; i < count_of_buttons; ++i) {
-    EXPECT_CALL(
-        *mock_app_,
-        SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(i)));
-  }
-
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
 

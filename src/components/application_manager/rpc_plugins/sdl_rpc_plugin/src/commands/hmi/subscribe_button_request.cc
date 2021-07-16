@@ -69,21 +69,18 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {}
 void SubscribeButtonRequest::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
-                     correlation_id());
+  const auto btn_id = static_cast<mobile_apis::ButtonName::eType>(
+      (*message_)[strings::msg_params][strings::button_name].asInt());
+
+  // Specific case when app subscribes to CUSTOM_BUTTON upon registration and no
+  // explicit mobile request exist when response arrives. In this case event
+  // should be catched by HMI request itself.
+  if (mobile_apis::ButtonName::CUSTOM_BUTTON == btn_id) {
+    subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
+                       correlation_id());
+  }
+
   SendRequest();
-}
-
-void SubscribeButtonRequest::onTimeOut() {
-  SDL_LOG_AUTO_TRACE();
-
-  application_manager_.AddExpiredButtonRequest(
-      application_id(), correlation_id(), button_name_);
-
-  auto& resume_ctrl = application_manager_.resume_controller();
-  resume_ctrl.HandleOnTimeOut(
-      correlation_id(),
-      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
@@ -112,25 +109,26 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-  const mobile_apis::ButtonName::eType btn_id =
-      static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[strings::msg_params][strings::button_name].asInt());
-
   if (CommandImpl::IsHMIResultSuccess(hmi_result,
                                       HmiInterfaces::HMI_INTERFACE_Buttons)) {
+    const mobile_apis::ButtonName::eType btn_id =
+        static_cast<mobile_apis::ButtonName::eType>(
+            (*message_)[strings::msg_params][strings::button_name].asInt());
+
     app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
-  } else if (ShouldUnsubscribeIntertally(hmi_result, *app)) {
-    app->UnsubscribeFromButton(
-        static_cast<mobile_apis::ButtonName::eType>(btn_id));
   }
 }
 
-bool SubscribeButtonRequest::ShouldUnsubscribeIntertally(
-    const hmi_apis::Common_Result::eType hmi_result,
-    const app_mngr::Application& app) const {
-  return (!CommandImpl::IsHMIResultSuccess(
-              hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons) &&
-          app.is_resuming());
+void SubscribeButtonRequest::onTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+
+  application_manager_.AddExpiredButtonRequest(
+      application_id(), correlation_id(), button_name_);
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace hmi
