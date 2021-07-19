@@ -37,7 +37,9 @@
 namespace logger {
 
 LoggerImpl::LoggerImpl(bool use_message_loop_thread)
-    : impl_(nullptr), use_message_loop_thread_(use_message_loop_thread) {}
+    : impl_(nullptr)
+    , settings_(nullptr)
+    , use_message_loop_thread_(use_message_loop_thread) {}
 
 void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
   assert(impl_ == nullptr);
@@ -71,9 +73,20 @@ void LoggerImpl::DeInit() {
 }
 
 void LoggerImpl::Flush() {
-  if (use_message_loop_thread_) {
-    if (loop_thread_) {
+  if (use_message_loop_thread_ && loop_thread_) {
+    assert(settings_);
+
+    if (0 == flush_logs_time_point_.time_since_epoch().count()) {
       loop_thread_->WaitDumpQueue();
+    } else if (settings_->flush_log_messages_before_shutdown()) {
+      // Calculate elapsed seconds since IGNITION_OFF
+      const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
+          std::chrono::high_resolution_clock::now() - flush_logs_time_point_);
+      int16_t seconds_before_shutdown =
+          settings_->max_time_before_shutdown() - seconds.count();
+      if (0 < seconds_before_shutdown) {
+        loop_thread_->TimedWaitDumpQueue(seconds_before_shutdown);
+      }
     }
   }
 }
@@ -114,6 +127,14 @@ void LogMessageLoopThread::Push(const LogMessage& message) {
 
 void LogMessageLoopThread::Handle(const LogMessage message) {
   force_log_(message);
+}
+
+void LoggerImpl::InitLoggerSettings(LoggerSettings* settings) {
+  settings_ = settings;
+}
+
+void LoggerImpl::InitFlushLogsTimePoint(const TimePoint& time_point) {
+  flush_logs_time_point_ = time_point;
 }
 
 LogMessageLoopThread::~LogMessageLoopThread() {

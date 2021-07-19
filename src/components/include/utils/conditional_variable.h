@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <boost/thread/condition_variable.hpp>
 
+#include <functional>
 #include "utils/lock.h"
 #include "utils/macro.h"
 
@@ -73,6 +74,9 @@ class ConditionalVariable {
   bool Wait(AutoLock& auto_lock);
   bool Wait(BaseLock& lock);
   WaitStatus WaitFor(AutoLock& auto_lock, uint32_t milliseconds);
+  void WaitFor(AutoLock& lock,
+               uint16_t seconds,
+               std::function<bool()> predicate);
 
  private:
   boost::condition_variable_any cond_var_;

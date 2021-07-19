@@ -35,6 +35,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <chrono>
 
 #include "application_manager/application_manager.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -104,6 +105,8 @@ void OnExitAllApplicationsNotification::Run() {
           mob_reason) {
     application_manager_.HeadUnitReset(mob_reason);
   }
+
+  SDL_INIT_FLUSH_LOGS_TIME_POINT(std::chrono::system_clock::now());
   kill(getpid(), SIGINT);
 }
 

@@ -52,6 +52,9 @@
 // it's needed, for example, when crash happened
 #define SDL_FLUSH_LOGGER() logger::Logger::instance().Flush();
 
+#define SDL_INIT_FLUSH_LOGS_TIME_POINT(time_point) \
+  logger::Logger::instance().InitFlushLogsTimePoint(time_point);
+
 // Logger deinitilization function and macro, need to stop log4cxx writing
 // without this deinitilization log4cxx threads continue using some instances
 // destroyed by exit()
@@ -107,6 +110,8 @@
 #define SDL_CREATE_LOG_VARIABLE(x)
 
 #define SDL_CREATE_LOCAL_LOG_VARIABLE(x)
+
+#define SDL_INIT_FLUSH_LOGS_TIME_POINT(x)
 
 #define SDL_DEINIT_LOGGER()
 
