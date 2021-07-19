@@ -282,6 +282,42 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   command_->on_event(event);
 }
 
+TEST_F(ResetGlobalPropertiesRequestTest,
+       OnEvent_RC_SetGlobalProperties_SUCCESS) {
+  am::ResetGlobalPropertiesResult result;
+  result.user_location = true;
+
+  EXPECT_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillOnce(Return(result));
+
+  smart_objects::SmartObjectSPtr msg_params =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  EXPECT_CALL(mock_message_helper_, CreateRCResetGlobalPropertiesRequest(_, _))
+      .WillOnce(Return(msg_params));
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::RC_SetGlobalProperties), _))
+      .WillOnce(Return(true));
+
+  command_->Run();
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
+                  am::commands::Command::SOURCE_SDL));
+
+  (*msg_)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+
+  Event event(hmi_apis::FunctionID::RC_SetGlobalProperties);
+  event.set_smart_object(*msg_);
+
+  command_->on_event(event);
+}
+
 TEST_F(ResetGlobalPropertiesResponseTest, Run_Sendmsg_SUCCESS) {
   MessageSharedPtr message(CreateMessage());
   ResetGlobalPropertiesResponsePtr command(
