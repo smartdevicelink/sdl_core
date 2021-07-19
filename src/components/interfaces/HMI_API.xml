@@ -1809,10 +1809,10 @@
     <param name="moduleId" type="String" maxlength="100" mandatory="true">
         <description> uuid of a module. "moduleId + moduleType" uniquely identify a module.</description>
     </param>
-    <param name="location" type="Grid" mandatory="false">
+    <param name="location" type="Common.Grid" mandatory="false">
        <description>Location of a module.</description>
     </param>
-    <param name="serviceArea" type="Grid" mandatory="false">
+    <param name="serviceArea" type="Common.Grid" mandatory="false">
        <description>Service area of a module. </description>
     </param>
     <param name="allowMultipleAccess" type="Boolean" mandatory="false" defvalue="true">
@@ -1832,7 +1832,7 @@
     <param name="columns" type="Integer" minvalue="1" maxvalue="100" mandatory="false"></param>
     <param name="levels" type="Integer" minvalue="1" maxvalue="100" defvalue="1" mandatory="false">   
     </param>
-    <param name="seats" type="SeatLocation" array="true" mandatory="false">
+    <param name="seats" type="Common.SeatLocation" array="true" mandatory="false">
         <description>Contains a list of SeatLocation in the vehicle</description>
     </param>
 </struct>
@@ -1880,8 +1880,8 @@
 
     <struct name="MassageModeData">
       <description>Specify the mode of a massage zone.</description>
-      <param name="massageZone" type="MassageZone" mandatory="true"></param>
-      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+      <param name="massageZone" type="Common.MassageZone" mandatory="true"></param>
+      <param name="massageMode" type="Common.MassageMode" mandatory="true"></param>
     </struct>
 
     <enum name="MassageCushion">
@@ -1895,7 +1895,7 @@
 
     <struct name="MassageCushionFirmness">
       <description>The intensity or firmness of a cushion.</description>
-      <param name="cushion" type="MassageCushion" mandatory="true"></param>
+      <param name="cushion" type="Common.MassageCushion" mandatory="true"></param>
       <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
     </struct>
 
@@ -1914,7 +1914,7 @@
     <struct name="SeatMemoryAction">
       <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
       <param name="label" type="String" maxlength="100" mandatory="false"/>
-      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+      <param name="action" type="Common.SeatMemoryActionType" mandatory="true"/>
     </struct>
 
     <enum name="SupportedSeat">
@@ -1925,7 +1925,7 @@
 
     <struct name="SeatControlData">
       <description>Seat control data corresponds to "SEAT" ModuleType. </description>
-      <param name="id" type="SupportedSeat" mandatory="false"></param>
+      <param name="id" type="Common.SupportedSeat" mandatory="false"></param>
       <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
       <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
       <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
@@ -1941,9 +1941,9 @@
       <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
 
       <param name="massageEnabled" type="Boolean" mandatory="false"></param>
-      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
-      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
-      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+      <param name="massageMode" type="Common.MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+      <param name="massageCushionFirmness" type="Common.MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+      <param name="memory" type="Common.SeatMemoryAction" mandatory="false"></param>
     </struct>
 
     <struct name="SeatControlCapabilities">
@@ -1953,7 +1953,7 @@
         It should not be used to identify a module by mobile application.
         </description>
       </param>
-      <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+      <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
           <description>Information about a RC module, including its id. </description>
       </param>
       <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
@@ -2107,13 +2107,13 @@
      <param name="stationShortName" type="String" minlength="4" maxlength="7"  mandatory="false">
          <description>Identifies the 4-alpha-character station call sign plus an optional (-FM) extension</description>
      </param>
-     <param name="stationIDNumber" type="StationIDNumber"  mandatory="false">
+     <param name="stationIDNumber" type="Common.StationIDNumber"  mandatory="false">
          <description>Used for network Application. Consists of Country Code and FCC Facility ID.</description>
      </param>
      <param name="stationLongName" type="String" minlength="0" maxlength="56"  mandatory="false">
          <description>Identifies the station call sign or other identifying information in the long format.</description>
      </param>
-     <param name="stationLocation" type="GPSData" mandatory="false">
+     <param name="stationLocation" type="Common.GPSData" mandatory="false">
          <description>Provides the 3-dimensional geographic station location.</description>
      </param>
      <param name="stationMessage" type="String" minlength="0" maxlength="56"  mandatory="false">
@@ -2157,7 +2157,7 @@
    </param>
    <param name="state" type="Common.RadioState" mandatory="false">
    </param>
-   <param name="sisData" type="SisData" mandatory="false">
+   <param name="sisData" type="Common.SisData" mandatory="false">
        <description>Read-only Station Information Service (SIS) data provides basic information about the station such as call sign, as well as information not displayable to the consumer such as the station identification number</description>
    </param>
  </struct>
@@ -2167,7 +2167,7 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the radio control module.</description>
    </param>
-   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+   <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
        <description>Information about a RC module, including its id. </description>
    </param>
    <param name="radioEnableAvailable" type="Boolean" mandatory="false">
@@ -2293,7 +2293,7 @@
    </param>
    <param name="autoModeEnable" type="Boolean" mandatory="false">
    </param>
-   <param name="defrostZone" type="DefrostZone" mandatory="false">
+   <param name="defrostZone" type="Common.DefrostZone" mandatory="false">
    </param>
    <param name="dualModeEnable" type="Boolean" mandatory="false">
    </param>
@@ -2322,7 +2322,7 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the climate control module.</description>
    </param>
-   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+   <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
        <description>Information about a RC module, including its id. </description>
    </param>
    <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
@@ -2437,7 +2437,7 @@
  </struct>
 
  <struct name="AudioControlData">
-     <param name="source" type="PrimaryAudioSource" mandatory="false">
+     <param name="source" type="Common.PrimaryAudioSource" mandatory="false">
          <description>
            In a getter response or a notification, it is the current primary audio source of the system.
            In a setter request, it is the target audio source that the system shall switch to.
@@ -2456,7 +2456,7 @@
      <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
          <description>Reflects the volume of audio, from 0%-100%.</description>
      </param>
-     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
+     <param name="equalizerSettings" type="Common.EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
          <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
      </param>
  </struct>
@@ -2468,7 +2468,7 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
      <param name="sourceAvailable" type="Boolean" mandatory="false">
@@ -2605,7 +2605,7 @@
  </enum>
 
  <struct name="LightCapabilities">
-     <param name="name" type="LightName" mandatory="true" />
+     <param name="name" type="Common.LightName" mandatory="true" />
      <param name="statusAvailable" type="Boolean" mandatory="false">
        <description>
          Indicates if the status (ON/OFF) can be set remotely. App shall not use read-only values (RAMP_UP/RAMP_DOWN/UNKNOWN/INVALID) in a setInteriorVehicleData request.
@@ -2630,25 +2630,25 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
-     <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
+     <param name="supportedLights" type="Common.LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
      <description> An array of available light names that are controllable. </description>
      </param>
  </struct>
 
  <struct name="LightState">
-     <param name="id" type="LightName" mandatory="true">
+     <param name="id" type="Common.LightName" mandatory="true">
          <description>The name of a light or a group of lights. </description>
      </param>
-     <param name="status" type="LightStatus" mandatory="true"/>
+     <param name="status" type="Common.LightStatus" mandatory="true"/>
      <param name="density" type="Float" minvalue="0" maxvalue="1" mandatory="false" />
-     <param name="color" type="RGBColor" mandatory="false" />
+     <param name="color" type="Common.RGBColor" mandatory="false" />
  </struct>
 
  <struct name="LightControlData">
-     <param name="lightState" type="LightState" mandatory="true" minsize="1" maxsize="100" array="true">
+     <param name="lightState" type="Common.LightState" mandatory="true" minsize="1" maxsize="100" array="true">
          <description>An array of LightNames and their current or desired status. No change to the status of the LightNames that are not listed in the array.</description>
      </param>
  </struct>
@@ -2665,9 +2665,9 @@
 
  <struct name="HMISettingsControlData">
      <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
-     <param name="displayMode" type="DisplayMode" mandatory="false"></param>
-     <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
-     <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
+     <param name="displayMode" type="Common.DisplayMode" mandatory="false"></param>
+     <param name="temperatureUnit" type="Common.TemperatureUnit" mandatory="false"></param>
+     <param name="distanceUnit" type="Common.DistanceUnit" mandatory="false"></param>
  </struct>
 
  <struct name="HMISettingsControlCapabilities">
@@ -2677,7 +2677,7 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
      <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
@@ -2702,13 +2702,13 @@
    </param>
    <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
    </param>
-   <param name="seatControlData" type="SeatControlData" mandatory="false">
+   <param name="seatControlData" type="Common.SeatControlData" mandatory="false">
    </param>
-   <param name="audioControlData" type="AudioControlData" mandatory="false">
+   <param name="audioControlData" type="Common.AudioControlData" mandatory="false">
    </param>
-   <param name="lightControlData" type="LightControlData" mandatory="false">
+   <param name="lightControlData" type="Common.LightControlData" mandatory="false">
    </param>
-   <param name="hmiSettingsControlData" type="HMISettingsControlData" mandatory="false">
+   <param name="hmiSettingsControlData" type="Common.HMISettingsControlData" mandatory="false">
    </param>
  </struct>
 
@@ -2744,7 +2744,7 @@
     <param name="name" type="Common.ButtonName" mandatory="true">
         <description>The name of the Button from the ButtonName enum</description>
     </param>
-    <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+    <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
         <description>Information about a RC module, including its id. </description>
     </param>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
@@ -2886,8 +2886,8 @@
       Currently only predefined window template layouts are defined.
     </description>
   </param>
-  <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false" />
-  <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" />
+  <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false" />
+  <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false" />
 </struct>
 
 <struct name="HMIApplication">
@@ -3280,7 +3280,7 @@
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
   </param>
-  <param name="tpms" type="TPMS" mandatory="false">
+  <param name="tpms" type="Common.TPMS" mandatory="false">
       <description>The status of TPMS according to the particular tire.</description>
   </param>
   <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
@@ -3638,7 +3638,7 @@
 </struct>
 
   <struct name="LocationDetails">
-    <param name="coordinate" type="Coordinate" mandatory="false">
+    <param name="coordinate" type="Common.Coordinate" mandatory="false">
       <description>Latitude/Longitude of the location.</description>
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
@@ -3653,10 +3653,10 @@
     <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
       <description>Phone number of location / establishment.</description>
     </param>
-    <param name="locationImage" type="Image" mandatory="false">
+    <param name="locationImage" type="Common.Image" mandatory="false">
       <description>Image / icon of intended location.</description>
     </param>
-    <param name="searchAddress" type="OASISAddress" mandatory="false">
+    <param name="searchAddress" type="Common.OASISAddress" mandatory="false">
       <description>Address to be used by navigation engines for search</description>
     </param>
   </struct>
@@ -3708,24 +3708,24 @@
     <param name="preferredFPS" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
       <description>The preferred frame rate per second of the head unit. The mobile application / app library may take other factors into account that constrain the frame rate lower than this value, but it should not perform streaming at a higher frame rate than this value.</description>
     </param>
-    <param name="additionalVideoStreamingCapabilities" type="VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
+    <param name="additionalVideoStreamingCapabilities" type="Common.VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
     </param>
   </struct>
 
   <struct name="AppCapability">
-    <param name="appCapabilityType" type="AppCapabilityType" mandatory="true">
+    <param name="appCapabilityType" type="Common.AppCapabilityType" mandatory="true">
         <description>
             Used as a descriptor of what data to expect in this struct.
             The corresponding param to this enum should be included and the only other param included.
         </description>
     </param>
-    <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+    <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
         <description>Describes supported capabilities for video streaming </description>
     </param>
   </struct>
 
   <struct name="DynamicUpdateCapabilities">
-    <param name="supportedDynamicImageFieldNames" type="ImageFieldName" array="true" mandatory="false" minsize="1">
+    <param name="supportedDynamicImageFieldNames" type="Common.ImageFieldName" array="true" mandatory="false" minsize="1">
       <description>An array of ImageFieldName values for which the system supports sending OnFileUpdate notifications. If you send an Image struct for that image field with a name without having uploaded the image data using PutFile that matches that name, the system will request that you upload the data with PutFile at a later point when the HMI needs it. The HMI will then display the image in the appropriate field. If not sent, assume false.</description>
     </param>
 
@@ -3743,7 +3743,7 @@
     <description>
       Describes the capabilities of a single keyboard layout.
     </description>
-    <param name="keyboardLayout" type="KeyboardLayout" mandatory="true"/>
+    <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true"/>
     <param name="numConfigurableKeys" type="Integer" minvalue="0" maxvalue="10" mandatory="true">
       <description>Number of keys available for special characters, App can customize as per their needs.</description>
     </param>
@@ -3753,7 +3753,7 @@
     <param name="maskInputCharactersSupported" type="Boolean" mandatory="false">
       <description>Availability of capability to mask input characters using keyboard. True: Available, False: Not Available</description>
     </param>
-    <param name="supportedKeyboards" type="KeyboardLayoutCapability" minsize="1" maxsize="1000" array="true" mandatory="false">
+    <param name="supportedKeyboards" type="Common.KeyboardLayoutCapability" minsize="1" maxsize="1000" array="true" mandatory="false">
       <description>Capabilities of supported keyboard layouts by HMI.</description>
     </param>
   </struct>
@@ -3765,13 +3765,13 @@
         or omitted for the main window on the main display.
       </description>
     </param>
-    <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="textFields" type="Common.TextField" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>A set of all fields that support text data. See TextField</description>
     </param>
-    <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>A set of all fields that support images. See ImageField</description>
     </param>
-    <param name="imageTypeSupported" type="ImageType" array="true" minsize="0" maxsize="1000" mandatory="false">
+    <param name="imageTypeSupported" type="Common.ImageType" array="true" minsize="0" maxsize="1000" mandatory="false">
       <description>Provides information about image types supported by the system.</description>
     </param>
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" mandatory="false">
@@ -3780,19 +3780,19 @@
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
       <description>The number of on-window custom presets available (if any); otherwise omitted.</description>
     </param>
-    <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="buttonCapabilities" type="Common.ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The number of buttons and the capabilities of each on-window button.</description>
     </param>
-    <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The number of soft buttons available on-window and the capabilities for each button.</description>
     </param>
     <param name="menuLayoutsAvailable" type="Common.MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
     </param>
-    <param name="dynamicUpdateCapabilities" type="DynamicUpdateCapabilities" mandatory="false">
+    <param name="dynamicUpdateCapabilities" type="Common.DynamicUpdateCapabilities" mandatory="false">
       <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
     </param>
-    <param name="keyboardCapabilities" type="KeyboardCapabilities" mandatory="false">
+    <param name="keyboardCapabilities" type="Common.KeyboardCapabilities" mandatory="false">
       <description>See KeyboardCapabilities</description>
     </param>
   </struct>
@@ -3800,12 +3800,12 @@
   <struct name="DisplayCapability">
     <description>Contains information about the display capabilities.</description>
     <param name="displayName" type="String" mandatory="false" />
-    <param name="windowTypeSupported" type="WindowTypeCapabilities" array="true" minsize="1" mandatory="false">
+    <param name="windowTypeSupported" type="Common.WindowTypeCapabilities" array="true" minsize="1" mandatory="false">
       <description>
         Informs the application how many windows the app is allowed to create per type.
       </description>
     </param>
-    <param name="windowCapabilities" type="WindowCapability" array="true" minsize="1" maxsize="1000" mandatory="false">
+    <param name="windowCapabilities" type="Common.WindowCapability" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>
         Contains a list of capabilities of all windows related to the app.
         Once the app has registered the capabilities of all windows are provided.
@@ -3830,39 +3830,39 @@
   </struct>
 
   <struct name="SystemCapabilities">
-      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+      <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
       </param>
-      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      <param name="phoneCapability" type="Common.PhoneCapability" mandatory="false">
       </param>
-      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
       </param>
-      <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
+      <param name="driverDistractionCapability" type="Common.DriverDistractionCapability" mandatory="false">
         <description>Describes capabilities when the driver is distracted</description>
       </param>
   </struct>
 
   <struct name="RemoteControlCapabilities">
-    <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="climateControlCapabilities" type="Common.ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
     </param>
-    <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="radioControlCapabilities" type="Common.RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC radio controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
     </param>
-    <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
+    <param name="buttonCapabilities" type="Common.ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
       <description>If included, the platform supports RC button controls with the included button names.</description >
     </param>
-    <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="seatControlCapabilities" type="Common.SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>
       If included, the platform supports seat controls.
       </description >
     </param>
-    <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="audioControlCapabilities" type="Common.AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
         <description> If included, the platform supports audio controls. </description >
     </param>
-    <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false">
+    <param name="hmiSettingsControlCapabilities" type="Common.HMISettingsControlCapabilities" mandatory="false">
         <description> If included, the platform supports hmi setting controls. </description >
     </param>
-    <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false">
+    <param name="lightControlCapabilities" type="Common.LightControlCapabilities" mandatory="false">
         <description> If included, the platform supports light controls. </description >
     </param>
   </struct>
@@ -4395,10 +4395,10 @@
             </description>
         </param>
         <param name="displayCapabilities" type="Common.DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false"/>
-        <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
+        <param name="seatLocationCapability" type="Common.SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
-        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
+        <param name="driverDistractionCapability" type="Common.DriverDistractionCapability" mandatory="false">
             <description>Describes capabilities when the driver is distracted</description>
         </param>      
     </struct>
@@ -4471,7 +4471,7 @@
       <description>
         The seek next / skip previous subscription buttons' content
       </description>
-      <param name="type" type="SeekIndicatorType" mandatory="true" />
+      <param name="type" type="Common.SeekIndicatorType" mandatory="true" />
       <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
         <description>
           If the type is TIME, this number of seconds may be present alongside the skip indicator.
