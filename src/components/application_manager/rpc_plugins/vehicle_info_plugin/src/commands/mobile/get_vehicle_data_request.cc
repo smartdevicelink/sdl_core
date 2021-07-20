@@ -164,6 +164,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           }
         }
 
+        MessageHelper::RemoveEmptyMessageParams(message[strings::msg_params]);
+
         if (message[strings::msg_params].empty() &&
             hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
           response_info = "Failed to retrieve data from vehicle";

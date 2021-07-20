@@ -393,6 +393,8 @@ class MockMessageHelper {
                    application_manager::ApplicationSharedPtr application,
                    application_manager::ApplicationManager& app_mngr,
                    const application_manager::WindowID window_id));
+  MOCK_METHOD1(RemoveEmptyMessageParams,
+               void(const smart_objects::SmartObject&));
 
   static MockMessageHelper* message_helper_mock();
 };

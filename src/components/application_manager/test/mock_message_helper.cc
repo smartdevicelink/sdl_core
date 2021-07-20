@@ -689,4 +689,9 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
   return MockMessageHelper::message_helper_mock()->CreateResponseMessageFromHmi(
       function_id, correlation_id, result_code);
 }
+void MessageHelper::RemoveEmptyMessageParams(
+    smart_objects::SmartObject& msg_params) {
+  return MockMessageHelper::message_helper_mock()->RemoveEmptyMessageParams(
+      msg_params);
+}
 }  // namespace application_manager

@@ -3483,4 +3483,37 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
+void MessageHelper::RemoveEmptyMessageParams(
+    smart_objects::SmartObject& msg_params) {
+  if (msg_params.empty()) {
+    return;
+  }
+
+  const auto keys = msg_params.enumerate();
+
+  for (const auto& key_params : keys) {
+    auto& param = msg_params[key_params];
+
+    if (smart_objects::SmartType_Array == param.getType()) {
+      smart_objects::SmartArray* array = param.asArray();
+
+      if (array == nullptr || array->empty())
+        continue;
+
+      const auto iter_array = std::find_if(
+          array->begin(), array->end(), [](smart_objects::SmartObject item) {
+            if (smart_objects::SmartType_Array == item.getType() ||
+                smart_objects::SmartType_Map == item.getType())
+              return item.empty();
+            return false;
+          });
+      if (iter_array != array->end()) {
+        SDL_LOG_DEBUG("Remove " + key_params +
+                      " from msg_params in HMI response");
+        msg_params.erase(key_params);
+      }
+    }
+  }
+}
+
 }  //  namespace application_manager

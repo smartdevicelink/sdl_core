@@ -1113,6 +1113,12 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const WindowID window_id);
 
+  /**
+   * @brief Recursively removes empty parameters of composite type from message
+   * @param msg_params smart object containing message params
+   */
+  static void RemoveEmptyMessageParams(smart_objects::SmartObject& msg_params);
+
  private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
