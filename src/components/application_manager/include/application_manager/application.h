@@ -203,6 +203,7 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
+  virtual const smart_objects::SmartObject* menu_layout() const = 0;
   virtual smart_objects::SmartObject day_color_scheme() const = 0;
   virtual smart_objects::SmartObject night_color_scheme() const = 0;
   virtual std::string display_layout() const = 0;
@@ -242,6 +243,8 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& keyboard_props) = 0;
   virtual void set_menu_title(const smart_objects::SmartObject& menu_title) = 0;
   virtual void set_menu_icon(const smart_objects::SmartObject& menu_icon) = 0;
+  virtual void set_menu_layout(
+      const smart_objects::SmartObject& menu_layout) = 0;
 
   virtual uint32_t audio_stream_retry_number() const = 0;
 

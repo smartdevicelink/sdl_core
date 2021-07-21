@@ -186,6 +186,7 @@ void SetGlobalPropertiesRequest::Run() {
         msg_params[strings::menu_layout].asUInt());
     if (app->menu_layout_supported(menu_layout)) {
       params[strings::menu_layout] = msg_params[strings::menu_layout];
+      app->set_menu_layout(msg_params[strings::menu_layout]);
     } else {
       is_menu_layout_available_ = false;
     }

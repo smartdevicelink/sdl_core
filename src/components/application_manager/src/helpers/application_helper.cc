@@ -87,6 +87,7 @@ void DeleteGlobalProperties(ApplicationSharedPtr app,
   app->set_keyboard_props(empty_so);
   app->set_menu_icon(empty_so);
   app->set_menu_title(empty_so);
+  app->set_menu_layout(empty_so);
 
   MessageHelper::SendResetPropertiesRequest(app, app_manager);
 }

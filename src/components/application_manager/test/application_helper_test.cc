@@ -176,6 +176,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->set_keyboard_props(dummy_data);
   app_impl_->set_menu_title(dummy_data);
   app_impl_->set_menu_icon(dummy_data);
+  app_impl_->set_menu_layout(dummy_data);
 
   const bool persistent = false;
   const bool downloaded = true;
@@ -205,6 +206,8 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(menu_title->asString() == some_string);
   auto menu_icon = app_impl_->menu_icon();
   EXPECT_TRUE(menu_icon->asString() == some_string);
+  auto menu_layout = app_impl_->menu_layout();
+  EXPECT_TRUE(menu_layout->asString() == some_string);
   auto file_ptr = app_impl_->GetFile(filename);
   EXPECT_TRUE(NULL != file_ptr);
   EXPECT_TRUE(file_ptr->file_name == filename);
@@ -239,6 +242,8 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_FALSE(menu_title->asString() == some_string);
   menu_icon = app_impl_->menu_icon();
   EXPECT_FALSE(menu_icon->asString() == some_string);
+  menu_layout = app_impl_->menu_layout();
+  EXPECT_FALSE(menu_layout->asString() == some_string);
   file_ptr = app_impl_->GetFile(filename);
   EXPECT_TRUE(NULL == file_ptr);
 }

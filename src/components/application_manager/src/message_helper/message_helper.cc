@@ -1289,7 +1289,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   if (can_send_ui &&
       (app->vr_help_title() || app->vr_help() || app->keyboard_props() ||
-       app->menu_title() || app->menu_icon())) {
+       app->menu_title() || app->menu_icon() || app->menu_layout())) {
     smart_objects::SmartObjectSPtr ui_global_properties = CreateMessageForHMI(
         hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     if (ui_global_properties) {
@@ -1312,6 +1312,9 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       }
       if (app->menu_icon()) {
         ui_msg_params[strings::menu_icon] = (*app->menu_icon());
+      }
+      if (app->menu_layout()) {
+        ui_msg_params[strings::menu_layout] = (*app->menu_layout());
       }
       ui_msg_params[strings::app_id] = app->app_id();
 
@@ -1994,6 +1997,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
     if ((*i->second).keyExists(strings::parent_id)) {
       msg_params[strings::menu_params][strings::parent_id] =
           (*i->second)[strings::parent_id];
+    }
+    if ((*i->second).keyExists(strings::menu_layout)) {
+      msg_params[strings::menu_layout] = (*i->second)[strings::menu_layout];
     }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;

@@ -132,6 +132,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
       PointerToSmartObj(application->menu_title());
   global_properties[strings::menu_icon] =
       PointerToSmartObj(application->menu_icon());
+  global_properties[strings::menu_layout] =
+      PointerToSmartObj(application->menu_layout());
   return global_properties;
 }
 
