@@ -189,7 +189,9 @@ class ThreadedSocketConnection : public Connection {
   int write_fd_;
   void threadMain();
   void Transmit();
-  void Finalize();
+  void FinalizeExpectedDisconnect();
+  void FinalizeUnexpectedDisconnect();
+  void NotifyAboutAbortedMessages();
   TransportAdapter::Error Notify() const;
   bool Receive();
   bool Send();
