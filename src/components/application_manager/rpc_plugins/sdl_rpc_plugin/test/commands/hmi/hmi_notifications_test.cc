@@ -45,7 +45,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
@@ -343,7 +342,6 @@ class HMIOnNotificationsEventDispatcher
 
 typedef Types<OnAppPermissionChangedNotification,
               OnAudioDataStreamingNotification,
-              hmi::OnButtonSubscriptionNotification,
               OnFileRemovedNotification,
               OnPutFileNotification,
               OnResumeAudioSourceNotification,

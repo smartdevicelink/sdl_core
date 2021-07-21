@@ -34,6 +34,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_button_event_notification.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
@@ -51,146 +52,37 @@ OnButtonEventNotification::OnButtonEventNotification(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandNotificationImpl(message,
-                              application_manager,
-                              rpc_service,
-                              hmi_capabilities,
-                              policy_handler) {}
+    : ButtonNotificationToMobile(message,
+                                 application_manager,
+                                 rpc_service,
+                                 hmi_capabilities,
+                                 policy_handler) {}
 
 OnButtonEventNotification::~OnButtonEventNotification() {}
 
-void OnButtonEventNotification::Run() {
+void OnButtonEventNotification::SendButtonNotification(
+    ApplicationSharedPtr app) {
   SDL_LOG_AUTO_TRACE();
 
-  const uint32_t btn_id = static_cast<uint32_t>(
-      (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+  auto& ref = (*message_)[strings::msg_params];
 
-  const bool is_app_id_exists =
-      (*message_)[strings::msg_params].keyExists(strings::app_id);
-  ApplicationSharedPtr app;
+  mobile_apis::ButtonEventMode::eType btn_event_mode;
+  if (ref.keyExists(hmi_response::button_mode)) {
+    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        ref[hmi_response::button_mode].asInt());
 
-  // CUSTOM_BUTTON notification
-  if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
-    // app_id is mandatory for CUSTOM_BUTTON notification
-    if (!is_app_id_exists) {
-      SDL_LOG_ERROR("CUSTOM_BUTTON OnButtonEvent without app_id.");
-      return;
-    }
-
-    app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
-
-    // custom_button_id is mandatory for CUSTOM_BUTTON notification
-    if (false == (*message_)[strings::msg_params].keyExists(
-                     hmi_response::custom_button_id)) {
-      SDL_LOG_ERROR("CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
-      return;
-    }
-
-    if (!app) {
-      SDL_LOG_ERROR("Application doesn't exist.");
-      return;
-    }
-
-    uint32_t custom_btn_id = 0;
-    custom_btn_id =
-        (*message_)[strings::msg_params][hmi_response::custom_button_id]
-            .asUInt();
-
-    if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
-      SDL_LOG_ERROR("Application doesn't subscribed to this custom_button_id.");
-      return;
-    }
-
-    const auto window_id = app->GetSoftButtonWindowID(custom_btn_id);
-    (*message_)[strings::msg_params][strings::window_id] = window_id;
-    const auto window_hmi_level = app->hmi_level(window_id);
-    if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
-      SDL_LOG_WARN(
-          "CUSTOM_BUTTON OnButtonEvent notification is not allowed in "
-          "NONE hmi level");
-      return;
-    }
-
-    SendButtonEvent(app);
-    return;
+  } else if (ref.keyExists(strings::button_event_mode)) {
+    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        ref[strings::button_event_mode].asInt());
   }
 
-  const std::vector<ApplicationSharedPtr>& subscribed_apps =
-      application_manager_.applications_by_button(btn_id);
+  message_ = MessageHelper::CreateButtonNotificationToMobile(app, *message_);
 
-  std::vector<ApplicationSharedPtr>::const_iterator it =
-      subscribed_apps.begin();
-  for (; subscribed_apps.end() != it; ++it) {
-    ApplicationSharedPtr subscribed_app = *it;
-    if (!subscribed_app) {
-      SDL_LOG_WARN("Null pointer to subscribed app.");
-      continue;
-    }
+  (*message_)[strings::msg_params][strings::button_event_mode] = btn_event_mode;
 
-    // Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
-    const mobile_apis::HMILevel::eType app_hmi_level =
-        subscribed_app->hmi_level(
-            mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
-    if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
-        (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
-      SDL_LOG_WARN("OnButtonEvent notification is allowed only"
-                   << "in FULL or LIMITED hmi level");
-      continue;
-    }
-    // if OK button and "app_id" absent send notification only in HMI_FULL mode
-    // otherwise send to subscribed apps in limited
-    if (is_app_id_exists || hmi_apis::Common_ButtonName::OK != btn_id ||
-        subscribed_app->IsFullscreen()) {
-      SendButtonEvent(subscribed_app);
-    }
-  }
-}
+  (*message_)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::eType::OnButtonEventID;
 
-void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
-  if (!app) {
-    SDL_LOG_ERROR("OnButtonEvent NULL pointer");
-    return;
-  }
-
-  smart_objects::SmartObjectSPtr on_btn_event =
-      std::make_shared<smart_objects::SmartObject>();
-
-  if (!on_btn_event) {
-    SDL_LOG_ERROR("OnButtonEvent NULL pointer");
-    return;
-  }
-
-  (*on_btn_event)[strings::params][strings::connection_key] = app->app_id();
-
-  (*on_btn_event)[strings::params][strings::function_id] =
-      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonEventID);
-
-  mobile_apis::ButtonName::eType btn_id =
-      static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
-
-  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
-      app->msg_version() < utils::rpc_version_5) {
-    btn_id = mobile_apis::ButtonName::OK;
-  }
-
-  (*on_btn_event)[strings::msg_params][strings::button_name] = btn_id;
-  (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
-      (*message_)[strings::msg_params][hmi_response::button_mode];
-
-  if ((*message_)[strings::msg_params].keyExists(
-          hmi_response::custom_button_id)) {
-    (*on_btn_event)[strings::msg_params][strings::custom_button_id] =
-        (*message_)[strings::msg_params][strings::custom_button_id];
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
-    (*on_btn_event)[strings::msg_params][strings::window_id] =
-        (*message_)[strings::msg_params][strings::window_id];
-  }
-
-  message_ = on_btn_event;
   SendNotification();
 }
 

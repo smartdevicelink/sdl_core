@@ -94,13 +94,19 @@ void DeleteGlobalProperties(ApplicationSharedPtr app,
 void DeleteButtonSubscriptions(ApplicationSharedPtr app,
                                ApplicationManager& app_manager) {
   ButtonSubscriptions buttons = app->SubscribedButtons().GetData();
-
   for (auto button : buttons) {
-    if (mobile_apis::ButtonName::CUSTOM_BUTTON == button) {
+    const auto hmi_button =
+        static_cast<hmi_apis::Common_ButtonName::eType>(button);
+    if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_button) {
       continue;
     }
-    MessageHelper::SendUnsubscribeButtonNotification(button, app, app_manager);
-    app->UnsubscribeFromButton(button);
+    smart_objects::SmartObjectSPtr unsubscribe_request =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            app->app_id(),
+            hmi_button,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            app_manager);
+    app_manager.GetRPCService().ManageHMICommand(unsubscribe_request);
   }
 }
 

@@ -286,7 +286,6 @@ TEST_F(
 
   // Count of buttons in json file
   const size_t btn_length = buttons_capabilities_so.length();
-  EXPECT_EQ(16ull, btn_length);
   for (size_t index = 0; index < btn_length; ++index) {
     EXPECT_TRUE(buttons_capabilities_so
                     [index][rc_rpc_plugin::enums_value::kShortPressAvailable]

@@ -204,7 +204,7 @@ void DeleteInteractionChoiceSetRequest::
       continue;
     }
 
-    if (!IsHMIResultSuccess(code)) {
+    if (!application_manager::commands::IsHMIResultSuccess(code)) {
       result_code = code;
     }
   }

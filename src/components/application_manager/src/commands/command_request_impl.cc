@@ -160,7 +160,7 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
   interface_state =
       application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
 
-  is_ok = CommandRequestImpl::IsHMIResultSuccess(result_code);
+  is_ok = IsHMIResultSuccess(result_code);
 
   is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
 
@@ -695,49 +695,11 @@ bool CommandRequestImpl::HasDisallowedParams() const {
           (!removed_parameters_permissions_.undefined_params.empty()));
 }
 
-bool CommandRequestImpl::IsMobileResultSuccess(
-    const mobile_apis::Result::eType result_code) {
-  SDL_LOG_AUTO_TRACE();
-  using namespace helpers;
-  return Compare<mobile_apis::Result::eType, EQ, ONE>(
-      result_code,
-      mobile_apis::Result::SUCCESS,
-      mobile_apis::Result::WARNINGS,
-      mobile_apis::Result::WRONG_LANGUAGE,
-      mobile_apis::Result::RETRY,
-      mobile_apis::Result::SAVED,
-      mobile_apis::Result::TRUNCATED_DATA);
-}
-
-bool CommandRequestImpl::IsHMIResultSuccess(
-    const hmi_apis::Common_Result::eType result_code) {
-  SDL_LOG_AUTO_TRACE();
-  using namespace helpers;
-  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED,
-      hmi_apis::Common_Result::TRUNCATED_DATA);
-}
-
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   SDL_LOG_AUTO_TRACE();
-  if (IsHMIResultSuccess(result_code)) {
-    return true;
-  }
-
-  const HmiInterfaces::InterfaceState state =
-      application_manager_.hmi_interfaces().GetInterfaceState(interface);
-  if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
-      (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
-    return true;
-  }
-  return false;
+  return IsHMIResultSuccess(result_code, interface);
 }
 
 bool CommandRequestImpl::PrepareResultForMobileResponse(

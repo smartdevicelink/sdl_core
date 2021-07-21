@@ -367,6 +367,17 @@ class ResumptionDataProcessorImpl
       const smart_objects::SmartObject& request,
       const smart_objects::SmartObject& response) const;
 
+  /**
+   * @brief Checks whether SubscribeButton response successful or not and
+   * subscribes application if successful
+   * @param app_id application id
+   * @param request reference to request SO
+   * @param response reference to response SO
+   */
+  void ProcessSubscribeButtonResponse(
+      const uint32_t app_id,
+      const smart_objects::SmartObject& request,
+      const smart_objects::SmartObject& response);
   app_mngr::ApplicationManager& application_manager_;
 
   /**

@@ -159,8 +159,7 @@ ApplicationImpl::ApplicationImpl(
   set_name(app_name);
 
   MarkUnregistered();
-  // subscribe application to custom button by default
-  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
+
   // load persistent files
   LoadPersistentFiles();
 
