@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0054 NEW)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
