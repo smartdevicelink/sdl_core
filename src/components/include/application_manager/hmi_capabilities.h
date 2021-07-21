@@ -274,7 +274,7 @@ class HMICapabilities {
 
   /**
    * @brief Sets supported Button's capabilities
-   * @param soft_button_capabilities supported Button's capabilities
+   * @param button_capabilities supported Button's capabilities
    */
   virtual void set_button_capabilities(
       const smart_objects::SmartObject& button_capabilities) = 0;
