@@ -71,6 +71,30 @@ namespace commands {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
 
+bool IsMobileResultSuccess(const mobile_apis::Result::eType result_code) {
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED,
+      mobile_apis::Result::TRUNCATED_DATA);
+}
+
+bool IsHMIResultSuccess(const hmi_apis::Common_Result::eType result_code) {
+  using namespace helpers;
+  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::TRUNCATED_DATA);
+}
+
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;
 const int32_t CommandImpl::protocol_version_ = 3;
@@ -541,6 +565,20 @@ bool CommandImpl::CheckSyntax(const std::string& str,
     }
   }
   return true;
+}
+
+bool CommandImpl::IsHMIResultSuccess(
+    hmi_apis::Common_Result::eType result_code,
+    HmiInterfaces::InterfaceID interface) const {
+  SDL_LOG_AUTO_TRACE();
+  if (application_manager::commands::IsHMIResultSuccess(result_code)) {
+    return true;
+  }
+
+  const HmiInterfaces::InterfaceState state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  return hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
+         HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
 }  // namespace commands

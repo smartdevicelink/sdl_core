@@ -77,6 +77,8 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "sdl_rpc_plugin/commands/hmi/subscribe_button_request.h"
+#include "sdl_rpc_plugin/commands/hmi/subscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_change_registration_response.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_request.h"
@@ -137,6 +139,8 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_response.h"
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_request.h"
+#include "sdl_rpc_plugin/commands/hmi/unsubscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_request.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
@@ -207,7 +211,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_app_unregistered_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
@@ -681,6 +684,19 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  : factory
                        .GetCreator<commands::ButtonGetCapabilitiesResponse>();
     }
+    case hmi_apis::FunctionID::Buttons_SubscribeButton: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::hmi::SubscribeButtonRequest>()
+                 : factory.GetCreator<commands::hmi::SubscribeButtonResponse>();
+    }
+
+    case hmi_apis::FunctionID::Buttons_UnsubscribeButton: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::hmi::UnsubscribeButtonRequest>()
+                 : factory
+                       .GetCreator<commands::hmi::UnsubscribeButtonResponse>();
+    }
+
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       return factory
           .GetCreator<commands::OnAllowSDLFunctionalityNotification>();
@@ -761,10 +777,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       return factory.GetCreator<commands::hmi::OnButtonPressNotification>();
-    }
-    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
-      return factory
-          .GetCreator<commands::hmi::OnButtonSubscriptionNotification>();
     }
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {
       return factory.GetCreator<commands::OnNaviTBTClientStateNotification>();

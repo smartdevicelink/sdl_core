@@ -206,24 +206,6 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
-  /**
-   * @brief Checks Mobile result code for single RPC
-   * @param result_code contains result code from response to Mobile
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   */
-  static bool IsMobileResultSuccess(
-      const mobile_apis::Result::eType result_code);
-
-  /**
-   * @brief Checks HMI result code for single RPC
-   * @param result_code contains result code from HMI response
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   */
-  static bool IsHMIResultSuccess(
-      const hmi_apis::Common_Result::eType result_code);
-
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table

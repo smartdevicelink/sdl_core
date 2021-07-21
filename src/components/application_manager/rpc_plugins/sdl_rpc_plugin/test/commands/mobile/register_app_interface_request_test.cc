@@ -289,8 +289,7 @@ class RegisterAppInterfaceRequestTest
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(
-            HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-            _))
+            HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
         .Times(0);
 
     EXPECT_CALL(
@@ -349,12 +348,6 @@ class RegisterAppInterfaceRequestTest
                 HMIResultCodeIs(
                     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                 _))
-        .WillByDefault(Return(true));
-    ON_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(
-            HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-            _))
         .WillByDefault(Return(true));
   }
 
@@ -455,11 +448,22 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                   _))
       .WillOnce(Return(true));
+
+  ON_CALL(mock_hmi_interfaces_,
+          GetInterfaceState(
+              application_manager::HmiInterfaces::HMI_INTERFACE_Buttons))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  ON_CALL(
+      mock_hmi_interfaces_,
+      GetInterfaceFromFunction(hmi_apis::FunctionID::Buttons_SubscribeButton))
+      .WillByDefault(
+          Return(application_manager::HmiInterfaces::HMI_INTERFACE_Buttons));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-          _))
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
       .WillOnce(Return(true));
 
   application_manager::DisplayCapabilitiesBuilder builder(*mock_app);
@@ -581,8 +585,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-          _))
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
@@ -845,8 +848,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
-          _))
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,

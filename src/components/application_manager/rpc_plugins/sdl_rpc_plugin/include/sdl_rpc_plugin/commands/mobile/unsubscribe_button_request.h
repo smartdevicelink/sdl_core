@@ -42,44 +42,23 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
-/**
- * @brief UnsubscribeButtonRequest command class
- **/
 class UnsubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
  public:
-  /**
-   * @brief UnsubscribeButtonRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
   UnsubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
                            app_mngr::ApplicationManager& application_manager,
                            app_mngr::rpc_service::RPCService& rpc_service,
                            app_mngr::HMICapabilities& hmi_capabilities,
                            policy::PolicyHandlerInterface& policy_handler);
 
-  /**
-   * @brief UnsubscribeButtonRequest class destructor
-   **/
   ~UnsubscribeButtonRequest() FINAL;
 
-  /**
-   * @brief Execute command
-   **/
   void Run() FINAL;
 
-  /**
-   * @brief Init sets hash update mode for request
-   */
   bool Init() FINAL;
 
- private:
-  /**
-   * @brief Sends ButtonSubscription notification
-   * to notify HMI that app unsubscribed from the button.
-   */
-  void SendUnsubscribeButtonNotification();
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonRequest);
 };
 

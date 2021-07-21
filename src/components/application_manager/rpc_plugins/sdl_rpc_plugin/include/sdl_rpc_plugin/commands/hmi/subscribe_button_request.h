@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,54 +30,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_BUTTON_SUBSCRIPTION_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_BUTTON_SUBSCRIPTION_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_
 
-#include "application_manager/commands/notification_to_hmi.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/event_engine/event.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 namespace hmi {
-
 /**
- * @brief OnButtonSubscriptionNotification command class
+ * @brief SubscribeButtonRequest command class
  **/
-class OnButtonSubscriptionNotification
-    : public app_mngr::commands::NotificationToHMI {
+class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
+                               public app_mngr::event_engine::EventObserver {
  public:
   /**
-   * @brief OnButtonSubscriptionNotification class constructor
-   *
+   * @brief SubscribeButtonRequest class constructor
    * @param message Incoming SmartObject message
    **/
-  OnButtonSubscriptionNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+  SubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager,
+                         app_mngr::rpc_service::RPCService& rpc_service,
+                         app_mngr::HMICapabilities& hmi_capabilities,
+                         policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief OnButtonSubscriptionNotification class destructor
+   * @brief SubscribeButtonRequest class destructor
    **/
-  virtual ~OnButtonSubscriptionNotification();
+  ~SubscribeButtonRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
+
+  void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnButtonSubscriptionNotification);
+  DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
+
+  hmi_apis::Common_ButtonName::eType button_name_;
 };
 
 }  // namespace hmi
-
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_BUTTON_SUBSCRIPTION_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_

@@ -106,12 +106,6 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);
 
- protected:
-  bool IsMobileResultSuccess(mobile_apis::Result::eType result_code) const;
-
-  bool IsHMIResultSuccess(hmi_apis::Common_Result::eType result_code,
-                          HmiInterfaces::InterfaceID interface) const;
-
  private:
   /**
    * @brief Fills common parameters for SO

@@ -140,7 +140,8 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
           msg_params[strings::result_code].asInt());
   hmi_apis::Common_Result::eType result =
       MessageHelper::MobileToHMIResult(mobile_result);
-  bool success = IsMobileResultSuccess(mobile_result);
+  bool success =
+      application_manager::commands::IsMobileResultSuccess(mobile_result);
   SendResponse(success,
                correlation_id(),
                hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
