@@ -440,6 +440,10 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
                                       &(msg_params[strings::app_hmi_type]));
   }
 
+  // Default HMI level should be set before any permissions validation, since
+  // it relies on HMI level.
+  app_manager.OnApplicationRegistered(application);
+
   // Once HMI level is set we can safely forward system capabilities for the
   // main window and it won't be blocked by policies
   application->display_capabilities_builder().StopWaitingForWindow(
@@ -695,10 +699,6 @@ void RegisterAppInterfaceRequest::Run() {
   // it will be resumed in any case
   resume_ctrl.StartWaitingForDisplayCapabilitiesUpdate(application,
                                                        is_resumption_required);
-
-  // Default HMI level should be set before any permissions validation or
-  // sending OnAppRegistered to the HMI, since these rely on HMI level.
-  application_manager_.OnApplicationRegistered(application);
 
   SendOnAppRegisteredNotificationToHMI(
       application, is_resumption_required && !is_resumption_failed_);
