@@ -159,10 +159,6 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
-  DEPRECATED
-  bool Init(resumption::LastState&,
-            media_manager::MediaManager* media_manager) OVERRIDE;
-
   /**
    * Inits application manager
    */
@@ -189,8 +185,6 @@ class ApplicationManagerImpl
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
-  DEPRECATED ApplicationSharedPtr
-  application_by_name(const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
   ApplicationSharedPtr reregister_application_by_policy_id(
@@ -858,9 +852,6 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
-  DEPRECATED
-  void ForbidStreaming(uint32_t app_id) OVERRIDE;
-
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
@@ -874,10 +865,6 @@ class ApplicationManagerImpl
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
                       bool state) OVERRIDE;
-
-  void OnAppStreaming(uint32_t app_id,
-                      protocol_handler::ServiceType service_type,
-                      const Application::StreamingState new_state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;

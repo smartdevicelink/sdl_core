@@ -2128,14 +2128,6 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 }
 
-void ProtocolHandlerImpl::NotifySessionStarted(
-    const SessionContext& context,
-    std::vector<std::string>& rejected_params,
-    const std::string err_reason) {
-  SessionContext context_copy = context;
-  NotifySessionStarted(context_copy, rejected_params, err_reason);
-}
-
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();

@@ -431,8 +431,6 @@ void HMICapabilitiesImpl::Init(
       ui_language_, vr_language_, tts_language_);
 }
 
-void HMICapabilitiesImpl::Init(resumption::LastState*) {}
-
 bool HMICapabilitiesImpl::is_ui_cooperating() const {
   return is_ui_cooperating_;
 }

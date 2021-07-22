@@ -257,9 +257,6 @@ bool ReadBinaryFile(const std::string& name,
 
 bool ReadFile(const std::string& name, std::string& result);
 
-DEPRECATED
-const std::string ConvertPathForURL(const std::string& path);
-
 /**
  * @brief Create empty file
  *
