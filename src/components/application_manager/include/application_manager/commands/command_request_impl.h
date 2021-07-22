@@ -276,11 +276,11 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Checks result code from HMI for splitted RPC
    * and returns parameter for sending to mobile app.
-   * @param first contains result_code from HMI response and
+   * @param out_first Contains result_code from HMI response and
    * interface that returns response
-   * @param second contains result_code from HMI response and
+   * @param out_second Contains result_code from HMI response and
    * interface that returns response
-   * * @param third contains result_code from HMI response and
+   * @param out_third Contains result_code from HMI response and
    * interface that returns response
    * @return true if result code complies successful result code
    * otherwise returns false
