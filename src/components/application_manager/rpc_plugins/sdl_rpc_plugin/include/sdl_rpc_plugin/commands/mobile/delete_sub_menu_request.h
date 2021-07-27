@@ -90,7 +90,7 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteNestedSubMenus(app_mngr::ApplicationSharedPtr const app,
-                            uint32_t parentID,
+                            const uint32_t parentID,
                             const app_mngr::SubMenuMap& subMenus);
 
   /*
@@ -100,7 +100,7 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteSubMenuVRCommands(app_mngr::ApplicationConstSharedPtr app,
-                               uint32_t parentID);
+                               const uint32_t parentID);
 
   /*
    * @brief Deletes UI commands from SDL for corresponding submenu ID
@@ -109,7 +109,13 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteSubMenuUICommands(app_mngr::ApplicationSharedPtr const app,
-                               uint32_t parentID);
+                               const uint32_t parentID);
+
+  void SendNextRequest();
+
+  typedef std::list<smart_objects::SmartObject> RequestsList;
+  RequestsList requests_list_;
+  uint32_t pending_request_corr_id_;
 
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };
