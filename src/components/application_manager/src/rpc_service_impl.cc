@@ -138,10 +138,18 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   const uint32_t connection_key = static_cast<uint32_t>(
       (*message)[strings::params][strings::connection_key].asUInt());
+  const WindowID window_id = MessageHelper::ExtractWindowIdFromSmartObject(
+      (*message)[strings::msg_params]);
+  int32_t message_type =
+      (*message)[strings::params][strings::message_type].asInt();
 
   auto app_ptr = app_manager_.application(connection_key);
-  if (app_ptr && app_manager_.IsAppInReconnectMode(app_ptr->device(),
-                                                   app_ptr->policy_app_id())) {
+  if (app_ptr &&
+      (app_manager_.IsAppInReconnectMode(app_ptr->device(),
+                                         app_ptr->policy_app_id()) ||
+       (!app_ptr->WindowIdExists(window_id) &&
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id &&
+        mobile_apis::messageType::notification == message_type))) {
     commands_holder_.Suspend(
         app_ptr, CommandHolder::CommandType::kMobileCommand, source, message);
     return true;
@@ -209,8 +217,6 @@ bool RPCServiceImpl::ManageMobileCommand(
     return false;
   }
 
-  int32_t message_type =
-      (*message)[strings::params][strings::message_type].asInt();
   if (message_type == mobile_apis::messageType::response) {
     if (command->Init() && command->CheckPermissions()) {
       command->Run();
