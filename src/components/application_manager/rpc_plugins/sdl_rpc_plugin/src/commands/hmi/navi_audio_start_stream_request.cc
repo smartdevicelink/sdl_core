@@ -142,6 +142,7 @@ void AudioStartStreamRequest::onTimeOut() {
 }
 
 void AudioStartStreamRequest::RetryStartSession() {
+  using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
   auto retry_start_session = [this](const uint32_t hmi_app_id) {
@@ -176,7 +177,7 @@ void AudioStartStreamRequest::RetryStartSession() {
       SDL_LOG_DEBUG("Audio start stream retry sequence stopped. "
                     << "Attempts expired.");
 
-      application_manager_.EndNaviServices(app->app_id());
+      application_manager_.EndService(app->app_id(), ServiceType::kAudio);
     }
   };
 

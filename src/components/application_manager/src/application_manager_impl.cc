@@ -3537,6 +3537,7 @@ void ApplicationManagerImpl::ForbidStreaming(
     sync_primitives::AutoLock lock(navi_service_status_lock_);
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+
     if (navi_service_status_.end() == it ||
         (!it->second.first && !it->second.second)) {
       unregister = true;
@@ -3586,7 +3587,8 @@ void ApplicationManagerImpl::OnAppStreaming(
   }
 }
 
-void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
+void ApplicationManagerImpl::EndService(
+    const uint32_t app_id, const protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
@@ -3599,6 +3601,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
   bool end_video = false;
   bool end_audio = false;
+
   {
     sync_primitives::AutoLock lock(navi_service_status_lock_);
 
@@ -3607,8 +3610,9 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       SDL_LOG_ERROR("No info about navi servicies for app");
       return;
     }
-    end_video = it->second.first;
-    end_audio = it->second.second;
+
+    end_video = service_type == ServiceType::kMobileNav && it->second.first;
+    end_audio = service_type == ServiceType::kAudio && it->second.second;
   }
 
   if (connection_handler_) {
@@ -3622,23 +3626,42 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
     }
+  }
 
-    DisallowStreaming(app_id);
+  DisallowStreaming(app_id, service_type);
 
+  if (!app->video_streaming_allowed() && !app->audio_streaming_allowed()) {
+    bool close_app = false;
     {
       sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-      navi_app_to_stop_.push_back(app_id);
+
+      if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
+                                               navi_app_to_stop_.end(),
+                                               app_id)) {
+        close_app = true;
+        navi_app_to_stop_.push_back(app_id);
+      }
     }
 
-    TimerSPtr close_timer(std::make_shared<timer::Timer>(
-        "CloseNaviAppTimer",
-        new TimerTaskImpl<ApplicationManagerImpl>(
-            this, &ApplicationManagerImpl::CloseNaviApp)));
-    close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
+    if (close_app) {
+      TimerSPtr close_timer(std::make_shared<timer::Timer>(
+          "CloseNaviAppTimer",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::CloseNaviApp)));
+      close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
 
-    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-    close_app_timer_pool_.push_back(close_timer);
+      sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+      close_app_timer_pool_.push_back(close_timer);
+    }
   }
+}
+
+void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
+  using namespace protocol_handler;
+  SDL_LOG_AUTO_TRACE();
+
+  EndService(app_id, ServiceType::kAudio);
+  EndService(app_id, ServiceType::kMobileNav);
 }
 
 void ApplicationManagerImpl::OnHMIStateChanged(const uint32_t app_id,
@@ -3928,6 +3951,7 @@ void ApplicationManagerImpl::EndNaviStreaming() {
   SDL_LOG_AUTO_TRACE();
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
+  using namespace protocol_handler;
 
   if (!navi_app_to_end_stream_.empty()) {
     const uint32_t app_id = navi_app_to_end_stream_.front();
@@ -3938,13 +3962,15 @@ void ApplicationManagerImpl::EndNaviStreaming() {
       if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
                                                navi_app_to_stop_.end(),
                                                app_id)) {
-        DisallowStreaming(app_id);
+        DisallowStreaming(app_id, ServiceType::kMobileNav);
+        DisallowStreaming(app_id, ServiceType::kAudio);
       }
     }
   }
 }
 
-void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
+void ApplicationManagerImpl::DisallowStreaming(
+    const uint32_t app_id, const protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
@@ -3959,10 +3985,10 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() != it) {
-      if (it->second.first) {
+      if (it->second.first && service_type == ServiceType::kMobileNav) {
         app->set_video_streaming_allowed(false);
       }
-      if (it->second.second) {
+      if (it->second.second && service_type == ServiceType::kAudio) {
         app->set_audio_streaming_allowed(false);
       }
     }

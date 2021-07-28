@@ -847,10 +847,18 @@ class ApplicationManagerImpl
                     protocol_handler::ServiceType service_type) const OVERRIDE;
 
   /**
-   * @brief Ends opened navi services (audio/video) for application
+   * @brief Ends opened navi services audio and video for application
    * @param app_id Application id
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Ends opened navi service audio or video for application
+   * @param app_id Application id
+   * @param service_type Service type to check
+   */
+  void EndService(const uint32_t app_id,
+                  const protocol_handler::ServiceType service_type) OVERRIDE;
 
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
@@ -1438,8 +1446,10 @@ class ApplicationManagerImpl
    * @brief Disallows streaming for application, but doesn't close
    * opened services. Streaming ability could be restored by AllowStreaming();
    * @param app_id Application to proceed
+   * @param service_type Type of service to disallow
    */
-  void DisallowStreaming(uint32_t app_id);
+  void DisallowStreaming(const uint32_t app_id,
+                         const protocol_handler::ServiceType service_type);
 
   /**
    * @brief Types of directories used by Application Manager
