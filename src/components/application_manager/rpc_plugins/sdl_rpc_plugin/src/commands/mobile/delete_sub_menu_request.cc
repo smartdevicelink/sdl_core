@@ -133,7 +133,7 @@ void DeleteSubMenuRequest::DeleteNestedSubMenus(ApplicationSharedPtr const app,
     }
 
     if (parentID == (*it->second)[strings::parent_id].asUInt()) {
-      uint32_t menuID = (*it->second)[strings::menu_id].asUInt();
+      const uint32_t menuID = (*it->second)[strings::menu_id].asUInt();
       DeleteNestedSubMenus(app, menuID, subMenus);
 
       smart_objects::SmartObject msg_params =
