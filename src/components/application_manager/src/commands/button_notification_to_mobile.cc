@@ -57,8 +57,7 @@ bool ButtonNotificationToMobile::DoesParamExist(
     const std::string& param_name) const {
   SDL_LOG_AUTO_TRACE();
   using namespace application_manager::strings;
-  return (*message_).keyExists(msg_params) &&
-         (*message_)[msg_params].keyExists(param_name);
+  return (*message_)[msg_params].keyExists(param_name);
 }
 
 void ButtonNotificationToMobile::HandleCustomButton(
@@ -68,12 +67,6 @@ void ButtonNotificationToMobile::HandleCustomButton(
 
   if (!app) {
     SDL_LOG_ERROR("Application doesn't exist.");
-    return;
-  }
-
-  // app_id is mandatory for CUSTOM_BUTTON notification
-  if (!DoesParamExist(strings::app_id)) {
-    SDL_LOG_ERROR("CUSTOM_BUTTON mobile notification without app_id.");
     return;
   }
 
@@ -144,7 +137,6 @@ void ButtonNotificationToMobile::HandleOKButton(
     SDL_LOG_DEBUG("Sending button press for app in FULL with app id: "
                   << (*app_ptr)->app_id());
     SendButtonNotification(*app_ptr);
-    return;
   } else {
     SDL_LOG_ERROR("No application found");
   }
@@ -181,9 +173,7 @@ void ButtonNotificationToMobile::HandleMediaButton(
   const auto app_ptr =
       std::find_if(subscribed_apps.begin(),
                    subscribed_apps.end(),
-                   [](const ApplicationSharedPtr subscribed_app)
-
-                   {
+                   [](const ApplicationSharedPtr subscribed_app) {
                      return helpers::Compare<mobile_api::HMILevel::eType,
                                              helpers::EQ,
                                              helpers::ONE>(
@@ -191,9 +181,7 @@ void ButtonNotificationToMobile::HandleMediaButton(
                              mobile_apis::PredefinedWindows::DEFAULT_WINDOW),
                          mobile_api::HMILevel::HMI_FULL,
                          mobile_api::HMILevel::HMI_LIMITED);
-                   }
-
-      );
+                   });
 
   if (app_ptr != subscribed_apps.end()) {
     SendButtonNotification(*app_ptr);
