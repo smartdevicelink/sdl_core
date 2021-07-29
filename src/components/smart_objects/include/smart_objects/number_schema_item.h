@@ -160,17 +160,17 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
 
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    if (Object.asInt() > std::numeric_limits<int32_t>::max() ||
-        Object.asInt() < std::numeric_limits<int32_t>::min()) {
+    if (Object.asInt() < std::numeric_limits<int32_t>::min() ||
+        Object.asInt() > std::numeric_limits<int32_t>::max()) {
       return errors::OUT_OF_RANGE;
     }
-    value = static_cast<int32_t>(Object.asInt());
+    value = Object.asInt();
   } else if (typeid(uint32_t) == typeid(value)) {
-    if (Object.asUInt() > std::numeric_limits<uint32_t>::max() ||
-        Object.asUInt() < std::numeric_limits<uint32_t>::min()) {
+    if (Object.asUInt() < std::numeric_limits<uint32_t>::min() ||
+        Object.asUInt() > std::numeric_limits<uint32_t>::max()) {
       return errors::OUT_OF_RANGE;
     }
-    value = static_cast<uint32_t>(Object.asUInt());
+    value = Object.asUInt();
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
