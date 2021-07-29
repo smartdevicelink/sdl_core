@@ -157,11 +157,20 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
+
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<int64_t, int32_t>(Object.asInt());
+    if (Object.asInt() > std::numeric_limits<int32_t>::max() ||
+        Object.asInt() < std::numeric_limits<int32_t>::min()) {
+      return errors::OUT_OF_RANGE;
+    }
+    value = static_cast<int32_t>(Object.asInt());
   } else if (typeid(uint32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<uint64_t, uint32_t>(Object.asUInt());
+    if (Object.asUInt() > std::numeric_limits<uint32_t>::max() ||
+        Object.asUInt() < std::numeric_limits<uint32_t>::min()) {
+      return errors::OUT_OF_RANGE;
+    }
+    value = static_cast<uint32_t>(Object.asUInt());
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
