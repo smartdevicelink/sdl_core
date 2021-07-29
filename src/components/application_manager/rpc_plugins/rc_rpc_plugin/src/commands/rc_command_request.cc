@@ -279,7 +279,8 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
   if (is_allowed) {
     SetResourceState(module_type, ResourceState::BUSY);
     const auto default_timeout =
-        application_manager_.get_settings().default_timeout();
+        application_manager_.get_settings().default_timeout() +
+        application_manager_.get_settings().default_timeout_compensation();
     application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout);
     Execute();  // run child's logic

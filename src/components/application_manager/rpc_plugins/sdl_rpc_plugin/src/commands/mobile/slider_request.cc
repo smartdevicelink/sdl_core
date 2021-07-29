@@ -63,8 +63,7 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        application_manager_.get_settings().default_timeout() +
+    default_timeout_ +=
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 

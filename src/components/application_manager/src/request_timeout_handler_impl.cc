@@ -104,6 +104,9 @@ void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
     if (it != requests_.end()) {
       const auto& request = it->second;
       if (IsTimeoutUpdateRequired(request, timeout, method_name)) {
+        // Add compensation time
+        timeout +=
+            application_manager_.get_settings().default_timeout_compensation();
         application_manager_.UpdateRequestTimeout(
             request.connection_key_, request.mob_correlation_id_, timeout);
         application_manager_.UpdateRequestTimeout(

@@ -250,6 +250,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint32_t& default_timeout() const;
 
   /**
+   * @brief Default timeout compensation for waiting for response to mobile app
+   * some extra time
+   */
+  const uint32_t& default_timeout_compensation() const;
+
+  /**
    * @brief Default timeout for waiting for resuming
    */
   const uint32_t& app_resuming_timeout() const;
@@ -1012,6 +1018,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool is_redecoding_enabled_;
   uint32_t max_cmd_id_;
   uint32_t default_timeout_;
+  uint32_t default_timeout_compensation_;
   uint32_t app_resuming_timeout_;
   uint32_t app_resumption_save_persistent_data_timeout_;
   std::string vr_help_title_;

@@ -81,7 +81,9 @@ CommandImpl::CommandImpl(const MessageSharedPtr& message,
                          HMICapabilities& hmi_capabilities,
                          policy::PolicyHandlerInterface& policy_handler)
     : message_(message)
-    , default_timeout_(application_manager.get_settings().default_timeout())
+    , default_timeout_(
+          application_manager.get_settings().default_timeout() +
+          application_manager.get_settings().default_timeout_compensation())
     , allowed_to_terminate_(true)
     , application_manager_(application_manager)
     , rpc_service_(rpc_service)
