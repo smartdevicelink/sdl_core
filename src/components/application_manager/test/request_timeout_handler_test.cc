@@ -67,6 +67,7 @@ using sdl_rpc_plugin::commands::UnsubscribeWayPointsRequest;
 
 namespace {
 const uint32_t kDefaultTimeout = 10000u;
+const uint32_t kDefaultTimeoutCompensation = 1000u;
 const uint32_t kTimeout = 13000u;
 const uint32_t kRequestId = 22;
 const std::string kMethodNameSubscribeWayPoints =
@@ -105,6 +106,8 @@ class RequestTimeoutHandlerTest
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(kDefaultTimeout));
+    ON_CALL(app_mngr_settings_, default_timeout_compensation())
+        .WillByDefault(ReturnRef(kDefaultTimeoutCompensation));
 
     std::shared_ptr<smart_objects::SmartObject> msg =
         std::make_shared<smart_objects::SmartObject>(
@@ -153,16 +156,20 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
       .WillByDefault(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
+  ON_CALL(app_mngr_settings_, default_timeout_compensation())
+      .WillByDefault(ReturnRef(kDefaultTimeoutCompensation));
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
 
   EXPECT_CALL(app_mngr_,
-              UpdateRequestTimeout(
-                  mock_app->app_id(), command->correlation_id(), kTimeout));
+              UpdateRequestTimeout(mock_app->app_id(),
+                                   command->correlation_id(),
+                                   kTimeout + kDefaultTimeoutCompensation));
   EXPECT_CALL(app_mngr_,
-              UpdateRequestTimeout(
-                  RequestInfo::kHmiConnectionKey, kRequestId, kTimeout));
+              UpdateRequestTimeout(RequestInfo::kHmiConnectionKey,
+                                   kRequestId,
+                                   kTimeout + kDefaultTimeoutCompensation));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -196,16 +203,21 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
       .WillByDefault(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
+  ON_CALL(app_mngr_settings_, default_timeout_compensation())
+      .WillByDefault(ReturnRef(kDefaultTimeoutCompensation));
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
   EXPECT_CALL(
       app_mngr_,
-      UpdateRequestTimeout(
-          mock_app->app_id(), command->correlation_id(), kDefaultTimeout));
-  EXPECT_CALL(app_mngr_,
-              UpdateRequestTimeout(
-                  RequestInfo::kHmiConnectionKey, kRequestId, kDefaultTimeout));
+      UpdateRequestTimeout(mock_app->app_id(),
+                           command->correlation_id(),
+                           kDefaultTimeout + kDefaultTimeoutCompensation));
+  EXPECT_CALL(
+      app_mngr_,
+      UpdateRequestTimeout(RequestInfo::kHmiConnectionKey,
+                           kRequestId,
+                           kDefaultTimeout + kDefaultTimeoutCompensation));
 
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -239,6 +251,8 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
       .WillByDefault(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
+  ON_CALL(app_mngr_settings_, default_timeout_compensation())
+      .WillByDefault(ReturnRef(kDefaultTimeoutCompensation));
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));
@@ -276,6 +290,8 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
       .WillByDefault(ReturnRef(app_mngr_settings_));
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kDefaultTimeout));
+  ON_CALL(app_mngr_settings_, default_timeout_compensation())
+      .WillByDefault(ReturnRef(kDefaultTimeoutCompensation));
 
   EXPECT_CALL(app_mngr_, get_request_timeout_handler())
       .WillOnce(ReturnRef(*request_timeout_handler_));

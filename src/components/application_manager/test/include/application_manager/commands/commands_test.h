@@ -146,7 +146,7 @@ class CommandsTest : public ::testing::Test {
                                      mock_policy_handler_);
   }
 
-  enum { kDefaultTimeout_ = 100 };
+  enum { kDefaultTimeout_ = 100, kDefaultTimeoutCompensation_ = 10 };
 
   MockAppManager app_mngr_;
   MockRPCService mock_rpc_service_;
@@ -160,16 +160,25 @@ class CommandsTest : public ::testing::Test {
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
+    this->InitCommand(timeout, kDefaultTimeoutCompensation_);
+  }
+
+  virtual void InitCommand(const uint32_t timeout,
+                           const uint32_t compensation) {
     timeout_ = timeout;
+    timeout_compensation_ = compensation;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout_));
+    ON_CALL(app_mngr_settings_, default_timeout_compensation())
+        .WillByDefault(ReturnRef(timeout_compensation_));
   }
 
   CommandsTest()
       : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , timeout_(0) {
+      , timeout_(0)
+      , timeout_compensation_(0) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -254,6 +263,7 @@ class CommandsTest : public ::testing::Test {
 
  private:
   uint32_t timeout_;
+  uint32_t timeout_compensation_;
 };
 
 MATCHER_P(MobileResultCodeIs, result_code, "") {

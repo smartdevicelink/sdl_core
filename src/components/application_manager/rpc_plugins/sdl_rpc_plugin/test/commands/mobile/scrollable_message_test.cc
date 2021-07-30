@@ -173,17 +173,21 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
   (*msg_)[msg_params][timeout] = kTimeOut;
   (*msg_)[msg_params][interaction_mode] =
       mobile_apis::InteractionMode::MANUAL_ONLY;
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  const uint32_t initial_timeout =
+      kDefaultTimeout_ + kDefaultTimeoutCompensation_;
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut + kDefaultTimeout_, command_->default_timeout());
+  EXPECT_EQ(kTimeOut + initial_timeout, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
   (*msg_)[msg_params][interaction_mode] =
       mobile_apis::InteractionMode::MANUAL_ONLY;
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  const uint32_t initial_timeout =
+      kDefaultTimeout_ + kDefaultTimeoutCompensation_;
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {

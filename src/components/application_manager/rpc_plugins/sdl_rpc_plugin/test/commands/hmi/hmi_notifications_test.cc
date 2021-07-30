@@ -256,13 +256,9 @@ class HMICommandsNotificationsTest
   MockAppServiceManager mock_app_service_manager_;
 
   void InitCommand(const uint32_t& default_timeout) OVERRIDE {
+    CommandsTest<kIsNice>::InitCommand(default_timeout);
+
     app_ = ConfigureApp(&app_ptr_, kAppId_, NOT_MEDIA, NOT_NAVI, NOT_VC);
-    EXPECT_CALL(app_mngr_, get_settings())
-        .WillOnce(ReturnRef(app_mngr_settings_));
-    EXPECT_CALL(app_mngr_settings_, default_timeout())
-        .WillOnce(ReturnRef(default_timeout));
-    ON_CALL(app_mngr_, event_dispatcher())
-        .WillByDefault(ReturnRef(mock_event_dispatcher_));
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
     ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
@@ -514,7 +510,8 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnAppRegisteredNotification>(message);
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -536,7 +533,8 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnAppUnregisteredNotification>(message);
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -558,7 +556,8 @@ TEST_F(HMICommandsNotificationsTest, OnButtonPressNotificationEventDispatcher) {
       CreateCommand<hmi::OnButtonPressNotification>(message);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -575,7 +574,8 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
       CreateCommand<OnReadyNotification>(message);
 
   EXPECT_CALL(app_mngr_, OnHMIReady());
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -1295,11 +1295,10 @@ TEST_F(HMICommandsNotificationsTest,
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   EXPECT_CALL(app_mngr_settings_, max_cmd_id()).WillOnce(ReturnRef(kMaxCmdId));
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
   EXPECT_CALL(*app_ptr_, is_perform_interaction_active())
       .WillOnce(Return(kIsPerformInteractionActive));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);

@@ -119,7 +119,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
  protected:
   CommandRequestTest() : CommandsTest<kIsNice>() {}
 
-  virtual void InitCommand(const uint32_t& default_timeout) OVERRIDE {
+  void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
     ON_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
