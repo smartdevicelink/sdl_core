@@ -593,12 +593,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string hmi_origin_id() const OVERRIDE;
 
   /**
-   * @brief  Returns true if writing logs to file system before shutdown is
+   * @brief Returns true if writing logs to file system before shutdown is
    * enabled
    */
   bool flush_log_messages_before_shutdown() const OVERRIDE;
   /**
-   * @brief  Returns maximum time to wait for writing all data before exit SDL
+   * @brief Returns maximum time to wait for writing all data before exit SDL
    * in seconds
    */
   uint16_t max_time_before_shutdown() const OVERRIDE;

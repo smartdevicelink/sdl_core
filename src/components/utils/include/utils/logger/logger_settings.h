@@ -1,7 +1,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_SETTINGS_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_SETTINGS_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace logger {
 class LoggerSettings {
