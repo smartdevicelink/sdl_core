@@ -65,23 +65,11 @@ void OnButtonPressNotification::SendButtonNotification(
     ApplicationSharedPtr app) {
   SDL_LOG_AUTO_TRACE();
 
-  mobile_apis::ButtonPressMode::eType btn_press_mode;
-  if ((*message_)[strings::msg_params].keyExists(hmi_response::button_mode)) {
-    btn_press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
-        (*message_)[strings::msg_params][hmi_response::button_mode].asInt());
-
-  } else if ((*message_)[strings::msg_params].keyExists(
-                 strings::button_press_mode)) {
-    btn_press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
-        (*message_)[strings::msg_params][strings::button_press_mode].asInt());
-  }
+  (*message_)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::eType::OnButtonPressID;
 
   message_ = MessageHelper::CreateButtonNotificationToMobile(app, *message_);
 
-  (*message_)[strings::msg_params][strings::button_press_mode] = btn_press_mode;
-
-  (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::eType::OnButtonPressID;
   SendNotification();
 }
 

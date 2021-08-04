@@ -87,12 +87,14 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   using namespace helpers;
 
-  const smart_objects::SmartObject& message = event.smart_object();
-
   if (hmi_apis::FunctionID::Buttons_SubscribeButton != event.id()) {
-    SDL_LOG_ERROR("Received unknown event.");
+    SDL_LOG_ERROR("Unexpected event id received: " << event.id());
     return;
   }
+
+  unsubscribe_from_event(hmi_apis::FunctionID::Buttons_SubscribeButton);
+
+  const smart_objects::SmartObject& message = event.smart_object();
 
   const uint32_t app_id =
       (*message_)[strings::msg_params][strings::app_id].asUInt();

@@ -64,24 +64,10 @@ void OnButtonEventNotification::SendButtonNotification(
     ApplicationSharedPtr app) {
   SDL_LOG_AUTO_TRACE();
 
-  auto& ref = (*message_)[strings::msg_params];
-
-  mobile_apis::ButtonEventMode::eType btn_event_mode;
-  if (ref.keyExists(hmi_response::button_mode)) {
-    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
-        ref[hmi_response::button_mode].asInt());
-
-  } else if (ref.keyExists(strings::button_event_mode)) {
-    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
-        ref[strings::button_event_mode].asInt());
-  }
-
-  message_ = MessageHelper::CreateButtonNotificationToMobile(app, *message_);
-
-  (*message_)[strings::msg_params][strings::button_event_mode] = btn_event_mode;
-
   (*message_)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::eType::OnButtonEventID;
+
+  message_ = MessageHelper::CreateButtonNotificationToMobile(app, *message_);
 
   SendNotification();
 }

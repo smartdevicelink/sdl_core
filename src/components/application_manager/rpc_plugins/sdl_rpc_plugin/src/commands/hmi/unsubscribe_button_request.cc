@@ -89,6 +89,13 @@ void UnsubscribeButtonRequest::onTimeOut() {
 void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
 
+  if (hmi_apis::FunctionID::Buttons_UnsubscribeButton != event.id()) {
+    SDL_LOG_ERROR("Unexpected event id received: " << event.id());
+    return;
+  }
+
+  unsubscribe_from_event(hmi_apis::FunctionID::Buttons_UnsubscribeButton);
+
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
 
