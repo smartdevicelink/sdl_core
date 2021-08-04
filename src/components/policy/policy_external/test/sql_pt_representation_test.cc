@@ -48,7 +48,6 @@
 #include "policy/sql_wrapper.h"
 #include "rpc_base/rpc_base.h"
 #include "utils/file_system.h"
-#include "utils/system.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::CheckPermissionResult;
