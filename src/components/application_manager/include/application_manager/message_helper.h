@@ -1113,6 +1113,17 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const WindowID window_id);
 
+  /**
+   * @brief AddDefaultParamsToTireStatus adds missing default sub-params to
+   * tirePressure param, if version of related application requires presence of
+   * all sub-params in response
+   * @param application shared pointer to related application
+   * @param response_from_hmi reference to response from HMI
+   */
+  static void AddDefaultParamsToTireStatus(
+      ApplicationSharedPtr application,
+      smart_objects::SmartObject& response_from_hmi);
+
  private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
