@@ -1090,6 +1090,10 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
   smart_objects::SmartObject& ref = *msg;
   ref[strings::params][strings::connection_key] = app->app_id();
 
+  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
+      source_message[strings::params][strings::function_id].asInt());
+  ref[strings::params][strings::function_id] = function_id;
+
   mobile_apis::ButtonName::eType btn_id = mobile_apis::ButtonName::INVALID_ENUM;
 
   if (source_message[strings::msg_params].keyExists(
@@ -1123,9 +1127,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
 
     return -1;
   };
-
-  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
-      source_message[strings::params][strings::function_id].asInt());
 
   if (mobile_apis::FunctionID::eType::OnButtonPressID == function_id) {
     const auto press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
