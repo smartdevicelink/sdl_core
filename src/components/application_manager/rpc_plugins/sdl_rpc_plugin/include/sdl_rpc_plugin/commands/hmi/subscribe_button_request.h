@@ -73,6 +73,8 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
   void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 
  private:
+  app_mngr::ApplicationSharedPtr GetApplicationPtr();
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 
   hmi_apis::Common_ButtonName::eType button_name_;

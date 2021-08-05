@@ -66,16 +66,27 @@ SubscribeButtonRequest::SubscribeButtonRequest(
 
 SubscribeButtonRequest::~SubscribeButtonRequest() {}
 
+app_mngr::ApplicationSharedPtr SubscribeButtonRequest::GetApplicationPtr() {
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
+
+  return application_manager_.application_by_hmi_app(app_id);
+}
+
 void SubscribeButtonRequest::Run() {
   SDL_LOG_AUTO_TRACE();
-
-  const auto btn_id = static_cast<mobile_apis::ButtonName::eType>(
-      (*message_)[strings::msg_params][strings::button_name].asInt());
 
   // Specific case when app subscribes to CUSTOM_BUTTON upon registration and no
   // explicit mobile request exist when response arrives. In this case event
   // should be catched by HMI request itself.
-  if (mobile_apis::ButtonName::CUSTOM_BUTTON == btn_id) {
+  if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == button_name_) {
+    ApplicationSharedPtr app = GetApplicationPtr();
+    if (app) {
+      // Application should also be subscribed to CUSTOM_BUTTON even before
+      // response is received
+      app->SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
+    }
+
     subscribe_on_event(hmi_apis::FunctionID::Buttons_SubscribeButton,
                        correlation_id());
   }
@@ -95,29 +106,30 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
   unsubscribe_from_event(hmi_apis::FunctionID::Buttons_SubscribeButton);
 
   const smart_objects::SmartObject& message = event.smart_object();
-
-  const uint32_t app_id =
-      (*message_)[strings::msg_params][strings::app_id].asUInt();
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(app_id);
+  ApplicationSharedPtr app = GetApplicationPtr();
 
   if (!app) {
     SDL_LOG_ERROR("NULL pointer.");
     return;
   }
 
-  hmi_apis::Common_Result::eType hmi_result =
-      static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+  const auto hmi_result = static_cast<hmi_apis::Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
 
   if (CommandImpl::IsHMIResultSuccess(hmi_result,
                                       HmiInterfaces::HMI_INTERFACE_Buttons)) {
-    const mobile_apis::ButtonName::eType btn_id =
-        static_cast<mobile_apis::ButtonName::eType>(
-            (*message_)[strings::msg_params][strings::button_name].asInt());
-
-    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+    SDL_LOG_DEBUG("Subscription to "
+                  << button_name_ << " was successful. Subscribing internally");
+    app->SubscribeToButton(
+        static_cast<mobile_apis::ButtonName::eType>(button_name_));
+  } else if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == button_name_) {
+    // SDL should revert subscription in a specific case related to custom
+    // button because it was subscribed when the request is sent to HMI
+    SDL_LOG_ERROR(
+        "Subscription to custom button was failed. Revert the internal "
+        "subscription");
+    app->UnsubscribeFromButton(
+        static_cast<mobile_apis::ButtonName::eType>(button_name_));
   }
 }
 
@@ -126,6 +138,20 @@ void SubscribeButtonRequest::onTimeOut() {
 
   application_manager_.AddExpiredButtonRequest(
       application_id(), correlation_id(), button_name_);
+
+  if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == button_name_) {
+    ApplicationSharedPtr app = GetApplicationPtr();
+
+    if (app) {
+      // SDL should revert subscription in a specific case related to custom
+      // button because it was subscribed when the request is sent to HMI
+      SDL_LOG_ERROR(
+          "Subscription to custom button was timed out. Revert the internal "
+          "subscription");
+      app->UnsubscribeFromButton(
+          static_cast<mobile_apis::ButtonName::eType>(button_name_));
+    }
+  }
 
   auto& resume_ctrl = application_manager_.resume_controller();
   resume_ctrl.HandleOnTimeOut(
