@@ -250,8 +250,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint32_t& default_timeout() const;
 
   /**
-   * @brief Default timeout compensation for waiting for response to mobile app
-   * some extra time
+   * @brief Default timeout compensation for waiting some extra time for
+   * response to mobile app
    */
   const uint32_t& default_timeout_compensation() const;
 
