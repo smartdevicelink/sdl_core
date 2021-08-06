@@ -689,4 +689,11 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
   return MockMessageHelper::message_helper_mock()->CreateResponseMessageFromHmi(
       function_id, correlation_id, result_code);
 }
+
+void MessageHelper::AddDefaultParamsToTireStatus(
+    application_manager::ApplicationSharedPtr application,
+    smart_objects::SmartObject& response_from_hmi) {
+  return MockMessageHelper::message_helper_mock()->AddDefaultParamsToTireStatus(
+      application, response_from_hmi);
+}
 }  // namespace application_manager

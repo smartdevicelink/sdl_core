@@ -140,10 +140,6 @@ class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
 
-  DEPRECATED
-  virtual bool Init(resumption::LastState&,
-                    media_manager::MediaManager* media_manager) = 0;
-
   /**
    * Inits application manager
    */
@@ -214,9 +210,6 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
-
-  DEPRECATED virtual ApplicationSharedPtr application_by_name(
-      const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
@@ -876,11 +869,6 @@ class ApplicationManager {
                               protocol_handler::ServiceType service_type,
                               bool state) = 0;
 
-  DEPRECATED
-  virtual void OnAppStreaming(uint32_t app_id,
-                              protocol_handler::ServiceType service_type,
-                              const Application::StreamingState new_state) = 0;
-
   /**
    * @brief CreateRegularState create regular HMI state for application
    * @param app Application
@@ -907,9 +895,6 @@ class ApplicationManager {
    */
   virtual bool CanAppStream(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
-
-  DEPRECATED
-  virtual void ForbidStreaming(uint32_t app_id) = 0;
 
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.

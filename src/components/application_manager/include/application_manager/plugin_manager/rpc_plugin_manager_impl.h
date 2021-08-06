@@ -59,13 +59,6 @@ class RPCPluginManagerImpl : public RPCPluginManager {
                        policy::PolicyHandlerInterface& policy_handler,
                        resumption::LastStateWrapperPtr last_state);
 
-  DEPRECATED
-  RPCPluginManagerImpl(ApplicationManager& app_manager,
-                       rpc_service::RPCService& rpc_service,
-                       HMICapabilities& hmi_capabilities,
-                       policy::PolicyHandlerInterface& policy_handler,
-                       resumption::LastState& last_state);
-
   uint32_t LoadPlugins(const std::string& plugins_path) OVERRIDE;
 
   utils::Optional<RPCPlugin> FindPluginToProcess(

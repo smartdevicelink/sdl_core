@@ -335,7 +335,7 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
-  EXPECT_EQ(result_code,
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR,
             static_cast<mobile_apis::Result::eType>(
                 (*result_msg)[am::strings::msg_params][am::strings::result_code]
                     .asInt()));

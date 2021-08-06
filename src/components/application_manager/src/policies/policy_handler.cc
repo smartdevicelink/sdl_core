@@ -1237,12 +1237,6 @@ void PolicyHandler::OnPendingPermissionChange(
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
-  const uint32_t app_id = GetAppIdForSending();
-  return SendMessageToSDK(pt_string, url, app_id);
-}
-
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url,
                                      const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
@@ -2014,7 +2008,9 @@ void PolicyHandler::AddStatisticsInfo(int type) {
       ++count_of_iap_buffer_full;
       break;
     }
-    default: { SDL_LOG_WARN("Type of statistics is unknown"); }
+    default: {
+      SDL_LOG_WARN("Type of statistics is unknown");
+    }
   }
 }
 
@@ -2033,7 +2029,9 @@ void PolicyHandler::OnSystemError(int code) {
       ++count_sync_out_of_memory;
       break;
     }
-    default: { SDL_LOG_WARN("System error is unknown"); }
+    default: {
+      SDL_LOG_WARN("System error is unknown");
+    }
   }
 }
 

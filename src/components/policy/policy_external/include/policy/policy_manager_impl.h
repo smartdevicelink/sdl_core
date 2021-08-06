@@ -791,14 +791,6 @@ class PolicyManagerImpl : public PolicyManager {
   const PolicySettings& get_settings() const OVERRIDE;
 
   /**
-   * @brief Finds the next URL that must be sent on OnSystemRequest retry
-   * @param urls vector of vectors that contain urls for each application
-   * @return Pair of policy application id and application url id from the
-   * urls vector
-   */
-  DEPRECATED AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
-
-  /**
    * @brief Checks if there is existing URL in the EndpointUrls vector with
    * index saved in the policy manager and if not, it moves to the next
    * application index

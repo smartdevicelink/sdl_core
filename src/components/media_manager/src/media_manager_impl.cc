@@ -184,39 +184,6 @@ void MediaManagerImpl::Init() {
   }
 }
 
-void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
-  SDL_LOG_AUTO_TRACE();
-
-#if defined(EXTENDED_MEDIA_MODE)
-  if (!a2dp_player_ && protocol_handler_) {
-    a2dp_player_ =
-        new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
-  }
-#endif
-
-  if (a2dp_player_) {
-    a2dp_player_->StartActivity(application_key);
-  }
-}
-
-void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
-  SDL_LOG_AUTO_TRACE();
-  if (a2dp_player_) {
-    a2dp_player_->StopActivity(application_key);
-  }
-}
-
-void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
-                                                const std::string& output_file,
-                                                int32_t duration) {
-  StartMicrophoneRecording(application_key,
-                           output_file,
-                           duration,
-                           mobile_apis::SamplingRate::INVALID_ENUM,
-                           mobile_apis::BitsPerSample::INVALID_ENUM,
-                           mobile_apis::AudioType::INVALID_ENUM);
-}
-
 void MediaManagerImpl::StartMicrophoneRecording(
     int32_t application_key,
     const std::string& output_file,

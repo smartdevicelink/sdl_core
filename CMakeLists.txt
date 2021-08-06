@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0054 NEW)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -52,7 +53,6 @@ option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_IAP2EMULATION "IAP2 emulation via tcp" OFF)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
@@ -215,12 +215,6 @@ get_property(cType CACHE HMI PROPERTY TYPE)
 get_property(cValue CACHE HMI PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
-
-get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
-get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
-get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
-file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
 get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
 get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
@@ -455,11 +449,6 @@ if(ENABLE_SECURITY)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
   message(STATUS "Security enabled")
-endif()
-
-if(ENABLE_HMI_PTU_DECRYPTION)
-  add_definitions(-DUSE_HMI_PTU_DECRYPTION)
-  message(STATUS "HMI PTU decription enabled")
 endif()
 
 if(ENABLE_IAP2EMULATION)

@@ -52,28 +52,6 @@ LastStateImpl::~LastStateImpl() {
   SaveToFileSystem();
 }
 
-void LastStateImpl::SaveStateToFileSystem() {
-  SDL_LOG_AUTO_TRACE();
-
-  std::string styled_string;
-  {
-    sync_primitives::AutoLock lock(dictionary_lock_);
-    styled_string = dictionary_.toStyledString();
-  }
-
-  const std::string full_path =
-      !app_storage_folder_.empty()
-          ? app_storage_folder_ + "/" + app_info_storage_
-          : app_info_storage_;
-
-  const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
-                                               styled_string.end());
-  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  SDL_LOG_INFO("LastState::SaveStateToFileSystem[DEPRECATED] "
-               << full_path << styled_string);
-  DCHECK(file_system::Write(full_path, char_vector_pdata));
-}
-
 void LastStateImpl::SaveToFileSystem() {
   SDL_LOG_AUTO_TRACE();
 
@@ -120,11 +98,6 @@ void LastStateImpl::RemoveFromFileSystem() {
 }
 
 Json::Value LastStateImpl::dictionary() const {
-  sync_primitives::AutoLock lock(dictionary_lock_);
-  return dictionary_;
-}
-
-Json::Value& LastStateImpl::get_dictionary() {
   sync_primitives::AutoLock lock(dictionary_lock_);
   return dictionary_;
 }

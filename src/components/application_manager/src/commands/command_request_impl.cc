@@ -290,6 +290,11 @@ void CommandRequestImpl::SendResponse(
                                 : warning_info();
     response[strings::msg_params][strings::result_code] =
         mobile_apis::Result::WARNINGS;
+  } else if (mobile_apis::Result::INVALID_ENUM == result_code) {
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::GENERIC_ERROR;
+    response[strings::msg_params][strings::info] =
+        "Invalid result received from vehicle";
   } else {
     response[strings::msg_params][strings::result_code] = result_code;
   }

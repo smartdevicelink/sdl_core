@@ -943,7 +943,9 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return factory
           .GetCreator<commands::BCOnAppCapabilityUpdatedNotification>();
     }
-    default: { return factory.GetCreator<InvalidCommand>(); }
+    default: {
+      return factory.GetCreator<InvalidCommand>();
+    }
   }
 }
 

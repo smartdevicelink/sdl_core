@@ -309,13 +309,6 @@ ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
   return FindPendingApp(accessor, finder);
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
-    const std::string& app_name) const {
-  AppNamePredicate finder(app_name);
-  DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, finder);
-}
-
 ApplicationSharedPtr
 ApplicationManagerImpl::reregister_application_by_policy_id(
     const std::string& policy_app_id) const {
@@ -463,6 +456,7 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
+  commands_holder_->Resume(app, CommandHolder::CommandType::kMobileCommand);
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
@@ -2507,11 +2501,6 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
-bool ApplicationManagerImpl::Init(resumption::LastState&,
-                                  media_manager::MediaManager*) {
-  return false;
-}
-
 bool ApplicationManagerImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper,
     media_manager::MediaManager* media_manager) {
@@ -3520,53 +3509,6 @@ bool ApplicationManagerImpl::CanAppStream(
   return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
-void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
-  using namespace mobile_apis::AppInterfaceUnregisteredReason;
-  using namespace mobile_apis::Result;
-
-  SDL_LOG_AUTO_TRACE();
-
-  ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    SDL_LOG_DEBUG(
-        "There is no navi or projection application with id: " << app_id);
-    return;
-  }
-
-  {
-    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-    if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
-                                             navi_app_to_stop_.end(),
-                                             app_id) ||
-        navi_app_to_end_stream_.end() !=
-            std::find(navi_app_to_end_stream_.begin(),
-                      navi_app_to_end_stream_.end(),
-                      app_id)) {
-      return;
-    }
-  }
-
-  bool unregister = false;
-  {
-    sync_primitives::AutoLock lock(navi_service_status_lock_);
-
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it ||
-        (!it->second.first && !it->second.second)) {
-      unregister = true;
-    }
-  }
-  if (unregister) {
-    rpc_service_->ManageMobileCommand(
-        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-            app_id, PROTOCOL_VIOLATION),
-        commands::Command::SOURCE_SDL);
-    UnregisterApplication(app_id, ABORTED);
-    return;
-  }
-  EndNaviServices(app_id);
-}
-
 void ApplicationManagerImpl::ForbidStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
@@ -3647,48 +3589,6 @@ void ApplicationManagerImpl::OnAppStreaming(
   } else {
     media_manager_->StopStreaming(app_id, service_type);
     state_ctrl_.OnVideoStreamingStopped(app);
-  }
-}
-
-void ApplicationManagerImpl::OnAppStreaming(
-    uint32_t app_id,
-    protocol_handler::ServiceType service_type,
-    const Application::StreamingState new_state) {
-  SDL_LOG_AUTO_TRACE();
-
-  ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    SDL_LOG_DEBUG(
-        " There is no navi or projection application with id: " << app_id);
-    return;
-  }
-  DCHECK_OR_RETURN_VOID(media_manager_);
-
-  SDL_LOG_DEBUG("New state for service " << static_cast<int32_t>(service_type)
-                                         << " is "
-                                         << static_cast<int32_t>(new_state));
-  switch (new_state) {
-    case Application::StreamingState::kStopped: {
-      // Stop activity in media_manager_ when service is stopped
-      // State controller has been already notified by kSuspended event
-      // received before
-      media_manager_->StopStreaming(app_id, service_type);
-      break;
-    }
-
-    case Application::StreamingState::kStarted: {
-      // Apply temporary streaming state and start activity in media_manager_
-      state_ctrl_.OnVideoStreamingStarted(app);
-      media_manager_->StartStreaming(app_id, service_type);
-      break;
-    }
-
-    case Application::StreamingState::kSuspended: {
-      // Don't stop activity in media_manager_ in that case
-      // Just cancel the temporary streaming state
-      state_ctrl_.OnVideoStreamingStopped(app);
-      break;
-    }
   }
 }
 
