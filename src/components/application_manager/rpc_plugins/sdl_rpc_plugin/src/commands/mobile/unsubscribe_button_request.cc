@@ -100,6 +100,12 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
+  if (mobile_apis::ButtonName::CUSTOM_BUTTON == btn_id) {
+    SDL_LOG_ERROR("App cannot unsubscribe from CUSTOM_BUTTON");
+    SendResponse(false, mobile_apis::Result::IGNORED);
+    return;
+  }
+
   (*message_)[str::msg_params][str::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Buttons);
   SendHMIRequest(hmi_apis::FunctionID::Buttons_UnsubscribeButton,

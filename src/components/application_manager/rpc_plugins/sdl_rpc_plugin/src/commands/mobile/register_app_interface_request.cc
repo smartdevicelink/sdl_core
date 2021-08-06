@@ -1470,7 +1470,6 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonRequest() {
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
   msg_params[strings::button_name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
-  msg_params[strings::is_suscribed] = true;
   SendHMIRequest(
       hmi_apis::FunctionID::Buttons_SubscribeButton, &msg_params, false);
 }

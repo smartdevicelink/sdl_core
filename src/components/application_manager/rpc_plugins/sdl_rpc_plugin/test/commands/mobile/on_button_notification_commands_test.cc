@@ -221,6 +221,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
   auto mock_message_helper = am::MockMessageHelper::message_helper_mock();
   smart_objects::SmartObjectSPtr msg =
       std::make_shared<smart_objects::SmartObject>();
+  (*msg)[strings::params][strings::function_id] = TestFixture::kFunctionId;
   EXPECT_CALL(*mock_message_helper, CreateButtonNotificationToMobile(_, _))
       .WillRepeatedly(Return(msg));
 
@@ -370,6 +371,7 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
   auto mock_message_helper = am::MockMessageHelper::message_helper_mock();
   smart_objects::SmartObjectSPtr msg =
       std::make_shared<smart_objects::SmartObject>();
+  (*msg)[strings::params][strings::function_id] = TestFixture::kFunctionId;
   EXPECT_CALL(*mock_message_helper, CreateButtonNotificationToMobile(_, _))
       .WillRepeatedly(Return(msg));
 

@@ -1090,6 +1090,10 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
   smart_objects::SmartObject& ref = *msg;
   ref[strings::params][strings::connection_key] = app->app_id();
 
+  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
+      source_message[strings::params][strings::function_id].asInt());
+  ref[strings::params][strings::function_id] = function_id;
+
   mobile_apis::ButtonName::eType btn_id = mobile_apis::ButtonName::INVALID_ENUM;
 
   if (source_message[strings::msg_params].keyExists(
@@ -1109,6 +1113,32 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
   }
 
   ref[strings::msg_params][strings::button_name] = btn_id;
+
+  auto get_mode_code = [&source_message](
+                           const std::string& hmi_param_name,
+                           const std::string& mobile_param_name) -> int64_t {
+    if (source_message[strings::msg_params].keyExists(hmi_param_name)) {
+      return source_message[strings::msg_params][hmi_param_name].asInt();
+    }
+
+    if (source_message[strings::msg_params].keyExists(mobile_param_name)) {
+      return source_message[strings::msg_params][mobile_param_name].asInt();
+    }
+
+    return -1;
+  };
+
+  if (mobile_apis::FunctionID::eType::OnButtonPressID == function_id) {
+    const auto press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
+        get_mode_code(hmi_response::button_mode, strings::button_press_mode));
+    ref[strings::msg_params][strings::button_press_mode] = press_mode;
+  }
+
+  if (mobile_apis::FunctionID::eType::OnButtonEventID == function_id) {
+    const auto press_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        get_mode_code(hmi_response::button_mode, strings::button_event_mode));
+    ref[strings::msg_params][strings::button_event_mode] = press_mode;
+  }
 
   if (source_message[strings::msg_params].keyExists(
           hmi_response::custom_button_id)) {
