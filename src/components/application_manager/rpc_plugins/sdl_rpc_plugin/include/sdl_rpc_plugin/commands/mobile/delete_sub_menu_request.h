@@ -83,8 +83,8 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
 
  private:
   /*
-   * @brief Deletes submenus that have a parentID that matches the parentID
-   * parameter
+   * @brief Creates and queues up delete requests for a submenues that have a
+   * parentID that matches the parentID parameter
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
@@ -94,7 +94,8 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
                             const app_mngr::SubMenuMap& subMenus);
 
   /*
-   * @brief Deletes VR commands from SDL for corresponding submenu ID
+   * @brief Creates and queues up delete requests for a VR commands from SDL for
+   * corresponding submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
@@ -103,7 +104,8 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
                                const uint32_t parentID);
 
   /*
-   * @brief Deletes UI commands from SDL for corresponding submenu ID
+   * @brief Creates and queues up the delete requests for a UI commands from SDL
+   * for corresponding submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
@@ -111,6 +113,9 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
   void DeleteSubMenuUICommands(app_mngr::ApplicationSharedPtr const app,
                                const uint32_t parentID);
 
+  /**
+   * @brief Takes the next request in the queue and sends it to HMI
+   */
   void SendNextRequest();
 
   typedef std::list<smart_objects::SmartObject> RequestsList;

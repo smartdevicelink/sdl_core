@@ -193,12 +193,6 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
       continue;
     }
 
-    if ((*it->second).keyExists(strings::vr_commands)) {
-      SDL_LOG_ERROR("Skipping VR command");
-      ++it;
-      continue;
-    }
-
     if (parentID ==
         (*it->second)[strings::menu_params][hmi_request::parent_id].asUInt()) {
       smart_objects::SmartObject msg_params =
