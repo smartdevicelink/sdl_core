@@ -105,7 +105,9 @@ class ResetGlobalPropertiesRequest
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  hmi_apis::Common_Result::eType rc_result_;
   std::string ui_response_info_;
+  std::string rc_response_info_;
   std::string tts_response_info_;
 };
 
