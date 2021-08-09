@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="interface">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="enum"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="struct"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="function"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="version" use="required" type="xs:string"/>
+            <xs:attribute name="minVersion" use="required" type="xs:string"/>
+            <xs:attribute name="date" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="struct">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="param"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="history"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="since" use="required" type="xs:string"/>
+            <xs:attribute name="until" type="xs:string"/>
+            <xs:attribute name="deprecated" type="xs:boolean"/>
+            <xs:attribute name="removed" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="function">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="param"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="history"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="functionID" use="required" type="xs:string"/>
+            <xs:attribute name="messagetype" use="required" type="xs:string"/>
+            <xs:attribute name="since" use="required" type="xs:string"/>
+            <xs:attribute name="until" type="xs:string"/>
+            <xs:attribute name="deprecated" type="xs:boolean"/>
+            <xs:attribute name="removed" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="enum">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="element"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="history"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="since" use="required" type="xs:string"/>
+            <xs:attribute name="deprecated" type="xs:boolean"/>
+            <xs:attribute name="removed" type="xs:boolean"/>
+            <xs:attribute name="internal_scope" type="xs:string"/>
+            <xs:attribute name="platform" type="xs:string"/>
+            <xs:attribute name="until" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="description" type="xs:string"/>
+    <xs:element name="param">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="history"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="todo"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="element"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="type" use="required" type="xs:string"/>
+            <xs:attribute name="mandatory" use="required" type="xs:boolean"/>
+            <xs:attribute name="array" type="xs:boolean"/>
+            <xs:attribute name="defvalue" type="xs:string"/>
+            <xs:attribute name="deprecated" type="xs:boolean"/>
+            <xs:attribute name="removed" type="xs:boolean"/>
+            <xs:attribute name="maxlength" type="xs:integer"/>
+            <xs:attribute name="maxsize" type="xs:integer"/>
+            <xs:attribute name="maxvalue" type="xs:decimal"/>
+            <xs:attribute name="minlength" type="xs:integer"/>
+            <xs:attribute name="minsize" type="xs:integer"/>
+            <xs:attribute name="minvalue" type="xs:decimal"/>
+            <xs:attribute name="platform" type="xs:string"/>
+            <xs:attribute name="since" type="xs:string"/>
+            <xs:attribute name="until" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="todo" type="xs:string"/>
+    <xs:element name="element">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="description"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="warning"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="history"/>
+            </xs:choice>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="hexvalue" type="xs:string"/>
+            <xs:attribute name="internal_name" type="xs:string"/>
+            <xs:attribute name="rootscreen" type="xs:boolean"/>
+            <xs:attribute name="deprecated" type="xs:boolean"/>
+            <xs:attribute name="removed" type="xs:boolean"/>
+            <xs:attribute name="since" type="xs:string"/>
+            <xs:attribute name="until" type="xs:string"/>
+            <xs:attribute name="value" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="warning" type="xs:string"/>
+    <xs:element name="history">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="enum"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="struct"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="function"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="param"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="element"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

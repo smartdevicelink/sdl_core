@@ -97,6 +97,15 @@ WebSocketConnection<Session>::~WebSocketConnection() {
   }
 }
 
+#ifdef ENABLE_SECURITY
+template <>
+WebSocketConnection<WebSocketSecureSession<>>::~WebSocketConnection() {
+    if (!IsShuttingDown()) {
+        Shutdown();
+    }
+}
+#endif  // ENABLE_SECURITY
+
 template <typename Session>
 void WebSocketConnection<Session>::OnError() {
   SDL_LOG_AUTO_TRACE();
@@ -160,6 +169,14 @@ void WebSocketConnection<Session>::Run() {
   SDL_LOG_AUTO_TRACE();
   session_->AsyncAccept();
 }
+
+#ifdef ENABLE_SECURITY
+template <>
+void WebSocketConnection<WebSocketSecureSession<> >::Run() {
+  SDL_LOG_AUTO_TRACE();
+  session_->AsyncAccept();
+}
+#endif // ENABLE_SECURITY
 
 template <typename Session>
 void WebSocketConnection<Session>::Shutdown() {

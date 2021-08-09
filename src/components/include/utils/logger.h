@@ -39,6 +39,20 @@
 #include <sstream>
 #include <string>
 
+#define LOG_WITH_LEVEL(logLevel, logEvent)                             \
+  if (logger::Logger::instance().IsEnabledFor(logger_, logLevel)) {    \
+    std::stringstream accumulator;                                     \
+    accumulator << logEvent;                                           \
+    logger::LogMessage message{                                        \
+        logger_,                                                       \
+        logLevel,                                                      \
+        accumulator.str(),                                             \
+        std::chrono::high_resolution_clock::now(),                     \
+        logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__}, \
+        std::this_thread::get_id()};                                   \
+    logger::Logger::instance().PushLog(message);                       \
+  }                                                                    
+
 #include "utils/auto_trace.h"
 #define SDL_CREATE_LOG_VARIABLE(component_name) \
   namespace {                                   \
@@ -57,28 +71,12 @@
 // destroyed by exit()
 #define SDL_DEINIT_LOGGER() logger::Logger::instance().DeInit();
 
-#define LOG_WITH_LEVEL(logLevel, logEvent)                               \
-  do {                                                                   \
-    if (logger::Logger::instance().IsEnabledFor(logger_, logLevel)) {    \
-      std::stringstream accumulator;                                     \
-      accumulator << logEvent;                                           \
-      logger::LogMessage message{                                        \
-          logger_,                                                       \
-          logLevel,                                                      \
-          accumulator.str(),                                             \
-          std::chrono::high_resolution_clock::now(),                     \
-          logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__}, \
-          std::this_thread::get_id()};                                   \
-      logger::Logger::instance().PushLog(message);                       \
-    }                                                                    \
-  } while (false)
-
 #define SDL_LOG_TRACE(logEvent) \
   LOG_WITH_LEVEL(logger::LogLevel::TRACE_LEVEL, logEvent)
 
 #define SDL_LOG_AUTO_TRACE()    \
-  logger::AutoTrace auto_trace( \
-      logger_, logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__})
+    logger::AutoTrace auto_trace( \
+    logger_, logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__})
 
 #define SDL_LOG_DEBUG(logEvent) \
   LOG_WITH_LEVEL(logger::LogLevel::DEBUG_LEVEL, logEvent)

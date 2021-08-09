@@ -37,6 +37,10 @@
 #include "utils/lock.h"
 #include "utils/threads/thread.h"
 
+#ifdef __ANDROID__
+#include "utils/threads/pthread_android.h"
+#endif // __ANDROID__
+
 namespace threads {
 
 ThreadDelegate::~ThreadDelegate() {

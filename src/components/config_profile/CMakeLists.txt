@@ -36,6 +36,7 @@ include_directories (
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
 set(PATHS
@@ -46,6 +47,9 @@ set(PATHS
 set(LIBRARIES
   Utils
 )
+
+list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
+list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
 
 collect_sources(SOURCES "${PATHS}")
 add_library("ConfigProfile" ${SOURCES})

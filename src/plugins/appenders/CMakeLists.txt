@@ -43,7 +43,9 @@ set(LIBRARIES
 add_library(appenders SHARED ${SOURCES})
 target_link_libraries(appenders ${LIBRARIES})
 
+if(ENABLE_LOG AND NOT ANDROID)
 add_dependencies(appenders install-3rd_party_logger)
+endif()
 
 install(TARGETS appenders
   DESTINATION bin

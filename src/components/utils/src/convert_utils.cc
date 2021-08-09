@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <limits>
+#include <locale>
 #include "utils/macro.h"
 
 long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {
@@ -69,4 +70,24 @@ uint64_t utils::ConvertLongLongUIntToUInt64(
       std::max<uint64_t>(value, std::numeric_limits<uint64_t>::max()));
 
   return static_cast<uint64_t>(value);
+}
+
+std::string utils::ConvertBinaryDataToString(const uint8_t* data,
+                                             const size_t data_size) {
+  if (!data_size) {
+    return std::string();
+  }
+
+  bool is_printable_array = true;
+  std::locale loc;
+  const char* text = reinterpret_cast<const char*>(data);
+  // Check data for printability
+  for (size_t i = 0; i < data_size; ++i) {
+    if (!std::isprint(text[i], loc)) {
+      is_printable_array = false;
+      break;
+    }
+  }
+  return is_printable_array ? std::string(text, data_size)
+                            : std::string("is raw data");
 }

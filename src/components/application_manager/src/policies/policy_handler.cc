@@ -333,7 +333,14 @@ bool PolicyHandler::LoadPolicyLibrary() {
 
     ExchangePolicyManager(nullptr);
     sync_primitives::AutoWriteLock lock(policy_manager_lock_);
-    void* const dl_policy_handle = dlopen(kLibrary.c_str(), RTLD_LAZY);
+
+#ifdef __ANDROID__
+    const std::string policy_lib_path = application_manager_.get_settings().plugins_folder() + "/" + kLibrary;
+#else
+    const std::string policy_lib_path = kLibrary;
+#endif
+
+    void* const dl_policy_handle = dlopen(policy_lib_path.c_str(), RTLD_LAZY);
 
     if (!dl_policy_handle) {
       SDL_LOG_ERROR("An error occurs while calling dlopen");

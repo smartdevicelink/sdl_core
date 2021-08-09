@@ -112,13 +112,18 @@ set(LIBRARIES
   Utils
 )
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
-else ()
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   # --- SQLite Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
   list(APPEND LIBRARIES sqlite3)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  # --- Android specific Wrapper
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
 endif ()
 
 add_library(PolicyStatic ${SOURCES})
@@ -128,11 +133,11 @@ target_link_libraries(PolicyStatic ${LIBRARIES})
 add_library(Policy SHARED "src/policy_manager_impl.cc")
 target_link_libraries(Policy PolicyStatic)
 
-if (ENABLE_LOG)
+if(ENABLE_LOG AND NOT ANDROID)
   target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_custom_target(copy_library_Policy ALL
+add_custom_target(copy_policy_library ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
     ${copy_destination}

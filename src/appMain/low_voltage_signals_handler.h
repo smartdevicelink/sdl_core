@@ -116,7 +116,7 @@ class NotificationThreadDelegate : public threads::ThreadDelegate {
  public:
   NotificationThreadDelegate(
       LowVoltageSignalsHandler& low_voltage_signals_handler)
-      : low_voltage_signals_handler_(low_voltage_signals_handler) {}
+      : is_stopped_(false), low_voltage_signals_handler_(low_voltage_signals_handler) {}
 
   ~NotificationThreadDelegate() {}
 
@@ -124,6 +124,7 @@ class NotificationThreadDelegate : public threads::ThreadDelegate {
   void exitThreadMain() OVERRIDE;
 
  private:
+  bool is_stopped_;
   LowVoltageSignalsHandler& low_voltage_signals_handler_;
 };
 

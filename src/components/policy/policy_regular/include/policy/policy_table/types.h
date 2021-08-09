@@ -563,7 +563,7 @@ struct VehicleDataItem : CompositeType {
   VehicleDataItem(const VehicleDataItem& policy_table);
   explicit VehicleDataItem(const Json::Value* value__);
 
-  bool operator==(const VehicleDataItem& vd);
+  bool operator==(const VehicleDataItem& vd) const;
 
   ~VehicleDataItem();
 

@@ -36,20 +36,21 @@
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
 #include <openssl/ssl.h>
-
 #include <stdio.h>
+
 #include <algorithm>
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include "security_manager/security_manager.h"
 
+#include "security_manager/security_manager.h"
 #include "utils/atomic.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
+#define OPENSSL1_1_VERSION 0x1010000fL
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
@@ -170,11 +171,17 @@ bool CryptoManagerImpl::Init() {
 #else
       SDL_LOG_DEBUG("SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
+      SSL_CTX_set_max_proto_version(context_, SSL3_VERSION);
       break;
 #endif
     case TLSv1:
       SDL_LOG_DEBUG("TLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_VERSION);
+#endif
       break;
     case TLSv1_1:
       SDL_LOG_DEBUG("TLSv1_1 is used");
@@ -182,8 +189,11 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_1_VERSION);
 #endif
       break;
     case TLSv1_2:
@@ -192,13 +202,21 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
 #endif
       break;
     case DTLSv1:
       SDL_LOG_DEBUG("DTLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
+#else
+      method = is_server ? DTLS_server_method() : DTLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, DTLS1_VERSION);
+#endif
       break;
     default:
       SDL_LOG_ERROR("Unknown protocol: "
@@ -213,6 +231,7 @@ bool CryptoManagerImpl::Init() {
   utils::ScopeGuard guard = utils::MakeGuard(free_ctx, &context_);
 
   // Disable SSL2 as deprecated
+  // TLS 1.2 is the max supported TLS version for SDL
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
   SaveCertificateData(get_settings().certificate_data());
@@ -221,12 +240,25 @@ bool CryptoManagerImpl::Init() {
     SDL_LOG_WARN("Empty ciphers list");
   } else {
     SDL_LOG_DEBUG("Cipher list: " << get_settings().ciphers_list());
+    // If using openssl 1.1.1, this method may always return true
+    // https://github.com/openssl/openssl/issues/7196#issue-359287519
     if (!SSL_CTX_set_cipher_list(context_,
                                  get_settings().ciphers_list().c_str())) {
       SDL_LOG_ERROR(
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
+#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
+    auto sk = SSL_CTX_get_ciphers(context_);
+    const char* p;
+    for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+      const SSL_CIPHER* c = sk_SSL_CIPHER_value(sk, i);
+      p = SSL_CIPHER_get_name(c);
+      if (p == NULL)
+        break;
+      SDL_LOG_DEBUG("Using Cipher: " << p);
+    }
+#endif
   }
 
   if (get_settings().ca_cert_path().empty()) {

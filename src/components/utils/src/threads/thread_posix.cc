@@ -43,6 +43,10 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#ifdef __ANDROID__
+#include "utils/threads/pthread_android.h"
+#endif // __ANDROID__
+
 #ifndef __QNXNTO__
 const int EOK = 0;
 #endif

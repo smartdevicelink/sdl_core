@@ -30,7 +30,7 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-find_package(SDLOpenSSL REQUIRED)
+#find_package(SDLOpenSSL REQUIRED)
 
 if (EXTENDED_MEDIA_MODE) 
   set(default_media_inc 
@@ -69,6 +69,7 @@ include_directories(
   ${OPENSSL_INCLUDE_DIRECTORY}
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src
 )
@@ -79,11 +80,16 @@ add_library("LowVoltageHandlerObjLibrary" OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/low
 add_dependencies("LowVoltageHandlerObjLibrary" Boost)
 
 set (SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/life_cycle_impl.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/signal_handlers.cc
   $<TARGET_OBJECTS:LowVoltageHandlerObjLibrary>
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/android_platform_interface.cc)
+  else()
+  list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cc)
+endif()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -138,7 +144,7 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif()
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND NOT ANDROID)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
@@ -147,8 +153,16 @@ endif()
 
 list(APPEND LIBRARIES bson -L${BSON_LIBS_DIRECTORY})
 list(APPEND LIBRARIES emhashmap -L${EMHASHMAP_LIBS_DIRECTORY})
+list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
+list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
 
-add_executable(${PROJECT} ${SOURCES})
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  set(INI_FILE_NAME androidSmartDeviceLink.ini)
+  add_library(${PROJECT} SHARED ${SOURCES})
+else()
+  set(INI_FILE_NAME smartDeviceLink.ini)
+  add_executable(${PROJECT} ${SOURCES})
+endif()
 
 if (HMIADAPTER STREQUAL "messagebroker")
   add_dependencies(${PROJECT} Boost)
@@ -159,11 +173,19 @@ endif()
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 add_dependencies(${PROJECT} Policy)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  add_dependencies(${PROJECT} copy_sdl_rpc_plugin)
+  add_dependencies(${PROJECT} copy_vehicle_info_plugin)
+  add_dependencies(${PROJECT} copy_rc_rpc_plugin)
+  add_dependencies(${PROJECT} copy_app_service_rpc_plugin)
+endif()
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build_config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${INI_FILE_NAME} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sample_policy_manager.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -183,7 +205,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       OUTPUT_VARIABLE GITCOMMIT ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(INI_FILE ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini)
+    set(INI_FILE ${CMAKE_CURRENT_BINARY_DIR}/${INI_FILE_NAME})
     if(EXISTS ${INI_FILE})
       file(READ ${INI_FILE} FILE_CONTENT)
       set(LINE SDLVersion)
@@ -218,7 +240,7 @@ endif ()
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
   FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt
-    ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini
+    ${CMAKE_CURRENT_BINARY_DIR}/${INI_FILE_NAME}
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin

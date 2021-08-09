@@ -4,7 +4,13 @@
 #include <asm/types.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#ifdef __ANDROID__
+#include "transport_manager/tcp/ifaddrs_android/ifaddrs-android.h"
+#else
 #include <ifaddrs.h>
+#endif // __ANDROID__
+
 #include <net/if.h>
 #include <sys/select.h>
 #include <sys/socket.h>

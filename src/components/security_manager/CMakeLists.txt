@@ -39,6 +39,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/application_manager/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
   ${APR_INCLUDE_DIRECTORY}
 )
@@ -51,12 +52,13 @@ collect_sources(SOURCES "${PATHS}")
 
 set(LIBRARIES
   Utils
-  crypto
-  ssl
   ProtocolHandler
   jsoncpp
   ProtocolLibrary
 )
+
+list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
+list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
 
 add_library(SecurityManager ${SOURCES})
 target_link_libraries(SecurityManager ${LIBRARIES})

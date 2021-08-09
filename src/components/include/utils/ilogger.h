@@ -72,6 +72,9 @@ class Logger {
   virtual void Flush() = 0;
   virtual void PushLog(const LogMessage& log_message) = 0;
   static Logger& instance(Logger* pre_init = nullptr);
+
+ protected:
+  static Logger* instance_;
 };
 
 class ThirdPartyLoggerInterface {

@@ -412,7 +412,7 @@ void SubtleAlertRequest::SendSpeakRequest(int32_t app_id,
   msg_params[strings::app_id] = app_id;
   msg_params[hmi_request::speak_type] = Common_MethodName::SUBTLE_ALERT;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-  SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
 bool SubtleAlertRequest::CheckStrings() {

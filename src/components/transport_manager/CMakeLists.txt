@@ -41,12 +41,15 @@ include_directories (
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/qnx")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
     include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/linux")
 endif ()
 
@@ -61,6 +64,9 @@ set(LIBRARIES
   ProtocolLibrary
   Utils
 )
+
+list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
+list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
 
 if(BUILD_BT_SUPPORT)
   list(APPEND LIBRARIES
@@ -139,13 +145,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/qnx")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/linux")
 endif ()
 list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND NOT ANDROID)
   target_link_libraries("TransportManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

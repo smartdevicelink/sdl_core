@@ -583,6 +583,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const std::vector<std::string>& embedded_services() const OVERRIDE;
   const std::string hmi_origin_id() const OVERRIDE;
+
+  virtual void SubstituteMacroInString(std::string&) const {
+    // empty by design
+  }
+
   /**
    * @brief Reads a string value from the profile
    *

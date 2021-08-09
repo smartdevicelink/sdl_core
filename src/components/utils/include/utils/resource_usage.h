@@ -61,8 +61,7 @@ class Resources {
 #if defined(__QNXNTO__)
   typedef procfs_info PidStats;
 
-#elif defined(OS_LINUX)
-
+#else
   struct PidStats {
     int pid;
     char comm[MAX_COMM_LEN];
@@ -109,8 +108,6 @@ class Resources {
     unsigned long guest_time;
     long int cguest_time;
   };
-#else
-
 #endif
  public:
   /*

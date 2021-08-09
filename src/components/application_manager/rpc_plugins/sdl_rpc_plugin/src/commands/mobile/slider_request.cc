@@ -134,14 +134,14 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == FunctionID::UI_OnResetTimeout) {
+  if (event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
     SDL_LOG_INFO("Received UI_OnResetTimeout event");
     application_manager_.updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     return;
   }
 
-  if (event_id != FunctionID::UI_Slider) {
+  if (event_id != hmi_apis::FunctionID::UI_Slider) {
     SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }

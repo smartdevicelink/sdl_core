@@ -1653,7 +1653,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateUICreateWindowRequestToHMI(
       (*ui_request)[strings::params][strings::function_id];
 
   smart_objects::SmartObject msg_params(
-      smart_objects::SmartObject(smart_objects::SmartType_Map));
+      (smart_objects::SmartObject(smart_objects::SmartType_Map)));
 
   msg_params[strings::window_id] = window_info[strings::window_id].asInt();
   msg_params[strings::window_type] = window_info[strings::window_type].asInt();
@@ -1693,7 +1693,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateUIDeleteWindowRequestToHMI(
       (*ui_request)[strings::params][strings::function_id];
 
   smart_objects::SmartObject msg_params(
-      smart_objects::SmartObject(smart_objects::SmartType_Map));
+      (smart_objects::SmartObject(smart_objects::SmartType_Map)));
 
   msg_params[strings::window_id] = window_id;
   msg_params[strings::app_id] = application->app_id();
@@ -2280,7 +2280,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 
   SmartObject& params = (*message)[strings::params];
 
-  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::function_id] = hmi_apis::FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
   params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
@@ -2315,17 +2315,16 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   SmartObjectSPtr message = std::make_shared<SmartObject>(SmartType_Map);
   DCHECK_OR_RETURN_VOID(message);
 
   SmartObject& params = (*message)[strings::params];
 
-  params[strings::function_id] = FunctionID::SDL_GetListOfPermissions;
+  params[strings::function_id] = hmi_apis::FunctionID::SDL_GetListOfPermissions;
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
-  params[hmi_response::code] = static_cast<int32_t>(Common_Result::SUCCESS);
+  params[hmi_response::code] = static_cast<int32_t>(hmi_apis::Common_Result::SUCCESS);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2693,11 +2692,10 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
                                   const std::string& urlSchema,
                                   const std::string& packageName,
                                   ApplicationManager& app_mngr) {
-  using namespace mobile_apis;
   using namespace smart_objects;
 
   SmartObject content(SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
+  content[strings::msg_params][strings::request_type] = mobile_apis::RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
     content[strings::msg_params][strings::url] = urlSchema;
@@ -2710,13 +2708,11 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
 
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
                                   ApplicationManager& app_mngr) {
-  using namespace mobile_apis;
-
   policy::PolicyHandlerInterface& policy_handler = app_mngr.GetPolicyHandler();
 
   const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
+  content[strings::msg_params][strings::request_type] = mobile_apis::RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
   content[strings::msg_params][strings::timeout] = timeout;
 
@@ -2738,7 +2734,7 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(binary_data);
-  content[strings::msg_params][strings::file_type] = FileType::BINARY;
+  content[strings::msg_params][strings::file_type] = mobile_apis::FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }

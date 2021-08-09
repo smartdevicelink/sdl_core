@@ -307,7 +307,12 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 #endif  // BUILD_TESTS
 
   if (!is_in_memory) {
-    const std::string& path = get_settings().app_storage_folder();
+#ifdef __ANDROID__
+    std::string path = get_settings().system_files_path();
+    path = path.substr(0, path.find_last_of("/"));
+#else
+    const std::string path = get_settings().app_storage_folder();
+#endif
     if (!path.empty()) {
       db_->set_path(path + "/");
     }

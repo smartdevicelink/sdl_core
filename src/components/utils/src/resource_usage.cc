@@ -54,7 +54,7 @@ bool Resources::ReadStatFile(std::string& output) {
 }
 
 bool Resources::GetProcInfo(Resources::PidStats& output) {
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) or (__ANDROID__)
   std::string proc_buf;
   if (false == ReadStatFile(proc_buf)) {
     return false;
@@ -170,7 +170,7 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
 
 bool Resources::GetMemInfo(Resources::MemInfo& output) {
   bool result = false;
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) or defined(__ANDROID__)
   Resources::PidStats pid_stat;
   if (false == GetProcInfo(pid_stat)) {
     SDL_LOG_ERROR("Failed to get proc info");
@@ -209,7 +209,7 @@ bool Resources::GetMemInfo(Resources::MemInfo& output) {
 
 std::string Resources::GetStatPath() {
   std::string filename;
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) or defined(__ANDROID__)
   filename = GetProcPath() + "/stat";
 #elif defined(__QNXNTO__)
   filename = GetProcPath() + "/as";

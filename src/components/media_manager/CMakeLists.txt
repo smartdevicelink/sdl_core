@@ -102,7 +102,7 @@ collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 add_library("MediaManager" ${SOURCES})
 target_link_libraries("MediaManager" ${LIBRARIES})
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND NOT ANDROID)
   target_link_libraries("MediaManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

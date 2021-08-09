@@ -271,7 +271,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
   msg_params[strings::app_id] = connection_key();
   msg_params[hmi_request::speak_type] = Common_MethodName::AUDIO_PASS_THRU;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-  SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
 void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {

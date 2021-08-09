@@ -52,10 +52,15 @@ set(LIBRARIES
   Utils
   jsoncpp
   connectionHandler
+  crypto
 )
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND NOT ANDROID)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+
+if (ANDROID)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 add_library("vehicle_info_plugin_static"  ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${VEHICLE_INFO_PLUGIN_SOURCES})
@@ -64,15 +69,25 @@ target_link_libraries("vehicle_info_plugin_static" ${LIBRARIES})
 add_library(vehicle_info_plugin SHARED "src/vehicle_info_plugin.cc" )
 target_link_libraries(vehicle_info_plugin vehicle_info_plugin_static)
 
+if (NOT ANDROID)
+  set(INSTALL_DESTINATION bin)
 
-set(INSTALL_DESTINATION bin)
-
-install(TARGETS vehicle_info_plugin
-  DESTINATION ${INSTALL_DESTINATION}
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
-)
+  install(TARGETS vehicle_info_plugin
+    DESTINATION ${INSTALL_DESTINATION}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  )
+else()
+  set(LIBRARY_NAME ${CMAKE_SHARED_LIBRARY_PREFIX}vehicle_info_plugin${CMAKE_SHARED_LIBRARY_SUFFIX})
+  add_custom_target(copy_vehicle_info_plugin ALL
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
+          ${CMAKE_BINARY_DIR}/src/appMain/${LIBRARY_NAME}
+          DEPENDS vehicle_info_plugin
+          COMMENT "Copying library ${LIBRARY_NAME}"
+          )
+endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)

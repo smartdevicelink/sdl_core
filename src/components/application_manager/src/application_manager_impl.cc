@@ -1635,10 +1635,9 @@ void ApplicationManagerImpl::SendUpdateAppList() {
   SDL_LOG_AUTO_TRACE();
 
   using namespace smart_objects;
-  using namespace hmi_apis;
 
   SmartObjectSPtr request = MessageHelper::CreateModuleInfoSO(
-      FunctionID::BasicCommunication_UpdateAppList, *this);
+      hmi_apis::FunctionID::BasicCommunication_UpdateAppList, *this);
 
   (*request)[strings::msg_params][strings::applications] =
       SmartObject(SmartType_Array);

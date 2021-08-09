@@ -60,6 +60,10 @@ LowVoltageSignalsHandler::LowVoltageSignalsHandler(
     , cpid_(-1) {
   sigemptyset(&lv_mask_);
   sigaddset(&lv_mask_, SIGLOWVOLTAGE_);
+#ifdef __ANDROID__
+  // Android thread should also allow SIGINT to break sigwait() calls
+  sigaddset(&lv_mask_, SIGINT);
+#endif
   signals_handler_thread_->Start();
 }
 
@@ -141,7 +145,7 @@ void LowVoltageSignalsHandler::HandleSignal(const int signo) {
 }
 
 void NotificationThreadDelegate::threadMain() {
-  while (true) {
+  while (!is_stopped_) {
     int signo = 0;
     const sigset_t lv_mask =
         low_voltage_signals_handler_.LowVoltageSignalsMask();
@@ -157,6 +161,7 @@ void NotificationThreadDelegate::threadMain() {
 
 void NotificationThreadDelegate::exitThreadMain() {
   SDL_LOG_AUTO_TRACE();
+  is_stopped_ = true;
   ThreadDelegate::exitThreadMain();
 }
 

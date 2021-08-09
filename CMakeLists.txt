@@ -44,7 +44,7 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
-option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" ON)
+option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -77,8 +77,8 @@ set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
 set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
-set(CMAKE_CXX_COMPILER   $ENV{CMAKE_CXX_COMPILER})
-set(CMAKE_C_COMPILER     $ENV{CMAKE_C_COMPILER})
+#set(CMAKE_CXX_COMPILER   $ENV{CMAKE_CXX_COMPILER})
+#set(CMAKE_C_COMPILER     $ENV{CMAKE_C_COMPILER})
 set(BUILDDIR "$ENV{BUILDDIR}")
 
 if (ARCH_TYPE_OPTION)
@@ -246,7 +246,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -343,7 +343,9 @@ endif()
 
 if(ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
+  if (NOT ANDROID)
   set(install-3rd_party_logger "install-3rd_party_logger")
+  endif ()
   message(STATUS "Logger enabled")
 endif()
 
@@ -418,10 +420,11 @@ include_directories(
 # --- 3rd party libs
 add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
-find_package(OpenSSL REQUIRED)
+if (NOT ANDROID)
 if(ENABLE_LOG)
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
 endif()
+endif ()
 
 if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
@@ -441,8 +444,9 @@ if(ENABLE_IAP2EMULATION)
   message(STATUS "IAP2 emulation enabled")
 endif()
 
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(RTLIB rt)
+else()
   set(RTLIB )
 endif()
 
@@ -469,6 +473,13 @@ if(BUILD_TESTS)
 endif()
 
 # --- 3rd party libs (static)
+if (NOT ANDROID)
+  find_package(OpenSSL REQUIRED)
+else()
+  set(OPENSSL_INCLUDE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/3rd_party-static/openssl/include)
+  set(OPENSSL_LIBS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/3rd_party-static/openssl/x86_64)
+endif()
+
 add_subdirectory(./src/3rd_party-static)
 
 # --- Tools

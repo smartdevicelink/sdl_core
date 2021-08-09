@@ -148,7 +148,12 @@ void timer::Timer::StopThread() {
     delegate_->set_finalized_flag(true);
     {
       sync_primitives::AutoUnlock auto_unlock(state_lock_);
+#ifdef __ANDROID__
+      // Wait for a full thread stopping to avoid data races in Android threads
+      thread_->Stop(threads::Thread::kThreadSoftStop);
+#else
       thread_->Stop(threads::Thread::kThreadStopDelegate);
+#endif // __ANDROID__
     }
     delegate_->set_finalized_flag(false);
   }

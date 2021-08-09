@@ -1,0 +1,38 @@
+From dc4dff0e13ad400958867c4e4c024c373578cc5b Mon Sep 17 00:00:00 2001
+From: Andrii Kalinich <AKalinich@luxoft.com>
+Date: Fri, 23 Oct 2020 18:25:27 -0400
+Subject: [PATCH] Reproduce commit
+
+---
+ .../src/transport_adapter/threaded_socket_connection.cc     | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/src/components/transport_manager/src/transport_adapter/threaded_socket_connection.cc b/src/components/transport_manager/src/transport_adapter/threaded_socket_connection.cc
+index eb92599..da5fed1 100644
+--- a/src/components/transport_manager/src/transport_adapter/threaded_socket_connection.cc
++++ b/src/components/transport_manager/src/transport_adapter/threaded_socket_connection.cc
+@@ -125,14 +125,15 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
+ 
+ void ThreadedSocketConnection::Finalize() {
+   SDL_LOG_AUTO_TRACE();
+-  if (unexpected_disconnect_) {
+-    SDL_LOG_DEBUG("unexpected_disconnect");
+-    controller_->ConnectionAborted(
+-        device_handle(), application_handle(), CommunicationError());
+-  } else {
++//  if (unexpected_disconnect_) {
++//    SDL_LOG_DEBUG("unexpected_disconnect");
++//    controller_->ConnectionAborted(
++//        device_handle(), application_handle(), CommunicationError());
++//  } else {
+     SDL_LOG_DEBUG("not unexpected_disconnect");
+     controller_->ConnectionFinished(device_handle(), application_handle());
+-  }
++    // Something is missing here
++//  }
+ 
+   ShutdownAndCloseSocket();
+ }
+-- 
+2.7.4
+

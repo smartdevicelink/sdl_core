@@ -1345,7 +1345,7 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kHmiCapabilitiesCacheFileKey);
 
-  if (!hmi_capabilities_cache_file_name_.empty()) {
+  if (!hmi_capabilities_cache_file_name_.empty() && IsRelativePath(hmi_capabilities_cache_file_name_)) {
     hmi_capabilities_cache_file_name_ =
         app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
   }
@@ -2646,6 +2646,7 @@ bool Profile::ReadStringValue(std::string* value,
     *value = default_value;
     return false;
   }
+  SubstituteMacroInString(*value);
   return true;
 }
 

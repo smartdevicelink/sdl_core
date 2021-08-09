@@ -35,11 +35,14 @@ set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
 include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set (LIBRARIES crypto)
+set (LIBRARIES crypto -L$ENV{THIRD_PARTY_INSTALL_PREFIX}/${CMAKE_ANDROID_ARCH_ABI}/lib)
 
 add_library("encryption" ${SOURCES})
+target_include_directories("encryption" PUBLIC "$ENV{THIRD_PARTY_INSTALL_PREFIX}/${CMAKE_ANDROID_ARCH_ABI}/include")
 target_link_libraries("encryption" "${LIBRARIES}")
+add_dependencies("encryption" openssl_external)

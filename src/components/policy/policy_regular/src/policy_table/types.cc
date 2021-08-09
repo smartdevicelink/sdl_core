@@ -1745,7 +1745,7 @@ Json::Value VehicleDataItem::ToJsonValue() const {
   return ret;
 }
 
-bool VehicleDataItem::operator==(const VehicleDataItem& vd) {
+bool VehicleDataItem::operator==(const VehicleDataItem& vd) const {
   return (name == vd.name && type == vd.type && key == vd.key &&
           mandatory == vd.mandatory && params == vd.params &&
           array == vd.array && since == vd.since && until == vd.until &&

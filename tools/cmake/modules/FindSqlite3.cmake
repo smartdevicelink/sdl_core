@@ -70,9 +70,9 @@ else (SQLITE3_LIBRARIES AND SQLITE3_INCLUDE_DIRS)
       message(STATUS "Found Sqlite3: ${SQLITE3_LIBRARIES}")
     endif (NOT Sqlite3_FIND_QUIETLY)
   else (SQLITE3_FOUND)
-    if (Sqlite3_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find Sqlite3")
-    endif (Sqlite3_FIND_REQUIRED)
+#    if (Sqlite3_FIND_REQUIRED)
+#      message(FATAL_ERROR "Could not find Sqlite3")
+#    endif (Sqlite3_FIND_REQUIRED)
   endif (SQLITE3_FOUND)
 
   # show the SQLITE3_INCLUDE_DIRS and SQLITE3_LIBRARIES variables only in the advanced view

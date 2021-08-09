@@ -31,8 +31,6 @@
 set(target dbms)
 set(SQLITE_SRC_DIR ${COMPONENTS_DIR}/utils/src/sqlite_wrapper)
 
-find_package(Sqlite3 REQUIRED)
-
 include_directories(${COMPONENTS_DIR}/utils/include/utils)
 
 set(SOURCES

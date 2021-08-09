@@ -36,22 +36,28 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <ifaddrs.h>
 #include <memory.h>
 #include <signal.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #ifdef __linux__
 #include <linux/tcp.h>
 #else  // __linux__
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_var.h>
+#include <sys/sysctl.h>
 #include <sys/time.h>
 #endif  // __linux__
+
+#ifdef __ANDROID__
+#include "transport_manager/tcp/ifaddrs_android/ifaddrs-android.h"
+#else
+#include <ifaddrs.h>
+#endif // __ANDROID__
 
 #include <sstream>
 
