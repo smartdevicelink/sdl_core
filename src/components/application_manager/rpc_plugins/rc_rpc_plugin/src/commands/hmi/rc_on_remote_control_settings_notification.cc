@@ -88,7 +88,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
   SDL_LOG_AUTO_TRACE();
 
   if ((*message_)[app_mngr::strings::msg_params].empty()) {
-    SDL_LOG_DEBUG("Notification is ignored due to \"allow\" parameter absense");
+    SDL_LOG_DEBUG("Notification is ignored due to absence of any parameters");
     SDL_LOG_DEBUG("RC Functionality remains unchanged");
     return;
   }
