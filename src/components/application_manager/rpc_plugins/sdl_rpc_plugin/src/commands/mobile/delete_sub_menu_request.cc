@@ -224,8 +224,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
             message[strings::params][hmi_response::code].asInt());
 
-        auto app = application_manager_.application(
-            msg_params[strings::app_id].asUInt());
+        auto app = application_manager_.application(connection_key());
         if (!app) {
           SDL_LOG_ERROR("Application not found");
           return;
@@ -251,10 +250,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           message[strings::params][strings::correlation_id].asUInt();
 
       if (corr_id == pending_request_corr_id_) {
-        auto msg_params = requests_list_.front();
-
-        auto app = application_manager_.application(
-            msg_params[strings::app_id].asUInt());
+        auto app = application_manager_.application(connection_key());
         if (!app) {
           SDL_LOG_ERROR("Application not found");
           return;
@@ -277,8 +273,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
             message[strings::params][hmi_response::code].asInt());
 
-        auto app = application_manager_.application(
-            msg_params[strings::app_id].asUInt());
+        auto app = application_manager_.application(connection_key());
         if (!app) {
           SDL_LOG_ERROR("Application not found");
           return;
