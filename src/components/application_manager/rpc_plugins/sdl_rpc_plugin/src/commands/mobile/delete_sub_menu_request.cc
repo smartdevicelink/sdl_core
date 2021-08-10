@@ -224,18 +224,18 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
             message[strings::params][hmi_response::code].asInt());
 
-        if (IsHMIResultSuccess(result_code)) {
-          auto app = application_manager_.application(
-              msg_params[strings::app_id].asUInt());
+        auto app = application_manager_.application(
+            msg_params[strings::app_id].asUInt());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
 
-          if (app) {
-            const auto cmd_id = msg_params[strings::cmd_id].asUInt();
-            SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
-            app->RemoveCommand(cmd_id);
-            app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
-          } else {
-            SDL_LOG_ERROR("Application not found");
-          }
+        if (IsHMIResultSuccess(result_code)) {
+          const auto cmd_id = msg_params[strings::cmd_id].asUInt();
+          SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
+          app->RemoveCommand(cmd_id);
+          app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
         }
 
         requests_list_.pop_front();
@@ -251,6 +251,15 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           message[strings::params][strings::correlation_id].asUInt();
 
       if (corr_id == pending_request_corr_id_) {
+        auto msg_params = requests_list_.front();
+
+        auto app = application_manager_.application(
+            msg_params[strings::app_id].asUInt());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
+
         requests_list_.pop_front();
       }
 
@@ -268,17 +277,17 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
             message[strings::params][hmi_response::code].asInt());
 
-        if (IsHMIResultSuccess(result_code)) {
-          auto app = application_manager_.application(
-              msg_params[strings::app_id].asUInt());
+        auto app = application_manager_.application(
+            msg_params[strings::app_id].asUInt());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
 
-          if (app) {
-            const auto menu_id = msg_params[strings::menu_id].asUInt();
-            SDL_LOG_DEBUG("Removing submenuID: " << menu_id);
-            app->RemoveSubMenu(menu_id);
-          } else {
-            SDL_LOG_ERROR("Application not found");
-          }
+        if (IsHMIResultSuccess(result_code)) {
+          const auto menu_id = msg_params[strings::menu_id].asUInt();
+          SDL_LOG_DEBUG("Removing submenuID: " << menu_id);
+          app->RemoveSubMenu(menu_id);
         }
 
         requests_list_.pop_front();

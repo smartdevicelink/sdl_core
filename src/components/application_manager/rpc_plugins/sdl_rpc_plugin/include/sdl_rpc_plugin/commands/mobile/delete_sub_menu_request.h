@@ -82,9 +82,9 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
   bool Init() FINAL;
 
  private:
-  /*
-   * @brief Creates and queues up delete requests for a submenues that have a
-   * parentID that matches the parentID parameter
+  /**
+   * @brief Creates and queues up delete requests for a submenus that have a
+   * parent ID which matches the parentID parameter
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
@@ -93,9 +93,9 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
                             const uint32_t parentID,
                             const app_mngr::SubMenuMap& subMenus);
 
-  /*
-   * @brief Creates and queues up delete requests for a VR commands from SDL for
-   * corresponding submenu ID
+  /**
+   * @brief Creates and queues up delete requests for each VR command tied to
+   * the given submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
@@ -103,9 +103,9 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
   void DeleteSubMenuVRCommands(app_mngr::ApplicationConstSharedPtr app,
                                const uint32_t parentID);
 
-  /*
-   * @brief Creates and queues up the delete requests for a UI commands from SDL
-   * for corresponding submenu ID
+  /**
+   * @brief Creates and queues up delete requests for each UI command tied to
+   * the given submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
