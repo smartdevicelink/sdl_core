@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_
 
 #include "application_manager/commands/notification_from_hmi.h"
 
@@ -43,17 +43,17 @@ namespace commands {
 namespace hmi {
 
 /**
- * @brief OnUIResetTimeoutNotification command class
+ * @brief OnResetTimeoutNotification command class
  **/
-class OnUIResetTimeoutNotification
+class OnResetTimeoutNotification
     : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
-   * @brief OnUIResetTimeoutNotification class constructor
+   * @brief OnResetTimeoutNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnUIResetTimeoutNotification(
+  OnResetTimeoutNotification(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
@@ -61,9 +61,9 @@ class OnUIResetTimeoutNotification
       policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief OnUIResetTimeoutNotification class destructor
+   * @brief OnResetTimeoutNotification class destructor
    **/
-  virtual ~OnUIResetTimeoutNotification();
+  virtual ~OnResetTimeoutNotification();
 
   /**
    * @brief Execute command
@@ -71,7 +71,7 @@ class OnUIResetTimeoutNotification
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnResetTimeoutNotification);
 };
 
 }  // namespace hmi
@@ -80,4 +80,4 @@ class OnUIResetTimeoutNotification
 
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_

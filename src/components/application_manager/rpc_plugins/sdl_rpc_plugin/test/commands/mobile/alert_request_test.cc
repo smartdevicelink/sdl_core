@@ -403,27 +403,6 @@ TEST_F(AlertRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   command->on_event(event);
 }
 
-TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
-  PreConditions();
-  Expectations();
-  AddAlertTextsToMsg();
-
-  (*msg_)[am::strings::msg_params][am::strings::duration] = kDefaultTimeout;
-
-  CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  EXPECT_TRUE(command->Init());
-
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
-
-  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_ENUM);
-
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
-  command->on_event(event);
-}
-
 TEST_F(AlertRequestTest, OnEvent_UIAlertHasHmiResponsesToWait_UNSUCCESS) {
   Expectations();
   AddAlertTextsToMsg();

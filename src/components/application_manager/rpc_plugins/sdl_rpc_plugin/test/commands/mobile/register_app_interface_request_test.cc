@@ -416,6 +416,7 @@ TEST_F(RegisterAppInterfaceRequestTest, DefaultTimeout_CheckIfZero_SUCCESS) {
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId1;
+
   EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
@@ -501,6 +502,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   InitBasicMessage();
 
   ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
+
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -802,6 +804,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey2;
 
   ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
+
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 

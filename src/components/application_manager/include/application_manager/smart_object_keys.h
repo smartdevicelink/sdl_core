@@ -501,6 +501,10 @@ extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
 extern const char* const preferred_fps;
+
+// OnResetTimeout
+extern const char* const request_id;
+extern const char* const reset_period;
 }  // namespace strings
 
 namespace hmi_interface {

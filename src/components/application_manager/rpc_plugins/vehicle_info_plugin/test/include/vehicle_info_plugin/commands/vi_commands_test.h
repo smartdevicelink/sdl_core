@@ -66,7 +66,7 @@ using ::smart_objects::SmartObject;
 template <const CommandsTestMocks kIsNice = CommandsTestMocks::kNotNice>
 class VICommandsTest : public CommandsTest<kIsNice> {
  public:
-  enum { kDefaultTimeout_ = 100 };
+  enum { kDefaultTimeout_ = 100, kDefaultTimeoutCompensation_ = 10 };
 
   template <class Command>
   std::shared_ptr<Command> CreateCommandVI() {
@@ -76,7 +76,7 @@ class VICommandsTest : public CommandsTest<kIsNice> {
 
   template <class Command>
   std::shared_ptr<Command> CreateCommandVI(MessageSharedPtr& msg) {
-    InitCommandVI(kDefaultTimeout_);
+    InitCommandVI(kDefaultTimeout_, kDefaultTimeoutCompensation_);
     vehicle_info_plugin::VehicleInfoCommandParams params = {
         CommandsTest<kIsNice>::app_mngr_,
         CommandsTest<kIsNice>::mock_rpc_service_,
@@ -90,11 +90,14 @@ class VICommandsTest : public CommandsTest<kIsNice> {
       mock_custom_vehicle_data_manager_;
 
  protected:
-  void InitCommandVI(const uint32_t& timeout) {
+  void InitCommandVI(const uint32_t timeout, const uint32_t compensation) {
     ON_CALL(CommandsTest<kIsNice>::app_mngr_, get_settings())
         .WillByDefault(ReturnRef(CommandsTest<kIsNice>::app_mngr_settings_));
     ON_CALL(CommandsTest<kIsNice>::app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout));
+    ON_CALL(CommandsTest<kIsNice>::app_mngr_settings_,
+            default_timeout_compensation())
+        .WillByDefault(ReturnRef(compensation));
   }
 };
 }  // namespace commands_test

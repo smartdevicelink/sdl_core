@@ -39,10 +39,11 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/mock_request_timeout_handler.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_protection_manager.h"
-#include "application_manager/request_controller.h"
+#include "application_manager/request_controller_impl.h"
 #include "application_manager/rpc_service_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
@@ -81,6 +82,7 @@ using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockCommandFactory;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::application_manager_test::MockRequestControlerSettings;
+using test::components::application_manager_test::MockRequestTimeoutHandler;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
 using test::components::hmi_message_handler_test::MockHMIMessageHandler;
@@ -108,9 +110,10 @@ class RCGetInteriorVehicleDataConsentTest
       , command_holder(app_mngr_)
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array))
-      , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
+      , request_controller(mock_request_controler,
+                           mock_request_timeout_handler_)
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
@@ -214,9 +217,10 @@ class RCGetInteriorVehicleDataConsentTest
   smart_objects::SmartObjectSPtr rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
-  am::request_controller::RequestController request_controller;
   std::shared_ptr<application_manager::MockRPCProtectionManager>
       rpc_protection_manager_;
+  MockRequestTimeoutHandler mock_request_timeout_handler_;
+  am::request_controller::RequestControllerImpl request_controller;
   am::rpc_service::RPCServiceImpl rpc_service_;
   RCRPCPlugin rc_plugin_;
   std::shared_ptr<RCAppExtension> rc_app_extension_;
@@ -235,6 +239,8 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendASKDRIVERModeToMobile) {
   // Arrange
   auto mobile_message = CreateBasicMessage();
+  ON_CALL(mock_allocation_manager_, GetAccessMode())
+      .WillByDefault(Return(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
 
   // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
@@ -279,6 +285,9 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
       .WillOnce(ReturnRef(mock_command_factory));
 
   auto mobile_message = CreateBasicMessage();
+  ON_CALL(mock_allocation_manager_, GetAccessMode())
+      .WillByDefault(Return(hmi_apis::Common_RCAccessMode::AUTO_DENY));
+
   auto rc_consent_response =
       CreateRCCommand<commands::RCGetInteriorVehicleDataConsentResponse>(
           mobile_message);

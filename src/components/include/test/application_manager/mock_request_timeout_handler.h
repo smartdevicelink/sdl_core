@@ -29,43 +29,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_REQUEST_TIMEOUT_HANDLER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_REQUEST_TIMEOUT_HANDLER_H_
 
-namespace commands {
+#include "application_manager/request_timeout_handler.h"
+#include "gmock/gmock.h"
 
-namespace hmi {
+namespace test {
+namespace components {
+namespace application_manager_test {
 
-SDL_CREATE_LOG_VARIABLE("Commands")
+class MockRequestTimeoutHandler
+    : public application_manager::request_controller::RequestTimeoutHandler {
+ public:
+  MOCK_METHOD2(
+      AddRequest,
+      void(const uint32_t hmi_correlation_id,
+           const application_manager::request_controller::Request& request));
+  MOCK_METHOD1(RemoveRequest, void(const uint32_t hmi_correlation_id));
+};
 
-OnTTSResetTimeoutNotification::OnTTSResetTimeoutNotification(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handle) {}
+}  //  namespace application_manager_test
+}  //  namespace components
+}  //  namespace test
 
-OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {}
-
-void OnTTSResetTimeoutNotification::Run() {
-  SDL_LOG_AUTO_TRACE();
-
-  event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-  event.set_smart_object(*message_);
-  event.raise(application_manager_.event_dispatcher());
-}
-
-}  // namespace hmi
-
-}  // namespace commands
-
-}  // namespace sdl_rpc_plugin
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_REQUEST_TIMEOUT_HANDLER_H_

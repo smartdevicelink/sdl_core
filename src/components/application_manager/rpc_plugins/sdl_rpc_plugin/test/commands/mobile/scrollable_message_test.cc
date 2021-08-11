@@ -173,17 +173,21 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
   (*msg_)[msg_params][timeout] = kTimeOut;
   (*msg_)[msg_params][interaction_mode] =
       mobile_apis::InteractionMode::MANUAL_ONLY;
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  const uint32_t initial_timeout =
+      kDefaultTimeout_ + kDefaultTimeoutCompensation_;
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut + kDefaultTimeout_, command_->default_timeout());
+  EXPECT_EQ(kTimeOut + initial_timeout, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
   (*msg_)[msg_params][interaction_mode] =
       mobile_apis::InteractionMode::MANUAL_ONLY;
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  const uint32_t initial_timeout =
+      kDefaultTimeout_ + kDefaultTimeoutCompensation_;
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
+  EXPECT_EQ(initial_timeout, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
@@ -237,18 +241,6 @@ TEST_F(ScrollableMessageRequestTest, Run_SoftButtonProcessingResult_SUCCESS) {
 TEST_F(ScrollableMessageRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  command_->on_event(event);
-}
-
-TEST_F(ScrollableMessageRequestTest,
-       OnEvent_ReceivedUIOnResetTimeoutEvent_SUCCESS) {
-  (*msg_)[params][connection_key] = kConnectionKey;
-  (*msg_)[params][correlation_id] = kCorrelationId;
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout_));
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
   command_->on_event(event);
 }
 
