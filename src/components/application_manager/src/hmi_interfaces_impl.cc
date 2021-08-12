@@ -43,8 +43,8 @@ generate_function_to_interface_convert_map() {
   convert_map[Buttons_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonEvent] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonPress] = HmiInterfaces::HMI_INTERFACE_Buttons;
-  convert_map[Buttons_OnButtonSubscription] =
-      HmiInterfaces::HMI_INTERFACE_Buttons;
+  convert_map[Buttons_SubscribeButton] = HmiInterfaces::HMI_INTERFACE_Buttons;
+  convert_map[Buttons_UnsubscribeButton] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[BasicCommunication_OnReady] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnStartDeviceDiscovery] =

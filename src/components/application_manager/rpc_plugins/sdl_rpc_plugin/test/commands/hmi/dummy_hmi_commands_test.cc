@@ -97,7 +97,6 @@
 #include "hmi/on_audio_data_streaming_notification.h"
 #include "hmi/on_button_event_notification.h"
 #include "hmi/on_button_press_notification.h"
-#include "hmi/on_button_subscription_notification.h"
 #include "hmi/on_device_chosen_notification.h"
 #include "hmi/on_device_state_changed_notification.h"
 #include "hmi/on_driver_distraction_notification.h"
@@ -148,6 +147,8 @@
 #include "hmi/sdl_get_user_friendly_message_response.h"
 #include "hmi/sdl_policy_update.h"
 #include "hmi/sdl_policy_update_response.h"
+#include "hmi/subscribe_button_request.h"
+#include "hmi/subscribe_button_response.h"
 #include "hmi/tts_change_registration_request.h"
 #include "hmi/tts_change_registration_response.h"
 #include "hmi/tts_get_capabilities_request.h"
@@ -206,6 +207,8 @@
 #include "hmi/ui_slider_response.h"
 #include "hmi/ui_subtle_alert_request.h"
 #include "hmi/ui_subtle_alert_response.h"
+#include "hmi/unsubscribe_button_request.h"
+#include "hmi/unsubscribe_button_response.h"
 #include "hmi/update_app_list_request.h"
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_request.h"
@@ -445,7 +448,6 @@ typedef Types<commands::NaviIsReadyResponse,
 
 typedef Types<commands::hmi::OnButtonEventNotification,
               commands::hmi::OnButtonPressNotification,
-              commands::hmi::OnButtonSubscriptionNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,
@@ -495,8 +497,12 @@ typedef Types<commands::AllowAllAppsRequest,
               commands::AllowAppResponse,
               commands::BCGetFilePathRequest,
               commands::BCGetFilePathResponse,
+              commands::hmi::SubscribeButtonRequest,
+              commands::hmi::SubscribeButtonResponse,
               commands::UISubtleAlertResponse,
-              commands::UISubtleAlertRequest>
+              commands::UISubtleAlertRequest,
+              commands::hmi::UnsubscribeButtonRequest,
+              commands::hmi::UnsubscribeButtonResponse>
     HMICommandsListFifth;
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);

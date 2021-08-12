@@ -269,11 +269,6 @@ MockMessageHelper* MockMessageHelper::message_helper_mock() {
   static ::testing::NiceMock<MockMessageHelper> message_helper_mock;
   return &message_helper_mock;
 }
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  MockMessageHelper::message_helper_mock()
-      ->SendAllOnButtonSubscriptionNotificationsForApp(app, app_mngr);
-}
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
                                                  ApplicationManager& app_mngr) {
@@ -600,30 +595,32 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 }
 
 smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed) {
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button_name,
+    const hmi_apis::FunctionID::eType function_id,
+    ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
-      ->CreateOnButtonSubscriptionNotification(app_id, button, is_subscribed);
+      ->CreateButtonSubscriptionHandlingRequestToHmi(
+          app_id, button_name, function_id, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonNotificationToMobile(app, source_message);
 }
 
 smart_objects::SmartObjectList
-MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr application,
-    ApplicationManager& app_mngr,
-    const ButtonSubscriptions& button_subscriptions) {
-  return MockMessageHelper::message_helper_mock()
-      ->CreateOnButtonSubscriptionNotificationsForApp(
-          application, app_mngr, button_subscriptions);
-}
-
-void MessageHelper::SendUnsubscribeButtonNotification(
-    mobile_apis::ButtonName::eType button,
-    ApplicationSharedPtr application,
+MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
+    ApplicationConstSharedPtr app,
+    const ButtonSubscriptions& button_subscriptions,
+    const hmi_apis::FunctionID::eType function_id,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
-      ->SendUnsubscribeButtonNotification(button, application, app_mngr);
+      ->CreateButtonSubscriptionsHandlingRequestsList(
+          app, button_subscriptions, function_id, app_mngr);
 }
 
 smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(

@@ -3182,6 +3182,11 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     resume_controller().OnIgnitionOff();
   }
   request_ctrl_->TerminateAllHMIRequests();
+
+  {
+    sync_primitives::AutoLock lock(expired_button_requests_lock_);
+    expired_button_requests_.clear();
+  }
 }
 
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
@@ -5022,6 +5027,38 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
   } else {
     SDL_LOG_WARN("Redundant changing HMI level: " << level);
   }
+}
+
+void ApplicationManagerImpl::AddExpiredButtonRequest(
+    const uint32_t app_id,
+    const int32_t corr_id,
+    const hmi_apis::Common_ButtonName::eType button_name) {
+  SDL_LOG_AUTO_TRACE();
+
+  sync_primitives::AutoLock lock(expired_button_requests_lock_);
+  expired_button_requests_[corr_id] = {app_id, button_name};
+}
+
+utils::Optional<ExpiredButtonRequestData>
+ApplicationManagerImpl::GetExpiredButtonRequestData(
+    const int32_t corr_id) const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(expired_button_requests_lock_);
+
+  auto found_subscription = expired_button_requests_.find(corr_id);
+  if (found_subscription == expired_button_requests_.end()) {
+    return utils::Optional<ExpiredButtonRequestData>::EMPTY;
+  }
+
+  return utils::Optional<ExpiredButtonRequestData>(found_subscription->second);
+}
+
+void ApplicationManagerImpl::DeleteExpiredButtonRequest(const int32_t corr_id) {
+  SDL_LOG_AUTO_TRACE();
+
+  sync_primitives::AutoLock lock(expired_button_requests_lock_);
+  auto found_subscription = expired_button_requests_.find(corr_id);
+  expired_button_requests_.erase(found_subscription);
 }
 
 }  // namespace application_manager

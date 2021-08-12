@@ -69,6 +69,23 @@ struct CommandParametersPermissions {
 };
 
 namespace commands {
+
+/**
+ * @brief Checks Mobile result code for single RPC
+ * @param result_code contains result code from response to Mobile
+ * @return true if result code complies to successful result codes,
+ * false otherwise.
+ */
+bool IsMobileResultSuccess(const mobile_apis::Result::eType result_code);
+
+/**
+ * @brief Checks HMI result code for single RPC
+ * @param result_code contains result code from HMI response
+ * @return true if result code complies to successful result codes,
+ * false otherwise.
+ */
+bool IsHMIResultSuccess(const hmi_apis::Common_Result::eType result_code);
+
 /**
  * @brief Class is intended to encapsulate RPC as an object
  **/
@@ -182,6 +199,16 @@ class CommandImpl : public Command {
    * @return true if success otherwise return false
    */
   bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
+
+  /**
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @param interface to check availability
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  bool IsHMIResultSuccess(hmi_apis::Common_Result::eType result_code,
+                          HmiInterfaces::InterfaceID interface) const;
 
   // members
   static const int32_t hmi_protocol_type_;

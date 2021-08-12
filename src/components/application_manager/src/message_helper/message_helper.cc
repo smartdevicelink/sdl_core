@@ -819,31 +819,6 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   }
 }
 
-void MessageHelper::SendUnsubscribeButtonNotification(
-    mobile_apis::ButtonName::eType button,
-    ApplicationSharedPtr application,
-    ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = application->app_id();
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = false;
-
-  SmartObjectSPtr message = CreateMessageForHMI(
-      hmi_apis::messageType::notification, app_mngr.GetNextHMICorrelationID());
-  DCHECK(message);
-
-  SmartObject& object = *message;
-  object[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-
-  object[strings::msg_params] = msg_params;
-
-  app_mngr.GetRPCService().ManageHMICommand(message);
-}
-
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
@@ -1098,104 +1073,119 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-void MessageHelper::SendOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed,
-    ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
   SDL_LOG_AUTO_TRACE();
 
-  SmartObjectSPtr notification_ptr =
-      std::make_shared<SmartObject>(SmartType_Map);
-  if (!notification_ptr) {
-    SDL_LOG_ERROR("Memory allocation failed.");
-    return;
-  }
-  SmartObject& notification = *notification_ptr;
-
-  SmartObject msg_params = SmartObject(SmartType_Map);
-  msg_params[strings::app_id] = app_id;
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = is_subscribed;
-
-  notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  notification[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  notification[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  notification[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-  notification[strings::msg_params] = msg_params;
-
-  if (!app_mngr.GetRPCService().ManageHMICommand(notification_ptr)) {
-    SDL_LOG_ERROR("Unable to send HMI notification");
-  }
-}
-
-void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
-  using namespace smart_objects;
-  using namespace hmi_apis;
-  using namespace mobile_apis;
-  SDL_LOG_AUTO_TRACE();
-
-  if (app.use_count() == 0) {
-    SDL_LOG_ERROR("Invalid application pointer ");
-    return;
+  if (!app) {
+    SDL_LOG_ERROR("application NULL pointer");
+    return std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Null);
   }
 
-  const ButtonSubscriptions subscriptions = app->SubscribedButtons().GetData();
-  ButtonSubscriptions::iterator it = subscriptions.begin();
-  for (; subscriptions.end() != it; ++it) {
-    SendOnButtonSubscriptionNotification(
-        app->hmi_app_id(),
-        static_cast<Common_ButtonName::eType>(*it),
-        true,
-        app_mngr);
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& ref = *msg;
+  ref[strings::params][strings::connection_key] = app->app_id();
+
+  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
+      source_message[strings::params][strings::function_id].asInt());
+  ref[strings::params][strings::function_id] = function_id;
+
+  mobile_apis::ButtonName::eType btn_id = mobile_apis::ButtonName::INVALID_ENUM;
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][hmi_response::button_name].asInt());
+
+  } else if (source_message[strings::msg_params].keyExists(
+                 strings::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][strings::button_name].asInt());
   }
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() <= utils::base_rpc_version) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  ref[strings::msg_params][strings::button_name] = btn_id;
+
+  auto get_mode_code = [&source_message](
+                           const std::string& hmi_param_name,
+                           const std::string& mobile_param_name) -> int64_t {
+    if (source_message[strings::msg_params].keyExists(hmi_param_name)) {
+      return source_message[strings::msg_params][hmi_param_name].asInt();
+    }
+
+    if (source_message[strings::msg_params].keyExists(mobile_param_name)) {
+      return source_message[strings::msg_params][mobile_param_name].asInt();
+    }
+
+    return -1;
+  };
+
+  if (mobile_apis::FunctionID::eType::OnButtonPressID == function_id) {
+    const auto press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
+        get_mode_code(hmi_response::button_mode, strings::button_press_mode));
+    ref[strings::msg_params][strings::button_press_mode] = press_mode;
+  }
+
+  if (mobile_apis::FunctionID::eType::OnButtonEventID == function_id) {
+    const auto press_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        get_mode_code(hmi_response::button_mode, strings::button_event_mode));
+    ref[strings::msg_params][strings::button_event_mode] = press_mode;
+  }
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::custom_button_id)) {
+    ref[strings::msg_params][strings::custom_button_id] =
+        source_message[strings::msg_params][strings::custom_button_id];
+  }
+
+  if (source_message[strings::msg_params].keyExists(strings::window_id)) {
+    ref[strings::msg_params][strings::window_id] =
+        source_message[strings::msg_params][strings::window_id];
+  }
+
+  return msg;
 }
 
 smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed) {
+MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button_name,
+    const hmi_apis::FunctionID::eType function_id,
+    application_manager::ApplicationManager& app_mngr) {
   using namespace smart_objects;
-  using namespace hmi_apis;
   SDL_LOG_AUTO_TRACE();
-  SmartObjectSPtr notification_ptr =
-      std::make_shared<SmartObject>(SmartType_Map);
-  SmartObject& notification = *notification_ptr;
+
+  SmartObjectSPtr request_ptr = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+
+  SmartObject& request = *request_ptr;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::name] = button;
-  msg_params[strings::is_suscribed] = is_subscribed;
-  notification[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-  notification[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  notification[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-  notification[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
-  notification[strings::msg_params] = msg_params;
-  return notification_ptr;
+  msg_params[strings::button_name] = button_name;
+  request[strings::params][strings::function_id] = function_id;
+  request[strings::msg_params] = msg_params;
+  return request_ptr;
 }
 
 smart_objects::SmartObjectList
-MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
     ApplicationConstSharedPtr app,
-    ApplicationManager& app_mngr,
-    const ButtonSubscriptions& button_subscriptions) {
-  using namespace smart_objects;
+    const ButtonSubscriptions& button_subscriptions,
+    const hmi_apis::FunctionID::eType function_id,
+    ApplicationManager& app_mngr) {
   using namespace hmi_apis;
-  using namespace mobile_apis;
   SDL_LOG_AUTO_TRACE();
 
-  SmartObjectList button_subscription_requests;
+  smart_objects::SmartObjectList button_subscription_requests;
 
   if (app.use_count() == 0) {
     SDL_LOG_ERROR("Invalid application pointer ");
@@ -1207,7 +1197,8 @@ MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
         static_cast<Common_ButtonName::eType>(it);
 
     button_subscription_requests.push_back(
-        CreateOnButtonSubscriptionNotification(app->hmi_app_id(), btn, true));
+        CreateButtonSubscriptionHandlingRequestToHmi(
+            app->app_id(), btn, function_id, app_mngr));
   }
 
   return button_subscription_requests;

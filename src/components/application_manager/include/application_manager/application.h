@@ -46,6 +46,7 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/message.h"
 #include "connection_handler/device.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
@@ -106,6 +107,8 @@ struct AppFile {
   mobile_apis::FileType::eType file_type;
 };
 typedef std::map<std::string, AppFile> AppFilesMap;
+typedef std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+    ButtonSubscriptionsMap;
 class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
