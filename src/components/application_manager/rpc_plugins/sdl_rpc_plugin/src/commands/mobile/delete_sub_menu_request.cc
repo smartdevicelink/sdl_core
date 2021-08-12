@@ -230,7 +230,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           return;
         }
 
-        if (IsHMIResultSuccess(result_code)) {
+        if (application_manager::commands::IsHMIResultSuccess(result_code)) {
           const auto cmd_id = msg_params[strings::cmd_id].asUInt();
           SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
           app->RemoveCommand(cmd_id);
@@ -279,7 +279,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           return;
         }
 
-        if (IsHMIResultSuccess(result_code)) {
+        if (application_manager::commands::IsHMIResultSuccess(result_code)) {
           const auto menu_id = msg_params[strings::menu_id].asUInt();
           SDL_LOG_DEBUG("Removing submenuID: " << menu_id);
           app->RemoveSubMenu(menu_id);
