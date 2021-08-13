@@ -51,9 +51,7 @@ GetWayPointsRequest::GetWayPointsRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-}
+                         policy_handler) {}
 
 GetWayPointsRequest::~GetWayPointsRequest() {}
 
@@ -81,12 +79,6 @@ void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO("Received UI_OnResetTimeout event");
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       SDL_LOG_INFO("Received Navigation_GetWayPoints event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);

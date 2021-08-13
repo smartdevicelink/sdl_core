@@ -36,6 +36,7 @@
 #include "application_manager/app_service_manager.h"
 #include "application_manager/command_factory.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
@@ -138,10 +139,18 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   const uint32_t connection_key = static_cast<uint32_t>(
       (*message)[strings::params][strings::connection_key].asUInt());
+  const WindowID window_id = MessageHelper::ExtractWindowIdFromSmartObject(
+      (*message)[strings::msg_params]);
+  int32_t message_type =
+      (*message)[strings::params][strings::message_type].asInt();
 
   auto app_ptr = app_manager_.application(connection_key);
-  if (app_ptr && app_manager_.IsAppInReconnectMode(app_ptr->device(),
-                                                   app_ptr->policy_app_id())) {
+  if (app_ptr &&
+      (app_manager_.IsAppInReconnectMode(app_ptr->device(),
+                                         app_ptr->policy_app_id()) ||
+       (!app_ptr->WindowIdExists(window_id) &&
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id &&
+        mobile_apis::messageType::notification == message_type))) {
     commands_holder_.Suspend(
         app_ptr, CommandHolder::CommandType::kMobileCommand, source, message);
     return true;
@@ -209,8 +218,6 @@ bool RPCServiceImpl::ManageMobileCommand(
     return false;
   }
 
-  int32_t message_type =
-      (*message)[strings::params][strings::message_type].asInt();
   if (message_type == mobile_apis::messageType::response) {
     if (command->Init() && command->CheckPermissions()) {
       command->Run();
@@ -219,11 +226,11 @@ bool RPCServiceImpl::ManageMobileCommand(
     return true;
   }
   if (message_type == mobile_apis::messageType::notification) {
-    request_ctrl_.addNotification(command);
+    request_ctrl_.AddNotification(command);
     if (command->Init() && command->CheckPermissions()) {
       command->Run();
       if (command->CleanUp()) {
-        request_ctrl_.removeNotification(command.get());
+        request_ctrl_.RemoveNotification(command.get());
       }
       // If CleanUp returned false notification should remove it self.
     }
@@ -254,11 +261,11 @@ bool RPCServiceImpl::ManageMobileCommand(
 
     // commands will be launched from request_ctrl
     const request_controller::RequestController::TResult result =
-        request_ctrl_.addMobileRequest(command, app_hmi_level);
+        request_ctrl_.AddMobileRequest(command, app_hmi_level);
 
-    if (result == request_controller::RequestController::SUCCESS) {
+    if (result == request_controller::RequestController::TResult::SUCCESS) {
       SDL_LOG_DEBUG("Perform request");
-    } else if (result == request_controller::RequestController::
+    } else if (result == request_controller::RequestController::TResult::
                              TOO_MANY_PENDING_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable top perform request: "
                     << "TOO_MANY_PENDING_REQUESTS");
@@ -277,8 +284,8 @@ bool RPCServiceImpl::ManageMobileCommand(
 
       SendMessageToMobile(response);
       return false;
-    } else if (result ==
-               request_controller::RequestController::TOO_MANY_REQUESTS) {
+    } else if (result == request_controller::RequestController::TResult::
+                             TOO_MANY_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable to perform request: "
                     << "TOO_MANY_REQUESTS");
 
@@ -297,7 +304,7 @@ bool RPCServiceImpl::ManageMobileCommand(
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
       }
       return false;
-    } else if (result == request_controller::RequestController::
+    } else if (result == request_controller::RequestController::TResult::
                              NONE_HMI_LEVEL_MANY_REQUESTS) {
       SDL_LOG_ERROR("RET  Unable to perform request: "
                     << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
@@ -385,7 +392,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
   if (kRequest == message_type) {
     SDL_LOG_DEBUG("ManageHMICommand");
     command->set_warning_info(warning_info);
-    request_ctrl_.addHMIRequest(command);
+    request_ctrl_.AddHMIRequest(command);
   }
 
   if (command->Init()) {

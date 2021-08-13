@@ -308,6 +308,13 @@ extern const char* vin;
 extern const char* gearStatus;
 extern const char* prndl;
 extern const char* tire_pressure;
+extern const char* pressure_telltale;
+extern const char* left_front;
+extern const char* right_front;
+extern const char* left_rear;
+extern const char* right_rear;
+extern const char* inner_left_rear;
+extern const char* inner_right_rear;
 extern const char* odometer;
 extern const char* belt_status;
 extern const char* electronic_park_brake_status;
@@ -494,6 +501,10 @@ extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
 extern const char* const preferred_fps;
+
+// OnResetTimeout
+extern const char* const request_id;
+extern const char* const reset_period;
 }  // namespace strings
 
 namespace hmi_interface {

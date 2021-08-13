@@ -53,7 +53,6 @@
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_service.h"
@@ -162,10 +161,6 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
-  DEPRECATED
-  bool Init(resumption::LastState&,
-            media_manager::MediaManager* media_manager) OVERRIDE;
-
   /**
    * Inits application manager
    */
@@ -192,8 +187,6 @@ class ApplicationManagerImpl
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
-  DEPRECATED ApplicationSharedPtr
-  application_by_name(const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
   ApplicationSharedPtr reregister_application_by_policy_id(
@@ -790,14 +783,14 @@ class ApplicationManagerImpl
    *
    * @param ptr Reference to shared pointer that point on hmi notification
    */
-  void addNotification(const CommandSharedPtr ptr);
+  void AddNotification(const CommandSharedPtr ptr);
 
   /**
    * @ Add notification to collection
    *
-   * @param ptr Reference to shared pointer that point on hmi notification
+   * @param notification Pointer that points to hmi notification
    */
-  void removeNotification(const commands::Command* notification);
+  void RemoveNotification(const commands::Command* notification);
 
   /**
    * @ Updates request timeout
@@ -806,7 +799,7 @@ class ApplicationManagerImpl
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  void updateRequestTimeout(uint32_t connection_key,
+  void UpdateRequestTimeout(uint32_t connection_key,
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
 
@@ -861,9 +854,6 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
-  DEPRECATED
-  void ForbidStreaming(uint32_t app_id) OVERRIDE;
-
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
@@ -877,10 +867,6 @@ class ApplicationManagerImpl
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
                       bool state) OVERRIDE;
-
-  void OnAppStreaming(uint32_t app_id,
-                      protocol_handler::ServiceType service_type,
-                      const Application::StreamingState new_state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;
@@ -1000,6 +986,18 @@ class ApplicationManagerImpl
 
   rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
     return *rpc_handler_;
+  }
+
+  request_controller::RequestTimeoutHandler& get_request_timeout_handler()
+      const OVERRIDE {
+    DCHECK(request_timeout_handler_);
+    return *request_timeout_handler_;
+  }
+
+  request_controller::RequestController& get_request_controller()
+      const OVERRIDE {
+    DCHECK(request_ctrl_);
+    return *request_ctrl_;
   }
 
   void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
@@ -1615,8 +1613,10 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler* connection_handler_;
   std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
+  std::unique_ptr<request_controller::RequestTimeoutHandler>
+      request_timeout_handler_;
+  std::unique_ptr<request_controller::RequestController> request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
-  request_controller::RequestController request_ctrl_;
   std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**

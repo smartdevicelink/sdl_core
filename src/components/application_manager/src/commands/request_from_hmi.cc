@@ -177,7 +177,7 @@ void RequestFromHMI::SendProviderRequest(
   if (hmi_destination) {
     SDL_LOG_DEBUG("Sending Request to HMI Provider");
     application_manager_.IncreaseForwardedRequestTimeout(
-        application_manager::request_controller::RequestInfo::HmiConnectionKey,
+        application_manager::request_controller::RequestInfo::kHmiConnectionKey,
         correlation_id());
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
@@ -195,7 +195,7 @@ void RequestFromHMI::SendProviderRequest(
 
   SDL_LOG_DEBUG("Sending Request to Mobile Provider");
   application_manager_.IncreaseForwardedRequestTimeout(
-      application_manager::request_controller::RequestInfo::HmiConnectionKey,
+      application_manager::request_controller::RequestInfo::kHmiConnectionKey,
       correlation_id());
   SendMobileRequest(
       mobile_function_id, app, &(*msg)[strings::msg_params], use_events);

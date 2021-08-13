@@ -62,6 +62,7 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
 
 #include "formatters/CFormatterJsonBase.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
@@ -1280,7 +1281,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   if (can_send_ui &&
       (app->vr_help_title() || app->vr_help() || app->keyboard_props() ||
-       app->menu_title() || app->menu_icon())) {
+       app->menu_title() || app->menu_icon() || app->menu_layout())) {
     smart_objects::SmartObjectSPtr ui_global_properties = CreateMessageForHMI(
         hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
     if (ui_global_properties) {
@@ -1303,6 +1304,9 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       }
       if (app->menu_icon()) {
         ui_msg_params[strings::menu_icon] = (*app->menu_icon());
+      }
+      if (app->menu_layout()) {
+        ui_msg_params[strings::menu_layout] = (*app->menu_layout());
       }
       ui_msg_params[strings::app_id] = app->app_id();
 
@@ -1985,6 +1989,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
     if ((*i->second).keyExists(strings::parent_id)) {
       msg_params[strings::menu_params][strings::parent_id] =
           (*i->second)[strings::parent_id];
+    }
+    if ((*i->second).keyExists(strings::menu_layout)) {
+      msg_params[strings::menu_layout] = (*i->second)[strings::menu_layout];
     }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
@@ -3466,6 +3473,44 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
     }
   }
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
+void MessageHelper::AddDefaultParamsToTireStatus(
+    ApplicationSharedPtr app, smart_objects::SmartObject& response_from_hmi) {
+  const utils::SemanticVersion max_version_with_mandatory_params(8, 0, 0);
+
+  if (!app) {
+    SDL_LOG_ERROR("Application not found");
+    return;
+  }
+
+  if (app->msg_version() >= max_version_with_mandatory_params) {
+    SDL_LOG_DEBUG(
+        "Tire status parameters are "
+        "non-mandatory for this app version, no need in default values");
+    return;
+  }
+
+  smart_objects::SmartObject& tire_status =
+      response_from_hmi[strings::msg_params][strings::tire_pressure];
+
+  if (!tire_status.keyExists(strings::pressure_telltale)) {
+    tire_status[strings::pressure_telltale] =
+        mobile_apis::WarningLightStatus::WLS_NOT_USED;
+  }
+
+  const std::vector<std::string> tires{strings::left_front,
+                                       strings::right_front,
+                                       strings::left_rear,
+                                       strings::right_rear,
+                                       strings::inner_left_rear,
+                                       strings::inner_right_rear};
+  for (const std::string& tire : tires) {
+    if (!tire_status.keyExists(tire)) {
+      tire_status[tire][strings::status] =
+          mobile_apis::ComponentVolumeStatus::CVS_UNKNOWN;
+    }
+  }
 }
 
 }  //  namespace application_manager

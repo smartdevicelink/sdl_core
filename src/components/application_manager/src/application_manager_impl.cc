@@ -51,6 +51,8 @@
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/request_controller_impl.h"
+#include "application_manager/request_timeout_handler_impl.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/rpc_handler_impl.h"
 #include "application_manager/rpc_protection_manager_impl.h"
@@ -170,7 +172,10 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , connection_handler_(NULL)
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
-    , request_ctrl_(am_settings)
+    , request_timeout_handler_(
+          new request_controller::RequestTimeoutHandlerImpl(*this))
+    , request_ctrl_(new request_controller::RequestControllerImpl(
+          am_settings, *request_timeout_handler_))
     , mobile_correlation_id_(0)
     , correlation_id_(0)
     , max_correlation_id_(UINT_MAX)
@@ -215,7 +220,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
       std::make_shared<RPCProtectionManagerImpl>(*policy_handler_);
   policy_handler_->add_listener(rpc_protection_manager.get());
   rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
-                                                     request_ctrl_,
+                                                     *request_ctrl_,
                                                      protocol_handler_,
                                                      hmi_handler_,
                                                      *commands_holder_,
@@ -302,13 +307,6 @@ ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
   return FindPendingApp(accessor, finder);
-}
-
-ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
-    const std::string& app_name) const {
-  AppNamePredicate finder(app_name);
-  DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, finder);
 }
 
 ApplicationSharedPtr
@@ -458,6 +456,7 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
+  commands_holder_->Resume(app, CommandHolder::CommandType::kMobileCommand);
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
@@ -1720,7 +1719,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
   }
 
   for (const auto& app : wait_list) {
-    request_ctrl_.terminateAppRequests(app->app_id());
+    request_ctrl_->TerminateAppRequests(app->app_id());
     resume_ctrl_->SaveApplication(app);
   }
 
@@ -2482,7 +2481,7 @@ void ApplicationManagerImpl::StartDevicesDiscovery() {
 void ApplicationManagerImpl::TerminateRequest(const uint32_t connection_key,
                                               const uint32_t corr_id,
                                               const int32_t function_id) {
-  request_ctrl_.TerminateRequest(corr_id, connection_key, function_id, true);
+  request_ctrl_->TerminateRequest(corr_id, connection_key, function_id, true);
 }
 
 void ApplicationManagerImpl::RemoveHMIFakeParameters(
@@ -2500,11 +2499,6 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = function_id;
   factory.attachSchema(*message, true);
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
-}
-
-bool ApplicationManagerImpl::Init(resumption::LastState&,
-                                  media_manager::MediaManager*) {
-  return false;
 }
 
 bool ApplicationManagerImpl::Init(
@@ -2601,7 +2595,7 @@ bool ApplicationManagerImpl::Stop() {
   } catch (...) {
     SDL_LOG_ERROR("An error occurred during unregistering applications.");
   }
-  request_ctrl_.DestroyThreadpool();
+  request_ctrl_->Stop();
 
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   SDL_LOG_DEBUG("Unloading policy library.");
@@ -2941,21 +2935,21 @@ void ApplicationManagerImpl::SetTelemetryObserver(
 }
 #endif  // TELEMETRY_MONITOR
 
-void ApplicationManagerImpl::addNotification(const CommandSharedPtr ptr) {
-  request_ctrl_.addNotification(ptr);
+void ApplicationManagerImpl::AddNotification(const CommandSharedPtr ptr) {
+  request_ctrl_->AddNotification(ptr);
 }
 
-void ApplicationManagerImpl::removeNotification(
+void ApplicationManagerImpl::RemoveNotification(
     const commands::Command* notification) {
-  request_ctrl_.removeNotification(notification);
+  request_ctrl_->RemoveNotification(notification);
 }
 
-void ApplicationManagerImpl::updateRequestTimeout(
+void ApplicationManagerImpl::UpdateRequestTimeout(
     uint32_t connection_key,
     uint32_t mobile_correlation_id,
     uint32_t new_timeout_value) {
   SDL_LOG_AUTO_TRACE();
-  request_ctrl_.updateRequestTimeout(
+  request_ctrl_->UpdateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
@@ -2965,7 +2959,7 @@ void ApplicationManagerImpl::IncreaseForwardedRequestTimeout(
                 << get_settings().rpc_pass_through_timeout());
   uint32_t new_timeout_value = get_settings().default_timeout() +
                                get_settings().rpc_pass_through_timeout();
-  request_ctrl_.updateRequestTimeout(
+  request_ctrl_->UpdateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
@@ -3187,7 +3181,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   if (is_ignition_off) {
     resume_controller().OnIgnitionOff();
   }
-  request_ctrl_.terminateAllHMIRequests();
+  request_ctrl_->TerminateAllHMIRequests();
 
   {
     sync_primitives::AutoLock lock(expired_button_requests_lock_);
@@ -3292,11 +3286,10 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
   if (!app_to_remove) {
     SDL_LOG_ERROR("Cant find application with app_id = " << app_id);
-
     // Just to terminate RAI in case of connection is dropped (rare case)
     // App won't be unregistered since RAI has not been started yet
     SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
-    request_ctrl_.terminateAppRequests(app_id);
+    request_ctrl_->TerminateAppRequests(app_id);
 
     return;
   }
@@ -3360,7 +3353,8 @@ void ApplicationManagerImpl::UnregisterApplication(
       };
 
   plugin_manager_->ForEachPlugin(on_app_unregistered);
-  request_ctrl_.terminateAppRequests(app_id);
+
+  request_ctrl_->TerminateAppRequests(app_id);
 
   const bool is_applications_list_empty = applications().GetData().empty();
   if (is_applications_list_empty) {
@@ -3445,7 +3439,7 @@ void ApplicationManagerImpl::OnLowVoltage() {
   is_low_voltage_ = true;
   resume_ctrl_->SaveLowVoltageTime();
   resume_ctrl_->StopSavePersistentDataTimer();
-  request_ctrl_.OnLowVoltage();
+  request_ctrl_->OnLowVoltage();
 }
 
 bool ApplicationManagerImpl::IsLowVoltage() const {
@@ -3457,7 +3451,7 @@ void ApplicationManagerImpl::OnWakeUp() {
   SDL_LOG_AUTO_TRACE();
   resume_ctrl_->SaveWakeUpTime();
   resume_ctrl_->StartSavePersistentDataTimer();
-  request_ctrl_.OnWakeUp();
+  request_ctrl_->OnWakeUp();
   is_low_voltage_ = false;
 }
 
@@ -3518,53 +3512,6 @@ bool ApplicationManagerImpl::CanAppStream(
   }
 
   return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
-}
-
-void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
-  using namespace mobile_apis::AppInterfaceUnregisteredReason;
-  using namespace mobile_apis::Result;
-
-  SDL_LOG_AUTO_TRACE();
-
-  ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    SDL_LOG_DEBUG(
-        "There is no navi or projection application with id: " << app_id);
-    return;
-  }
-
-  {
-    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-    if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
-                                             navi_app_to_stop_.end(),
-                                             app_id) ||
-        navi_app_to_end_stream_.end() !=
-            std::find(navi_app_to_end_stream_.begin(),
-                      navi_app_to_end_stream_.end(),
-                      app_id)) {
-      return;
-    }
-  }
-
-  bool unregister = false;
-  {
-    sync_primitives::AutoLock lock(navi_service_status_lock_);
-
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it ||
-        (!it->second.first && !it->second.second)) {
-      unregister = true;
-    }
-  }
-  if (unregister) {
-    rpc_service_->ManageMobileCommand(
-        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-            app_id, PROTOCOL_VIOLATION),
-        commands::Command::SOURCE_SDL);
-    UnregisterApplication(app_id, ABORTED);
-    return;
-  }
-  EndNaviServices(app_id);
 }
 
 void ApplicationManagerImpl::ForbidStreaming(
@@ -3647,48 +3594,6 @@ void ApplicationManagerImpl::OnAppStreaming(
   } else {
     media_manager_->StopStreaming(app_id, service_type);
     state_ctrl_.OnVideoStreamingStopped(app);
-  }
-}
-
-void ApplicationManagerImpl::OnAppStreaming(
-    uint32_t app_id,
-    protocol_handler::ServiceType service_type,
-    const Application::StreamingState new_state) {
-  SDL_LOG_AUTO_TRACE();
-
-  ApplicationSharedPtr app = application(app_id);
-  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
-    SDL_LOG_DEBUG(
-        " There is no navi or projection application with id: " << app_id);
-    return;
-  }
-  DCHECK_OR_RETURN_VOID(media_manager_);
-
-  SDL_LOG_DEBUG("New state for service " << static_cast<int32_t>(service_type)
-                                         << " is "
-                                         << static_cast<int32_t>(new_state));
-  switch (new_state) {
-    case Application::StreamingState::kStopped: {
-      // Stop activity in media_manager_ when service is stopped
-      // State controller has been already notified by kSuspended event
-      // received before
-      media_manager_->StopStreaming(app_id, service_type);
-      break;
-    }
-
-    case Application::StreamingState::kStarted: {
-      // Apply temporary streaming state and start activity in media_manager_
-      state_ctrl_.OnVideoStreamingStarted(app);
-      media_manager_->StartStreaming(app_id, service_type);
-      break;
-    }
-
-    case Application::StreamingState::kSuspended: {
-      // Don't stop activity in media_manager_ in that case
-      // Just cancel the temporary streaming state
-      state_ctrl_.OnVideoStreamingStopped(app);
-      break;
-    }
   }
 }
 

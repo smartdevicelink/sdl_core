@@ -46,12 +46,6 @@ class LastState {
   virtual ~LastState() {}
 
   /**
-   * @brief Saves dictionary to filesystem
-   */
-  DEPRECATED
-  virtual void SaveStateToFileSystem() = 0;
-
-  /**
    * @brief SaveToFileSystem
    * Saving dictionary to filesystem
    */
@@ -62,12 +56,6 @@ class LastState {
    * Remove dictionary from filesystem
    */
   virtual void RemoveFromFileSystem() = 0;
-
-  /**
-   * @brief dictionary Gets internal dictionary
-   * @return Reference to internal dictionary json value
-   */
-  virtual Json::Value& get_dictionary() = 0;
 
   /**
    * @brief dictionary Gets internal dictionary

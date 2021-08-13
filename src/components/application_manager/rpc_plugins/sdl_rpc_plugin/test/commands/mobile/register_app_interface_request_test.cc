@@ -409,6 +409,7 @@ TEST_F(RegisterAppInterfaceRequestTest, DefaultTimeout_CheckIfZero_SUCCESS) {
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId1;
+
   EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
@@ -460,22 +461,6 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(
           Return(application_manager::HmiInterfaces::HMI_INTERFACE_Buttons));
 
-  EXPECT_CALL(mock_hmi_capabilities_, is_ui_cooperating())
-      .WillRepeatedly(Return(true));
-
-  MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
-  (*button_caps_ptr)[0][am::hmi_response::button_name] =
-      mobile_apis::ButtonName::CUSTOM_BUTTON;
-
-  EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillRepeatedly(Return(button_caps_ptr));
-
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
-      .WillOnce(Return(true));
-
   application_manager::DisplayCapabilitiesBuilder builder(*mock_app);
   ON_CALL(*mock_app, display_capabilities_builder())
       .WillByDefault(ReturnRef(builder));
@@ -515,6 +500,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   InitBasicMessage();
 
   ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
+
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -592,7 +578,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                   _))
       .WillOnce(Return(true));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
@@ -811,6 +796,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey2;
 
   ON_CALL(app_mngr_, WaitForHmiIsReady()).WillByDefault(Return(true));
+
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 
@@ -851,7 +837,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                   _))
       .WillOnce(Return(true));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(

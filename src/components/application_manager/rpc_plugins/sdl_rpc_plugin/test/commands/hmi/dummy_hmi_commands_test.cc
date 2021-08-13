@@ -113,6 +113,7 @@
 #include "hmi/on_ready_notification.h"
 #include "hmi/on_received_policy_update.h"
 #include "hmi/on_record_start_notification.h"
+#include "hmi/on_reset_timeout_notification.h"
 #include "hmi/on_resume_audio_source_notification.h"
 #include "hmi/on_sdl_close_notification.h"
 #include "hmi/on_sdl_consent_needed_notification.h"
@@ -124,13 +125,11 @@
 #include "hmi/on_system_info_changed_notification.h"
 #include "hmi/on_system_request_notification.h"
 #include "hmi/on_tts_language_change_notification.h"
-#include "hmi/on_tts_reset_timeout_notification.h"
 #include "hmi/on_tts_started_notification.h"
 #include "hmi/on_tts_stopped_notification.h"
 #include "hmi/on_ui_command_notification.h"
 #include "hmi/on_ui_keyboard_input_notification.h"
 #include "hmi/on_ui_language_change_notification.h"
-#include "hmi/on_ui_reset_timeout_notification.h"
 #include "hmi/on_ui_touch_event_notification.h"
 #include "hmi/on_update_device_list.h"
 #include "hmi/on_video_data_streaming_notification.h"
@@ -261,14 +260,10 @@ class HMICommandsTest : public components::commands_test::CommandRequestTest<
   typedef Command CommandType;
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
+    CommandRequestTest<kIsNice>::InitCommand(timeout);
+
     stream_retry_.first = 0;
     stream_retry_.second = 0;
-    EXPECT_CALL(app_mngr_settings_, default_timeout())
-        .WillOnce(ReturnRef(timeout));
-    ON_CALL(app_mngr_, event_dispatcher())
-        .WillByDefault(ReturnRef(event_dispatcher_));
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, start_stream_retry_amount())
         .WillByDefault(ReturnRef(stream_retry_));
   }
@@ -456,7 +451,6 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,
-              commands::hmi::OnUIResetTimeoutNotification,
               commands::NaviStartStreamResponse,
               commands::NaviStartStreamRequest,
               commands::NaviStopStreamResponse,
@@ -487,7 +481,7 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnReceivedPolicyUpdate,
               commands::OnPolicyUpdate,
               commands::OnDeviceStateChangedNotification,
-              commands::hmi::OnTTSResetTimeoutNotification,
+              commands::hmi::OnResetTimeoutNotification,
               commands::hmi::DialNumberResponse,
               commands::hmi::DialNumberRequest,
               commands::OnEventChangedNotification,

@@ -582,15 +582,6 @@ int TransportManagerImpl::Init(
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::Init(resumption::LastState& last_state) {
-  // Last state required to initialize Transport adapters
-  UNUSED(last_state);
-  SDL_LOG_TRACE("enter");
-  is_initialized_ = true;
-  SDL_LOG_TRACE("exit with E_SUCCESS");
-  return E_SUCCESS;
-}
-
 void TransportManagerImpl::Deinit() {
   SDL_LOG_AUTO_TRACE();
   DisconnectAllDevices();
