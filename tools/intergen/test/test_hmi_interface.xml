@@ -221,6 +221,9 @@
     <element name="HI-IN" internal_name="HI_IN">
       <description>Hindi - India</description>
     </element>
+    <element name="EN-IE" internal_name="EN_IE">
+      <description>English - Ireland</description>
+    </element>
 </enum>
 
 <enum name="SoftButtonType">
