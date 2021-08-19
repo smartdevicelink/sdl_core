@@ -151,11 +151,6 @@ void UIGetCapabilitiesResponse::Run() {
         hmi_capabilities_.set_driver_distraction_supported(true);
       }
     }
-    if (system_capabilities_so.keyExists(strings::display_capabilities)) {
-      sections_to_update.push_back(strings::display_capabilities);
-      hmi_capabilities_.set_system_display_capabilities(
-          system_capabilities_so[strings::display_capabilities]);
-    }
   }
 
   if (msg_params.keyExists(strings::pcm_stream_capabilities)) {

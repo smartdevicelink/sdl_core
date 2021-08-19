@@ -181,6 +181,7 @@ const char* kDeleteFileRequestKey = "DeleteFileRequest";
 const char* kListFilesRequestKey = "ListFilesRequest";
 const char* kListFilesResponseSizeKey = "ListFilesResponseSize";
 const char* kDefaultTimeoutKey = "DefaultTimeout";
+const char* kDefaultTimeoutCompensationKey = "DefaultTimeoutCompensation";
 const char* kAppResumingTimeoutKey = "ApplicationResumingTimeout";
 const char* kAppSavePersistentDataTimeoutKey = "AppSavePersistentDataTimeout";
 const char* kResumptionDelayBeforeIgnKey = "ResumptionDelayBeforeIgn";
@@ -359,6 +360,7 @@ const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
 const uint32_t kDefaultTimeout = 10000;
+const uint32_t kDefaultTimeoutCompensation = 1000;
 const uint32_t kDefaultAppResumingTimeout = 3000;
 const uint32_t kDefaultAppSavePersistentDataTimeout = 10000;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
@@ -482,6 +484,7 @@ Profile::Profile()
     , is_redecoding_enabled_(false)
     , max_cmd_id_(kDefaultMaxCmdId)
     , default_timeout_(kDefaultTimeout)
+    , default_timeout_compensation_(kDefaultTimeoutCompensation)
     , app_resuming_timeout_(kDefaultAppResumingTimeout)
     , app_resumption_save_persistent_data_timeout_(
           kDefaultAppSavePersistentDataTimeout)
@@ -683,6 +686,10 @@ const uint32_t& Profile::max_cmd_id() const {
 
 const uint32_t& Profile::default_timeout() const {
   return default_timeout_;
+}
+
+const uint32_t& Profile::default_timeout_compensation() const {
+  return default_timeout_compensation_;
 }
 
 const uint32_t& Profile::app_resuming_timeout() const {
@@ -1437,10 +1444,6 @@ void Profile::UpdateValues() {
                 kSDL4Section,
                 kAppIconsFolderMaxSizeKey);
 
-  if (app_icons_folder_max_size_ < kDefaultAppIconsFolderMaxSize) {
-    app_icons_folder_max_size_ = kDefaultAppIconsFolderMaxSize;
-  }
-
   LOG_UPDATED_VALUE(
       app_icons_folder_max_size_, kAppIconsFolderMaxSizeKey, kSDL4Section);
 
@@ -1724,6 +1727,16 @@ void Profile::UpdateValues() {
   }
 
   LOG_UPDATED_VALUE(default_timeout_, kDefaultTimeoutKey, kMainSection);
+
+  // Default timeout compensation
+  ReadUIntValue(&default_timeout_compensation_,
+                kDefaultTimeoutCompensation,
+                kMainSection,
+                kDefaultTimeoutCompensationKey);
+
+  LOG_UPDATED_VALUE(default_timeout_compensation_,
+                    kDefaultTimeoutCompensationKey,
+                    kMainSection);
 
   // Application resuming timeout
   ReadUIntValue(&app_resuming_timeout_,

@@ -273,52 +273,46 @@ class MessageHelper {
       const std::string& path_to_icon, uint32_t app_id);
 
   /**
-   * @brief Sends button subscription notification
-   * @param app_id Application ID
-   * @param button Enum with button name
-   * @param is_subscribed true if subscribed, false otherwise
+   * @brief Creates button subscription requests for buttons
+   * that application is subscribed on
+   * @param app application to be subscribed for button
+   * @param button_subscriptions collection of subscribed buttons
+   * @param function_id function ID
    * @param app_mngr reference to application manager
+   * @return list of all buttons subscription requests ready to be sent to hmi
+   * @note for every button separate request is created in the list
    */
-  static void SendOnButtonSubscriptionNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ButtonName::eType button,
-      const bool is_subscribed,
+  static smart_objects::SmartObjectList
+  CreateButtonSubscriptionsHandlingRequestsList(
+      ApplicationConstSharedPtr app,
+      const ButtonSubscriptions& button_subscriptions,
+      const hmi_apis::FunctionID::eType function_id,
       ApplicationManager& app_mngr);
 
   /**
-   * @brief Creates button subscription notification
-   * @param app_id Application ID
-   * @param button Enum with button name
-   * @param is_subscribed true if subscribed, false otherwise
-   * @return notification message in SmartObject format
+   * @brief Creates button subscription request to mobile
+   * @param app shared pointer to application instance
+   * @param source_message source message
+   * @return Smart object with fulfilled request
    */
-  static smart_objects::SmartObjectSPtr CreateOnButtonSubscriptionNotification(
+  static smart_objects::SmartObjectSPtr CreateButtonNotificationToMobile(
+      ApplicationSharedPtr app,
+      const smart_objects::SmartObject& source_message);
+
+  /**
+   * @brief Creates button subscription request to hmi
+   * @param app_id id of application for which request should be created
+   * @param button_name button to be subscribed
+   * @param function_id function ID
+   * @param app_mngr reference to application manager
+   * @return Smart object with fulfilled request
+   */
+  static smart_objects::SmartObjectSPtr
+  CreateButtonSubscriptionHandlingRequestToHmi(
       const uint32_t app_id,
-      const hmi_apis::Common_ButtonName::eType button,
-      const bool is_subscribed);
-
-  /**
-   * @brief Sends button subscription notifications for all buttons
-   * that application is subscribed on
-   * @param app shared pointer to application instance
-   * @param app_mngr reference to application manager
-   */
-  static void SendAllOnButtonSubscriptionNotificationsForApp(
-      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
-
-  /**
-   * @brief Creates button subscription notifications for buttons
-   * that application is subscribed on
-   * @param app shared pointer to application instance
-   * @param app_mngr reference to application manager
-   * @param button_subscriptions collection of subscribed buttons
-   * @return list of notification messages in SmartObject format
-   */
-  static smart_objects::SmartObjectList
-  CreateOnButtonSubscriptionNotificationsForApp(
-      ApplicationConstSharedPtr app,
-      ApplicationManager& app_mngr,
-      const ButtonSubscriptions& button_subscriptions);
+      const hmi_apis::Common_ButtonName::eType button_name,
+      const hmi_apis::FunctionID::eType function_id,
+      ApplicationManager& app_mngr);
 
   static void SendAppDataToHMI(ApplicationConstSharedPtr app,
                                ApplicationManager& app_man);
@@ -993,18 +987,6 @@ class MessageHelper {
                                          ApplicationManager& app_mngr);
 
   /**
-   * @brief SendUnsubscribeButtonNotification sends notification to HMI to
-   * remove button subscription for application
-   * @param button Button type
-   * @param application Application to unsubscribe
-   * @param app_mngr Application manager
-   */
-  static void SendUnsubscribeButtonNotification(
-      mobile_apis::ButtonName::eType button,
-      ApplicationSharedPtr application,
-      ApplicationManager& app_mngr);
-
-  /**
    * @brief Sends HMI status notification to mobile
    * @param application application with changed HMI status
    * @param window_id id of affected window
@@ -1118,6 +1100,17 @@ class MessageHelper {
    * @param msg_params smart object containing message params
    */
   static void RemoveEmptyMessageParams(smart_objects::SmartObject& msg_params);
+
+  /**
+   * @brief AddDefaultParamsToTireStatus adds missing default sub-params to
+   * tirePressure param, if version of related application requires presence of
+   * all sub-params in response
+   * @param application shared pointer to related application
+   * @param response_from_hmi reference to response from HMI
+   */
+  static void AddDefaultParamsToTireStatus(
+      ApplicationSharedPtr application,
+      smart_objects::SmartObject& response_from_hmi);
 
  private:
   /**

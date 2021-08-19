@@ -127,7 +127,7 @@ struct RequestInfo {
   }
   uint64_t hash();
   static uint64_t GenerateHash(uint32_t var1, uint32_t var2);
-  static uint32_t HmiConnectionKey;
+  static constexpr uint32_t kHmiConnectionKey = 0;
 
  protected:
   RequestPtr request_;
@@ -199,7 +199,7 @@ class RequestInfoSet {
    * @return founded request or shared_ptr with NULL
    */
   RequestInfoPtr Find(const uint32_t connection_key,
-                      const uint32_t correlation_id);
+                      const uint32_t correlation_id) const;
 
   /*
    * @brief Get request with smalest end_time_
@@ -269,7 +269,7 @@ class RequestInfoSet {
   TimeSortedRequestInfoSet time_sorted_pending_requests_;
   HashSortedRequestInfoSet hash_sorted_pending_requests_;
 
-  sync_primitives::Lock pending_requests_lock_;
+  mutable sync_primitives::Lock pending_requests_lock_;
 };
 
 /**

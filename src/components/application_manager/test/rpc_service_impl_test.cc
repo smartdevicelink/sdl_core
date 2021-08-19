@@ -46,11 +46,13 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_request.h"
 #include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/mock_request_timeout_handler.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_protection_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/request_controller_impl.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
@@ -66,6 +68,7 @@ using test::components::protocol_handler_test::MockProtocolHandler;
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
 typedef utils::Optional<am::plugin_manager::RPCPlugin> PluginOpt;
 using test::components::application_manager_test::MockAppServiceManager;
+using test::components::application_manager_test::MockRequestTimeoutHandler;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -86,7 +89,8 @@ const int32_t kConnectionSessionsCount = 2;
 class RPCServiceImplTest : public ::testing::Test {
  public:
   RPCServiceImplTest()
-      : request_controller_(mock_request_controler_)
+      : request_controller_(mock_request_controler_,
+                            mock_request_timeout_handler_)
       , mock_rpc_protection_manager_(
             std::make_shared<
                 testing::NiceMock<am::MockRPCProtectionManager> >())
@@ -145,7 +149,7 @@ class RPCServiceImplTest : public ::testing::Test {
   testing::NiceMock<MockApplicationManager> mock_app_mngr_;
   testing::NiceMock<MockRequestControlerSettings> mock_request_controler_;
   testing::NiceMock<MockProtocolHandler> mock_protocol_handler_;
-  am::request_controller::RequestController request_controller_;
+  am::request_controller::RequestControllerImpl request_controller_;
   testing::NiceMock<MockHMIMessageHandler> mock_hmi_handler_;
   testing::NiceMock<MockCommandHolder> mock_command_holder_;
   std::shared_ptr<am::MockRPCProtectionManager> mock_rpc_protection_manager_;
@@ -157,6 +161,7 @@ class RPCServiceImplTest : public ::testing::Test {
       mock_rpc_plugin_manager_;
   testing::NiceMock<am::plugin_manager::MockRPCPlugin> mock_rpc_plugin_;
   testing::NiceMock<MockCommandFactory> mock_command_factory_;
+  MockRequestTimeoutHandler mock_request_timeout_handler_;
 };
 
 TEST_F(RPCServiceImplTest, ManageMobileCommand_MessageIsNullPtr_False) {

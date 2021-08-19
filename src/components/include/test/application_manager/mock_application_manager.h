@@ -188,6 +188,12 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      application_manager::rpc_service::RPCService&());
   MOCK_CONST_METHOD0(GetRPCHandler,
                      application_manager::rpc_handler::RPCHandler&());
+  MOCK_CONST_METHOD0(
+      get_request_timeout_handler,
+      application_manager::request_controller::RequestTimeoutHandler&());
+  MOCK_CONST_METHOD0(
+      get_request_controller,
+      application_manager::request_controller::RequestController&());
   MOCK_CONST_METHOD0(is_stopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
@@ -262,7 +268,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const connection_handler::DeviceHandle));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
-  MOCK_METHOD3(updateRequestTimeout,
+  MOCK_METHOD3(UpdateRequestTimeout,
                void(uint32_t connection_key,
                     uint32_t mobile_correlation_id,
                     uint32_t new_timeout_value));
@@ -390,6 +396,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));
+  MOCK_METHOD3(AddExpiredButtonRequest,
+               void(const uint32_t app_id,
+                    const int32_t corr_id,
+                    const hmi_apis::Common_ButtonName::eType button_name));
+  MOCK_CONST_METHOD1(
+      GetExpiredButtonRequestData,
+      utils::Optional<application_manager::ExpiredButtonRequestData>(
+          const int32_t corr_id));
+  MOCK_METHOD1(DeleteExpiredButtonRequest, void(const int32_t corr_id));
 };
 
 }  // namespace application_manager_test

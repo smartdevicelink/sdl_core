@@ -703,8 +703,11 @@ void RegisterAppInterfaceRequest::Run() {
   SendOnAppRegisteredNotificationToHMI(
       application, is_resumption_required && !is_resumption_failed_);
 
-  // By default app subscribed to CUSTOM_BUTTON
-  SendSubscribeCustomButtonNotification();
+  if (CheckHMICapabilities(mobile_apis::ButtonName::CUSTOM_BUTTON)) {
+    SDL_LOG_DEBUG("CUSTOM_BUTTON available");
+    SendSubscribeCustomButtonRequest();
+  }
+
   SendChangeRegistrationOnHMI(application);
 
   if (is_resumption_required) {
@@ -1461,14 +1464,14 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
   }
 }
 
-void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
+void RegisterAppInterfaceRequest::SendSubscribeCustomButtonRequest() {
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
-  msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-                        msg_params);
+  msg_params[strings::button_name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
+  SendHMIRequest(
+      hmi_apis::FunctionID::Buttons_SubscribeButton, &msg_params, false);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
