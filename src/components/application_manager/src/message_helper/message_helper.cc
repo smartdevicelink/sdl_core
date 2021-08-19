@@ -3492,15 +3492,30 @@ void MessageHelper::RemoveEmptyMessageParams(
       if (array == nullptr || array->empty())
         continue;
 
-      const auto iter_array = std::find_if(
-          array->begin(), array->end(), [](smart_objects::SmartObject item) {
-            if (smart_objects::SmartType_Array == item.getType() ||
-                smart_objects::SmartType_Map == item.getType())
-              return item.empty();
-            return false;
-          });
-      if (iter_array != array->end()) {
-        SDL_LOG_DEBUG("Remove " + key_params +
+      const bool are_all_empty =
+          std::any_of(array->begin(),
+                      array->end(),
+                      [](const smart_objects::SmartObject& item) {
+                        if (smart_objects::SmartType_Array == item.getType() ||
+                            smart_objects::SmartType_Map == item.getType()) {
+                          return item.empty();
+                        }
+
+                        return false;
+                      });
+
+      if (are_all_empty) {
+        SDL_LOG_DEBUG("Remove empty array " + key_params +
+                      " from msg_params in HMI response");
+        msg_params.erase(key_params);
+      }
+
+      continue;
+    }
+
+    if (smart_objects::SmartType_Map == param.getType()) {
+      if (param.empty()) {
+        SDL_LOG_DEBUG("Remove empty field " + key_params +
                       " from msg_params in HMI response");
         msg_params.erase(key_params);
       }
