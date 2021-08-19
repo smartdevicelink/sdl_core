@@ -40,17 +40,18 @@ std::string JNI_GetMainActivityStringProperty(const char* property) {
 }
 
 jint JNI_OnLoad(JavaVM* vm, void*) {
-   gJavaVM = vm;
-   JNIEnv *env = NULL;
-   gJavaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
+    gJavaVM = vm;
+    JNIEnv *env = NULL;
+    gJavaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
 
-   jclass cls = env->FindClass("org/luxoft/sdl_core/MainActivity");
-   auto globalClass = reinterpret_cast<jclass>(env->NewGlobalRef(cls));
+    jclass cls = env->FindClass("org/luxoft/sdl_core/MainActivity");
+    auto globalClass = reinterpret_cast<jclass>(env->NewGlobalRef(cls));
 
-   int len = sizeof(s_methods) / sizeof(s_methods[0]);
+    int len = sizeof(s_methods) / sizeof(s_methods[0]);
 
-   env->RegisterNatives(globalClass, s_methods, len);
-   return JNI_VERSION_1_6;
+    env->RegisterNatives(globalClass, s_methods, len);
+
+    return JNI_VERSION_1_6;
 }
 
 void StartSDL(JNIEnv* env, jobject)
