@@ -4,6 +4,9 @@ EXTENDED_POLICY:STRING=PROPRIETARY
 //Bluetooth support
 BUILD_BT_SUPPORT:BOOL=OFF
 
+//Bluetooth Low Energy support
+BUILD_BLE_SUPPORT:BOOL=ON
+
 //libusb support
 BUILD_USB_SUPPORT:BOOL=OFF
 

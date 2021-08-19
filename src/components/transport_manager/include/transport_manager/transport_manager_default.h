@@ -49,6 +49,10 @@ struct TransportAdapterFactory {
   CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
       ta_bluetooth_creator_;
 #endif
+#ifdef BLUETOOTH_LE_SUPPORT
+  CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
+      ta_bluetooth_le_creator_;
+#endif
   CreatorTA<const uint16_t,
             resumption::LastStateWrapperPtr&,
             const TransportManagerSettings&>

@@ -150,6 +150,29 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif ()
 list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
+if(BUILD_BLE_SUPPORT)
+  list(APPEND SOURCES
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/bluetooth_le_transport_adapter.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/bluetooth_le_connection_factory.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/bluetooth_le_socket_connection.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/bluetooth_le_device_scanner.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/bluetooth_le_device.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/ble_client.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/ble_server.cc
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le/ble_control_protocol.cc
+    )
+
+    if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+      include_directories ("${COMPONENTS_DIR}../platform_specific/android")
+    endif ()
+
+else()
+  list(APPEND EXCLUDE_PATHS
+    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/bluetooth_le
+    ${COMPONENTS_DIR}/transport_manager/src/bluetooth_le
+  )
+endif()
+
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})
 

@@ -56,6 +56,7 @@ namespace {
 DeviceTypes devicesType = {
     std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
     std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
+    std::make_pair(DeviceType::BLUETOOTH_LE, std::string("BLUETOOTH_LE")),
     std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
     std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
     std::make_pair(DeviceType::TCP, std::string("WIFI")),
@@ -76,18 +77,17 @@ TransportAdapterImpl::TransportAdapterImpl(
     ClientConnectionListener* client_connection_listener,
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
-    : listeners_()
+    : device_scanner_(device_scanner)
+    , listeners_()
     , initialised_(0)
     , devices_()
     , devices_mutex_()
     , connections_()
     , connections_lock_()
-    ,
 #ifdef TELEMETRY_MONITOR
-    metric_observer_(NULL)
-    ,
+    , metric_observer_(NULL)
+    
 #endif  // TELEMETRY_MONITOR
-    device_scanner_(device_scanner)
     , server_connection_factory_(server_connection_factory)
     , client_connection_listener_(client_connection_listener)
     , last_state_wrapper_(last_state_wrapper)

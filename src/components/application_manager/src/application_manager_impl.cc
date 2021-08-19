@@ -1594,6 +1594,11 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
     app_launch_ctrl().OnDeviceConnected(dev_params.device_mac_address);
   }
 
+  if (!IsHMICooperating()) {
+    SDL_LOG_ERROR("HMI is not cooperating yet. Don't send the message");
+    return;
+  }
+
   smart_objects::SmartObjectSPtr msg_params =
       MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
   if (!msg_params) {
