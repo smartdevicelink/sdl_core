@@ -152,7 +152,7 @@ class SecurityManagerTest : public ::testing::Test {
   void EmulateMobileMessageHandshake(const uint8_t* const data,
                                      const uint32_t data_size,
                                      const int repeat_count = 1) {
-    const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
+    const SecurityQuery::QueryHeader header(SecurityQuery::RESPONSE,
                                             SecurityQuery::SEND_HANDSHAKE_DATA,
                                             kSeqNumber);
     for (int c = 0; c < repeat_count; ++c) {
