@@ -12,12 +12,12 @@
 
 SDL_CREATE_LOCAL_LOG_VARIABLE("Main")
 
-void StartSDL(JNIEnv* env, jobject);
-void StopSDL(JNIEnv* env, jobject);
+void StartSDLNative(JNIEnv* env, jobject);
+void StopSDLNative(JNIEnv* env, jobject);
 
 static JNINativeMethod s_methods[] = {
-   {"StartSDL", "()V", (void*)StartSDL},
-   {"StopSDL", "()V", (void*)StopSDL}
+   {"StartSDLNative", "()V", (void*)StartSDLNative},
+   {"StopSDLNative", "()V", (void*)StopSDLNative}
 };
 
 // To call Java methods when running native code inside an Android activity,
@@ -44,9 +44,8 @@ jint JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv *env = NULL;
     gJavaVM->GetEnv((void**)&env, JNI_VERSION_1_6);
 
-    jclass cls = env->FindClass("org/luxoft/sdl_core/MainActivity");
+    jclass cls = env->FindClass("org/luxoft/sdl_core/SdlLauncherService");
     auto globalClass = reinterpret_cast<jclass>(env->NewGlobalRef(cls));
-
     int len = sizeof(s_methods) / sizeof(s_methods[0]);
 
     env->RegisterNatives(globalClass, s_methods, len);
@@ -54,7 +53,7 @@ jint JNI_OnLoad(JavaVM* vm, void*) {
     return JNI_VERSION_1_6;
 }
 
-void StartSDL(JNIEnv* env, jobject)
+void StartSDLNative(JNIEnv* env, jobject)
 {
 #ifdef ENABLE_LOG
     auto logger_impl =
@@ -128,7 +127,7 @@ void StartSDL(JNIEnv* env, jobject)
     SDL_DEINIT_LOGGER();
 }
 
-void StopSDL(JNIEnv*, jobject) {
+void StopSDLNative(JNIEnv*, jobject) {
     SDL_LOG_INFO("Stop from main activity requested");
     {
         // TODO: Replace with sigkill(SIGINT) once signal handling is fixed
