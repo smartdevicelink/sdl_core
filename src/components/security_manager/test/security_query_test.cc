@@ -107,9 +107,8 @@ TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
  * Security QueryHeader shall construct with correct fields
  */
 TEST_F(SecurityQueryTest, QueryHeaderConstructor2) {
-  SecurityQuery::QueryHeader new_header(SecurityQuery::REQUEST,
-                                        SecurityQuery::SEND_HANDSHAKE_DATA,
-                                        SEQ_NUMBER);
+  SecurityQuery::QueryHeader new_header(
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, SEQ_NUMBER);
   ASSERT_EQ(new_header.query_type, SecurityQuery::REQUEST);
   ASSERT_EQ(new_header.query_id, SecurityQuery::SEND_HANDSHAKE_DATA);
   ASSERT_EQ(new_header.seq_number, SEQ_NUMBER);
@@ -385,9 +384,7 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownId_Response) {
  */
 TEST_F(SecurityQueryTest, Parse_Handshake) {
   SecurityQuery::QueryHeader handshake_header(
-      SecurityQuery::REQUEST,
-      SecurityQuery::SEND_HANDSHAKE_DATA,
-      SEQ_NUMBER);
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, SEQ_NUMBER);
   // some sample data
   uint8_t raw_data[] = {0x6, 0x7, 0x8};
   const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);

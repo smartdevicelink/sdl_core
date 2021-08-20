@@ -605,16 +605,16 @@ uint32_t SecurityManagerImpl::NextSequentialNumber() {
   return current_seq_number_;
 }
 
-void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
-                                               const uint8_t* const data,
-                                               const size_t data_size,
-                                               const uint32_t custom_seq_number) {
+void SecurityManagerImpl::SendHandshakeBinData(
+    const uint32_t connection_key,
+    const uint8_t* const data,
+    const size_t data_size,
+    const uint32_t custom_seq_number) {
   uint32_t seq_number =
       (0 == custom_seq_number) ? NextSequentialNumber() : custom_seq_number;
 
-  const SecurityQuery::QueryHeader header(SecurityQuery::REQUEST,
-                                          SecurityQuery::SEND_HANDSHAKE_DATA,
-                                          seq_number);
+  const SecurityQuery::QueryHeader header(
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
   DCHECK(data_size < 1024 * 1024 * 1024);
   const SecurityQuery query =
       SecurityQuery(header, connection_key, data, data_size);
