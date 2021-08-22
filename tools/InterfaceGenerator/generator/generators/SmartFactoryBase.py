@@ -840,7 +840,7 @@ class CodeGenerator(object):
                     [[u"bool", None if param.default_value is None
                       else u"true" if param.default_value is True else u"false"]]))
         elif type(param) is Integer:
-            if (param.min_value is not None and param.min_value >= 0) and (param.max_value is None  or param.max_value >= 2 ** 31):
+            if (param.min_value is not None and param.min_value >= 0) and (param.max_value is None or param.max_value >= 2 ** 32):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"uint64_t",
                     params=self._gen_schema_item_param_values(
@@ -854,14 +854,14 @@ class CodeGenerator(object):
                         [[u"uint32_t", param.min_value],
                          [u"uint32_t", param.max_value],
                          [u"uint32_t", param.default_value]]))
-            elif  (param.min_value is None or param.min_value >= -(2 ** 31) and param.min_value < 0) and (param.max_value is not None and param.max_value < 2 ** 31):
+            elif  (param.min_value is not None and param.min_value > -(2 ** 31) and param.min_value < 0) and (param.max_value is not None and param.max_value < 2 ** 31):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int32_t",
                     params=self._gen_schema_item_param_values(
                         [[u"int32_t", param.min_value], 
                          [u"int32_t", param.max_value],
                          [u"int32_t", param.default_value]]))
-            elif (param.min_value is None or param.min_value < -(2 ** 31) ) and (param.max_value is None or param.max_value < 2 ** 63):
+            elif (param.min_value is None or param.min_value > -(2 ** 63)) and (param.max_value is None or param.max_value < 2 ** 63):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int64_t",
                     params=self._gen_schema_item_param_values(
@@ -869,7 +869,7 @@ class CodeGenerator(object):
                          [u"int64_t", param.max_value],
                          [u"int64_t", param.default_value]]))
             else:
-                raise GenerateError("Parameter value too large: " + str(param.max_value))
+                raise GenerateError("Parameter value too large/small: " + str(param.min_value) + "/" + str(param.max_value))
         elif type(param) is Float:
             code = self._impl_code_integer_item_template.substitute(
                 type=u"double",

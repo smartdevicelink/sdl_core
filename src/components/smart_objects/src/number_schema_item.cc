@@ -50,6 +50,11 @@ SmartType TNumberSchemaItem<int64_t>::getSmartType() const {
 }
 
 template <>
+SmartType TNumberSchemaItem<uint64_t>::getSmartType() const {
+  return SmartType_UInteger;
+}
+
+template <>
 SmartType TNumberSchemaItem<double>::getSmartType() const {
   return SmartType_Double;
 }

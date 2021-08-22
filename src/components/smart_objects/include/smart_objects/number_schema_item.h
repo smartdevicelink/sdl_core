@@ -135,6 +135,7 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
                  typeid(int32_t),
                  typeid(uint32_t),
                  typeid(int64_t),
+                 typeid(uint64_t),
                  typeid(double))) {
     return true;
   }
@@ -238,6 +239,9 @@ SmartType TNumberSchemaItem<uint32_t>::getSmartType() const;
 
 template <>
 SmartType TNumberSchemaItem<int64_t>::getSmartType() const;
+
+template <>
+SmartType TNumberSchemaItem<uint64_t>::getSmartType() const;
 
 template <>
 SmartType TNumberSchemaItem<double>::getSmartType() const;
