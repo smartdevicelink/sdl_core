@@ -167,8 +167,8 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     }
     value = Object.asInt();
   } else if (typeid(uint32_t) == typeid(value)) {
-    if (Object.asUInt() < std::numeric_limits<uint32_t>::min() ||
-        Object.asUInt() > std::numeric_limits<uint32_t>::max()) {
+    if (Object.asInt() < std::numeric_limits<uint32_t>::min() ||
+        Object.asInt() > std::numeric_limits<uint32_t>::max()) {
       return errors::OUT_OF_RANGE;
     }
     value = Object.asUInt();
