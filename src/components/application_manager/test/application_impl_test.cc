@@ -560,9 +560,9 @@ TEST_F(ApplicationImplTest, SubscribeToButton_UnsubscribeFromButton) {
   EXPECT_FALSE(app_impl->IsSubscribedToButton(ButtonName::PRESET_0));
 }
 
-TEST_F(ApplicationImplTest, SubscribeToDefaultButton_UnsubscribeFromButton) {
-  EXPECT_TRUE(app_impl->IsSubscribedToButton(ButtonName::CUSTOM_BUTTON));
-  EXPECT_FALSE(app_impl->SubscribeToButton(ButtonName::CUSTOM_BUTTON));
+TEST_F(ApplicationImplTest, NotSubscribedToDefaultButton_SubscribeToButton) {
+  EXPECT_FALSE(app_impl->IsSubscribedToButton(ButtonName::CUSTOM_BUTTON));
+  EXPECT_TRUE(app_impl->SubscribeToButton(ButtonName::CUSTOM_BUTTON));
 }
 
 TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {

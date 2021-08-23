@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,43 +29,69 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/subscribe_button_response.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
-
 namespace commands {
-
-namespace hmi {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
 
-OnTTSResetTimeoutNotification::OnTTSResetTimeoutNotification(
+namespace hmi {
+SubscribeButtonResponse::SubscribeButtonResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handle)
-    : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handle) {}
+    : ResponseFromHMI(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handle) {}
 
-OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {}
+SubscribeButtonResponse::~SubscribeButtonResponse() {}
 
-void OnTTSResetTimeoutNotification::Run() {
+void SubscribeButtonResponse::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)
+              .getElement(strings::params)
+              .getElement(hmi_response::code)
+              .asInt());
+
+  const auto expired_request_data =
+      application_manager_.GetExpiredButtonRequestData(correlation_id());
+  if (expired_request_data) {
+    const uint32_t app_id = (*expired_request_data).app_id_;
+    const auto button_name = (*expired_request_data).button_name_;
+    application_manager_.DeleteExpiredButtonRequest(correlation_id());
+
+    if (!CommandImpl::IsHMIResultSuccess(
+            hmi_result, HmiInterfaces::HMI_INTERFACE_Buttons)) {
+      return;
+    }
+
+    smart_objects::SmartObjectSPtr msg =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            app_id,
+            button_name,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            application_manager_);
+
+    rpc_service_.SendMessageToHMI(msg);
+    return;
+  }
+
+  event_engine::Event event(hmi_apis::FunctionID::Buttons_SubscribeButton);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace hmi
-
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin

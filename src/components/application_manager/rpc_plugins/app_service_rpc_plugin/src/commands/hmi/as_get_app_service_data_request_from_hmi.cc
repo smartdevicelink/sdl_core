@@ -240,8 +240,8 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
   hmi_apis::Common_Result::eType result =
       static_cast<hmi_apis::Common_Result::eType>(
           event_message[strings::params][hmi_response::code].asInt());
-  bool success =
-      IsHMIResultSuccess(result, HmiInterfaces::HMI_INTERFACE_AppService);
+  bool success = CommandImpl::IsHMIResultSuccess(
+      result, HmiInterfaces::HMI_INTERFACE_AppService);
   if (ValidateResponse(msg_params)) {
     SendResponse(success,
                  correlation_id(),
@@ -263,7 +263,8 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
           msg_params[strings::result_code].asInt());
   hmi_apis::Common_Result::eType result =
       MessageHelper::MobileToHMIResult(mobile_result);
-  bool success = IsMobileResultSuccess(mobile_result);
+  bool success =
+      application_manager::commands::IsMobileResultSuccess(mobile_result);
 
   if (ValidateResponse(msg_params)) {
     SendResponse(success,

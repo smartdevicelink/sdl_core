@@ -99,19 +99,19 @@ TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
   RequestController request_ctrl_;
 
   commands::Command* reg = RegisterApplication();
-  request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
     commands::Command* testCommand =
         PutFileCommand(correlation_id, connection_key);
-    result = request_ctrl_.addMobileRequest(testCommand,
+    result = request_ctrl_.AddMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
 
   commands::Command* unreg = UnregisterApplication();
-  request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
 }
 
 TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
@@ -124,19 +124,19 @@ TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
   RequestController request_ctrl_;
 
   commands::Command* reg = RegisterApplication();
-  request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
     commands::Command* testCommand =
         PutFileCommand(correlation_id, connection_key);
-    result = request_ctrl_.addMobileRequest(testCommand,
+    result = request_ctrl_.AddMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
 
   commands::Command* unreg = UnregisterApplication();
-  request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
 }
 
 TEST(RequestControlTest, ZeroValueAppTimeScaleMaxRequests) {
@@ -149,19 +149,19 @@ TEST(RequestControlTest, ZeroValueAppTimeScaleMaxRequests) {
   RequestController request_ctrl_;
 
   commands::Command* reg = RegisterApplication();
-  request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
     commands::Command* testCommand =
         PutFileCommand(correlation_id, connection_key);
-    result = request_ctrl_.addMobileRequest(testCommand,
+    result = request_ctrl_.AddMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
 
   commands::Command* unreg = UnregisterApplication();
-  request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
+  request_ctrl_.AddMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
 }
 
 }  // namespace application_manager_test
