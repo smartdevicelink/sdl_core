@@ -3493,7 +3493,7 @@ void MessageHelper::RemoveEmptyMessageParams(
         continue;
 
       const bool are_all_empty =
-          std::any_of(array->begin(),
+          std::all_of(array->begin(),
                       array->end(),
                       [](const smart_objects::SmartObject& item) {
                         if (smart_objects::SmartType_Array == item.getType() ||
