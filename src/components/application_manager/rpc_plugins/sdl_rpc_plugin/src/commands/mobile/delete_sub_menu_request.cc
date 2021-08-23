@@ -56,7 +56,9 @@ DeleteSubMenuRequest::DeleteSubMenuRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {}
+                         policy_handler)
+    , requests_list_()
+    , pending_request_corr_id_(0) {}
 
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
@@ -82,19 +84,42 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
+  {
+    const DataAccessor<SubMenuMap> accessor = app->sub_menu_map();
+    const SubMenuMap& sub_menus = accessor.GetData();
+    DeleteNestedSubMenus(app, menu_id, sub_menus);
+  }
+
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
   msg_params[strings::app_id] = app->app_id();
-  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+  requests_list_.push_back(msg_params);
 
-  SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params, true);
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+  SendNextRequest();
+}
+
+void DeleteSubMenuRequest::SendNextRequest() {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto request_params = requests_list_.front();
+  auto function_id = hmi_apis::FunctionID::UI_DeleteSubMenu;
+
+  if (request_params.keyExists(strings::cmd_id)) {
+    function_id = request_params.keyExists(strings::grammar_id)
+                      ? hmi_apis::FunctionID::VR_DeleteCommand
+                      : hmi_apis::FunctionID::UI_DeleteCommand;
+  }
+
+  pending_request_corr_id_ = SendHMIRequest(function_id, &request_params, true);
+  SDL_LOG_DEBUG(
+      "Waiting for response for corr_id = " << pending_request_corr_id_);
 }
 
 void DeleteSubMenuRequest::DeleteNestedSubMenus(ApplicationSharedPtr const app,
-                                                uint32_t parentID,
+                                                const uint32_t parentID,
                                                 const SubMenuMap& subMenus) {
   SDL_LOG_AUTO_TRACE();
 
@@ -108,26 +133,26 @@ void DeleteSubMenuRequest::DeleteNestedSubMenus(ApplicationSharedPtr const app,
     }
 
     if (parentID == (*it->second)[strings::parent_id].asUInt()) {
-      uint32_t menuID = (*it->second)[strings::menu_id].asUInt();
+      const uint32_t menuID = (*it->second)[strings::menu_id].asUInt();
       DeleteNestedSubMenus(app, menuID, subMenus);
-      DeleteSubMenuVRCommands(app, menuID);
-      DeleteSubMenuUICommands(app, menuID);
+
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::menu_id] = menuID;
       msg_params[strings::app_id] = app->app_id();
-      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params);
-      ++it;
-      SDL_LOG_DEBUG("Removing submenuID: " << menuID);
-      app->RemoveSubMenu(menuID);
-    } else {
-      ++it;
+      requests_list_.push_back(msg_params);
     }
+
+    ++it;
   }
+
+  SDL_LOG_DEBUG("Delete commands with Parent ID: " << parentID);
+  DeleteSubMenuVRCommands(app, parentID);
+  DeleteSubMenuUICommands(app, parentID);
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
-    ApplicationConstSharedPtr app, uint32_t parentID) {
+    ApplicationConstSharedPtr app, const uint32_t parentID) {
   SDL_LOG_AUTO_TRACE();
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
@@ -148,7 +173,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
       msg_params[strings::grammar_id] = app->get_grammar_id();
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
-      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
+      requests_list_.push_back(msg_params);
     }
   }
 }
@@ -175,16 +200,11 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
       const uint32_t cmd_id = (*it->second)[strings::cmd_id].asUInt();
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] = cmd_id;
-      SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
-      app->RemoveCommand(cmd_id);
-      app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
-      it = commands.begin();  // Can not relay on
-                              // iterators after erase was called
 
-      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
-    } else {
-      ++it;
+      requests_list_.push_back(msg_params);
     }
+
+    ++it;
   }
 }
 
@@ -193,48 +213,110 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_DeleteSubMenu: {
-      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      hmi_apis::Common_Result::eType result_code =
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-      std::string response_info;
-      GetInfo(message, response_info);
-      const bool result = PrepareResultForMobileResponse(
-          result_code, HmiInterfaces::HMI_INTERFACE_UI);
+    case hmi_apis::FunctionID::UI_DeleteCommand: {
+      SDL_LOG_DEBUG("Received UI_DeleteCommand response");
 
-      ApplicationSharedPtr application =
-          application_manager_.application(connection_key());
+      const auto corr_id =
+          message[strings::params][strings::correlation_id].asUInt();
+      if (pending_request_corr_id_ == corr_id) {
+        auto msg_params = requests_list_.front();
 
-      if (!application) {
-        SDL_LOG_ERROR("NULL pointer");
-        return;
+        const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+
+        auto app = application_manager_.application(connection_key());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
+
+        if (application_manager::commands::IsHMIResultSuccess(result_code)) {
+          const auto cmd_id = msg_params[strings::cmd_id].asUInt();
+          SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
+          app->RemoveCommand(cmd_id);
+          app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
+        }
+
+        requests_list_.pop_front();
       }
 
-      if (result) {
-        // delete sub menu items from SDL and HMI
-        uint32_t parentID =
-            (*message_)[strings::msg_params][strings::menu_id].asUInt();
-        const DataAccessor<SubMenuMap> accessor = application->sub_menu_map();
-        const SubMenuMap& subMenus = accessor.GetData();
-        DeleteNestedSubMenus(application, parentID, subMenus);
-        DeleteSubMenuVRCommands(application, parentID);
-        DeleteSubMenuUICommands(application, parentID);
-        application->RemoveSubMenu(
-            (*message_)[strings::msg_params][strings::menu_id].asInt());
-      }
-
-      SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty() ? NULL : response_info.c_str(),
-                   &(message[strings::msg_params]));
       break;
     }
+
+    case hmi_apis::FunctionID::VR_DeleteCommand: {
+      SDL_LOG_DEBUG("Received VR_DeleteCommand response");
+
+      const auto corr_id =
+          message[strings::params][strings::correlation_id].asUInt();
+
+      if (corr_id == pending_request_corr_id_) {
+        auto app = application_manager_.application(connection_key());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
+
+        requests_list_.pop_front();
+      }
+
+      break;
+    }
+
+    case hmi_apis::FunctionID::UI_DeleteSubMenu: {
+      SDL_LOG_DEBUG("Received UI_DeleteSubMenu response");
+
+      const auto corr_id =
+          message[strings::params][strings::correlation_id].asUInt();
+      if (corr_id == pending_request_corr_id_) {
+        auto msg_params = requests_list_.front();
+
+        const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+
+        auto app = application_manager_.application(connection_key());
+        if (!app) {
+          SDL_LOG_ERROR("Application not found");
+          return;
+        }
+
+        if (application_manager::commands::IsHMIResultSuccess(result_code)) {
+          const auto menu_id = msg_params[strings::menu_id].asUInt();
+          SDL_LOG_DEBUG("Removing submenuID: " << menu_id);
+          app->RemoveSubMenu(menu_id);
+        }
+
+        requests_list_.pop_front();
+      }
+
+      break;
+    }
+
     default: {
       SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }
+
+  if (!requests_list_.empty()) {
+    SDL_LOG_DEBUG("Still waiting for another requests");
+    SendNextRequest();
+    return;
+  }
+
+  EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+
+  hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+  std::string response_info;
+  GetInfo(message, response_info);
+  const bool result = PrepareResultForMobileResponse(
+      result_code, HmiInterfaces::HMI_INTERFACE_UI);
+
+  SendResponse(result,
+               MessageHelper::HMIToMobileResult(result_code),
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
 }
 
 bool DeleteSubMenuRequest::Init() {

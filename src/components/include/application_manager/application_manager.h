@@ -48,6 +48,8 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/request_timeout_handler.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
 
@@ -87,7 +89,10 @@ class RPCService;
 namespace rpc_handler {
 class RPCHandler;
 }
-
+namespace request_controller {
+class RequestTimeoutHandler;
+class RequestController;
+}  // namespace request_controller
 class Application;
 class AppServiceManager;
 class StateControllerImpl;
@@ -112,6 +117,11 @@ struct ApplicationsPolicyAppIdSorter {
     }
     return lhs->policy_app_id() < rhs->policy_app_id();
   }
+};
+
+struct ExpiredButtonRequestData {
+  uint32_t app_id_;
+  hmi_apis::Common_ButtonName::eType button_name_;
 };
 
 typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
@@ -495,6 +505,10 @@ class ApplicationManager {
 
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual request_controller::RequestTimeoutHandler&
+  get_request_timeout_handler() const = 0;
+  virtual request_controller::RequestController& get_request_controller()
+      const = 0;
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
@@ -725,7 +739,7 @@ class ApplicationManager {
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  virtual void updateRequestTimeout(uint32_t connection_key,
+  virtual void UpdateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
@@ -946,6 +960,35 @@ class ApplicationManager {
    */
   virtual bool UnsubscribeAppFromSoftButtons(
       const commands::MessageSharedPtr response_message) = 0;
+
+  /**
+   * @brief Save subscribe/unsubscribe button request after timeout to ensure
+   * possibility to align mobile subscription/unsubscription status with actual
+   * subscription/unsubscription status on HMI
+   * @param app_id Application id from request message
+   * @param corr_id Correlation id
+   * @param button_name name of button to subscribe/unsubscribe
+   */
+  virtual void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+
+  /**
+   * @brief Return optional structure with information regarding
+   * subscribe/unsubscribe button request data
+   * @param corr_id Correlation id
+   * @return optional structure with subscribe/unsubscribe button request data
+   */
+  virtual utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const = 0;
+
+  /**
+   * @brief Delete data about already processed expired subscribe/unsubscribe
+   * button request in case if HMI send response to expired request
+   * @param corr_id Correlation id
+   */
+  virtual void DeleteExpiredButtonRequest(const int32_t corr_id) = 0;
 };
 
 }  // namespace application_manager

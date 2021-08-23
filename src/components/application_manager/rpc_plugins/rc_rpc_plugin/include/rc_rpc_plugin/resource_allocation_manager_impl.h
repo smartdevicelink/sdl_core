@@ -94,6 +94,10 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   bool IsResourceFree(const std::string& module_type,
                       const std::string& module_id) const FINAL;
 
+  bool IsResourceAllocated(const std::string& module_type,
+                           const std::string& module_id,
+                           const uint32_t app_id) FINAL;
+
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
 

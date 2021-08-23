@@ -206,24 +206,6 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
-  /**
-   * @brief Checks Mobile result code for single RPC
-   * @param result_code contains result code from response to Mobile
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   */
-  static bool IsMobileResultSuccess(
-      const mobile_apis::Result::eType result_code);
-
-  /**
-   * @brief Checks HMI result code for single RPC
-   * @param result_code contains result code from HMI response
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   */
-  static bool IsHMIResultSuccess(
-      const hmi_apis::Common_Result::eType result_code);
-
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
@@ -274,6 +256,22 @@ class CommandRequestImpl : public CommandImpl,
                                       ResponseInfo& out_second) const;
 
   /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param out_first Contains result_code from HMI response and
+   * interface that returns response
+   * @param out_second Contains result_code from HMI response and
+   * interface that returns response
+   * @param out_third Contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                      ResponseInfo& out_second,
+                                      ResponseInfo& out_third) const;
+
+  /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
    * and create info.
@@ -295,6 +293,19 @@ class CommandRequestImpl : public CommandImpl,
    */
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& first,
+      const ResponseInfo& second,
+      const ResponseInfo& third);
 
   /**
    * @brief Resolves if the return code must be
@@ -390,6 +401,13 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddTimeOutComponentInfoToMessage(
       smart_objects::SmartObject& response) const;
+  /**
+   * @brief AddRequestToTimeoutHandler checks the request and adds it to
+   * request_timeout_handler map for tracking
+   * @param request_to_hmi request to HMI
+   */
+  void AddRequestToTimeoutHandler(
+      const smart_objects::SmartObject& request_to_hmi) const;
 };
 
 }  // namespace commands

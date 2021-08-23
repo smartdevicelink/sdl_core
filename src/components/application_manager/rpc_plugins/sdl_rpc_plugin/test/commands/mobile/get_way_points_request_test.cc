@@ -202,7 +202,7 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
 
   event.set_smart_object(*message_);
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 

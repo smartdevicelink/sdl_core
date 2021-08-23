@@ -55,9 +55,7 @@ SliderRequest::SliderRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-}
+                         policy_handler) {}
 
 SliderRequest::~SliderRequest() {}
 
@@ -65,8 +63,7 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        application_manager_.get_settings().default_timeout() +
+    default_timeout_ +=
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 
@@ -134,12 +131,6 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == FunctionID::UI_OnResetTimeout) {
-    SDL_LOG_INFO("Received UI_OnResetTimeout event");
-    application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
-    return;
-  }
 
   if (event_id != FunctionID::UI_Slider) {
     SDL_LOG_ERROR("Received unknown event " << event.id());

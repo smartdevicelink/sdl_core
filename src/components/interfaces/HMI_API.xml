@@ -4546,24 +4546,30 @@
             </description>
         </param>
     </function>
-    <function name="OnButtonSubscription" messagetype="notification">
+    <function name="SubscribeButton" messagetype="request">
       <description>
-        Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application
+        Subscribes to buttons.
       </description>
-      <param name="name" type="Common.ButtonName" mandatory="true" />
-      <param name="isSubscribed" type="Boolean" mandatory="true">
-        <description>
-          Defines whether the named button has status of 'subscribed' or 'unsubscribed':
-          If "true" - the named button is subscribed.
-          If "false" - the named button is unsubscribed.
-        </description>
-      </param>
       <param name="appID" type="Integer" mandatory="true">
-        <description>
-          The ID of application that relates to this button-subscription status change.
-        </description>
+        <description>The ID of the application requesting this button subscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to subscribe.</description>
       </param>
     </function>
+    <function name="SubscribeButton" messagetype="response"> </function>
+    <function name="UnsubscribeButton" messagetype="request">
+      <description>
+        Unsubscribes from buttons.
+      </description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>The ID of the application requesting this button unsubscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to unsubscribe from.</description>
+      </param>
+    </function>
+    <function name="UnsubscribeButton" messagetype="response"></function>
 </interface>
 
 <interface name="BasicCommunication" version="2.2.0" date="2021-04-14">
@@ -4782,6 +4788,27 @@
       </param>
     </function>
     <function name="DialNumber" messagetype="response">
+    </function>
+    <function name="OnResetTimeout" messagetype="notification">
+      <description>
+        HMI must send this notification to SDL for method instance for which timeout needs to be reset
+      </description>
+      <param name="requestID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Id between HMI and SDL which SDL used to send the request for method in question, for which timeout needs to be reset.
+        </description>
+      </param>
+      <param name="methodName" type="String" mandatory="true">
+        <description>
+          Name of the function for which timeout needs to be reset
+        </description>
+      </param>
+      <param name="resetPeriod" type="Integer" minvalue="0" maxvalue="1000000" mandatory="false">
+        <description>
+          Timeout period in milliseconds, for the method for which timeout needs to be reset.
+          If omitted, timeout would be reset by defaultTimeout specified in smartDeviceLink.ini
+        </description>
+      </param>
     </function>
     <!-- Policies -->
 
@@ -5316,18 +5343,6 @@
     </param>
   </function>
   <function name="SetGlobalProperties" messagetype="response">
-  </function>
-  <function name="OnResetTimeout" messagetype="notification">
-    <description>
-      Sender: HMI->SDL. HMI must send this notification every 10 sec. in case the 'methodName'
-      results long processing on HMI
-    </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that concerns the 'methodName'.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>The name of the method, the renew of timeout is required for</description>
-    </param>
   </function>
 </interface>
 
@@ -6027,15 +6042,6 @@
   </function>
   <function name="ClosePopUp" messagetype="response">
     <description>Provides the result of operation.</description>
-  </function>
-  <function name="OnResetTimeout" messagetype="notification">
-    <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that invoked notifcation.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>Currently used method name on which was triggered action</description>
-    </param>
   </function>
   <function name="OnRecordStart" messagetype="notification">
     <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
