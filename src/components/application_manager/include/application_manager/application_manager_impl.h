@@ -1380,19 +1380,19 @@ class ApplicationManagerImpl
   bool ResetVrHelpTitleItems(ApplicationSharedPtr app) const;
 
  private:
-  /*
-   * NaviServiceStatusMap shows which navi service (audio/video) is opened
-   * for specified application. Two bool values in std::pair mean:
-   * 1st value - is video service opened or not
-   * 2nd value - is audio service opened or not
-   */
-  typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+  struct NaviServiceStatusDescriptor {
+    bool is_video_service_active_;
+    bool is_audio_service_active_;
+  };
 
   struct NaviServiceDescriptor {
     uint32_t app_id_;
     protocol_handler::ServiceType service_type_;
     TimerSPtr timer_to_stop_service_;
   };
+
+  typedef std::map<uint32_t, NaviServiceStatusDescriptor> NaviServiceStatusMap;
+  typedef std::deque<NaviServiceDescriptor> NaviServicesDequeue;
 
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
@@ -1675,10 +1675,10 @@ class ApplicationManagerImpl
   NaviServiceStatusMap navi_service_status_;
 
   sync_primitives::Lock navi_app_to_stop_lock_;
-  std::deque<NaviServiceDescriptor> navi_app_to_stop_;
+  NaviServicesDequeue navi_app_to_stop_;
 
   sync_primitives::Lock navi_app_to_end_stream_lock_;
-  std::deque<NaviServiceDescriptor> navi_app_to_end_stream_;
+  NaviServicesDequeue navi_app_to_end_stream_;
 
   TimerSPtr last_stream_timer_ref_;
 

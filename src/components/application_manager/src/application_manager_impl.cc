@@ -1903,10 +1903,11 @@ bool ApplicationManagerImpl::StartNaviService(
 
       NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
       if (navi_service_status_.end() == it) {
-        std::pair<NaviServiceStatusMap::iterator, bool> res =
-            navi_service_status_.insert(
-                std::pair<uint32_t, std::pair<bool, bool> >(
-                    app_id, std::make_pair(false, false)));
+        NaviServiceStatusDescriptor descriptor({false, false});
+        auto res = navi_service_status_.insert(
+            std::pair<uint32_t, NaviServiceStatusDescriptor>(app_id,
+                                                             descriptor));
+
         if (!res.second) {
           SDL_LOG_WARN("Navi service refused");
           return false;
@@ -1995,9 +1996,13 @@ void ApplicationManagerImpl::OnStreamingConfigurationSuccessful(
     // Fill NaviServices map. Set true to first value of pair if
     // we've started video service or to second value if we've
     // started audio service
-    service_type == protocol_handler::ServiceType::kMobileNav
-        ? it->second.first = true
-        : it->second.second = true;
+    if (protocol_handler::ServiceType::kMobileNav == service_type) {
+      it->second.is_video_service_active_ = true;
+    }
+
+    if (protocol_handler::ServiceType::kAudio == service_type) {
+      it->second.is_audio_service_active_ = true;
+    }
 
     {
       sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
@@ -2063,14 +2068,15 @@ void ApplicationManagerImpl::StopNaviService(
       return;
     } else {
       // Fix: Repeated tests are not executed after they have stopped for Navi
-      if (false == it->second.first &&
+      if (false == it->second.is_video_service_active_ &&
           ServiceType::kMobileNav == service_type) {
         SDL_LOG_DEBUG("appId: " << app_id << "Navi had stopped");
         return;
       }
 
       // Fix: Repeated tests are not executed after they have stopped for Audio
-      if (false == it->second.second && ServiceType::kAudio == service_type) {
+      if (false == it->second.is_audio_service_active_ &&
+          ServiceType::kAudio == service_type) {
         SDL_LOG_DEBUG("appId: " << app_id << "Audio had stopped");
         return;
       }
@@ -2079,8 +2085,13 @@ void ApplicationManagerImpl::StopNaviService(
       // stopped audio service
       SDL_LOG_DEBUG("appId: " << app_id << " service_type: " << service_type
                               << " to stopped");
-      service_type == ServiceType::kMobileNav ? it->second.first = false
-                                              : it->second.second = false;
+      if (service_type == ServiceType::kMobileNav) {
+        it->second.is_video_service_active_ = false;
+      }
+
+      if (service_type == ServiceType::kAudio) {
+        it->second.is_audio_service_active_ = false;
+      }
     }
     // Fix: For wifi Secondary
     // undisposed data active the VPMService restart again,
@@ -3574,7 +3585,8 @@ void ApplicationManagerImpl::ForbidStreaming(
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
 
     if (navi_service_status_.end() == it ||
-        (!it->second.first && !it->second.second)) {
+        (!it->second.is_audio_service_active_ &&
+         !it->second.is_video_service_active_)) {
       unregister = true;
     }
   }
@@ -3646,8 +3658,10 @@ void ApplicationManagerImpl::EndService(
       return;
     }
 
-    end_video = service_type == ServiceType::kMobileNav && it->second.first;
-    end_audio = service_type == ServiceType::kAudio && it->second.second;
+    end_video = service_type == ServiceType::kMobileNav &&
+                it->second.is_video_service_active_;
+    end_audio = service_type == ServiceType::kAudio &&
+                it->second.is_audio_service_active_;
   }
 
   if (connection_handler_) {
@@ -3964,9 +3978,9 @@ void ApplicationManagerImpl::CloseNaviApp() {
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() != it) {
       if ((protocol_handler::ServiceType::kMobileNav == service_type &&
-           it->second.first) ||
+           it->second.is_video_service_active_) ||
           (protocol_handler::ServiceType::kAudio == service_type &&
-           it->second.second)) {
+           it->second.is_audio_service_active_)) {
         unregister = true;
         navi_service_status_.erase(it);
       }
@@ -4035,10 +4049,12 @@ void ApplicationManagerImpl::DisallowStreaming(
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() != it) {
-      if (it->second.first && service_type == ServiceType::kMobileNav) {
+      if (it->second.is_video_service_active_ &&
+          service_type == ServiceType::kMobileNav) {
         app->set_video_streaming_allowed(false);
       }
-      if (it->second.second && service_type == ServiceType::kAudio) {
+      if (it->second.is_audio_service_active_ &&
+          service_type == ServiceType::kAudio) {
         app->set_audio_streaming_allowed(false);
       }
     }
@@ -4060,10 +4076,10 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() != it) {
-      if (it->second.first) {
+      if (it->second.is_video_service_active_) {
         app->set_video_streaming_allowed(true);
       }
-      if (it->second.second) {
+      if (it->second.is_audio_service_active_) {
         app->set_audio_streaming_allowed(true);
       }
     }
