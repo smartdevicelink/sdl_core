@@ -196,9 +196,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
-    , clear_pool_timer_("ClearPoolTimer",
-                        new TimerTaskImpl<ApplicationManagerImpl>(
-                            this, &ApplicationManagerImpl::ClearTimerPool))
     , is_low_voltage_(false)
     , apps_size_(0)
     , registered_during_timer_execution_(false)
@@ -209,9 +206,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   dir_type_to_string_map_ = {{TYPE_STORAGE, "Storage"},
                              {TYPE_SYSTEM, "System"},
                              {TYPE_ICONS, "Icons"}};
-
-  const uint32_t timeout_ms = 10000u;
-  clear_pool_timer_.Start(timeout_ms, timer::kPeriodic);
 
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(
       *this, hmi_so_factory(), mobile_so_factory()));
@@ -242,21 +236,16 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   RemovePolicyObserver(this);
 
   {
-    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-    close_app_timer_pool_.clear();
-  }
-
-  {
-    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-    end_stream_timer_pool_.clear();
-  }
-
-  {
     sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
     navi_app_to_stop_.clear();
   }
 
-  navi_app_to_end_stream_.clear();
+  {
+    sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
+    navi_app_to_end_stream_.clear();
+  }
+
+  last_stream_timer_ref_.reset();
 
   secondary_transport_devices_cache_.clear();
 }
@@ -2012,13 +2001,17 @@ void ApplicationManagerImpl::OnStreamingConfigurationSuccessful(
 
     {
       sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-      for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
-        if (app_id == navi_app_to_stop_[i]) {
-          sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-          close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
-          navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
-          break;
-        }
+      auto it = std::find_if(
+          navi_app_to_stop_.begin(),
+          navi_app_to_stop_.end(),
+          [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+            return app_id == desc.app_id_ && service_type == desc.service_type_;
+          });
+
+      if (it != navi_app_to_stop_.end()) {
+        SDL_LOG_DEBUG("Removing app descriptor for service "
+                      << service_type << " from map to stop");
+        navi_app_to_stop_.erase(it);
       }
     }
   }
@@ -2028,10 +2021,18 @@ void ApplicationManagerImpl::OnStreamingConfigurationSuccessful(
 
   // Fix: For wifi Secondary
   // Should erase appid from deque of ForbidStreaming() push in the last time
-  std::deque<uint32_t>::const_iterator iter = std::find(
-      navi_app_to_end_stream_.begin(), navi_app_to_end_stream_.end(), app_id);
-  if (navi_app_to_end_stream_.end() != iter) {
-    navi_app_to_end_stream_.erase(iter);
+  {
+    sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
+    auto it = std::find_if(
+        navi_app_to_end_stream_.begin(),
+        navi_app_to_end_stream_.end(),
+        [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+          return app_id == desc.app_id_ && service_type == desc.service_type_;
+        });
+
+    if (navi_app_to_end_stream_.end() != it) {
+      navi_app_to_end_stream_.erase(it);
+    }
   }
 }
 
@@ -2096,7 +2097,7 @@ void ApplicationManagerImpl::StopNaviService(
       app->set_audio_streaming_allowed(false);
     }
     //  push_back for judge in ForbidStreaming(),
-    StartEndStreamTimer(app_id);
+    StartEndStreamTimer(app_id, service_type);
   }
 
   ApplicationSharedPtr app = application(app_id);
@@ -3473,6 +3474,7 @@ bool ApplicationManagerImpl::HMIStateAllowsStreaming(
   using namespace mobile_apis::HMILevel;
   using namespace mobile_apis::PredefinedWindows;
   using namespace mobile_apis::VideoStreamingState;
+  using namespace mobile_apis::AudioStreamingState;
   using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
@@ -3486,7 +3488,10 @@ bool ApplicationManagerImpl::HMIStateAllowsStreaming(
       Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
           hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED);
   const bool allow_streaming_by_streaming_state =
-      hmi_state->video_streaming_state() == STREAMABLE;
+      (service_type == protocol_handler::SERVICE_TYPE_NAVI &&
+       hmi_state->video_streaming_state() == STREAMABLE) ||
+      (service_type == protocol_handler::SERVICE_TYPE_AUDIO &&
+       hmi_state->audio_streaming_state() != NOT_AUDIBLE);
 
   return allow_streaming_by_hmi_level && allow_streaming_by_streaming_state;
 }
@@ -3529,18 +3534,37 @@ void ApplicationManagerImpl::ForbidStreaming(
     return;
   }
 
+  bool app_to_stop_found = false;
+  bool app_to_end_stream_found = false;
   {
     sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
 
-    if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
-                                             navi_app_to_stop_.end(),
-                                             app_id) ||
-        navi_app_to_end_stream_.end() !=
-            std::find(navi_app_to_end_stream_.begin(),
-                      navi_app_to_end_stream_.end(),
-                      app_id)) {
-      return;
-    }
+    auto it = std::find_if(
+        navi_app_to_stop_.begin(),
+        navi_app_to_stop_.end(),
+        [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+          return app_id == desc.app_id_ && service_type == desc.service_type_;
+        });
+
+    app_to_stop_found = navi_app_to_stop_.end() != it;
+  }
+
+  {
+    sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
+    auto it_stream = std::find_if(
+        navi_app_to_end_stream_.begin(),
+        navi_app_to_end_stream_.end(),
+        [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+          return app_id == desc.app_id_ && service_type == desc.service_type_;
+        });
+
+    app_to_end_stream_found = navi_app_to_end_stream_.end() != it_stream;
+  }
+
+  if (app_to_stop_found || app_to_end_stream_found) {
+    SDL_LOG_DEBUG("App " << app_id << " service " << service_type
+                         << " is about to stop. Ignored");
+    return;
   }
 
   bool unregister = false;
@@ -3574,7 +3598,7 @@ void ApplicationManagerImpl::ForbidStreaming(
     return;
   }
 
-  EndNaviServices(app_id);
+  EndService(app_id, service_type);
 }
 
 void ApplicationManagerImpl::OnAppStreaming(
@@ -3641,28 +3665,25 @@ void ApplicationManagerImpl::EndService(
 
   DisallowStreaming(app_id, service_type);
 
-  if (!app->video_streaming_allowed() && !app->audio_streaming_allowed()) {
-    bool close_app = false;
-    {
-      sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+  {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
 
-      if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
-                                               navi_app_to_stop_.end(),
-                                               app_id)) {
-        close_app = true;
-        navi_app_to_stop_.push_back(app_id);
-      }
-    }
+    auto it = std::find_if(
+        navi_app_to_stop_.begin(),
+        navi_app_to_stop_.end(),
+        [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+          return app_id == desc.app_id_ && service_type == desc.service_type_;
+        });
 
-    if (close_app) {
+    if (navi_app_to_stop_.end() == it) {
       TimerSPtr close_timer(std::make_shared<timer::Timer>(
           "CloseNaviAppTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::CloseNaviApp)));
-      close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
+      NaviServiceDescriptor descriptor({app_id, service_type, close_timer});
+      navi_app_to_stop_.push_back(descriptor);
 
-      sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-      close_app_timer_pool_.push_back(close_timer);
+      close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
     }
   }
 }
@@ -3807,7 +3828,8 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
                   << std::boolalpha << end_streaming_by_streaming_state
                   << "; by hmi level: " << std::boolalpha
                   << start_timer_by_hmi_level);
-    StartEndStreamTimer(app_id);
+    StartEndStreamTimer(app_id, protocol_handler::ServiceType::kAudio);
+    StartEndStreamTimer(app_id, protocol_handler::ServiceType::kMobileNav);
     return;
   }
 
@@ -3888,38 +3910,32 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
   return true;
 }
 
-void ApplicationManagerImpl::StartEndStreamTimer(const uint32_t app_id) {
+void ApplicationManagerImpl::StartEndStreamTimer(
+    const uint32_t app_id, const protocol_handler::ServiceType service_type) {
   SDL_LOG_DEBUG("Start end stream timer for app " << app_id);
-  navi_app_to_end_stream_.push_back(app_id);
-  TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
-      "DisallowAppStreamTimer",
-      new TimerTaskImpl<ApplicationManagerImpl>(
-          this, &ApplicationManagerImpl::EndNaviStreaming)));
-  end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
 
-  sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-  end_stream_timer_pool_.push_back(end_stream_timer);
-}
-
-void ApplicationManagerImpl::ClearTimerPool() {
-  SDL_LOG_AUTO_TRACE();
-  {
-    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-
-    close_app_timer_pool_.erase(
-        std::remove_if(close_app_timer_pool_.begin(),
-                       close_app_timer_pool_.end(),
-                       [](TimerSPtr timer) { return !timer->is_running(); }),
-        close_app_timer_pool_.end());
+  TimerSPtr end_stream_timer;
+  if (protocol_handler::ServiceType::kAudio == service_type) {
+    end_stream_timer = std::make_shared<timer::Timer>(
+        "DisallowAppAudioStreamTimer",
+        new TimerTaskImpl<ApplicationManagerImpl>(
+            this, &ApplicationManagerImpl::EndStreaming));
   }
 
-  {
-    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-    end_stream_timer_pool_.erase(
-        std::remove_if(end_stream_timer_pool_.begin(),
-                       end_stream_timer_pool_.end(),
-                       [](TimerSPtr timer) { return !timer->is_running(); }),
-        end_stream_timer_pool_.end());
+  if (protocol_handler::ServiceType::kMobileNav == service_type) {
+    end_stream_timer = std::make_shared<timer::Timer>(
+        "DisallowAppVideoStreamTimer",
+        new TimerTaskImpl<ApplicationManagerImpl>(
+            this, &ApplicationManagerImpl::EndStreaming));
+  }
+
+  if (end_stream_timer) {
+    sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
+
+    NaviServiceDescriptor descriptor({app_id, service_type, end_stream_timer});
+    navi_app_to_end_stream_.push_back(descriptor);
+
+    end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
   }
 }
 
@@ -3928,11 +3944,16 @@ void ApplicationManagerImpl::CloseNaviApp() {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
   uint32_t app_id;
+  protocol_handler::ServiceType service_type;
 
   {
     sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
     DCHECK_OR_RETURN_VOID(!navi_app_to_stop_.empty());
-    app_id = navi_app_to_stop_.front();
+    app_id = navi_app_to_stop_.front().app_id_;
+    service_type = navi_app_to_stop_.front().service_type_;
+    // keep reference to the current timer to prevent its destruction during own
+    // delegate function call
+    last_stream_timer_ref_ = navi_app_to_stop_.front().timer_to_stop_service_;
     navi_app_to_stop_.pop_front();
   }
 
@@ -3942,12 +3963,16 @@ void ApplicationManagerImpl::CloseNaviApp() {
 
     NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
     if (navi_service_status_.end() != it) {
-      if (it->second.first || it->second.second) {
+      if ((protocol_handler::ServiceType::kMobileNav == service_type &&
+           it->second.first) ||
+          (protocol_handler::ServiceType::kAudio == service_type &&
+           it->second.second)) {
         unregister = true;
         navi_service_status_.erase(it);
       }
     }
   }
+
   if (unregister) {
     SDL_LOG_INFO("App haven't answered for EndService. Unregister it.");
     rpc_service_->ManageMobileCommand(
@@ -3958,24 +3983,38 @@ void ApplicationManagerImpl::CloseNaviApp() {
   }
 }
 
-void ApplicationManagerImpl::EndNaviStreaming() {
-  SDL_LOG_AUTO_TRACE();
+void ApplicationManagerImpl::EndStreaming() {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
   using namespace protocol_handler;
 
-  if (!navi_app_to_end_stream_.empty()) {
-    const uint32_t app_id = navi_app_to_end_stream_.front();
-    navi_app_to_end_stream_.pop_front();
+  uint32_t app_id = 0;
+  protocol_handler::ServiceType service_type;
 
-    {
-      sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-      if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
-                                               navi_app_to_stop_.end(),
-                                               app_id)) {
-        DisallowStreaming(app_id, ServiceType::kMobileNav);
-        DisallowStreaming(app_id, ServiceType::kAudio);
-      }
+  {
+    sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
+    if (!navi_app_to_end_stream_.empty()) {
+      app_id = navi_app_to_end_stream_.front().app_id_;
+      service_type = navi_app_to_end_stream_.front().service_type_;
+      // keep reference to the current timer to prevent its destruction during
+      // own delegate function call
+      last_stream_timer_ref_ =
+          navi_app_to_end_stream_.front().timer_to_stop_service_;
+      navi_app_to_end_stream_.pop_front();
+    }
+  }
+
+  if (app_id > 0) {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+    auto it = std::find_if(
+        navi_app_to_stop_.begin(),
+        navi_app_to_stop_.end(),
+        [&app_id, &service_type](const NaviServiceDescriptor& desc) {
+          return app_id == desc.app_id_ && service_type == desc.service_type_;
+        });
+
+    if (navi_app_to_stop_.end() == it) {
+      DisallowStreaming(app_id, service_type);
     }
   }
 }

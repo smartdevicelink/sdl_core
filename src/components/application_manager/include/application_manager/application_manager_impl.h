@@ -1332,10 +1332,12 @@ class ApplicationManagerImpl
                   const HmiStatePtr to);
 
   /**
-   * @brief Starts EndStream timer for a specified application
+   * @brief Starts EndStream timer for a specified application service type
    * @param app_id Application to process
+   * @param service_type Type of service to track
    */
-  void StartEndStreamTimer(const uint32_t app_id);
+  void StartEndStreamTimer(const uint32_t app_id,
+                           const protocol_handler::ServiceType service_type);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
@@ -1386,6 +1388,12 @@ class ApplicationManagerImpl
    */
   typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
 
+  struct NaviServiceDescriptor {
+    uint32_t app_id_;
+    protocol_handler::ServiceType service_type_;
+    TimerSPtr timer_to_stop_service_;
+  };
+
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
    * It concatenates device mac and application id to obtain unique id.
@@ -1411,11 +1419,6 @@ class ApplicationManagerImpl
       const uint32_t app_id) const;
 
   /**
-   * @brief Removes suspended and stopped timers from timer pool
-   */
-  void ClearTimerPool();
-
-  /**
    * @brief CloseNaviApp allows to unregister application in case the
    * EndServiceEndedAck
    * didn't come for at least one of services(audio or video)
@@ -1424,10 +1427,9 @@ class ApplicationManagerImpl
 
   /**
    * @brief Suspends streaming ability of application in case application's HMI
-   * level
-   * has been changed to not allowed for streaming
+   * level has been changed to not allowed for streaming
    */
-  void EndNaviStreaming();
+  void EndStreaming();
 
   /**
    * @brief Starts specified navi service for application
@@ -1669,18 +1671,19 @@ class ApplicationManagerImpl
 
   HmiInterfacesImpl hmi_interfaces_;
 
-  NaviServiceStatusMap navi_service_status_;
   sync_primitives::Lock navi_service_status_lock_;
-  std::deque<uint32_t> navi_app_to_stop_;
+  NaviServiceStatusMap navi_service_status_;
+
   sync_primitives::Lock navi_app_to_stop_lock_;
-  std::deque<uint32_t> navi_app_to_end_stream_;
+  std::deque<NaviServiceDescriptor> navi_app_to_stop_;
+
+  sync_primitives::Lock navi_app_to_end_stream_lock_;
+  std::deque<NaviServiceDescriptor> navi_app_to_end_stream_;
+
+  TimerSPtr last_stream_timer_ref_;
+
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
-
-  std::vector<TimerSPtr> close_app_timer_pool_;
-  std::vector<TimerSPtr> end_stream_timer_pool_;
-  sync_primitives::Lock close_app_timer_pool_lock_;
-  sync_primitives::Lock end_stream_timer_pool_lock_;
 
   mutable sync_primitives::Lock wait_for_hmi_lock_;
   sync_primitives::ConditionalVariable wait_for_hmi_condvar_;
@@ -1709,8 +1712,6 @@ class ApplicationManagerImpl
   Timer application_list_update_timer_;
 
   Timer tts_global_properties_timer_;
-
-  Timer clear_pool_timer_;
 
   bool is_low_voltage_;
 
