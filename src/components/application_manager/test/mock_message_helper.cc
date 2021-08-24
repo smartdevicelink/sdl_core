@@ -687,7 +687,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
       function_id, correlation_id, result_code);
 }
 
-void MessageHelper::RemoveEmptyMessageParams(
+uint16_t MessageHelper::RemoveEmptyMessageParams(
     smart_objects::SmartObject& msg_params) {
   return MockMessageHelper::message_helper_mock()->RemoveEmptyMessageParams(
       msg_params);

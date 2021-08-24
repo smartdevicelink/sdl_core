@@ -1098,8 +1098,10 @@ class MessageHelper {
   /**
    * @brief Recursively removes empty parameters of composite type from message
    * @param msg_params smart object containing message params
+   * @return amount of empty parameters removed
    */
-  static void RemoveEmptyMessageParams(smart_objects::SmartObject& msg_params);
+  static uint16_t RemoveEmptyMessageParams(
+      smart_objects::SmartObject& msg_params);
 
   /**
    * @brief AddDefaultParamsToTireStatus adds missing default sub-params to

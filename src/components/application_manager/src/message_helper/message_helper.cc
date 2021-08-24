@@ -3475,14 +3475,15 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
-void MessageHelper::RemoveEmptyMessageParams(
+uint16_t MessageHelper::RemoveEmptyMessageParams(
     smart_objects::SmartObject& msg_params) {
+  uint16_t erased_params = 0;
+
   if (msg_params.empty()) {
-    return;
+    return erased_params;
   }
 
   const auto keys = msg_params.enumerate();
-
   for (const auto& key_params : keys) {
     auto& param = msg_params[key_params];
 
@@ -3508,6 +3509,7 @@ void MessageHelper::RemoveEmptyMessageParams(
         SDL_LOG_DEBUG("Remove empty array " + key_params +
                       " from msg_params in HMI response");
         msg_params.erase(key_params);
+        ++erased_params;
       }
 
       continue;
@@ -3518,9 +3520,12 @@ void MessageHelper::RemoveEmptyMessageParams(
         SDL_LOG_DEBUG("Remove empty field " + key_params +
                       " from msg_params in HMI response");
         msg_params.erase(key_params);
+        ++erased_params;
       }
     }
   }
+
+  return erased_params;
 }
 
 void MessageHelper::AddDefaultParamsToTireStatus(
