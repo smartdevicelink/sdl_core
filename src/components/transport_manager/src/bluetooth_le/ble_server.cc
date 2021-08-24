@@ -81,7 +81,7 @@ void BleServer::Run()
        while (connected_ && !stop_requested_) {
         buffer.resize(buffer_size);
         const int n = read(client_sock_, buffer.data(), buffer_size - 1);
-        if(n >= 0) {
+        if(n > 0) {
             buffer.resize(n);
             callback_(buffer);
         }
