@@ -104,7 +104,7 @@ TransportAdapter::Error BluetoothLeSocketConnection::Disconnect() {
     }
 
     ble_server_.Stop();
-    if (ble_client_thread_.joinable()) {
+    if (ble_server_thread_.joinable()) {
         ble_server_thread_.join();
     }
 
