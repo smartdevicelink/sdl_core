@@ -840,20 +840,21 @@ class CodeGenerator(object):
                     [[u"bool", None if param.default_value is None
                       else u"true" if param.default_value is True else u"false"]]))
         elif type(param) is Integer:
-            if (param.min_value is not None and param.min_value >= 0) and (param.max_value is None or param.max_value >= 2 ** 32):
-                code = self._impl_code_integer_item_template.substitute(
-                    type=u"uint64_t",
-                    params=self._gen_schema_item_param_values(
-                        [[u"uint64_t", param.min_value],
-                         [u"uint64_t", param.max_value],
-                         [u"uint64_t", param.default_value]]))
-            elif (param.min_value is not None and param.min_value >= 0) and (param.max_value is not None and param.max_value < 2 ** 32):
-                code = self._impl_code_integer_item_template.substitute(
-                    type=u"uint32_t",
-                    params=self._gen_schema_item_param_values(
-                        [[u"uint32_t", param.min_value],
-                         [u"uint32_t", param.max_value],
-                         [u"uint32_t", param.default_value]]))
+            if param.min_value is not None and param.min_value >= 0:
+                if param.max_value is None or param.max_value >= 2 ** 32:
+                    code = self._impl_code_integer_item_template.substitute(
+                        type=u"uint64_t",
+                        params=self._gen_schema_item_param_values(
+                            [[u"uint64_t", param.min_value],
+                             [u"uint64_t", param.max_value],
+                             [u"uint64_t", param.default_value]]))
+                else:
+                    code = self._impl_code_integer_item_template.substitute(
+                        type=u"uint32_t",
+                        params=self._gen_schema_item_param_values(
+                            [[u"uint32_t", param.min_value],
+                             [u"uint32_t", param.max_value],
+                             [u"uint32_t", param.default_value]]))
             elif  (param.min_value is not None and param.min_value > -(2 ** 31) and param.min_value < 0) and (param.max_value is not None and param.max_value < 2 ** 31):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int32_t",
