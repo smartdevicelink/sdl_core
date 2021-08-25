@@ -163,12 +163,18 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
   if (typeid(int32_t) == typeid(value)) {
     if (Object.asInt() < std::numeric_limits<int32_t>::min() ||
         Object.asInt() > std::numeric_limits<int32_t>::max()) {
+      const std::string validation_info =
+          "Value " + Object.asString() + " out of int32 range";
+      report->set_validation_info(validation_info);
       return errors::OUT_OF_RANGE;
     }
     value = Object.asInt();
   } else if (typeid(uint32_t) == typeid(value)) {
     if (Object.asInt() < std::numeric_limits<uint32_t>::min() ||
         Object.asInt() > std::numeric_limits<uint32_t>::max()) {
+      const std::string validation_info =
+          "Value " + Object.asString() + " out of uint32 range";
+      report->set_validation_info(validation_info);
       return errors::OUT_OF_RANGE;
     }
     value = Object.asUInt();
