@@ -461,6 +461,17 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(
           Return(application_manager::HmiInterfaces::HMI_INTERFACE_Buttons));
 
+  ON_CALL(mock_hmi_capabilities_, is_ui_cooperating())
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr button_caps_ptr =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*button_caps_ptr)[0][am::hmi_response::button_name] =
+      mobile_apis::ButtonName::CUSTOM_BUTTON;
+
+  ON_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillByDefault(Return(button_caps_ptr));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
@@ -583,11 +594,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   HMIResultCodeIs(
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                   _))
-      .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
@@ -847,11 +853,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
                   HMIResultCodeIs(
                       hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
                   _))
-      .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(
-          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_SubscribeButton), _))
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,

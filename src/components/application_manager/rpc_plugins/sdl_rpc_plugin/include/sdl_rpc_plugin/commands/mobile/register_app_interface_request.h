@@ -210,10 +210,9 @@ class RegisterAppInterfaceRequest
                                      const std::string& param,
                                      const std::string& backup_value);
   /**
-   * @brief Sends ButtonSubscription notification at start up
-   * to notify HMI that app subscribed on the custom button by default.
+   * @brief Sends ButtonSubscription request if approved by hmi_capabilities
    */
-  void SendSubscribeCustomButtonNotification();
+  void SendSubscribeCustomButtonRequest();
 
   /**
    * @brief IsApplicationSwitched checks whether application is switched

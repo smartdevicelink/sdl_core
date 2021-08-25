@@ -1160,6 +1160,12 @@
                 "shortPressAvailable": true,
                 "longPressAvailable": true,
                 "upDownAvailable": true
+            },
+            {
+                "name" : "CUSTOM_BUTTON",
+                "longPressAvailable" : true,
+                "shortPressAvailable" : true,
+                "upDownAvailable" : true
             }
         ],
         "presetBankCapabilities": {

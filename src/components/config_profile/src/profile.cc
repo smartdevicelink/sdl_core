@@ -1444,10 +1444,6 @@ void Profile::UpdateValues() {
                 kSDL4Section,
                 kAppIconsFolderMaxSizeKey);
 
-  if (app_icons_folder_max_size_ < kDefaultAppIconsFolderMaxSize) {
-    app_icons_folder_max_size_ = kDefaultAppIconsFolderMaxSize;
-  }
-
   LOG_UPDATED_VALUE(
       app_icons_folder_max_size_, kAppIconsFolderMaxSizeKey, kSDL4Section);
 

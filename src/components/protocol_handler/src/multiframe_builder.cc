@@ -197,6 +197,7 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
                 << connection_id
                 << ", session_id: " << static_cast<int>(session_id)
                 << ", message_id: " << message_id);
+  packet->set_frame_data(FRAME_DATA_FIRST);
   messageId_map[message_id] = {packet, date_time::getCurrentTime()};
   return RESULT_OK;
 }
