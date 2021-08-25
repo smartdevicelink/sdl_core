@@ -70,6 +70,7 @@ void SendHapticDataRequest::Run() {
   }
 
   if (app->is_navi() || app->mobile_projection_enabled()) {
+    msg_params[strings::app_id] = connection_key();
     SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData, &msg_params, true);
   } else {
     SendResponse(false,

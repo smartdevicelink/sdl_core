@@ -369,14 +369,12 @@ class SSLHandshakeTest : public testing::TestWithParam<Protocol> {
   const std::vector<int> forced_unprotected_service_;
 };
 
-INSTANTIATE_TEST_CASE_P(
-    CorrectProtocol,
-    SSLHandshakeTest,
-    ::testing::Values(
-        Protocol(security_manager::TLSv1, security_manager::TLSv1),
-        Protocol(security_manager::TLSv1_1, security_manager::TLSv1_1),
-        Protocol(security_manager::TLSv1_2, security_manager::TLSv1_2),
-        Protocol(security_manager::DTLSv1, security_manager::DTLSv1)));
+INSTANTIATE_TEST_CASE_P(CorrectProtocol,
+                        SSLHandshakeTest,
+                        ::testing::Values(Protocol(security_manager::TLSv1_2,
+                                                   security_manager::TLSv1_2),
+                                          Protocol(security_manager::DTLSv1,
+                                                   security_manager::DTLSv1)));
 
 TEST_P(SSLHandshakeTest, NoVerification) {
   ASSERT_TRUE(InitServerManagers(GetParam().server_protocol,
@@ -413,7 +411,7 @@ TEST_P(SSLHandshakeTest, CAVerification_ServerSide) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_P(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
+TEST_P(SSLHandshakeTest, DISABLED_CAVerification_ServerSide_NoCACertificate) {
   ASSERT_TRUE(InitServerManagers(
       GetParam().server_protocol, "", "ALL", verify_peer, "unex"))
       << server_manager_->LastError();

@@ -63,7 +63,7 @@ void SystemCapabilityAppExtension::SaveResumptionData(
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
     resumption_data[strings::system_capability][i] = subscription;
-    i++;
+    ++i;
   }
 }
 

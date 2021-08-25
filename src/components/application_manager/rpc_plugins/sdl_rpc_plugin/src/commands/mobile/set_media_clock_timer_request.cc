@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -76,7 +77,8 @@ void SetMediaClockRequest::Run() {
     return;
   }
 
-  if (isDataValid()) {
+  std::string info;
+  if (isDataValid(info)) {
     // copy entirely msg
     smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
     msg_params[strings::app_id] = app->app_id();
@@ -85,7 +87,9 @@ void SetMediaClockRequest::Run() {
     SendHMIRequest(
         hmi_apis::FunctionID::UI_SetMediaClockTimer, &msg_params, true);
   } else {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false,
+                 mobile_apis::Result::INVALID_DATA,
+                 info.empty() ? NULL : info.c_str());
   }
 }
 
@@ -117,7 +121,7 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-bool SetMediaClockRequest::isDataValid() {
+bool SetMediaClockRequest::isDataValid(std::string& info) {
   smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
   mobile_apis::UpdateMode::eType update_mode =
       static_cast<mobile_apis::UpdateMode::eType>(
@@ -126,7 +130,10 @@ bool SetMediaClockRequest::isDataValid() {
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
     if (!msg_params.keyExists(strings::start_time)) {
-      SDL_LOG_INFO("Invalid data");
+      info =
+          "Start time must be provided for \"COUNTUP\" and \"COUNTDOWN\" "
+          "update modes";
+      SDL_LOG_INFO("Invalid data: " << info);
       return false;
     }
 
@@ -151,7 +158,33 @@ bool SetMediaClockRequest::isDataValid() {
            (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
            (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
-        SDL_LOG_INFO("Invalid data");
+        std::string update_mode_name;
+        smart_objects::EnumConversionHelper<
+            mobile_apis::UpdateMode::eType>::EnumToString(update_mode,
+                                                          &update_mode_name);
+        info = "Start time must be " +
+               std::string((update_mode == mobile_apis::UpdateMode::COUNTUP)
+                               ? "before"
+                               : "after") +
+               " the end time for update mode " + update_mode_name;
+        SDL_LOG_INFO("Invalid data: " << info);
+        return false;
+      }
+    }
+  }
+
+  std::vector<std::string> indicator_keys{strings::forward_seek_indicator,
+                                          strings::back_seek_indicator};
+  for (auto& key : indicator_keys) {
+    if (msg_params.keyExists(key)) {
+      mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+          static_cast<mobile_apis::SeekIndicatorType::eType>(
+              msg_params[key][strings::type].asUInt());
+      if (seek_indicator_type == mobile_apis::SeekIndicatorType::TRACK &&
+          msg_params[key].keyExists(strings::seek_time)) {
+        info =
+            "The seekTime parameter is not applicable for indicator type TRACK";
+        SDL_LOG_INFO("Invalid data: " << info);
         return false;
       }
     }

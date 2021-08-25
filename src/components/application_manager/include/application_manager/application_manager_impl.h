@@ -53,7 +53,6 @@
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_service.h"
@@ -121,6 +120,9 @@ enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
 typedef std::map<protocol_handler::ServiceType, std::set<uint32_t> >
     ServiceStreamingStatusMap;
 
+typedef std::map<const int32_t, ExpiredButtonRequestData>
+    ExpiredButtonRequestsMap;
+
 struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
@@ -159,10 +161,6 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
-  DEPRECATED
-  bool Init(resumption::LastState&,
-            media_manager::MediaManager* media_manager) OVERRIDE;
-
   /**
    * Inits application manager
    */
@@ -189,8 +187,6 @@ class ApplicationManagerImpl
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
-  DEPRECATED ApplicationSharedPtr
-  application_by_name(const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
   ApplicationSharedPtr reregister_application_by_policy_id(
@@ -709,6 +705,9 @@ class ApplicationManagerImpl
   void RemoveDevice(
       const connection_handler::DeviceHandle& device_handle) OVERRIDE;
 
+  bool GetProtocolVehicleData(
+      connection_handler::ProtocolVehicleData& data) OVERRIDE;
+
   /**
    * @brief OnDeviceSwitchingStart is invoked on device transport switching
    * start (e.g. from Bluetooth to USB) and creates waiting list of applications
@@ -793,14 +792,14 @@ class ApplicationManagerImpl
    *
    * @param ptr Reference to shared pointer that point on hmi notification
    */
-  void addNotification(const CommandSharedPtr ptr);
+  void AddNotification(const CommandSharedPtr ptr);
 
   /**
    * @ Add notification to collection
    *
-   * @param ptr Reference to shared pointer that point on hmi notification
+   * @param notification Pointer that points to hmi notification
    */
-  void removeNotification(const commands::Command* notification);
+  void RemoveNotification(const commands::Command* notification);
 
   /**
    * @ Updates request timeout
@@ -809,7 +808,7 @@ class ApplicationManagerImpl
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  void updateRequestTimeout(uint32_t connection_key,
+  void UpdateRequestTimeout(uint32_t connection_key,
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
 
@@ -864,9 +863,6 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
-  DEPRECATED
-  void ForbidStreaming(uint32_t app_id) OVERRIDE;
-
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
@@ -879,7 +875,7 @@ class ApplicationManagerImpl
 
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
-                      const Application::StreamingState new_state) OVERRIDE;
+                      bool state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;
@@ -999,6 +995,18 @@ class ApplicationManagerImpl
 
   rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
     return *rpc_handler_;
+  }
+
+  request_controller::RequestTimeoutHandler& get_request_timeout_handler()
+      const OVERRIDE {
+    DCHECK(request_timeout_handler_);
+    return *request_timeout_handler_;
+  }
+
+  request_controller::RequestController& get_request_controller()
+      const OVERRIDE {
+    DCHECK(request_ctrl_);
+    return *request_ctrl_;
   }
 
   void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
@@ -1153,6 +1161,8 @@ class ApplicationManagerImpl
     return is_stopping_;
   }
 
+  bool WaitForHmiIsReady() OVERRIDE;
+
   /**
    * @brief ProcessReconnection handles reconnection flow for application on
    * transport switch
@@ -1181,6 +1191,9 @@ class ApplicationManagerImpl
   bool IsSOStructValid(const hmi_apis::StructIdentifiers::eType struct_id,
                        const smart_objects::SmartObject& display_capabilities);
 
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response) OVERRIDE;
+
   /**
    * @brief Function returns supported SDL Protocol Version
    * @return protocol version depends on parameters from smartDeviceLink.ini.
@@ -1190,7 +1203,15 @@ class ApplicationManagerImpl
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
 
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() OVERRIDE;
+
  private:
+  /**
+   * @brief Sets is_stopping flag to true
+   */
+  void InitiateStopping();
+
   /**
    * @brief Adds application to registered applications list and marks it as
    * registered
@@ -1533,6 +1554,16 @@ class ApplicationManagerImpl
   static std::vector<std::string> ConvertRejectedParamList(
       const std::vector<std::string>& input);
 
+  void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) OVERRIDE;
+
+  utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const OVERRIDE;
+
+  void DeleteExpiredButtonRequest(const int32_t corr_id) OVERRIDE;
+
  private:
   const ApplicationManagerSettings& settings_;
   /**
@@ -1591,8 +1622,10 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler* connection_handler_;
   std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
+  std::unique_ptr<request_controller::RequestTimeoutHandler>
+      request_timeout_handler_;
+  std::unique_ptr<request_controller::RequestController> request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
-  request_controller::RequestController request_ctrl_;
   std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**
@@ -1613,12 +1646,14 @@ class ApplicationManagerImpl
     mobile_apis::SystemContext::eType system_context;
   };
 
-  hmi_apis::HMI_API* hmi_so_factory_;
-  mobile_apis::MOBILE_API* mobile_so_factory_;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
+      mobile_v4_protocol_so_factory_;
 
-  static uint32_t mobile_corelation_id_;
-  static uint32_t corelation_id_;
-  static const uint32_t max_corelation_id_;
+  std::atomic<uint32_t> mobile_correlation_id_;
+  std::atomic<uint32_t> correlation_id_;
+  const uint32_t max_correlation_id_;
 
   std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
@@ -1645,6 +1680,9 @@ class ApplicationManagerImpl
   std::vector<TimerSPtr> end_stream_timer_pool_;
   sync_primitives::Lock close_app_timer_pool_lock_;
   sync_primitives::Lock end_stream_timer_pool_lock_;
+
+  mutable sync_primitives::Lock wait_for_hmi_lock_;
+  sync_primitives::ConditionalVariable wait_for_hmi_condvar_;
 
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
@@ -1688,6 +1726,9 @@ class ApplicationManagerImpl
 
   ServiceStreamingStatusMap streaming_application_services_;
   sync_primitives::Lock streaming_services_lock_;
+
+  mutable sync_primitives::Lock expired_button_requests_lock_;
+  mutable ExpiredButtonRequestsMap expired_button_requests_;
 
 #ifdef BUILD_TESTS
  public:

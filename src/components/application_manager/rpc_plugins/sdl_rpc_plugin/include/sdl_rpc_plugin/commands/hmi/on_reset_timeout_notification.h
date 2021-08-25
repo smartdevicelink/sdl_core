@@ -30,39 +30,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_
+
+#include "application_manager/commands/notification_from_hmi.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 namespace hmi {
 
-SDL_CREATE_LOG_VARIABLE("Commands")
+/**
+ * @brief OnResetTimeoutNotification command class
+ **/
+class OnResetTimeoutNotification
+    : public app_mngr::commands::NotificationFromHMI {
+ public:
+  /**
+   * @brief OnResetTimeoutNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnResetTimeoutNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
-OnButtonSubscriptionNotification::OnButtonSubscriptionNotification(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : NotificationToHMI(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handle) {}
+  /**
+   * @brief OnResetTimeoutNotification class destructor
+   **/
+  virtual ~OnResetTimeoutNotification();
 
-OnButtonSubscriptionNotification::~OnButtonSubscriptionNotification() {}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void OnButtonSubscriptionNotification::Run() {
-  SDL_LOG_AUTO_TRACE();
-
-  SendNotification();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnResetTimeoutNotification);
+};
 
 }  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_RESET_TIMEOUT_NOTIFICATION_H_

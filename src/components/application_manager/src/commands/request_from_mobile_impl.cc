@@ -41,6 +41,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -138,34 +139,6 @@ bool IsResultCodeWarning(const ResponseInfo& first,
   return first_is_ok_second_is_warn || both_warnings;
 }
 
-struct DisallowedParamsInserter {
-  DisallowedParamsInserter(smart_objects::SmartObject& response,
-                           mobile_apis::VehicleDataResultCode::eType code)
-      : response_(response), code_(code) {}
-
-  bool operator()(const std::string& param) {
-    smart_objects::SmartObjectSPtr disallowed_param =
-        std::make_shared<smart_objects::SmartObject>(
-            smart_objects::SmartType_Map);
-
-    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
-    auto vehicle_data = rpc_spec_vehicle_data.find(param);
-    auto vehicle_data_type =
-        vehicle_data == rpc_spec_vehicle_data.end()
-            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
-            : vehicle_data->second;
-
-    (*disallowed_param)[strings::data_type] = vehicle_data_type;
-    (*disallowed_param)[strings::result_code] = code_;
-    response_[strings::msg_params][param.c_str()] = *disallowed_param;
-    return true;
-  }
-
- private:
-  smart_objects::SmartObject& response_;
-  mobile_apis::VehicleDataResultCode::eType code_;
-};
-
 ResponseInfo::ResponseInfo()
     : result_code(hmi_apis::Common_Result::INVALID_ENUM)
     , interface(HmiInterfaces::HMI_INTERFACE_INVALID_ENUM)
@@ -188,14 +161,7 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
   interface_state =
       application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
 
-  is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED,
-      hmi_apis::Common_Result::TRUNCATED_DATA);
+  is_ok = IsHMIResultSuccess(result_code);
 
   is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
 
@@ -297,15 +263,7 @@ void RequestFromMobileImpl::SendResponse(
   // appropriate reasons (VehicleData result codes)
   if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED &&
       result_code != mobile_apis::Result::INVALID_DATA) {
-    const mobile_apis::FunctionID::eType& id =
-        static_cast<mobile_apis::FunctionID::eType>(function_id());
-    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
-        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
-      AddDisallowedParameters(response);
-      AddDisallowedParametersToInfo(response);
-    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
-      AddDisallowedParametersToInfo(response);
-    }
+    FormatResponse(response);
   }
 
   response[strings::msg_params][strings::success] = success;
@@ -317,6 +275,11 @@ void RequestFromMobileImpl::SendResponse(
                                 : warning_info();
     response[strings::msg_params][strings::result_code] =
         mobile_apis::Result::WARNINGS;
+  } else if (mobile_apis::Result::INVALID_ENUM == result_code) {
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::GENERIC_ERROR;
+    response[strings::msg_params][strings::info] =
+        "Invalid result received from vehicle";
   } else {
     response[strings::msg_params][strings::result_code] = result_code;
   }
@@ -429,7 +392,9 @@ uint32_t RequestFromMobileImpl::SendHMIRequest(
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
+    if (rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
+      AddRequestToTimeoutHandler(request);
+    } else {
       SDL_LOG_ERROR("Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -669,59 +634,6 @@ void RequestFromMobileImpl::RemoveDisallowedParameters() {
   }
 }
 
-void RequestFromMobileImpl::AddDissalowedParameterToInfoString(
-    std::string& info, const std::string& param) const {
-  // prepare disallowed params enumeration for response info string
-  if (info.empty()) {
-    info = "\'" + param + "\'";
-  } else {
-    info = info + "," + " " + "\'" + param + "\'";
-  }
-}
-
-void RequestFromMobileImpl::AddDisallowedParametersToInfo(
-    smart_objects::SmartObject& response) const {
-  std::string info;
-
-  RPCParams::const_iterator it =
-      removed_parameters_permissions_.disallowed_params.begin();
-  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  it = removed_parameters_permissions_.undefined_params.begin();
-  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
-  }
-
-  if (!info.empty()) {
-    info += " disallowed by policies.";
-
-    if (!response[strings::msg_params][strings::info].asString().empty()) {
-      // If we already have info add info about disallowed params to it
-      response[strings::msg_params][strings::info] =
-          response[strings::msg_params][strings::info].asString() + " " + info;
-    } else {
-      response[strings::msg_params][strings::info] = info;
-    }
-  }
-}
-
-void RequestFromMobileImpl::AddDisallowedParameters(
-    smart_objects::SmartObject& response) {
-  DisallowedParamsInserter disallowed_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
-                removed_parameters_permissions_.disallowed_params.end(),
-                disallowed_inserter);
-
-  DisallowedParamsInserter undefined_inserter(
-      response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
-                removed_parameters_permissions_.undefined_params.end(),
-                undefined_inserter);
-}
-
 bool RequestFromMobileImpl::HasDisallowedParams() const {
   return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
           (!removed_parameters_permissions_.undefined_params.empty()));
@@ -731,17 +643,8 @@ bool RequestFromMobileImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   SDL_LOG_AUTO_TRACE();
-  if (IsHMIResultSuccess(result_code)) {
-    return true;
-  }
 
-  const HmiInterfaces::InterfaceState state =
-      application_manager_.hmi_interfaces().GetInterfaceState(interface);
-  if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
-      (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
-    return true;
-  }
-  return false;
+  return IsHMIResultSuccess(result_code, interface);
 }
 
 bool RequestFromMobileImpl::PrepareResultForMobileResponse(
@@ -749,6 +652,17 @@ bool RequestFromMobileImpl::PrepareResultForMobileResponse(
   SDL_LOG_AUTO_TRACE();
   bool result = CheckResultCode(out_first, out_second) ||
                 CheckResultCode(out_second, out_first);
+  return result;
+}
+
+bool RequestFromMobileImpl::PrepareResultForMobileResponse(
+    ResponseInfo& out_first,
+    ResponseInfo& out_second,
+    ResponseInfo& out_third) const {
+  SDL_LOG_AUTO_TRACE();
+  bool result = (PrepareResultForMobileResponse(out_first, out_second) ||
+                 PrepareResultForMobileResponse(out_second, out_third)) &&
+                PrepareResultForMobileResponse(out_first, out_third);
   return result;
 }
 
@@ -789,6 +703,19 @@ mobile_apis::Result::eType RequestFromMobileImpl::PrepareResultCodeForResponse(
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
   return result_code;
+}
+
+mobile_apis::Result::eType RequestFromMobileImpl::PrepareResultCodeForResponse(
+    const ResponseInfo& first,
+    const ResponseInfo& second,
+    const ResponseInfo& third) {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto first_comparison = PrepareResultCodeForResponse(first, second);
+  const auto second_comparison = PrepareResultCodeForResponse(second, third);
+  const auto third_comparison = PrepareResultCodeForResponse(first, third);
+
+  return std::max({first_comparison, second_comparison, third_comparison});
 }
 
 const CommandParametersPermissions&
@@ -927,6 +854,51 @@ void RequestFromMobileImpl::AddTimeOutComponentInfoToMessage(
         not_responding_interfaces_string + " component does not respond";
     response[strings::msg_params][strings::info] = component_info;
   }
+}
+
+void RequestFromMobileImpl::AddRequestToTimeoutHandler(
+    const smart_objects::SmartObject& request_to_hmi) const {
+  auto function_id = static_cast<hmi_apis::FunctionID::eType>(
+      request_to_hmi[strings::params][strings::function_id].asUInt());
+  // SDL must not apply "default timeout for RPCs processing" for
+  // BasicCommunication.DialNumber RPC (that is, SDL must always wait for HMI
+  // response to BC.DialNumber as long as it takes and not return GENERIC_ERROR
+  // to mobile app), so the OnResetTimeout logic is not applicable for
+  // DialNumber RPC
+  if (helpers::Compare<hmi_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+          function_id,
+          hmi_apis::FunctionID::BasicCommunication_DialNumber,
+          hmi_apis::FunctionID::INVALID_ENUM)) {
+    SDL_LOG_DEBUG(
+        "Current RPC is DialNumber or Invalid, OnResetTimeout "
+        "logic is not applicable in this case");
+    return;
+  }
+
+  // If soft buttons are present in Alert or SubtleAlert RPC, SDL will not use
+  // timeout tracking for response, so the OnResetTimeout logic is not
+  // applicable in this case
+  if (helpers::Compare<hmi_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+          function_id,
+          hmi_apis::FunctionID::UI_Alert,
+          hmi_apis::FunctionID::UI_SubtleAlert)) {
+    if (request_to_hmi.keyExists(strings::msg_params)) {
+      if (request_to_hmi[strings::msg_params].keyExists(
+              strings::soft_buttons)) {
+        SDL_LOG_DEBUG("Soft buttons are present in "
+                      << EnumToString(function_id)
+                      << " RPC, OnResetTimeout "
+                         "logic is not applicable in this case");
+        return;
+      }
+    }
+  }
+
+  const application_manager::request_controller::Request request{
+      correlation_id(), connection_key(), static_cast<uint32_t>(function_id)};
+  application_manager_.get_request_timeout_handler().AddRequest(
+      request_to_hmi[strings::params][strings::correlation_id].asUInt(),
+      request);
 }
 
 }  // namespace commands

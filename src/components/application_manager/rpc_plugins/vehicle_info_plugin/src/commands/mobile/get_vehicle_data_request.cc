@@ -91,7 +91,7 @@ void GetVehicleDataRequest::Run() {
       continue;
     }
     hmi_msg_params[name] = msg_params[name];
-    params_count++;
+    ++params_count;
   }
 
   const int minimal_params_count = 1;
@@ -125,6 +125,12 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
+
+      if (message[strings::msg_params].keyExists(strings::tire_pressure)) {
+        ApplicationSharedPtr app =
+            application_manager_.application(connection_key());
+        MessageHelper::AddDefaultParamsToTireStatus(app, message);
+      }
 
       auto data_not_available_with_params = [this, &result_code, &message]() {
         if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {

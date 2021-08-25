@@ -261,12 +261,6 @@ class RegisterAppInterfaceRequest
       const smart_objects::SmartObject& message);
 
   /**
-   * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
-   * requests processing
-   */
-  void WaitForHMIIsReady();
-
-  /**
    * @brief FillApplicationParams set app application attributes from the RAI
    * request
    * @param application applicaiton to fill params

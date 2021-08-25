@@ -64,10 +64,7 @@ AlertRequest::AlertRequest(
     , awaiting_tts_stop_speaking_response_(false)
     , is_ui_alert_sent_(false)
     , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 AlertRequest::~AlertRequest() {}
 
@@ -139,18 +136,6 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::TTS_OnResetTimeout:
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO(
-          "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event "
-          << awaiting_tts_speak_response_ << " "
-          << awaiting_tts_stop_speaking_response_ << " "
-          << awaiting_ui_alert_response_);
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_Alert: {
       SDL_LOG_INFO("Received UI_Alert event");
       // Unsubscribe from event to avoid unwanted messages
@@ -337,14 +322,14 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         hmi_apis::Common_TextFieldName::alertText1;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text1];
-    index++;
+    ++index;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
-    index++;
+    ++index;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =

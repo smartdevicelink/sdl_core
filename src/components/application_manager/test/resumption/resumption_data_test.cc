@@ -437,6 +437,8 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, getAppFiles()).WillByDefault(ReturnRef(app_files_map_));
   ON_CALL(*app_mock, window_optional_params_map())
       .WillByDefault(Return(window_params_map));
+  ON_CALL(*app_mock, get_user_location())
+      .WillByDefault(ReturnRef(user_location_));
 }
 
 void ResumptionDataTest::SetDefaultCurrentHmiState() {

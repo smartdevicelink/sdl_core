@@ -336,7 +336,7 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
-  EXPECT_EQ(result_code,
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR,
             static_cast<mobile_apis::Result::eType>(
                 (*result_msg)[am::strings::msg_params][am::strings::result_code]
                     .asInt()));
@@ -401,27 +401,6 @@ TEST_F(AlertRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   event.set_smart_object(*msg_);
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  command->on_event(event);
-}
-
-TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
-  PreConditions();
-  Expectations();
-  AddAlertTextsToMsg();
-
-  (*msg_)[am::strings::msg_params][am::strings::duration] = kDefaultTimeout;
-
-  CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  EXPECT_TRUE(command->Init());
-
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
-
-  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_ENUM);
-
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
   command->on_event(event);
 }
 

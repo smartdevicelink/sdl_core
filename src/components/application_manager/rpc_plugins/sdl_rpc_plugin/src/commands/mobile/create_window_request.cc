@@ -218,7 +218,8 @@ void CreateWindowRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           response_message[strings::params][hmi_response::code].asInt()));
 
-  const bool is_success = IsMobileResultSuccess(result_code);
+  const bool is_success =
+      app_mngr::commands::IsMobileResultSuccess(result_code);
   std::string response_info;
   GetInfo(response_message, response_info);
 

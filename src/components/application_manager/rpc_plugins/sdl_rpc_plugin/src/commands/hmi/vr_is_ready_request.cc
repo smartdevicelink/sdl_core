@@ -72,6 +72,8 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
 
       HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_vr_cooperating(is_available);
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VR_IsReady);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
         UpdateRequiredInterfaceCapabilitiesRequests(hmi_interface::vr);
@@ -91,6 +93,8 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VRIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_IsReady);
   RequestInterfaceCapabilities(hmi_interface::vr);
 }
 

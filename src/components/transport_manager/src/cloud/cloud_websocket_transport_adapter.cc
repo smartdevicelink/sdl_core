@@ -105,7 +105,7 @@ void CloudWebsocketTransportAdapter::CreateDevice(const std::string& uid) {
 
   SDL_LOG_DEBUG("#Results: " << results.size());
   std::string results_str;
-  for (size_t i = 0; i < results.size(); i++) {
+  for (size_t i = 0; i < results.size(); ++i) {
     results_str += " R[" + std::to_string(i) + "]:";
     results_str +=
         (results[i].length() != 0) ? results[i] : std::string("<EMPTY>");

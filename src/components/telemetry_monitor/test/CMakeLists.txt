@@ -74,4 +74,10 @@ endif()
 
 create_test("telemetry_monitor_test" "${SOURCES}" "${LIBRARIES}")
 
-file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+  file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+if (${LOGGER_NAME} STREQUAL "BOOST")
+  file(COPY ${COMPONENTS_DIR}/telemetry_monitor/test/boostlogconfig.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()

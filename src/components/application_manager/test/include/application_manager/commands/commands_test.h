@@ -54,6 +54,7 @@ namespace components {
 namespace commands_test {
 
 namespace am = ::application_manager;
+namespace strings = am::strings;
 
 using ::testing::_;
 using ::testing::Mock;
@@ -164,7 +165,7 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(Return(timeout_response));
   }
 
-  enum { kDefaultTimeout_ = 100 };
+  enum { kDefaultTimeout_ = 100, kDefaultTimeoutCompensation_ = 10 };
 
   MockAppManager app_mngr_;
   MockRPCService mock_rpc_service_;
@@ -179,16 +180,25 @@ class CommandsTest : public ::testing::Test {
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
+    this->InitCommand(timeout, kDefaultTimeoutCompensation_);
+  }
+
+  virtual void InitCommand(const uint32_t timeout,
+                           const uint32_t compensation) {
     timeout_ = timeout;
+    timeout_compensation_ = compensation;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout_));
+    ON_CALL(app_mngr_settings_, default_timeout_compensation())
+        .WillByDefault(ReturnRef(timeout_compensation_));
   }
 
   CommandsTest()
       : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , timeout_(0) {
+      , timeout_(0)
+      , timeout_compensation_(0) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -197,6 +207,30 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
     InitHMIToMobileResultConverter();
+  }
+
+  void FillVideoStreamingCapability(
+      smart_objects::SmartObject& video_streaming_capability) {
+    video_streaming_capability[strings::preferred_resolution] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_width] = 800;
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_height] = 354;
+    video_streaming_capability[strings::max_bitrate] = 10000;
+    video_streaming_capability[strings::supported_formats] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    video_streaming_capability[strings::supported_formats][0] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::supported_formats][0]
+                              [strings::protocol] =
+                                  hmi_apis::Common_VideoStreamingProtocol::RAW;
+    video_streaming_capability[strings::supported_formats][0][strings::codec] =
+        hmi_apis::Common_VideoStreamingCodec::H264;
+    video_streaming_capability[strings::haptic_spatial_data_supported] = true;
+    video_streaming_capability[strings::diagonal_screen_size] = 7.47;
+    video_streaming_capability[strings::pixel_per_inch] = 117.f;
+    video_streaming_capability[strings::scale] = 1.f;
   }
 
   void InitHMIToMobileResultConverter() {
@@ -249,6 +283,7 @@ class CommandsTest : public ::testing::Test {
 
  private:
   uint32_t timeout_;
+  uint32_t timeout_compensation_;
 };
 
 MATCHER_P(MobileResultCodeIs, result_code, "") {

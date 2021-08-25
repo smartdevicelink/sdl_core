@@ -159,18 +159,6 @@ uint32_t RegisterAppInterfaceRequest::default_timeout() const {
   return 0;
 }
 
-void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
-  while (!application_manager_.IsStopping() &&
-         !application_manager_.IsHMICooperating()) {
-    SDL_LOG_DEBUG("Waiting for the HMI... conn_key="
-                  << connection_key() << ", correlation_id=" << correlation_id()
-                  << ", default_timeout=" << default_timeout()
-                  << ", thread=" << pthread_self());
-    sleep(1);
-    // TODO(DK): timer_->StartWait(1);
-  }
-}
-
 void RegisterAppInterfaceRequest::FillApplicationParams(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
@@ -236,7 +224,8 @@ void RegisterAppInterfaceRequest::FillApplicationParams(
           application->set_webengine_projection_enabled(true);
           break;
         }
-        default: {}
+        default: {
+        }
       }
     }
   }
@@ -488,10 +477,8 @@ void RegisterAppInterfaceRequest::Run() {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Connection key is " << connection_key());
 
-  WaitForHMIIsReady();
-
-  if (application_manager_.IsStopping()) {
-    SDL_LOG_WARN("The ApplicationManager is stopping!");
+  if (!application_manager_.WaitForHmiIsReady()) {
+    SDL_LOG_WARN("Failed to wait for HMI readiness");
     return;
   }
 
@@ -997,12 +984,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   smart_objects::SmartObject msg_params_copy = msg_params;
+  ApplicationManager& app_manager = application_manager_;
   const auto result_code = CalculateFinalResultCode();
 
   SendResponse(true, result_code, response_info_.c_str(), &response_params);
 
   FinishSendingResponseToMobile(
-      msg_params_copy, application_manager_, key, status_notifier);
+      msg_params_copy, app_manager, key, status_notifier);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(
@@ -1474,13 +1462,13 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
 }
 
 void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
-  msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-                        msg_params);
+  msg_params[strings::button_name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
+  SendHMIRequest(
+      hmi_apis::FunctionID::Buttons_SubscribeButton, &msg_params, false);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {

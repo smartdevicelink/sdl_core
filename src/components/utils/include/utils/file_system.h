@@ -40,6 +40,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "utils/macro.h"
 
 namespace file_system {
 
@@ -255,14 +256,6 @@ bool ReadBinaryFile(const std::string& name,
                     uint32_t length);
 
 bool ReadFile(const std::string& name, std::string& result);
-
-/**
- * @brief Convert special symbols in system path to percent-encoded
- *
- * @param name path to file
- * @return returns converted path.
- */
-const std::string ConvertPathForURL(const std::string& path);
 
 /**
  * @brief Create empty file

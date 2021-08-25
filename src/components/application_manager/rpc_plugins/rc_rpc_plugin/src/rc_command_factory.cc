@@ -217,7 +217,8 @@ CommandCreator& RCCommandFactory::get_mobile_command_creator(
                  : rc_factory.GetCreator<
                        commands::GetInteriorVehicleDataConsentResponse>();
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -230,7 +231,8 @@ CommandCreator& RCCommandFactory::get_mobile_notification_creator(
       return rc_factory
           .GetCreator<commands::OnInteriorVehicleDataNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -259,7 +261,8 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
       }
       break;
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -314,7 +317,9 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
                  : rc_factory
                        .GetCreator<commands::RCSetGlobalPropertiesResponse>();
     }
-    default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
+    default: {
+      return rc_factory.GetCreator<RCInvalidCommand>();
+    }
   }
 }
 }  // namespace rc_rpc_plugin

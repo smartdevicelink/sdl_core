@@ -68,10 +68,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(Init,
                bool(resumption::LastStateWrapperPtr last_state,
                     media_manager::MediaManager* media_manager));
-  DEPRECATED
-  MOCK_METHOD2(Init,
-               bool(resumption::LastState& last_state,
-                    media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));
@@ -117,9 +113,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
-  MOCK_CONST_METHOD1(
-      application_by_name,
-      application_manager::ApplicationSharedPtr(const std::string& app_name));
   MOCK_CONST_METHOD1(pending_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
@@ -184,6 +177,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD1(OnApplicationSwitched,
                void(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD0(mobile_v4_protocol_so_factory,
+               ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&());
   MOCK_CONST_METHOD0(connection_handler,
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
@@ -193,6 +188,12 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                      application_manager::rpc_service::RPCService&());
   MOCK_CONST_METHOD0(GetRPCHandler,
                      application_manager::rpc_handler::RPCHandler&());
+  MOCK_CONST_METHOD0(
+      get_request_timeout_handler,
+      application_manager::request_controller::RequestTimeoutHandler&());
+  MOCK_CONST_METHOD0(
+      get_request_controller,
+      application_manager::request_controller::RequestController&());
   MOCK_CONST_METHOD0(is_stopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
@@ -230,6 +231,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
   MOCK_CONST_METHOD0(IsStopping, bool());
+  MOCK_METHOD0(WaitForHmiIsReady, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
   MOCK_METHOD2(ResetGlobalProperties,
@@ -266,7 +268,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const connection_handler::DeviceHandle));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
-  MOCK_METHOD3(updateRequestTimeout,
+  MOCK_METHOD3(UpdateRequestTimeout,
                void(uint32_t connection_key,
                     uint32_t mobile_correlation_id,
                     uint32_t new_timeout_value));
@@ -312,11 +314,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(OnAppUnauthorized, void(const uint32_t& app_id));
   MOCK_METHOD1(ActivateApplication,
                bool(application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD3(
-      OnAppStreaming,
-      void(uint32_t app_id,
-           protocol_handler::ServiceType service_type,
-           application_manager::Application::StreamingState new_state));
+  MOCK_METHOD3(OnAppStreaming,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type,
+                    bool state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
@@ -331,8 +332,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(CanAppStream,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  DEPRECATED
-  MOCK_METHOD1(ForbidStreaming, void(uint32_t app_id));
   MOCK_METHOD2(ForbidStreaming,
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type));
@@ -348,6 +347,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(IsSOStructValid,
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
+  MOCK_METHOD1(UnsubscribeAppFromSoftButtons,
+               bool(const application_manager::commands::MessageSharedPtr
+                        response_message));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::Application& app));
@@ -403,6 +405,15 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(IsStillWaitingForResponse,
                      bool(const uint32_t connection_key,
                           const uint32_t correlation_id));
+  MOCK_METHOD3(AddExpiredButtonRequest,
+               void(const uint32_t app_id,
+                    const int32_t corr_id,
+                    const hmi_apis::Common_ButtonName::eType button_name));
+  MOCK_CONST_METHOD1(
+      GetExpiredButtonRequestData,
+      utils::Optional<application_manager::ExpiredButtonRequestData>(
+          const int32_t corr_id));
+  MOCK_METHOD1(DeleteExpiredButtonRequest, void(const int32_t corr_id));
 };
 
 }  // namespace application_manager_test

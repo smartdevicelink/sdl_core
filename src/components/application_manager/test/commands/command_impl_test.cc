@@ -150,7 +150,9 @@ TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   (*msg)[strings::params][strings::function_id] = kFunctionId;
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-  EXPECT_EQ(kDefaultTimeout_, command->default_timeout());
+  const uint32_t expected_timeout =
+      kDefaultTimeout_ + kDefaultTimeoutCompensation_;
+  EXPECT_EQ(expected_timeout, command->default_timeout());
   EXPECT_EQ(kCorrelationId, command->correlation_id());
   EXPECT_EQ(kConnectionKey, command->connection_key());
   EXPECT_EQ(kFunctionId, command->function_id());

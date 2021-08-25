@@ -89,24 +89,6 @@ class CommandRequestImpl : public CommandImpl,
                          bool use_events);
 
   /**
-   * @brief Checks Mobile result code for single RPC
-   * @param result_code contains result code from response to Mobile
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   **/
-  static bool IsMobileResultSuccess(
-      const mobile_apis::Result::eType result_code);
-
-  /**
-   * @brief Checks HMI result code for single RPC
-   * @param result_code contains result code from HMI response
-   * @return true if result code complies to successful result codes,
-   * false otherwise.
-   **/
-  static bool IsHMIResultSuccess(
-      const hmi_apis::Common_Result::eType result_code);
-
-  /**
    * @brief Execute corresponding command by calling the action on reciever
    **/
   void Run() OVERRIDE;

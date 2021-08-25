@@ -74,6 +74,8 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
 
       HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_navi_cooperating(is_available);
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::Navigation_IsReady);
       break;
     }
     default: {
@@ -81,6 +83,11 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
+}
+
+void NaviIsReadyRequest::OnTimeOut() {
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Navigation_IsReady);
 }
 
 }  // namespace commands

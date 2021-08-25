@@ -23,9 +23,9 @@ void DeleteWayPoints(ApplicationSharedPtr app,
 
 void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
-  for (const auto& cmd : commands_map) {
+  for (const auto cmd : commands_map) {
     auto delete_UI_msg = MessageHelper::CreateDeleteUICommandRequest(
         cmd.second, app->app_id(), app_manager.GetNextHMICorrelationID());
     app_manager.GetRPCService().ManageHMICommand(delete_UI_msg);
@@ -41,9 +41,9 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 
 void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
-  for (const auto& smenu : sub_menu_map) {
+  for (const auto smenu : sub_menu_map) {
     MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, app_manager);
     app->RemoveSubMenu(smenu.first);
   }
@@ -52,9 +52,9 @@ void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 void DeleteChoiceSets(ApplicationSharedPtr app,
                       ApplicationManager& app_manager) {
   auto accessor = app->choice_set_map();
-  const auto& choices = accessor.GetData();
+  const auto choices = accessor.GetData();
 
-  for (const auto& choice : choices) {
+  for (const auto choice : choices) {
     MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, app_manager);
     app->RemoveChoiceSet(choice.first);
   }
@@ -87,6 +87,7 @@ void DeleteGlobalProperties(ApplicationSharedPtr app,
   app->set_keyboard_props(empty_so);
   app->set_menu_icon(empty_so);
   app->set_menu_title(empty_so);
+  app->set_menu_layout(empty_so);
 
   MessageHelper::SendResetPropertiesRequest(app, app_manager);
 }
@@ -94,13 +95,19 @@ void DeleteGlobalProperties(ApplicationSharedPtr app,
 void DeleteButtonSubscriptions(ApplicationSharedPtr app,
                                ApplicationManager& app_manager) {
   ButtonSubscriptions buttons = app->SubscribedButtons().GetData();
-
   for (auto button : buttons) {
-    if (mobile_apis::ButtonName::CUSTOM_BUTTON == button) {
+    const auto hmi_button =
+        static_cast<hmi_apis::Common_ButtonName::eType>(button);
+    if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_button) {
       continue;
     }
-    MessageHelper::SendUnsubscribeButtonNotification(button, app, app_manager);
-    app->UnsubscribeFromButton(button);
+    smart_objects::SmartObjectSPtr unsubscribe_request =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            app->app_id(),
+            hmi_button,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            app_manager);
+    app_manager.GetRPCService().ManageHMICommand(unsubscribe_request);
   }
 }
 

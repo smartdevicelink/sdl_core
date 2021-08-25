@@ -114,8 +114,9 @@ class SDLActivateAppRequestTest
   }
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
-    MockAppPtr mock_app = CreateMockApp();
     CommandRequestTest<CommandsTestMocks::kIsNice>::InitCommand(timeout);
+
+    MockAppPtr mock_app = CreateMockApp();
     ON_CALL((*mock_app), app_id()).WillByDefault(Return(kAppID));
     ON_CALL(app_mngr_, application_by_hmi_app(kAppID))
         .WillByDefault(Return(mock_app));
@@ -487,7 +488,7 @@ TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
   EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings));
 
   EXPECT_CALL(app_mngr_,
-              updateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
+              UpdateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
 
   MockConnectionHandler connection_handler;
   EXPECT_CALL(connection_handler, ConnectToDevice(kHandle));

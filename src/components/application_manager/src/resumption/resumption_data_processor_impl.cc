@@ -29,6 +29,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
@@ -151,12 +152,19 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   if (IsResponseSuccessful(response)) {
     status.successful_requests.push_back(found_request);
   } else {
+    SDL_LOG_DEBUG("Resumption request failed");
+    MessageHelper::PrintSmartObject(response);
     status.error_requests.push_back(found_request);
   }
 
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
       found_request.request_id.function_id) {
     CheckVehicleDataResponse(found_request.message, response, status);
+  }
+
+  if (hmi_apis::FunctionID::Buttons_SubscribeButton ==
+      found_request.request_id.function_id) {
+    ProcessSubscribeButtonResponse(app_id, found_request.message, response);
   }
 
   if (hmi_apis::FunctionID::UI_CreateWindow ==
@@ -304,6 +312,14 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
 
 void ResumptionDataProcessorImpl::FinalizeResumption(
     const ResumeCtrl::ResumptionCallBack& callback, const uint32_t app_id) {
+  auto app = application_manager_.application(app_id);
+  if (!app) {
+    SDL_LOG_ERROR("App " << app_id
+                         << " is not registered, erasing resumption data");
+    EraseAppResumptionData(app_id);
+    return;
+  }
+
   if (IsResumptionSuccessful(app_id)) {
     SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
@@ -311,7 +327,7 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
   } else {
     SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    RevertRestoredData(app);
     application_manager_.state_controller().DropPostponedWindows(app_id);
   }
   EraseAppResumptionData(app_id);
@@ -535,9 +551,9 @@ void ResumptionDataProcessorImpl::DeleteSubmenus(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
-  for (const auto& smenu : sub_menu_map) {
+  for (const auto smenu : sub_menu_map) {
     auto failed_submenu_request =
         FindResumptionSubmenuRequest(smenu.first, failed_requests);
     if (!failed_submenu_request) {
@@ -628,9 +644,9 @@ void ResumptionDataProcessorImpl::DeleteCommands(
   };
 
   auto accessor = application->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
-  for (const auto& cmd : commands_map) {
+  for (const auto cmd : commands_map) {
     const auto cmd_id = extract_cmd_id(cmd.second);
     if (0 == cmd_id) {
       SDL_LOG_ERROR("Can't extract cmd_id for command with internal number: "
@@ -720,8 +736,8 @@ void ResumptionDataProcessorImpl::DeleteChoicesets(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->choice_set_map();
-  const auto& choices = accessor.GetData();
-  for (const auto& choice : choices) {
+  const auto choices = accessor.GetData();
+  for (const auto choice : choices) {
     auto failed_choice_set =
         FindResumptionChoiceSetRequest(choice.first, failed_requests);
     if (!failed_choice_set) {
@@ -744,6 +760,10 @@ void ResumptionDataProcessorImpl::SetGlobalProperties(
   const smart_objects::SmartObject& properties_so =
       saved_app[strings::application_global_properties];
   application->load_global_properties(properties_so);
+
+  if (saved_app.keyExists(strings::user_location)) {
+    application->set_user_location(saved_app[strings::user_location]);
+  }
 
   ProcessMessagesToHMI(MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       application, application_manager_));
@@ -804,6 +824,21 @@ void ResumptionDataProcessorImpl::DeleteGlobalProperties(
     (*msg)[strings::msg_params] = *msg_params;
     ProcessMessageToHMI(msg, false);
   }
+
+  if (result.HasRCPropertiesReset() &&
+      check_if_successful(hmi_apis::FunctionID::RC_SetGlobalProperties)) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateRCResetGlobalPropertiesRequest(result,
+                                                            application);
+    auto msg = MessageHelper::CreateMessageForHMI(
+        hmi_apis::messageType::request,
+        application_manager_.GetNextHMICorrelationID());
+    (*msg)[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::RC_SetGlobalProperties;
+
+    (*msg)[strings::msg_params] = *msg_params;
+    ProcessMessageToHMI(msg, false);
+  }
 }
 
 void ResumptionDataProcessorImpl::AddSubscriptions(
@@ -828,6 +863,7 @@ void ResumptionDataProcessorImpl::AddButtonsSubscriptions(
   const smart_objects::SmartObject& subscriptions =
       saved_app[strings::application_subscriptions];
 
+  ButtonSubscriptions button_subscriptions;
   if (subscriptions.keyExists(strings::application_buttons)) {
     const smart_objects::SmartObject& subscriptions_buttons =
         subscriptions[strings::application_buttons];
@@ -835,29 +871,18 @@ void ResumptionDataProcessorImpl::AddButtonsSubscriptions(
     for (size_t i = 0; i < subscriptions_buttons.length(); ++i) {
       btn = static_cast<mobile_apis::ButtonName::eType>(
           (subscriptions_buttons[i]).asInt());
-      application->SubscribeToButton(btn);
+      if (mobile_apis::ButtonName::CUSTOM_BUTTON != btn) {
+        button_subscriptions.insert(btn);
+      }
     }
 
-    ButtonSubscriptions button_subscriptions =
-        GetButtonSubscriptionsToResume(application);
-
     ProcessMessagesToHMI(
-        MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
-            application, application_manager_, button_subscriptions));
+        MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
+            application,
+            button_subscriptions,
+            hmi_apis::FunctionID::Buttons_SubscribeButton,
+            application_manager_));
   }
-}
-
-ButtonSubscriptions ResumptionDataProcessorImpl::GetButtonSubscriptionsToResume(
-    ApplicationSharedPtr application) const {
-  ButtonSubscriptions button_subscriptions =
-      application->SubscribedButtons().GetData();
-  auto it = button_subscriptions.find(mobile_apis::ButtonName::CUSTOM_BUTTON);
-
-  if (it != button_subscriptions.end()) {
-    button_subscriptions.erase(it);
-  }
-
-  return button_subscriptions;
 }
 
 void ResumptionDataProcessorImpl::AddPluginsSubscriptions(
@@ -882,16 +907,18 @@ void ResumptionDataProcessorImpl::DeleteButtonsSubscriptions(
   SDL_LOG_AUTO_TRACE();
   const ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
-  for (auto& btn : button_subscriptions) {
+  for (auto btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
       continue;
     }
-    auto notification = MessageHelper::CreateOnButtonSubscriptionNotification(
-        application->hmi_app_id(), hmi_btn, false);
-    // is_subscribed = false
-    ProcessMessageToHMI(notification, false);
-    application->UnsubscribeFromButton(btn);
+    smart_objects::SmartObjectSPtr unsubscribe_request =
+        MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
+            application->app_id(),
+            hmi_btn,
+            hmi_apis::FunctionID::Buttons_UnsubscribeButton,
+            application_manager_);
+    ProcessMessageToHMI(unsubscribe_request, false);
   }
 }
 
@@ -954,7 +981,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
           smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
       module_data_so[index][message_params::kModuleId] = module.second;
-      index++;
+      ++index;
     }
   }
 
@@ -974,7 +1001,12 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 }
 
 bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
-  return !response[strings::params].keyExists(strings::error_msg);
+  auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response[strings::params][application_manager::hmi_response::code]
+          .asInt());
+
+  return commands::IsHMIResultSuccess(result_code) ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
 void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
@@ -1010,6 +1042,26 @@ void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
       status.successful_vehicle_data_subscriptions_.push_back(ivi);
     }
   }
+}
+
+void ResumptionDataProcessorImpl::ProcessSubscribeButtonResponse(
+    const uint32_t app_id,
+    const smart_objects::SmartObject& request,
+    const smart_objects::SmartObject& response) {
+  SDL_LOG_AUTO_TRACE();
+  if (!IsResponseSuccessful(response)) {
+    return;
+  }
+
+  ApplicationSharedPtr app = application_manager_.application(app_id);
+  if (!app) {
+    SDL_LOG_ERROR("NULL pointer.");
+    return;
+  }
+  const mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          request[strings::msg_params][strings::button_name].asInt());
+  app->SubscribeToButton(btn_id);
 }
 
 void ResumptionDataProcessorImpl::CheckModuleDataSubscription(

@@ -42,9 +42,14 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/request_timeout_handler.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
 
@@ -84,7 +89,10 @@ class RPCService;
 namespace rpc_handler {
 class RPCHandler;
 }
-
+namespace request_controller {
+class RequestTimeoutHandler;
+class RequestController;
+}  // namespace request_controller
 class Application;
 class AppServiceManager;
 class StateControllerImpl;
@@ -111,6 +119,11 @@ struct ApplicationsPolicyAppIdSorter {
   }
 };
 
+struct ExpiredButtonRequestData {
+  uint32_t app_id_;
+  hmi_apis::Common_ButtonName::eType button_name_;
+};
+
 typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
 
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
@@ -131,10 +144,6 @@ typedef ApplicationSet::const_iterator ApplicationSetConstIt;
 class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
-
-  DEPRECATED
-  virtual bool Init(resumption::LastState&,
-                    media_manager::MediaManager* media_manager) = 0;
 
   /**
    * Inits application manager
@@ -206,9 +215,6 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
-
-  DEPRECATED virtual ApplicationSharedPtr application_by_name(
-      const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
@@ -499,6 +505,10 @@ class ApplicationManager {
 
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual request_controller::RequestTimeoutHandler&
+  get_request_timeout_handler() const = 0;
+  virtual request_controller::RequestController& get_request_controller()
+      const = 0;
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
@@ -619,6 +629,12 @@ class ApplicationManager {
       const connection_handler::DeviceHandle handle) const = 0;
 
   virtual bool IsStopping() const = 0;
+
+  /**
+   * @brief Waits for HMI readiness and blocks thread if it's not ready yet
+   * @return true if HMI is ready and cooperating, otherwise returns false
+   */
+  virtual bool WaitForHmiIsReady() = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
@@ -745,7 +761,7 @@ class ApplicationManager {
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  virtual void updateRequestTimeout(uint32_t connection_key,
+  virtual void UpdateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
@@ -826,6 +842,9 @@ class ApplicationManager {
    */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
+  virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() = 0;
+
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
@@ -879,11 +898,11 @@ class ApplicationManager {
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param new_state Defines new streaming state
+   * @param state True if streaming started, false if streaming stopped.
    */
   virtual void OnAppStreaming(uint32_t app_id,
                               protocol_handler::ServiceType service_type,
-                              const Application::StreamingState new_state) = 0;
+                              bool state) = 0;
 
   /**
    * @brief CreateRegularState create regular HMI state for application
@@ -911,9 +930,6 @@ class ApplicationManager {
    */
   virtual bool CanAppStream(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
-
-  DEPRECATED
-  virtual void ForbidStreaming(uint32_t app_id) = 0;
 
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
@@ -958,6 +974,43 @@ class ApplicationManager {
   virtual bool IsSOStructValid(
       const hmi_apis::StructIdentifiers::eType struct_id,
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief Unsubscribe application specified in message from softbuttons.
+   * @param response_message - Response message received from HMI.
+   * @return bool - Result of unsubscribing process.
+   */
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response_message) = 0;
+
+  /**
+   * @brief Save subscribe/unsubscribe button request after timeout to ensure
+   * possibility to align mobile subscription/unsubscription status with actual
+   * subscription/unsubscription status on HMI
+   * @param app_id Application id from request message
+   * @param corr_id Correlation id
+   * @param button_name name of button to subscribe/unsubscribe
+   */
+  virtual void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+
+  /**
+   * @brief Return optional structure with information regarding
+   * subscribe/unsubscribe button request data
+   * @param corr_id Correlation id
+   * @return optional structure with subscribe/unsubscribe button request data
+   */
+  virtual utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const = 0;
+
+  /**
+   * @brief Delete data about already processed expired subscribe/unsubscribe
+   * button request in case if HMI send response to expired request
+   * @param corr_id Correlation id
+   */
+  virtual void DeleteExpiredButtonRequest(const int32_t corr_id) = 0;
 };
 
 }  // namespace application_manager

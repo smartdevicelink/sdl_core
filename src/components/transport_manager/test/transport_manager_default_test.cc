@@ -210,8 +210,6 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
       .WillByDefault(ReturnRef(kWSServerCACertPath));
   ON_CALL(*mock_last_state_, dictionary())
       .WillByDefault(Return(custom_dictionary_));
-  ON_CALL(*mock_last_state_, get_dictionary())
-      .WillByDefault(ReturnRef(custom_dictionary_));
 
   EXPECT_CALL(transport_manager_settings_, use_last_state())
       .WillRepeatedly(Return(use_last_state));

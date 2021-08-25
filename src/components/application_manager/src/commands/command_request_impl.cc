@@ -118,34 +118,6 @@ void CommandRequestImpl::HandleTimeOut() {
   OnTimeOut();
 }
 
-bool CommandRequestImpl::IsMobileResultSuccess(
-    const mobile_apis::Result::eType result_code) {
-  SDL_LOG_AUTO_TRACE();
-  using namespace helpers;
-  return Compare<mobile_apis::Result::eType, EQ, ONE>(
-      result_code,
-      mobile_apis::Result::SUCCESS,
-      mobile_apis::Result::WARNINGS,
-      mobile_apis::Result::WRONG_LANGUAGE,
-      mobile_apis::Result::RETRY,
-      mobile_apis::Result::SAVED,
-      mobile_apis::Result::TRUNCATED_DATA);
-}
-
-bool CommandRequestImpl::IsHMIResultSuccess(
-    const hmi_apis::Common_Result::eType result_code) {
-  SDL_LOG_AUTO_TRACE();
-  using namespace helpers;
-  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED,
-      hmi_apis::Common_Result::TRUNCATED_DATA);
-}
-
 bool CommandRequestImpl::StartOnEventHandling() {
   SDL_LOG_AUTO_TRACE();
 

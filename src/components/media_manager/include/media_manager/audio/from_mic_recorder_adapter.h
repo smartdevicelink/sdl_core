@@ -53,7 +53,6 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
   void StopActivity(int32_t application_key);
   bool is_app_performing_activity(int32_t application_key) const;
   void set_output_file(const std::string& output_file);
-  DEPRECATED void set_duration(int32_t duration);
   void set_config(mobile_apis::SamplingRate::eType sampling_rate,
                   mobile_apis::BitsPerSample::eType bits_per_sample,
                   mobile_apis::AudioType::eType audio_type,

@@ -284,10 +284,8 @@ void GetInteriorVehicleDataRequest::on_event(
                       [message_params::kModuleData][data_mapping(module_type)];
       interior_data_cache_.Add(module, module_data);
     }
-  } else {
-    hmi_response[app_mngr::strings::msg_params].erase(
-        message_params::kIsSubscribed);
   }
+
   std::string response_info;
   GetInfo(hmi_response, response_info);
   SetResourceState(ModuleType(), ResourceState::FREE);
@@ -295,7 +293,7 @@ void GetInteriorVehicleDataRequest::on_event(
   SendResponse(result,
                result_code,
                response_info.c_str(),
-               &hmi_response[app_mngr::strings::msg_params]);
+               result ? &hmi_response[app_mngr::strings::msg_params] : nullptr);
 }
 
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}

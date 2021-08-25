@@ -82,16 +82,6 @@ class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
 
  private:
   /*
-   * @brief Check if command name doesn't exist in application
-   * Please see SDLAQ-CRS-407 for more information
-   *
-   * @param app Mobile application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckCommandName(app_mngr::ApplicationConstSharedPtr app);
-
-  /*
    * @brief Check if command VR synonyms doesn't exist in application commands
    * Please see SDLAQ-CRS-407 for more information
    *

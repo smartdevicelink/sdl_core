@@ -114,7 +114,7 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
         auto& input_param = input_params[key];
         if (*schema->array &&
             input_param.getType() == smart_objects::SmartType_Array) {
-          for (size_t i = 0; i < input_param.length(); i++) {
+          for (size_t i = 0; i < input_param.length(); ++i) {
             const auto param =
                 fill_mobile_msg(input_param[i], SearchMethod::RECURSIVE);
             out_params[item_name][i] = param;
@@ -294,10 +294,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
       case SMemberType::SMEMBER_VDR_MOBILE: {
         // valid since struct_schema_items is not used in
         // InitStructSchemaItem_VehicleDataResult
-        mobile_apis::MOBILE_API::TStructsSchemaItems mobile_struct_schema_items;
         auto member_schema =
-            mobile_apis::MOBILE_API::InitStructSchemaItem_VehicleDataResult(
-                mobile_struct_schema_items);
+            mobile_apis::MOBILE_API::InitStructSchemaItem_VehicleDataResult();
         return SMember(
             member_schema,
             false,  // root level items should not be mandatory
@@ -330,10 +328,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
       case SMemberType::SMEMBER_VDR_HMI: {
         // valid since struct_schema_items is not used in
         // InitStructSchemaItem_Common_VehicleDataResult
-        hmi_apis::HMI_API::TStructsSchemaItems hmi_struct_schema_items;
         auto member_schema =
-            hmi_apis::HMI_API::InitStructSchemaItem_Common_VehicleDataResult(
-                hmi_struct_schema_items);
+            hmi_apis::HMI_API::InitStructSchemaItem_Common_VehicleDataResult();
         return SMember(
             member_schema, false  // root level items should not be mandatory
         );

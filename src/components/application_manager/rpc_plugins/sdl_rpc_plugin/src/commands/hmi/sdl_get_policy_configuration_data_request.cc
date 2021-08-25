@@ -144,7 +144,7 @@ smart_objects::SmartObject SDLGetPolicyConfigurationDataRequest::GetValueParam(
   };
 
   if (policy_property.type() == Json::arrayValue) {
-    for (Json::ArrayIndex i = 0; i < policy_property.size(); i++) {
+    for (Json::ArrayIndex i = 0; i < policy_property.size(); ++i) {
       put_element_in_value_array(policy_property[i], i);
     }
     return value;

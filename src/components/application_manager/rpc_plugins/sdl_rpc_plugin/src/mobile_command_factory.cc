@@ -76,6 +76,7 @@
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_response.h"
+#include "sdl_rpc_plugin/commands/mobile/on_app_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_app_interface_unregistered_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_audio_pass_thru_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_button_event_notification.h"
@@ -407,7 +408,8 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       using app_mngr::commands::Command;
       return factory.GetCreator<commands::GenericResponse>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -479,7 +481,8 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     case mobile_apis::FunctionID::OnSubtleAlertPressedID: {
       return factory.GetCreator<commands::OnSubtleAlertPressedNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -496,7 +499,12 @@ CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
       return factory
           .GetCreator<commands::OnWayPointChangeNotificationFromMobile>();
     }
-    default: {}
+    case mobile_apis::FunctionID::OnAppCapabilityUpdatedID: {
+      return factory
+          .GetCreator<commands::mobile::OnAppCapabilityUpdatedNotification>();
+    }
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -527,7 +535,8 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       }
       break;
     }
-    default: {}
+    default: {
+    }
   }
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
@@ -548,10 +557,12 @@ bool MobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource message_source)
     const {
+  SDL_LOG_AUTO_TRACE();
   auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
   return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
              .CanBeCreated() ||
-         get_notification_creator(id).CanBeCreated();
+         get_notification_creator(id).CanBeCreated() ||
+         get_notification_from_mobile_creator(id).CanBeCreated();
 }
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(

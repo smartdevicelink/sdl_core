@@ -365,6 +365,9 @@ TEST_F(RequestFromMobileImplTest,
   MessageSharedPtr message = CreateMessage();
   CommandPtr command = CreateCommand<URequestFromMobileImpl>(message);
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
+  MessageSharedPtr dummy_msg(CreateMessage());
+  EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
+      .WillOnce(Return(dummy_msg));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
@@ -457,7 +460,9 @@ TEST_F(RequestFromMobileImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  MessageSharedPtr msg;
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::SubscribeVehicleDataID;
 
   CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 

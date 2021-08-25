@@ -364,12 +364,12 @@ bool CreateInteractionChoiceSetRequest::ProcessSuccesfulHMIResponse(
 }
 
 void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
-  received_chs_count_++;
+  ++received_chs_count_;
   SDL_LOG_DEBUG("Got VR.AddCommand response, there are "
                 << expected_chs_count_ - received_chs_count_
                 << " more to wait.");
   if (received_chs_count_ < expected_chs_count_) {
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     SDL_LOG_DEBUG("Timeout for request was updated");
   } else {

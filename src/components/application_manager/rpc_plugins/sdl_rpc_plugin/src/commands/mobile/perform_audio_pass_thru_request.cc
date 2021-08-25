@@ -60,9 +60,7 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
                             hmi_capabilities,
                             policy_handler)
     , result_tts_speak_(hmi_apis::Common_Result::INVALID_ENUM)
-    , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , result_ui_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {}
 
@@ -184,18 +182,12 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         StartMicrophoneRecording();
 
         // update request timeout to get time for perform audio recording
-        application_manager_.updateRequestTimeout(
+        application_manager_.UpdateRequestTimeout(
             connection_key(), correlation_id(), default_timeout());
       }
       break;
     }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      SDL_LOG_INFO("Received TTS_OnResetTimeout event");
 
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     default: {
       SDL_LOG_ERROR("Received unknown event " << event.id());
       return;

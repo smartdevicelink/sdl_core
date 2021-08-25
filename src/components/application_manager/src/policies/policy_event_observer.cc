@@ -71,7 +71,9 @@ void PolicyEventObserver::HandleOnEvent(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
       break;
     }
-    default: { break; }
+    default: {
+      break;
+    }
   }
 }
 

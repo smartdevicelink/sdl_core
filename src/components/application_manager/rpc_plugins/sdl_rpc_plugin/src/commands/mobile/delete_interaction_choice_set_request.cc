@@ -55,7 +55,8 @@ DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
                             application_manager,
                             rpc_service,
                             hmi_capabilities,
-                            policy_handler) {}
+                            policy_handler)
+    , response_result_codes_() {}
 
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {}
 
@@ -89,23 +90,44 @@ void DeleteInteractionChoiceSetRequest::Run() {
     return;
   }
   SendVrDeleteCommand(app);
-
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  msg_params[strings::interaction_choice_set_id] = choice_set_id;
-  msg_params[strings::app_id] = app->app_id();
-
-  app->RemoveChoiceSet(choice_set_id);
-
-  // Checking of HMI responses will be implemented with APPLINK-14600
-  const bool result = true;
-  SendResponse(result, mobile_apis::Result::SUCCESS);
 }
 
 bool DeleteInteractionChoiceSetRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
   return true;
+}
+
+void DeleteInteractionChoiceSetRequest::on_event(
+    const event_engine::Event& event) {
+  using namespace helpers;
+  SDL_LOG_AUTO_TRACE();
+
+  if (event.id() == hmi_apis::FunctionID::VR_DeleteCommand) {
+    const smart_objects::SmartObject& message = event.smart_object();
+    const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+        message[strings::params][hmi_response::code].asInt());
+    response_result_codes_.push_back(result_code);
+    const std::uint32_t correlation_id = static_cast<uint32_t>(
+        message[strings::params][strings::correlation_id].asUInt());
+
+    bool should_send_response = false;
+    {
+      sync_primitives::AutoLock auto_lock(requests_lock_);
+      auto found_request = sent_requests_.find(correlation_id);
+      if (sent_requests_.end() == found_request) {
+        SDL_LOG_WARN("Request with " << correlation_id
+                                     << " correlation_id is not found.");
+        return;
+      }
+
+      sent_requests_.erase(found_request);
+      should_send_response = sent_requests_.empty();
+    }
+
+    if (should_send_response) {
+      SendDeleteInteractionChoiceSetResponse();
+    }
+  }
 }
 
 bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
@@ -157,10 +179,52 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
   msg_params[strings::grammar_id] = choice_set[strings::grammar_id];
   choice_set = choice_set[strings::choice_set];
+
+  sync_primitives::AutoLock auto_lock(requests_lock_);
   for (uint32_t i = 0; i < choice_set.length(); ++i) {
     msg_params[strings::cmd_id] = choice_set[i][strings::choice_id];
-    SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
+    const uint32_t delte_cmd_hmi_corr_id = SendHMIRequest(
+        hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
+    sent_requests_.insert(delte_cmd_hmi_corr_id);
   }
+}
+
+void DeleteInteractionChoiceSetRequest::
+    SendDeleteInteractionChoiceSetResponse() {
+  hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::INVALID_ENUM;
+  for (const auto& code : response_result_codes_) {
+    if (result_code == hmi_apis::Common_Result::INVALID_ENUM) {
+      result_code = code;
+      continue;
+    }
+
+    if (!application_manager::commands::IsHMIResultSuccess(code)) {
+      result_code = code;
+    }
+  }
+
+  const bool response_result = PrepareResultForMobileResponse(
+      result_code, HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
+
+  if (response_result) {
+    ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    if (!app) {
+      SDL_LOG_ERROR("Application with connection key " << connection_key()
+                                                       << " did not find.");
+      return;
+    }
+    const uint32_t choice_set_id =
+        (*message_)[strings::msg_params][strings::interaction_choice_set_id]
+            .asUInt();
+    app->RemoveChoiceSet(choice_set_id);
+  }
+
+  SDL_LOG_DEBUG("Response sent. Result code: " << result_code
+                                               << " sussess: " << std::boolalpha
+                                               << result_code);
+  SendResponse(response_result, MessageHelper::HMIToMobileResult(result_code));
 }
 
 }  // namespace commands

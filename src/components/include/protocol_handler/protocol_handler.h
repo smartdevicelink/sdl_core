@@ -138,7 +138,7 @@ class ProtocolHandler {
    * generated_session_id is 0.
    */
   virtual void NotifySessionStarted(
-      const SessionContext& context,
+      SessionContext& context,
       std::vector<std::string>& rejected_params,
       const std::string err_reason = std::string()) = 0;
 
@@ -146,7 +146,7 @@ class ProtocolHandler {
 
   virtual void ProcessFailedPTU() = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow

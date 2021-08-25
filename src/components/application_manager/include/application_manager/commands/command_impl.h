@@ -40,6 +40,8 @@
 #include "policy/policy_types.h"
 #include "utils/logger.h"
 
+#include <algorithm>
+
 namespace application_manager {
 
 /**
@@ -50,9 +52,40 @@ struct CommandParametersPermissions {
   RPCParams allowed_params;
   RPCParams disallowed_params;
   RPCParams undefined_params;
+
+  bool AreDisallowedParamsIncluded(const RPCParams& parameters) {
+    return std::includes(disallowed_params.begin(),
+                         disallowed_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
+
+  bool AreUndefinedParamsIncluded(const RPCParams& parameters) {
+    return std::includes(undefined_params.begin(),
+                         undefined_params.end(),
+                         parameters.begin(),
+                         parameters.end());
+  }
 };
 
 namespace commands {
+
+/**
+ * @brief Checks Mobile result code for single RPC
+ * @param result_code contains result code from response to Mobile
+ * @return true if result code complies to successful result codes,
+ * false otherwise.
+ */
+bool IsMobileResultSuccess(const mobile_apis::Result::eType result_code);
+
+/**
+ * @brief Checks HMI result code for single RPC
+ * @param result_code contains result code from HMI response
+ * @return true if result code complies to successful result codes,
+ * false otherwise.
+ */
+bool IsHMIResultSuccess(const hmi_apis::Common_Result::eType result_code);
+
 /**
  * @brief Class is intended to encapsulate RPC as an object
  **/
@@ -169,6 +202,16 @@ class CommandImpl : public Command {
    */
   bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
 
+  /**
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @param interface to check availability
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  bool IsHMIResultSuccess(hmi_apis::Common_Result::eType result_code,
+                          HmiInterfaces::InterfaceID interface) const;
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
@@ -183,6 +226,29 @@ class CommandImpl : public Command {
    * @return true if the RPC is allowed, false otherwise
    */
   bool CheckAllowedParameters(const Command::CommandSource source);
+
+  /**
+   * @brief Adds disallowed parameters back to response with appropriate
+   * reasons
+   * @param response Response message, which should be extended with blocked
+   * parameters reasons
+   */
+  void AddDisallowedParameters(smart_objects::SmartObject& response);
+
+  /**
+   * @brief Adds disallowed parameters to response info
+   * @param response Response message, which info should be extended
+   */
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
+
+  /**
+   * @brief Adds param to disallowed parameters enumeration
+   * @param info string with disallowed params enumeration
+   * @param param disallowed param
+   */
+  void AddDisallowedParameterToInfoString(std::string& info,
+                                          const std::string& param) const;
 
   /**
    * @brief Remove from current message parameters disallowed by policy table
@@ -202,6 +268,13 @@ class CommandImpl : public Command {
    * @return True if replacement succeeded, otherwise - false
    */
   bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message);
+
+  /**
+   * @brief Adds disallowed parameters to info string, sets result codes if
+   * necessary
+   * @param response Command smart object
+   */
+  void FormatResponse(smart_objects::SmartObject& response);
 
   MessageSharedPtr message_;
   uint32_t default_timeout_;

@@ -81,7 +81,6 @@ PerformInteractionRequest::PerformInteractionRequest(
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
   response_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
 }
@@ -193,8 +192,7 @@ void PerformInteractionRequest::Run() {
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
       SDL_LOG_DEBUG("Interaction Mode: BOTH");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app) ||
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app) ||
           !CheckChoiceSetListVRCommands(app)) {
         return;
       }
@@ -202,8 +200,7 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       SDL_LOG_DEBUG("Interaction Mode: MANUAL_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app)) {
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app)) {
         return;
       }
       break;
@@ -240,12 +237,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_DEBUG("Received UI_OnResetTimeout event");
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       SDL_LOG_DEBUG("Received UI_PerformInteraction event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
@@ -301,7 +292,7 @@ void PerformInteractionRequest::OnTimeOut() {
         DisablePerformInteraction();
         RequestFromMobileImpl::OnTimeOut();
       } else {
-        application_manager_.updateRequestTimeout(
+        application_manager_.UpdateRequestTimeout(
             connection_key(), correlation_id(), default_timeout_);
         set_current_state(RequestState::kAwaitingResponse);
       }
@@ -354,8 +345,10 @@ bool PerformInteractionRequest::ProcessVRResponse(
       SendResponse(false, MessageHelper::HMIToMobileResult(vr_result_code_));
       return true;
     }
+
     SDL_LOG_DEBUG("Update timeout for UI");
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
+
         connection_key(), correlation_id(), default_timeout_);
     return false;
   }
@@ -381,7 +374,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
     SDL_LOG_DEBUG("Update timeout for UI");
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout_);
   }
 
@@ -682,60 +675,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(
       hmi_apis::FunctionID::VR_PerformInteraction, &msg_params, true);
-}
-
-bool PerformInteractionRequest::CheckChoiceSetMenuNames(
-    application_manager::ApplicationSharedPtr const app) {
-  SDL_LOG_AUTO_TRACE();
-
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject i_choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-
-    for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject j_choice_set =
-          app->FindChoiceSet(choice_list[j].asInt());
-
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
-
-      if ((smart_objects::SmartType_Null == i_choice_set.getType()) ||
-          (smart_objects::SmartType_Null == j_choice_set.getType())) {
-        SDL_LOG_ERROR("Invalid ID");
-        SendResponse(false, mobile_apis::Result::INVALID_ID);
-        return false;
-      }
-
-      size_t ii = 0;
-      size_t jj = 0;
-      for (; ii < i_choice_set[strings::choice_set].length(); ++ii) {
-        for (; jj < j_choice_set[strings::choice_set].length(); ++jj) {
-          const std::string& ii_menu_name =
-              i_choice_set[strings::choice_set][ii][strings::menu_name]
-                  .asString();
-          const std::string& jj_menu_name =
-              j_choice_set[strings::choice_set][jj][strings::menu_name]
-                  .asString();
-
-          if (ii_menu_name == jj_menu_name) {
-            SDL_LOG_ERROR("Choice set has duplicated menu name");
-            SendResponse(false,
-                         mobile_apis::Result::DUPLICATE_NAME,
-                         "Choice set has duplicated menu name");
-            return false;
-          }
-        }
-      }
-    }
-  }
-
-  return true;
 }
 
 bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
@@ -1168,27 +1107,15 @@ bool PerformInteractionRequest::SetChoiceIdToResponseMsgParams(
     return true;
   }
 
-  switch (interaction_mode_) {
-    case mobile_apis::InteractionMode::eType::MANUAL_ONLY:
-      if (ui_choice_id_valid) {
-        msg_param[strings::trigger_source] =
-            mobile_apis::TriggerSource::TS_MENU;
-        msg_param[strings::choice_id] = ui_choice_id_received_;
-      }
-    case mobile_apis::InteractionMode::eType::VR_ONLY:
-      if (vr_choice_id_valid) {
-        msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
-        msg_param[strings::choice_id] = vr_choice_id_received_;
-      }
-    default:
-      if (ui_choice_id_valid) {
-        msg_param[strings::trigger_source] =
-            mobile_apis::TriggerSource::TS_MENU;
-        msg_param[strings::choice_id] = ui_choice_id_received_;
-      } else if (vr_choice_id_valid) {
-        msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
-        msg_param[strings::choice_id] = vr_choice_id_received_;
-      }
+  if (ui_choice_id_valid &&
+      interaction_mode_ != mobile_apis::InteractionMode::eType::VR_ONLY) {
+    msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
+    msg_param[strings::choice_id] = ui_choice_id_received_;
+  } else if (vr_choice_id_valid &&
+             interaction_mode_ !=
+                 mobile_apis::InteractionMode::eType::MANUAL_ONLY) {
+    msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
+    msg_param[strings::choice_id] = vr_choice_id_received_;
   }
 
   return true;

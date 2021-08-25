@@ -61,18 +61,6 @@ bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
   return true;
 }
 
-bool SDLRPCPlugin::Init(
-    application_manager::ApplicationManager& app_manager,
-    application_manager::rpc_service::RPCService& rpc_service,
-    application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
-  UNUSED(last_state);
-  command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
-      app_manager, rpc_service, hmi_capabilities, policy_handler));
-  return true;
-}
-
 bool SDLRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource message_source) {
@@ -131,14 +119,20 @@ void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
   pending_resumption_handler_->OnResumptionRevert();
 
   if (application_manager_->IsAppSubscribedForWayPoints(app)) {
-    application_manager_->UnsubscribeAppFromWayPoints(app.app_id());
-    if (!application_manager_->IsAnyAppSubscribedForWayPoints()) {
+    const auto subscribed_apps =
+        application_manager_->GetAppsSubscribedForWayPoints();
+    const bool send_unsubscribe =
+        subscribed_apps.size() <= 1 &&
+        application_manager_->IsSubscribedToHMIWayPoints();
+    if (send_unsubscribe) {
       SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
       auto request =
           application_manager::MessageHelper::CreateUnsubscribeWayPointsRequest(
               application_manager_->GetNextHMICorrelationID());
       application_manager_->GetRPCService().ManageHMICommand(request);
     }
+    application_manager_->UnsubscribeAppFromWayPoints(app.app_id(),
+                                                      send_unsubscribe);
   }
 }
 

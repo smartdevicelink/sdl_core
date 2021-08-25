@@ -116,8 +116,8 @@ void SetAppIconRequest::Run() {
   msg_params[strings::sync_file_name] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // For further use in on_event function
-  full_file_path_for_hmi_ = file_system::ConvertPathForURL(full_file_path);
+  // for further use in on_event function
+  full_file_path_for_hmi_ = full_file_path;
 
   msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi_;
 

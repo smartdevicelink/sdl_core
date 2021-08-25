@@ -96,7 +96,7 @@ void GetAppServiceDataRequest::on_event(
 
   mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
       msg_params[strings::result_code].asInt());
-  bool success = IsMobileResultSuccess(result);
+  bool success = application_manager::commands::IsMobileResultSuccess(result);
   if (success) {
     HandleSubscribe();
   }

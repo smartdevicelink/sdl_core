@@ -206,14 +206,6 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   void RemoveDisallowedParameters();
 
   /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
-   */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
-
-  /**
    * @brief Checks if any request param was marked as disallowed by policy
    * @return true if any param was marked as disallowed
    */
@@ -245,6 +237,22 @@ class RequestFromMobileImpl : public CommandRequestImpl {
                                       ResponseInfo& out_second) const;
 
   /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param out_first Contains result_code from HMI response and
+   * interface that returns response
+   * @param out_second Contains result_code from HMI response and
+   * interface that returns response
+   * @param out_third Contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
+  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
+                                      ResponseInfo& out_second,
+                                      ResponseInfo& out_third) const;
+
+  /**
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
    * and create info.
@@ -264,6 +272,19 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    */
   mobile_apis::Result::eType PrepareResultCodeForResponse(
       const ResponseInfo& first, const ResponseInfo& second);
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const ResponseInfo& first,
+      const ResponseInfo& second,
+      const ResponseInfo& third);
 
   /**
    * @brief Resolves if the return code must be
@@ -307,21 +328,6 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   DISALLOW_COPY_AND_ASSIGN(RequestFromMobileImpl);
 
   /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
-
-  /**
    * @brief Checks if HMI interface is available for the target function
    * @param hmi_correlation_id HMI correlation id
    * @param function_id Response message, which info should be extended
@@ -343,6 +349,14 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    */
   void AddTimeOutComponentInfoToMessage(
       smart_objects::SmartObject& response) const;
+
+  /**
+   * @brief AddRequestToTimeoutHandler checks the request and adds it to
+   * request_timeout_handler map for tracking
+   * @param request_to_hmi request to HMI
+   */
+  void AddRequestToTimeoutHandler(
+      const smart_objects::SmartObject& request_to_hmi) const;
 
   /**
    * @brief is_success_result_ Defines whether request succeded, at the moment

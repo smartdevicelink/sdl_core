@@ -91,11 +91,9 @@ class UpdateDeviceListRequestTest
 };
 
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
-  MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
+  MessageSharedPtr command_msg = CreateCommandMsg();
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
@@ -104,7 +102,7 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(false));
 
-  EXPECT_CALL(app_mngr_, IsHMICooperating()).Times(0);
+  EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).Times(0);
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
@@ -115,12 +113,10 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
             CommandImpl::protocol_version_);
 }
 
-TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
-  MessageSharedPtr command_msg = CreateCommandMsg();
+TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESS) {
+  InitEventDispatcher();
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
+  MessageSharedPtr command_msg = CreateCommandMsg();
 
   UpdateDeviceListRequestPtr command(
       CreateCommand<UpdateDeviceListRequest>(command_msg));
@@ -129,7 +125,7 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
 
   EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, IsHMICooperating()).WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
 
   command->Run();
@@ -140,30 +136,22 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESSS) {
             CommandImpl::protocol_version_);
 }
 
-TEST_F(UpdateDeviceListRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
-  Event event(Event::EventID::INVALID_ENUM);
+TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsFalse_UNSUCCESS) {
+  InitEventDispatcher();
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
+  MessageSharedPtr command_msg = CreateCommandMsg();
 
-  UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
+  UpdateDeviceListRequestPtr command(
+      CreateCommand<UpdateDeviceListRequest>(command_msg));
 
-  command->on_event(event);
-}
+  EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings_));
 
-TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
-  Event event(Event::EventID::BasicCommunication_OnReady);
+  EXPECT_CALL(settings_, launch_hmi()).WillOnce(Return(true));
 
-  EXPECT_CALL(app_mngr_, event_dispatcher())
-      .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_,
-              remove_observer(_, testing::Matcher<EventObserver&>(_)));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
+  EXPECT_CALL(app_mngr_, WaitForHmiIsReady()).WillOnce(Return(false));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_)).Times(0);
 
-  UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
-
-  command->on_event(event);
+  command->Run();
 }
 
 }  // namespace update_device_list_request

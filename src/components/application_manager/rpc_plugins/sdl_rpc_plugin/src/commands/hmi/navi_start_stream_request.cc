@@ -57,9 +57,11 @@ NaviStartStreamRequest::NaviStartStreamRequest(
   SDL_LOG_AUTO_TRACE();
   std::pair<uint32_t, int32_t> stream_retry =
       application_manager_.get_settings().start_stream_retry_amount();
-  default_timeout_ = stream_retry.second;
+  default_timeout_ =
+      stream_retry.second +
+      application_manager_.get_settings().default_timeout_compensation();
   retry_number_ = stream_retry.first;
-  SDL_LOG_DEBUG("default_timeout_ = " << default_timeout_
+  SDL_LOG_DEBUG("default_timeout_ = " << stream_retry.second
                                       << "; retry_number_ = " << retry_number_);
 }
 

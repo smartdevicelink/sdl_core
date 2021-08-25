@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,54 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_
 
-#include "application_manager/commands/notification_from_hmi.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/event_engine/event.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 namespace hmi {
-
 /**
- * @brief OnUIResetTimeoutNotification command class
+ * @brief SubscribeButtonRequest command class
  **/
-class OnUIResetTimeoutNotification
-    : public app_mngr::commands::NotificationFromHMI {
+class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
-   * @brief OnUIResetTimeoutNotification class constructor
-   *
+   * @brief SubscribeButtonRequest class constructor
    * @param message Incoming SmartObject message
    **/
-  OnUIResetTimeoutNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+  SubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
+                         app_mngr::ApplicationManager& application_manager,
+                         app_mngr::rpc_service::RPCService& rpc_service,
+                         app_mngr::HMICapabilities& hmi_capabilities,
+                         policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief OnUIResetTimeoutNotification class destructor
+   * @brief SubscribeButtonRequest class destructor
    **/
-  virtual ~OnUIResetTimeoutNotification();
+  ~SubscribeButtonRequest();
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void OnTimeOut() OVERRIDE;
+
+  void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnUIResetTimeoutNotification);
+  app_mngr::ApplicationSharedPtr GetApplicationPtr();
+
+  DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
+
+  hmi_apis::Common_ButtonName::eType button_name_;
 };
 
 }  // namespace hmi
-
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_RESET_TIMEOUT_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SUBSCRIBE_BUTTON_REQUEST_H_

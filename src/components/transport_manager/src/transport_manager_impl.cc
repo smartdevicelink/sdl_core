@@ -582,15 +582,6 @@ int TransportManagerImpl::Init(
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::Init(resumption::LastState& last_state) {
-  // Last state required to initialize Transport adapters
-  UNUSED(last_state);
-  SDL_LOG_TRACE("enter");
-  is_initialized_ = true;
-  SDL_LOG_TRACE("exit with E_SUCCESS");
-  return E_SUCCESS;
-}
-
 void TransportManagerImpl::Deinit() {
   SDL_LOG_AUTO_TRACE();
   DisconnectAllDevices();
@@ -768,7 +759,7 @@ void TransportManagerImpl::PostMessage(
 
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
   SDL_LOG_AUTO_TRACE();
-  SDL_LOG_DEBUG("TransportAdapterEvent: " << &event);
+  SDL_LOG_TRACE("TransportAdapterEvent: " << &event);
   event_queue_.PostMessage(event);
 }
 
@@ -823,12 +814,12 @@ void TransportManagerImpl::DeactivateDeviceConnections(
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const ConnectionUID id) {
   SDL_LOG_AUTO_TRACE();
-  SDL_LOG_DEBUG("ConnectionUID: " << id);
+  SDL_LOG_TRACE("ConnectionUID: " << id);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
     if (it->id == id) {
-      SDL_LOG_DEBUG("ConnectionInternal. It's address: " << &*it);
+      SDL_LOG_TRACE("ConnectionInternal. It's address: " << &*it);
       return &*it;
     }
   }
@@ -838,13 +829,13 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
   SDL_LOG_AUTO_TRACE();
-  SDL_LOG_DEBUG("DeviceUID: " << device
+  SDL_LOG_TRACE("DeviceUID: " << device
                               << "ApplicationHandle: " << application);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
     if (it->device == device && it->application == application) {
-      SDL_LOG_DEBUG("ConnectionInternal. It's address: " << &*it);
+      SDL_LOG_TRACE("ConnectionInternal. It's address: " << &*it);
       return &*it;
     }
   }
@@ -1297,7 +1288,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
 #endif  // TELEMETRY_MONITOR
       RaiseEvent(&TransportManagerListener::OnTMMessageReceived,
                  event.event_data);
-      SDL_LOG_DEBUG("event_type = ON_RECEIVED_DONE");
+      SDL_LOG_TRACE("event_type = ON_RECEIVED_DONE");
       break;
     }
     case EventTypeEnum::ON_RECEIVED_FAIL: {

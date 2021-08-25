@@ -47,10 +47,6 @@ class UsbAoaAdapter : public TransportAdapterImpl {
   UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
                 const TransportManagerSettings& settings);
 
-  DEPRECATED
-  UsbAoaAdapter(resumption::LastState&,
-                const TransportManagerSettings& settings) = delete;
-
   virtual ~UsbAoaAdapter();
 
  protected:

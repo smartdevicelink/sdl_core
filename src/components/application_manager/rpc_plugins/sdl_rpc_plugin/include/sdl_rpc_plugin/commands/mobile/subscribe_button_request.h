@@ -75,6 +75,12 @@ class SubscribeButtonRequest
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
  private:
   /**
    * @brief Checks if button subscription allowed. In case non-media
@@ -88,12 +94,6 @@ class SubscribeButtonRequest
    **/
   bool IsSubscriptionAllowed(app_mngr::ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
-
-  /**
-   * @brief Sends ButtonSubscription notification
-   * to notify HMI that app subscribed on the button.
-   */
-  void SendSubscribeButtonNotification();
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
