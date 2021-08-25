@@ -3473,6 +3473,7 @@ bool ApplicationManagerImpl::HMIStateAllowsStreaming(
   using namespace mobile_apis::HMILevel;
   using namespace mobile_apis::PredefinedWindows;
   using namespace mobile_apis::VideoStreamingState;
+  using namespace mobile_apis::AudioStreamingState;
   using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
@@ -3486,7 +3487,10 @@ bool ApplicationManagerImpl::HMIStateAllowsStreaming(
       Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
           hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED);
   const bool allow_streaming_by_streaming_state =
-      hmi_state->video_streaming_state() == STREAMABLE;
+      (service_type == protocol_handler::SERVICE_TYPE_NAVI &&
+       hmi_state->video_streaming_state() == STREAMABLE) ||
+      (service_type == protocol_handler::SERVICE_TYPE_AUDIO &&
+       hmi_state->audio_streaming_state() != NOT_AUDIBLE);
 
   return allow_streaming_by_hmi_level && allow_streaming_by_streaming_state;
 }
