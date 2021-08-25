@@ -394,6 +394,8 @@ class MockMessageHelper {
                    application_manager::ApplicationSharedPtr application,
                    application_manager::ApplicationManager& app_mngr,
                    const application_manager::WindowID window_id));
+  MOCK_METHOD1(RemoveEmptyMessageParams,
+               uint16_t(const smart_objects::SmartObject&));
 
   MOCK_METHOD2(AddDefaultParamsToTireStatus,
                void(application_manager::ApplicationSharedPtr application,

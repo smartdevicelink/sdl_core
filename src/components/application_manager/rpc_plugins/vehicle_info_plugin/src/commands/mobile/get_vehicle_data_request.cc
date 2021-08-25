@@ -170,6 +170,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           }
         }
 
+        if (MessageHelper::RemoveEmptyMessageParams(
+                message[strings::msg_params]) > 0) {
+          mobile_result_code = mobile_apis::Result::WARNINGS;
+          response_info = app_mngr::commands::MergeInfos(
+              response_info, "Some vehicle data items could not be retrieved");
+        }
+
         if (message[strings::msg_params].empty() &&
             hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
           response_info = "Failed to retrieve data from vehicle";

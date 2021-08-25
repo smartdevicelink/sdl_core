@@ -1096,6 +1096,14 @@ class MessageHelper {
       const WindowID window_id);
 
   /**
+   * @brief Recursively removes empty parameters of composite type from message
+   * @param msg_params smart object containing message params
+   * @return amount of empty parameters removed
+   */
+  static uint16_t RemoveEmptyMessageParams(
+      smart_objects::SmartObject& msg_params);
+
+  /**
    * @brief AddDefaultParamsToTireStatus adds missing default sub-params to
    * tirePressure param, if version of related application requires presence of
    * all sub-params in response

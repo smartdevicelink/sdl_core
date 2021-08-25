@@ -70,6 +70,8 @@ void OnVehicleDataNotification::Run() {
   custom_vehicle_data_manager_.CreateMobileMessageParams(
       (*message_)[strings::msg_params]);
 
+  MessageHelper::RemoveEmptyMessageParams((*message_)[strings::msg_params]);
+
   const auto& param_names = (*message_)[strings::msg_params].enumerate();
   for (const auto& name : param_names) {
     SDL_LOG_DEBUG("vehicle_data name: " << name);

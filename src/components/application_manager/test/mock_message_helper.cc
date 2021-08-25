@@ -687,10 +687,17 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
       function_id, correlation_id, result_code);
 }
 
+uint16_t MessageHelper::RemoveEmptyMessageParams(
+    smart_objects::SmartObject& msg_params) {
+  return MockMessageHelper::message_helper_mock()->RemoveEmptyMessageParams(
+      msg_params);
+}
+
 void MessageHelper::AddDefaultParamsToTireStatus(
     application_manager::ApplicationSharedPtr application,
     smart_objects::SmartObject& response_from_hmi) {
   return MockMessageHelper::message_helper_mock()->AddDefaultParamsToTireStatus(
       application, response_from_hmi);
 }
+
 }  // namespace application_manager

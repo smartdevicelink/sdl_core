@@ -3475,6 +3475,59 @@ WindowID MessageHelper::ExtractWindowIdFromSmartObject(
   return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
+uint16_t MessageHelper::RemoveEmptyMessageParams(
+    smart_objects::SmartObject& msg_params) {
+  uint16_t erased_params = 0;
+
+  if (msg_params.empty()) {
+    return erased_params;
+  }
+
+  const auto keys = msg_params.enumerate();
+  for (const auto& key_params : keys) {
+    auto& param = msg_params[key_params];
+
+    if (smart_objects::SmartType_Array == param.getType()) {
+      smart_objects::SmartArray* array = param.asArray();
+
+      if (array == nullptr || array->empty())
+        continue;
+
+      const bool are_all_empty =
+          std::all_of(array->begin(),
+                      array->end(),
+                      [](const smart_objects::SmartObject& item) {
+                        if (smart_objects::SmartType_Array == item.getType() ||
+                            smart_objects::SmartType_Map == item.getType()) {
+                          return item.empty();
+                        }
+
+                        return false;
+                      });
+
+      if (are_all_empty) {
+        SDL_LOG_DEBUG("Remove empty array " + key_params +
+                      " from msg_params in HMI response");
+        msg_params.erase(key_params);
+        ++erased_params;
+      }
+
+      continue;
+    }
+
+    if (smart_objects::SmartType_Map == param.getType()) {
+      if (param.empty()) {
+        SDL_LOG_DEBUG("Remove empty field " + key_params +
+                      " from msg_params in HMI response");
+        msg_params.erase(key_params);
+        ++erased_params;
+      }
+    }
+  }
+
+  return erased_params;
+}
+
 void MessageHelper::AddDefaultParamsToTireStatus(
     ApplicationSharedPtr app, smart_objects::SmartObject& response_from_hmi) {
   const utils::SemanticVersion max_version_with_mandatory_params(8, 0, 0);
