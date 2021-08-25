@@ -1419,6 +1419,11 @@ class ApplicationManagerImpl
       const uint32_t app_id) const;
 
   /**
+   * @brief Removes suspended and stopped timers from timer pool
+   */
+  void ClearTimerPool();
+
+  /**
    * @brief CloseNaviApp allows to unregister application in case the
    * EndServiceEndedAck
    * didn't come for at least one of services(audio or video)
@@ -1680,7 +1685,8 @@ class ApplicationManagerImpl
   sync_primitives::Lock navi_app_to_end_stream_lock_;
   NaviServicesDequeue navi_app_to_end_stream_;
 
-  TimerSPtr last_stream_timer_ref_;
+  sync_primitives::Lock streaming_timer_pool_lock_;
+  std::vector<TimerSPtr> streaming_timer_pool_;
 
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
@@ -1712,6 +1718,8 @@ class ApplicationManagerImpl
   Timer application_list_update_timer_;
 
   Timer tts_global_properties_timer_;
+
+  Timer clear_pool_timer_;
 
   bool is_low_voltage_;
 
