@@ -429,8 +429,6 @@ bool SetGlobalPropertiesRequest::Init() {
 void SetGlobalPropertiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
-  RequestFromMobileImpl::HandleTimeOut();
-
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(
