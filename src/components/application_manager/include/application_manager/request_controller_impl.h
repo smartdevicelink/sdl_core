@@ -87,7 +87,7 @@ class RequestControllerImpl : public RequestController, threads::AsyncRunner {
   bool RetainRequestInstance(const uint32_t connection_key,
                              const uint32_t correlation_id) OVERRIDE;
 
-  void RemoveRetainedRequest(const uint32_t connection_key,
+  bool RemoveRetainedRequest(const uint32_t connection_key,
                              const uint32_t correlation_id) OVERRIDE;
 
   bool IsStillWaitingForResponse(const uint32_t connection_key,

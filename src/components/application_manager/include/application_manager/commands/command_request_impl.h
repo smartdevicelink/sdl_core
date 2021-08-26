@@ -128,6 +128,10 @@ class CommandRequestImpl : public CommandImpl,
 
   void OnUpdateTimeOut() OVERRIDE;
 
+  bool IncrementReferenceCount() const OVERRIDE;
+
+  bool DecrementReferenceCount() const OVERRIDE;
+
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table

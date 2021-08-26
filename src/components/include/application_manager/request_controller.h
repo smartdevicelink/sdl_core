@@ -126,7 +126,7 @@ class RequestController {
    * @param connection_key connection key of application
    * @param correlation_id correlation id of request
    */
-  virtual void RemoveRetainedRequest(const uint32_t connection_key,
+  virtual bool RemoveRetainedRequest(const uint32_t connection_key,
                                      const uint32_t correlation_id) = 0;
 
   /**

@@ -121,14 +121,6 @@ void CommandRequestImpl::HandleTimeOut() {
 bool CommandRequestImpl::StartOnEventHandling() {
   SDL_LOG_AUTO_TRACE();
 
-  const auto conn_key = connection_key();
-  const auto corr_id = correlation_id();
-
-  // Retain request instance to avoid object suicide after on_event()
-  if (!application_manager_.RetainRequestInstance(conn_key, corr_id)) {
-    return false;
-  }
-
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (RequestState::kTimedOut == current_state()) {
@@ -150,9 +142,6 @@ void CommandRequestImpl::FinalizeOnEventHandling() {
                               << ") is still waiting for repsonse");
     set_current_state(RequestState::kAwaitingResponse);
   }
-
-  // Remove request instance from retained to destroy it safely if required
-  application_manager_.RemoveRetainedRequest(conn_key, corr_id);
 }
 
 void CommandRequestImpl::HandleOnEvent(const event_engine::Event& event) {
@@ -171,6 +160,20 @@ void CommandRequestImpl::HandleOnEvent(const event_engine::MobileEvent& event) {
     on_event(event);
     FinalizeOnEventHandling();
   }
+}
+
+bool CommandRequestImpl::IncrementReferenceCount() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto conn_key = connection_key();
+  const auto corr_id = correlation_id();
+  return application_manager_.RetainRequestInstance(conn_key, corr_id);
+}
+
+bool CommandRequestImpl::DecrementReferenceCount() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto conn_key = connection_key();
+  const auto corr_id = correlation_id();
+  return application_manager_.RemoveRetainedRequest(conn_key, corr_id);
 }
 
 void CommandRequestImpl::OnUpdateTimeOut() {

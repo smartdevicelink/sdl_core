@@ -66,7 +66,11 @@ void EventDispatcherImpl::raise_event(const Event& event) {
     EventObserver* temp = *observers.begin();
     observers.erase(observers.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->HandleOnEvent(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 
@@ -157,7 +161,11 @@ void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
     EventObserver* temp = *mobile_observers_.begin();
     mobile_observers_.erase(mobile_observers_.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->HandleOnEvent(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 

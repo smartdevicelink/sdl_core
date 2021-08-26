@@ -77,5 +77,13 @@ void EventObserver::unsubscribe_from_all_mobile_events() {
 
 void EventObserver::HandleOnEvent(const event_engine::MobileEvent& event) {}
 
+bool EventObserver::IncrementReferenceCount() const {
+  return true;
+}
+
+bool EventObserver::DecrementReferenceCount() const {
+  return true;
+}
+
 }  // namespace event_engine
 }  // namespace application_manager

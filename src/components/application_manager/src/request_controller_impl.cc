@@ -270,7 +270,7 @@ bool RequestControllerImpl::RetainRequestInstance(
   return static_cast<bool>(request);
 }
 
-void RequestControllerImpl::RemoveRetainedRequest(
+bool RequestControllerImpl::RemoveRetainedRequest(
     const uint32_t connection_key, const uint32_t correlation_id) {
   SDL_LOG_AUTO_TRACE();
   for (auto it = retained_mobile_requests_.begin();
@@ -281,11 +281,16 @@ void RequestControllerImpl::RemoveRetainedRequest(
       SDL_LOG_DEBUG("Removing request (" << connection_key << ", "
                                          << correlation_id << ")");
       retained_mobile_requests_.erase(it);
-      break;
+
+      SDL_LOG_DEBUG(
+          "Total retained requests: " << retained_mobile_requests_.size());
+      return true;
     }
   }
-  SDL_LOG_DEBUG(
-      "Total retained requests: " << retained_mobile_requests_.size());
+
+  SDL_LOG_ERROR("Can't find request (" << connection_key << ", "
+                                       << correlation_id << ")");
+  return false;
 }
 
 bool RequestControllerImpl::IsStillWaitingForResponse(

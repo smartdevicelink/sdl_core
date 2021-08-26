@@ -5034,9 +5034,9 @@ bool ApplicationManagerImpl::RetainRequestInstance(
   return request_ctrl_->RetainRequestInstance(connection_key, correlation_id);
 }
 
-void ApplicationManagerImpl::RemoveRetainedRequest(
+bool ApplicationManagerImpl::RemoveRetainedRequest(
     const uint32_t connection_key, const uint32_t correlation_id) {
-  request_ctrl_->RemoveRetainedRequest(connection_key, correlation_id);
+  return request_ctrl_->RemoveRetainedRequest(connection_key, correlation_id);
 }
 
 bool ApplicationManagerImpl::IsStillWaitingForResponse(

@@ -400,7 +400,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                bool(const uint32_t connection_key,
                     const uint32_t correlation_id));
   MOCK_METHOD2(RemoveRetainedRequest,
-               void(const uint32_t connection_key,
+               bool(const uint32_t connection_key,
                     const uint32_t correlation_id));
   MOCK_CONST_METHOD2(IsStillWaitingForResponse,
                      bool(const uint32_t connection_key,
