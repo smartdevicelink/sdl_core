@@ -51,7 +51,8 @@ RequestControllerImpl::RequestControllerImpl(
     const RequestControlerSettings& settings,
     RequestTimeoutHandler& request_timeout_handler,
     event_engine::EventDispatcher& event_dispatcher)
-    : pool_state_(TPoolState::UNDEFINED)
+    : threads::AsyncRunner("RequestController async runner")
+    , pool_state_(TPoolState::UNDEFINED)
     , pool_size_(settings.thread_pool_size())
     , request_tracker_(settings)
     , duplicate_message_count_()
@@ -85,6 +86,9 @@ void RequestControllerImpl::Stop() {
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
   }
+
+  SDL_LOG_DEBUG("Stopping async runner");
+  AsyncRunner::Stop();
 
   SDL_LOG_DEBUG("Stopping timeout tracker");
   timer_.Stop();
@@ -373,11 +377,19 @@ void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
   SDL_LOG_DEBUG("Waiting for execution " << mobile_request_list_.size());
 }
 
+void RequestControllerImpl::scheduleRequestsCleanup(
+    const RequestInfoPtrs& requests) {
+  SDL_LOG_AUTO_TRACE();
+  AsyncRun(new RequestCleanerDelegate(requests));
+}
+
 void RequestControllerImpl::TerminateWaitingForResponseAppRequests(
     const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Waiting for response count before cleanup: "
                 << waiting_for_response_.Size());
+
+  RequestInfoPtrs requests_to_terminate;
 
   auto pending_requests =
       waiting_for_response_.GetRequestsByConnectionKey(app_id);
@@ -391,12 +403,25 @@ void RequestControllerImpl::TerminateWaitingForResponseAppRequests(
     }
 
     SDL_LOG_DEBUG(
-        "Terminating request with corr_id: " << request_ptr->correlation_id());
+        "Removing request with corr_id: " << request_ptr->correlation_id());
+    requests_to_terminate.push_back(*it);
     waiting_for_response_.RemoveRequest(*it);
   }
 
   SDL_LOG_DEBUG("Waiting for response count after cleanup: "
                 << waiting_for_response_.Size());
+
+  // It is necessary to release requests references after some short amount of
+  // time because here might be a possible data races in event dispatcher
+  // between GetNextObserver() and IncrementReferenceCount() when reference to
+  // corresponding request is destroyed by that function right after CleanUp()
+  // This micro delay gives a time to event dispatcher to figure out that
+  // request was finalized and event should not be handled
+  if (!requests_to_terminate.empty()) {
+    SDL_LOG_DEBUG("Scheduling cleanup for " << requests_to_terminate.size()
+                                            << " requests for app " << app_id);
+    scheduleRequestsCleanup(requests_to_terminate);
+  }
 }
 
 void RequestControllerImpl::TerminateAppRequests(const uint32_t app_id) {
@@ -640,6 +665,32 @@ void RequestControllerImpl::Worker::exitThreadMain() {
   stop_flag_ = true;
   // setup stop flag and whit while threadMain will be finished correctly
   // FIXME (dchmerev@luxoft.com): There is no waiting
+}
+
+RequestControllerImpl::RequestCleanerDelegate::RequestCleanerDelegate(
+    const RequestInfoPtrs& requests)
+    : requests_(requests) {}
+
+RequestControllerImpl::RequestCleanerDelegate::~RequestCleanerDelegate() {
+  SDL_LOG_AUTO_TRACE();
+}
+
+void RequestControllerImpl::RequestCleanerDelegate::exitThreadMain() {
+  sync_primitives::AutoLock lock(state_lock_);
+  state_cond_.NotifyOne();
+}
+
+void RequestControllerImpl::RequestCleanerDelegate::threadMain() {
+  SDL_LOG_DEBUG("Prepare to cleanup of " << requests_.size() << " requests");
+
+  {
+    SDL_LOG_DEBUG("Waiting...");
+    sync_primitives::AutoLock lock(state_lock_);
+    state_cond_.WaitFor(lock, 50);
+  }
+
+  SDL_LOG_DEBUG("Releasing references");
+  requests_.clear();
 }
 
 void RequestControllerImpl::NotifyTimer() {

@@ -40,6 +40,7 @@
 #include "utils/lock.h"
 
 #include "utils/conditional_variable.h"
+#include "utils/threads/async_runner.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/timer.h"
@@ -57,7 +58,7 @@ namespace application_manager {
 
 namespace request_controller {
 
-class RequestControllerImpl : public RequestController {
+class RequestControllerImpl : public RequestController, threads::AsyncRunner {
  public:
   /**
    * @brief Class constructor
@@ -147,6 +148,15 @@ class RequestControllerImpl : public RequestController {
   void TerminateWaitingForResponseAppRequests(const uint32_t app_id);
 
   /**
+   * @brief Starts a new async task for cleaning up the provided requests
+   * references
+   * and perform the rest of cleanup actions for each request
+   * @param requests list of requests to cleanup
+   */
+  typedef std::list<RequestInfoPtr> RequestInfoPtrs;
+  void scheduleRequestsCleanup(const RequestInfoPtrs& requests);
+
+  /**
    * @brief Checks whether all constraints are met before adding of request into
    * processing queue. Verifies amount of pending requests, amount of requests
    * per time scale for different HMI levels
@@ -178,6 +188,19 @@ class RequestControllerImpl : public RequestController {
     RequestControllerImpl* request_controller_;
     sync_primitives::Lock thread_lock_;
     volatile bool stop_flag_;
+  };
+
+  class RequestCleanerDelegate : public threads::ThreadDelegate {
+   public:
+    explicit RequestCleanerDelegate(const RequestInfoPtrs& requests);
+    ~RequestCleanerDelegate();
+    void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
+
+   private:
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable state_cond_;
+    RequestInfoPtrs requests_;
   };
 
   std::vector<threads::Thread*> pool_;
