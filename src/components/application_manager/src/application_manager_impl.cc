@@ -3966,22 +3966,16 @@ void ApplicationManagerImpl::StartEndStreamTimer(
     const uint32_t app_id, const protocol_handler::ServiceType service_type) {
   SDL_LOG_DEBUG("Start end stream timer for app " << app_id);
 
-  TimerSPtr end_stream_timer;
-  if (protocol_handler::ServiceType::kAudio == service_type) {
-    end_stream_timer = std::make_shared<timer::Timer>(
-        "DisallowAppAudioStreamTimer",
+  if (helpers::
+          Compare<protocol_handler::ServiceType, helpers::EQ, helpers::ONE>(
+              service_type,
+              protocol_handler::ServiceType::kAudio,
+              protocol_handler::ServiceType::kMobileNav)) {
+    TimerSPtr end_stream_timer = std::make_shared<timer::Timer>(
+        "DisallowAppStreamTimer",
         new TimerTaskImpl<ApplicationManagerImpl>(
             this, &ApplicationManagerImpl::EndStreaming));
-  }
 
-  if (protocol_handler::ServiceType::kMobileNav == service_type) {
-    end_stream_timer = std::make_shared<timer::Timer>(
-        "DisallowAppVideoStreamTimer",
-        new TimerTaskImpl<ApplicationManagerImpl>(
-            this, &ApplicationManagerImpl::EndStreaming));
-  }
-
-  if (end_stream_timer) {
     sync_primitives::AutoLock lock(navi_app_to_end_stream_lock_);
 
     NaviServiceDescriptor descriptor({app_id, service_type, end_stream_timer});
