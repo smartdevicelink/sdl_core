@@ -66,7 +66,11 @@ void EventDispatcherImpl::raise_event(const Event& event) {
     EventObserver* temp = *observers.begin();
     observers.erase(observers.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->on_event(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 
@@ -87,6 +91,15 @@ struct IdCheckFunctor {
  private:
   const unsigned long target_id;
 };
+
+void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
+                                          const int32_t hmi_correlation_id) {
+  AutoLock auto_lock(state_lock_);
+  auto& observers = observers_event_[event_id][hmi_correlation_id];
+  for (auto observer : observers) {
+    remove_observer_from_vector(*observer);
+  }
+}
 
 void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
                                           EventObserver& observer) {
@@ -148,7 +161,11 @@ void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
     EventObserver* temp = *mobile_observers_.begin();
     mobile_observers_.erase(mobile_observers_.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->on_event(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 

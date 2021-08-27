@@ -55,6 +55,7 @@ namespace am = application_manager;
 using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
+using app_mngr::commands::RequestFromMobileImpl;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::SliderRequest;
 using ::testing::_;
@@ -182,13 +183,13 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+  CallOnTimeOut(RequestFromMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
-  CommandRequestImpl& command_;
+  RequestFromMobileImpl& command_;
 };
 
 TEST_F(SliderRequestTest, Init_SUCCESS) {

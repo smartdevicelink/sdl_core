@@ -175,7 +175,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , request_timeout_handler_(
           new request_controller::RequestTimeoutHandlerImpl(*this))
     , request_ctrl_(new request_controller::RequestControllerImpl(
-          am_settings, *request_timeout_handler_))
+          am_settings, *request_timeout_handler_, event_dispatcher_))
     , mobile_correlation_id_(0)
     , correlation_id_(0)
     , max_correlation_id_(UINT_MAX)
@@ -5031,6 +5031,22 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
   } else {
     SDL_LOG_WARN("Redundant changing HMI level: " << level);
   }
+}
+
+bool ApplicationManagerImpl::RetainRequestInstance(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  return request_ctrl_->RetainRequestInstance(connection_key, correlation_id);
+}
+
+bool ApplicationManagerImpl::RemoveRetainedRequest(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  return request_ctrl_->RemoveRetainedRequest(connection_key, correlation_id);
+}
+
+bool ApplicationManagerImpl::IsStillWaitingForResponse(
+    const uint32_t connection_key, const uint32_t correlation_id) const {
+  return request_ctrl_->IsStillWaitingForResponse(connection_key,
+                                                  correlation_id);
 }
 
 void ApplicationManagerImpl::AddExpiredButtonRequest(

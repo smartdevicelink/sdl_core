@@ -55,6 +55,15 @@ class MockRequestController
   MOCK_METHOD1(
       AddNotification,
       void(const application_manager::request_controller::RequestPtr request));
+  MOCK_METHOD2(RetainRequestInstance,
+               bool(const uint32_t connection_key,
+                    const uint32_t correlation_id));
+  MOCK_METHOD2(RemoveRetainedRequest,
+               bool(const uint32_t connection_key,
+                    const uint32_t correlation_id));
+  MOCK_CONST_METHOD2(IsStillWaitingForResponse,
+                     bool(const uint32_t connection_key,
+                          const uint32_t correlation_id));
   MOCK_METHOD4(TerminateRequest,
                void(const uint32_t correlation_id,
                     const uint32_t connection_key,

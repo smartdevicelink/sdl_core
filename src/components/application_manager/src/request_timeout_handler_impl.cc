@@ -80,7 +80,8 @@ bool RequestTimeoutHandlerImpl::IsTimeoutUpdateRequired(
   return true;
 }
 
-void RequestTimeoutHandlerImpl::on_event(const event_engine::Event& event) {
+void RequestTimeoutHandlerImpl::HandleOnEvent(
+    const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   const auto event_id = event.id();
   if (hmi_apis::FunctionID::BasicCommunication_OnResetTimeout == event_id) {

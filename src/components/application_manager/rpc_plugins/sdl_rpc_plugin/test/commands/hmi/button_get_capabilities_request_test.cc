@@ -75,6 +75,9 @@ class ButtonGetCapabilitiesRequestTest
 
 TEST_F(ButtonGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+
+  InitEventDispatcher();
+
   RequestToHMIPtr command(
       CreateCommand<ButtonGetCapabilitiesRequest>(command_msg));
 
@@ -92,6 +95,9 @@ TEST_F(ButtonGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 TEST_F(ButtonGetCapabilitiesRequestTest,
        onTimeOut_ButtonsGetCapabilitiesUpdated) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+
+  InitEventDispatcher();
+
   RequestToHMIPtr command(
       CreateCommand<ButtonGetCapabilitiesRequest>(command_msg));
 
@@ -101,7 +107,7 @@ TEST_F(ButtonGetCapabilitiesRequestTest,
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*command_msg)[strings::params][strings::protocol_type].asInt());

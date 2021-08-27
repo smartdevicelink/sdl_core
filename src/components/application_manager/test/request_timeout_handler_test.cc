@@ -173,7 +173,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
 
   ASSERT_TRUE(command->Init());
   command->Run();
-  request_timeout_handler_->on_event(event);
+  request_timeout_handler_->HandleOnEvent(event);
 }
 
 TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
@@ -221,7 +221,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
 
   ASSERT_TRUE(command->Init());
   command->Run();
-  request_timeout_handler_->on_event(event);
+  request_timeout_handler_->HandleOnEvent(event);
 }
 
 TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
@@ -260,7 +260,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidRequestId) {
 
   ASSERT_TRUE(command->Init());
   command->Run();
-  request_timeout_handler_->on_event(event);
+  request_timeout_handler_->HandleOnEvent(event);
 }
 
 TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
@@ -299,7 +299,7 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_InvalidMethodName) {
 
   ASSERT_TRUE(command->Init());
   command->Run();
-  request_timeout_handler_->on_event(event);
+  request_timeout_handler_->HandleOnEvent(event);
 }
 }  // namespace request_timeout_handler_test
 }  // namespace components

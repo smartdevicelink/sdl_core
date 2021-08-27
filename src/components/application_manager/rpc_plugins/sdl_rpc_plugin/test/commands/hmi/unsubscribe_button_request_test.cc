@@ -112,7 +112,7 @@ TEST_F(HMIUnsubscribeButtonRequestTest,
       .WillByDefault(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(HMIUnsubscribeButtonRequestTest,

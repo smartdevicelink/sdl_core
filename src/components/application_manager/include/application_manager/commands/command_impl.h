@@ -164,7 +164,7 @@ class CommandImpl : public Command {
    * has exceed it's limit
    *
    */
-  void onTimeOut() OVERRIDE;
+  void HandleTimeOut() OVERRIDE;
 
   /**
    * @brief AllowedToTerminate tells request Controller if it can terminate this
@@ -181,6 +181,8 @@ class CommandImpl : public Command {
    * If true, request controller will terminate request on response
    */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
+
+  void OnUpdateTimeOut() OVERRIDE;
 
   /**
    * @brief Calculates command`s internal consecutive number

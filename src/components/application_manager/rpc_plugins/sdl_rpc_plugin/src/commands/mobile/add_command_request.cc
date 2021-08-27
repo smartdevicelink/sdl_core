@@ -32,6 +32,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
+
 #include <string>
 
 #include "application_manager/application.h"
@@ -56,24 +57,22 @@ AddCommandRequest::AddCommandRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
-    , send_ui_(false)
-    , send_vr_(false)
-    , is_ui_received_(false)
-    , is_vr_received_(false)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
+    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , ui_is_sent_(false)
+    , vr_is_sent_(false) {}
 
 AddCommandRequest::~AddCommandRequest() {}
 
-void AddCommandRequest::onTimeOut() {
+void AddCommandRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   RemoveCommand();
-  CommandRequestImpl::onTimeOut();
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 bool AddCommandRequest::Init() {
@@ -184,6 +183,7 @@ void AddCommandRequest::Run() {
 
   smart_objects::SmartObject ui_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     ui_msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
@@ -201,6 +201,9 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
+    ui_is_sent_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+
     if (((*message_)[strings::msg_params].keyExists(
             strings::secondary_image)) &&
         ((*message_)[strings::msg_params][strings::secondary_image].keyExists(
@@ -211,8 +214,6 @@ void AddCommandRequest::Run() {
       ui_msg_params[strings::secondary_image] =
           (*message_)[strings::msg_params][strings::secondary_image];
     }
-
-    send_ui_ = true;
   }
 
   smart_objects::SmartObject vr_msg_params =
@@ -227,16 +228,15 @@ void AddCommandRequest::Run() {
     vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     vr_msg_params[strings::grammar_id] = app->get_grammar_id();
 
-    send_vr_ = true;
+    vr_is_sent_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   }
 
-  if (send_ui_) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &ui_msg_params, true);
   }
 
-  if (send_vr_) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
 }
@@ -322,7 +322,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_AddCommand: {
       SDL_LOG_INFO("Received UI_AddCommand event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_info_);
@@ -334,7 +333,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_AddCommand: {
       SDL_LOG_INFO("Received VR_AddCommand event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
-      is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, vr_info_);
@@ -350,6 +348,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   if (IsPendingResponseExist()) {
+    SDL_LOG_DEBUG("Command still wating for HMI response");
     return;
   }
 
@@ -505,10 +504,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
                &(message[strings::msg_params]));
 }
 
-bool AddCommandRequest::IsPendingResponseExist() {
-  return send_ui_ != is_ui_received_ || send_vr_ != is_vr_received_;
-}
-
 bool AddCommandRequest::IsWhiteSpaceExist() {
   SDL_LOG_AUTO_TRACE();
   const char* str = NULL;
@@ -559,7 +554,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 bool AddCommandRequest::BothSend() const {
-  return send_vr_ && send_ui_;
+  return ui_is_sent_ && vr_is_sent_;
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
@@ -607,17 +602,18 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && !(is_vr_received_ || is_ui_received_)) {
+  if (BothSend() && (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR) &&
+                     IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI))) {
     // in case we have send bth UI and VR and no one respond
     // we have nothing to remove from HMI so no DeleteCommand expected
     return;
   }
 
-  if (BothSend() && !is_vr_received_) {
+  if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
   }
 
-  if (BothSend() && !is_ui_received_) {
+  if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     msg_params[strings::grammar_id] = app->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);

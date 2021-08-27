@@ -59,7 +59,7 @@ void UIGetLanguageRequest::Run() {
   SendRequest();
 }
 
-void UIGetLanguageRequest::onTimeOut() {
+void UIGetLanguageRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::UI_GetLanguage);

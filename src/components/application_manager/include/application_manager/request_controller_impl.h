@@ -40,6 +40,7 @@
 #include "utils/lock.h"
 
 #include "utils/conditional_variable.h"
+#include "utils/threads/async_runner.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/timer.h"
@@ -47,6 +48,7 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_info.h"
@@ -56,14 +58,15 @@ namespace application_manager {
 
 namespace request_controller {
 
-class RequestControllerImpl : public RequestController {
+class RequestControllerImpl : public RequestController, threads::AsyncRunner {
  public:
   /**
    * @brief Class constructor
    *
    */
   RequestControllerImpl(const RequestControlerSettings& settings,
-                        RequestTimeoutHandler& request_timeout_handler);
+                        RequestTimeoutHandler& request_timeout_handler,
+                        event_engine::EventDispatcher& event_disptacher);
 
   ~RequestControllerImpl();
 
@@ -80,6 +83,25 @@ class RequestControllerImpl : public RequestController {
   TResult AddHMIRequest(const RequestPtr request) OVERRIDE;
 
   void AddNotification(const RequestPtr ptr) OVERRIDE;
+
+  bool RetainRequestInstance(const uint32_t connection_key,
+                             const uint32_t correlation_id) OVERRIDE;
+
+  bool RemoveRetainedRequest(const uint32_t connection_key,
+                             const uint32_t correlation_id) OVERRIDE;
+
+  bool IsStillWaitingForResponse(const uint32_t connection_key,
+                                 const uint32_t correlation_id) const OVERRIDE;
+
+  /**
+   * @brief Removes request from queue
+   *
+   * @param correlation_id Active request correlation ID,
+   * @param connection_key Active request connection key (0 for HMI requersts)
+   * @param function_id Active request  function id
+   * @param force_terminate if true, request controller will terminate
+   * even if not allowed by request
+   */
 
   void TerminateRequest(const uint32_t correlation_id,
                         const uint32_t connection_key,
@@ -126,6 +148,15 @@ class RequestControllerImpl : public RequestController {
   void TerminateWaitingForResponseAppRequests(const uint32_t app_id);
 
   /**
+   * @brief Starts a new async task for cleaning up the provided requests
+   * references
+   * and perform the rest of cleanup actions for each request
+   * @param requests list of requests to cleanup
+   */
+  typedef std::list<RequestInfoPtr> RequestInfoPtrs;
+  void scheduleRequestsCleanup(const RequestInfoPtrs& requests);
+
+  /**
    * @brief Checks whether all constraints are met before adding of request into
    * processing queue. Verifies amount of pending requests, amount of requests
    * per time scale for different HMI levels
@@ -159,6 +190,19 @@ class RequestControllerImpl : public RequestController {
     volatile bool stop_flag_;
   };
 
+  class RequestCleanerDelegate : public threads::ThreadDelegate {
+   public:
+    explicit RequestCleanerDelegate(const RequestInfoPtrs& requests);
+    ~RequestCleanerDelegate();
+    void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
+
+   private:
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable state_cond_;
+    RequestInfoPtrs requests_;
+  };
+
   std::vector<threads::Thread*> pool_;
   volatile TPoolState pool_state_;
   uint32_t pool_size_;
@@ -167,12 +211,18 @@ class RequestControllerImpl : public RequestController {
   std::list<RequestPtr> mobile_request_list_;
   sync_primitives::Lock mobile_request_list_lock_;
 
-  /*
-   * Requests, that are waiting for responses
+  /**
+   * @brief Requests, that are waiting for responses
    * RequestInfoSet provides correct processing of requests with thre same
    * app_id and corr_id
    */
   RequestInfoSet waiting_for_response_;
+
+  /**
+   * @brief Requests, that are retained to be not destroyed right after
+   * sending response to mobile request
+   */
+  HashSortedRequestInfoSet retained_mobile_requests_;
 
   /**
    * @brief Tracker verifying time scale and maximum requests amount in
@@ -206,7 +256,9 @@ class RequestControllerImpl : public RequestController {
 
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
+
   RequestTimeoutHandler& request_timeout_handler_;
+  event_engine::EventDispatcher& event_dispatcher_;
   DISALLOW_COPY_AND_ASSIGN(RequestControllerImpl);
 };
 

@@ -79,7 +79,7 @@ class ResumptionDataProcessorImpl
                smart_objects::SmartObject& saved_app,
                ResumeCtrl::ResumptionCallBack callback) override;
 
-  void on_event(const app_mngr::event_engine::Event& event) override;
+  void HandleOnEvent(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   void HandleOnTimeOut(const uint32_t correlation_id,
                        const hmi_apis::FunctionID::eType function_id) override;

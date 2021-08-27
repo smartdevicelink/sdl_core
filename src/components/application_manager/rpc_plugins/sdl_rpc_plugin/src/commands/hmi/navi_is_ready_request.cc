@@ -49,8 +49,7 @@ NaviIsReadyRequest::NaviIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 NaviIsReadyRequest::~NaviIsReadyRequest() {}
 
@@ -86,7 +85,7 @@ void NaviIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void NaviIsReadyRequest::onTimeOut() {
+void NaviIsReadyRequest::OnTimeOut() {
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::Navigation_IsReady);
 }

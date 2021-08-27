@@ -150,7 +150,7 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
                application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
-void ASPerformAppServiceInteractionRequestFromHMI::onTimeOut() {
+void ASPerformAppServiceInteractionRequestFromHMI::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject response_params;
   response_params[strings::info] =

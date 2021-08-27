@@ -45,8 +45,7 @@ namespace hmi {
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
-                               public app_mngr::event_engine::EventObserver {
+class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor
@@ -68,7 +67,7 @@ class SubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
    **/
   void Run() OVERRIDE;
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 

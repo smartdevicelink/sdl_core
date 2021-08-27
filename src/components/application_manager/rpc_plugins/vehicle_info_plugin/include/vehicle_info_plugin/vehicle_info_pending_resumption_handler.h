@@ -52,7 +52,7 @@ class VehicleInfoPendingResumptionHandler
       app_mngr::ApplicationManager& application_manager,
       CustomVehicleDataManager& custom_vehicle_data_manager);
 
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
                                            app_mngr::Application& app) OVERRIDE;

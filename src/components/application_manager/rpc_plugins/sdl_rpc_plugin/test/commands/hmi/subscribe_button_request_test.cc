@@ -141,7 +141,7 @@ TEST_F(HMISubscribeButtonRequestTest,
       .WillByDefault(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(kCorrelationId, kFunctionID));
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(HMISubscribeButtonRequestTest,

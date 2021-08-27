@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <set>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "commands/request_to_hmi.h"
 
 #include "utils/date_time.h"
@@ -212,6 +212,15 @@ class RequestInfoSet {
    * @return founded request or shared_ptr with NULL
    */
   RequestInfoPtr FrontWithNotNullTimeout();
+
+  /**
+   * @brief GetRequestsByConnectionKey gets all pending requests by provided
+   * connection key
+   * @param connection_key connection key for related requests
+   * @return list of all pending requests for a specified connection key
+   */
+  std::list<RequestInfoPtr> GetRequestsByConnectionKey(
+      const uint32_t connection_key);
 
   /*
    * @brief Erase request from colletion by log(n) time

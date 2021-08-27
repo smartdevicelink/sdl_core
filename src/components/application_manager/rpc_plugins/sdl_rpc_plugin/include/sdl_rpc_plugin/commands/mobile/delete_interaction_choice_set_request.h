@@ -39,6 +39,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -52,7 +53,7 @@ typedef std::set<uint32_t> SentRequestsSet;
  * @brief DeleteInteractionChoiceSetRequest command class
  **/
 class DeleteInteractionChoiceSetRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DeleteInteractionChoiceSetRequest class constructor
@@ -88,12 +89,6 @@ class DeleteInteractionChoiceSetRequest
    * @param event The received event.
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
-
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  void onTimeOut() FINAL;
 
  private:
   /*

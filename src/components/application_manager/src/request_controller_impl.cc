@@ -30,12 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
+#include "application_manager/request_controller.h"
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/request_controller_impl.h"
-
+#include "utils/logger.h"
 #include "utils/timer_task_impl.h"
 
 namespace application_manager {
@@ -48,8 +49,10 @@ SDL_CREATE_LOG_VARIABLE("RequestController")
 
 RequestControllerImpl::RequestControllerImpl(
     const RequestControlerSettings& settings,
-    RequestTimeoutHandler& request_timeout_handler)
-    : pool_state_(TPoolState::UNDEFINED)
+    RequestTimeoutHandler& request_timeout_handler,
+    event_engine::EventDispatcher& event_dispatcher)
+    : threads::AsyncRunner("RequestController async runner")
+    , pool_state_(TPoolState::UNDEFINED)
     , pool_size_(settings.thread_pool_size())
     , request_tracker_(settings)
     , duplicate_message_count_()
@@ -59,7 +62,8 @@ RequestControllerImpl::RequestControllerImpl(
     , timer_stop_flag_(false)
     , is_low_voltage_(false)
     , settings_(settings)
-    , request_timeout_handler_(request_timeout_handler) {
+    , request_timeout_handler_(request_timeout_handler)
+    , event_dispatcher_(event_dispatcher) {
   SDL_LOG_AUTO_TRACE();
   InitializeThreadpool();
   timer_.Start(0, timer::kSingleShot);
@@ -82,6 +86,9 @@ void RequestControllerImpl::Stop() {
   if (pool_state_ != TPoolState::STOPPED) {
     DestroyThreadpool();
   }
+
+  SDL_LOG_DEBUG("Stopping async runner");
+  AsyncRunner::Stop();
 
   SDL_LOG_DEBUG("Stopping timeout tracker");
   timer_.Stop();
@@ -248,6 +255,50 @@ void RequestControllerImpl::RemoveNotification(
   SDL_LOG_DEBUG("Cannot find notification");
 }
 
+bool RequestControllerImpl::RetainRequestInstance(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  SDL_LOG_AUTO_TRACE();
+  auto request = waiting_for_response_.Find(connection_key, correlation_id);
+  if (request) {
+    retained_mobile_requests_.insert(request);
+    SDL_LOG_DEBUG("Request (" << connection_key << ", " << correlation_id
+                              << ") has been retained");
+  }
+  SDL_LOG_DEBUG(
+      "Total retained requests: " << retained_mobile_requests_.size());
+
+  return static_cast<bool>(request);
+}
+
+bool RequestControllerImpl::RemoveRetainedRequest(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  SDL_LOG_AUTO_TRACE();
+  for (auto it = retained_mobile_requests_.begin();
+       it != retained_mobile_requests_.end();
+       ++it) {
+    if ((*it)->request()->connection_key() == connection_key &&
+        (*it)->request()->correlation_id() == correlation_id) {
+      SDL_LOG_DEBUG("Removing request (" << connection_key << ", "
+                                         << correlation_id << ")");
+      retained_mobile_requests_.erase(it);
+
+      SDL_LOG_DEBUG(
+          "Total retained requests: " << retained_mobile_requests_.size());
+      return true;
+    }
+  }
+
+  SDL_LOG_ERROR("Can't find request (" << connection_key << ", "
+                                       << correlation_id << ")");
+  return false;
+}
+
+bool RequestControllerImpl::IsStillWaitingForResponse(
+    const uint32_t connection_key, const uint32_t correlation_id) const {
+  auto request = waiting_for_response_.Find(connection_key, correlation_id);
+  return static_cast<bool>(request);
+}
+
 void RequestControllerImpl::TerminateRequest(const uint32_t correlation_id,
                                              const uint32_t connection_key,
                                              const int32_t function_id,
@@ -284,13 +335,17 @@ void RequestControllerImpl::TerminateRequest(const uint32_t correlation_id,
     return;
   }
   if (force_terminate || request->request()->AllowedToTerminate()) {
+    event_dispatcher_.remove_observer(
+        static_cast<hmi_apis::FunctionID::eType>(function_id), correlation_id);
     waiting_for_response_.RemoveRequest(request);
     if (RequestInfo::HMIRequest == request->request_type()) {
       request_timeout_handler_.RemoveRequest(request->requestId());
     }
 
   } else {
-    SDL_LOG_WARN("Request was not terminated");
+    SDL_LOG_WARN("Request was not terminated "
+                 << "correlation_id = " << correlation_id
+                 << " function_id = " << function_id);
   }
   NotifyTimer();
 }
@@ -327,12 +382,51 @@ void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
   SDL_LOG_DEBUG("Waiting for execution " << mobile_request_list_.size());
 }
 
+void RequestControllerImpl::scheduleRequestsCleanup(
+    const RequestInfoPtrs& requests) {
+  SDL_LOG_AUTO_TRACE();
+  AsyncRun(new RequestCleanerDelegate(requests));
+}
+
 void RequestControllerImpl::TerminateWaitingForResponseAppRequests(
     const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
-  waiting_for_response_.RemoveByConnectionKey(app_id);
-  SDL_LOG_DEBUG(
-      "Waiting for response count : " << waiting_for_response_.Size());
+  SDL_LOG_DEBUG("Waiting for response count before cleanup: "
+                << waiting_for_response_.Size());
+
+  RequestInfoPtrs requests_to_terminate;
+
+  auto pending_requests =
+      waiting_for_response_.GetRequestsByConnectionKey(app_id);
+  for (auto it = pending_requests.begin(); it != pending_requests.end(); ++it) {
+    auto request_ptr = (*it)->request();
+    if (!request_ptr->CleanUp()) {
+      SDL_LOG_WARN("Request with corr_id: "
+                   << request_ptr->correlation_id()
+                   << " can't be terminated right now. Keep in the queue");
+      continue;
+    }
+
+    SDL_LOG_DEBUG(
+        "Removing request with corr_id: " << request_ptr->correlation_id());
+    requests_to_terminate.push_back(*it);
+    waiting_for_response_.RemoveRequest(*it);
+  }
+
+  SDL_LOG_DEBUG("Waiting for response count after cleanup: "
+                << waiting_for_response_.Size());
+
+  // It is necessary to release requests references after some short amount of
+  // time because here might be a possible data races in event dispatcher
+  // between GetNextObserver() and IncrementReferenceCount() when reference to
+  // corresponding request is destroyed by that function right after CleanUp()
+  // This micro delay gives a time to event dispatcher to figure out that
+  // request was finalized and event should not be handled
+  if (!requests_to_terminate.empty()) {
+    SDL_LOG_DEBUG("Scheduling cleanup for " << requests_to_terminate.size()
+                                            << " requests for app " << app_id);
+    scheduleRequestsCleanup(requests_to_terminate);
+  }
 }
 
 void RequestControllerImpl::TerminateAppRequests(const uint32_t app_id) {
@@ -467,7 +561,8 @@ void RequestControllerImpl::TimeoutThread() {
     const uint32_t expired_request_id = probably_expired->requestId();
     const uint32_t expired_app_id = probably_expired->app_id();
 
-    probably_expired->request()->onTimeOut();
+    probably_expired->request()->HandleTimeOut();
+
     if (RequestInfo::kHmiConnectionKey == probably_expired->app_id()) {
       SDL_LOG_DEBUG("Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);
@@ -530,8 +625,8 @@ void RequestControllerImpl::Worker::threadMain() {
         std::make_shared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
     if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
-      commands::CommandRequestImpl* cmd_request =
-          dynamic_cast<commands::CommandRequestImpl*>(request_ptr.get());
+      commands::RequestFromMobileImpl* cmd_request =
+          dynamic_cast<commands::RequestFromMobileImpl*>(request_ptr.get());
       if (cmd_request != NULL) {
         uint32_t corr_id = cmd_request->correlation_id();
         request_controller_->duplicate_message_count_lock_.Acquire();
@@ -575,6 +670,32 @@ void RequestControllerImpl::Worker::exitThreadMain() {
   stop_flag_ = true;
   // setup stop flag and whit while threadMain will be finished correctly
   // FIXME (dchmerev@luxoft.com): There is no waiting
+}
+
+RequestControllerImpl::RequestCleanerDelegate::RequestCleanerDelegate(
+    const RequestInfoPtrs& requests)
+    : requests_(requests) {}
+
+RequestControllerImpl::RequestCleanerDelegate::~RequestCleanerDelegate() {
+  SDL_LOG_AUTO_TRACE();
+}
+
+void RequestControllerImpl::RequestCleanerDelegate::exitThreadMain() {
+  sync_primitives::AutoLock lock(state_lock_);
+  state_cond_.NotifyOne();
+}
+
+void RequestControllerImpl::RequestCleanerDelegate::threadMain() {
+  SDL_LOG_DEBUG("Prepare to cleanup of " << requests_.size() << " requests");
+
+  {
+    SDL_LOG_DEBUG("Waiting...");
+    sync_primitives::AutoLock lock(state_lock_);
+    state_cond_.WaitFor(lock, 50);
+  }
+
+  SDL_LOG_DEBUG("Releasing references");
+  requests_.clear();
 }
 
 void RequestControllerImpl::NotifyTimer() {

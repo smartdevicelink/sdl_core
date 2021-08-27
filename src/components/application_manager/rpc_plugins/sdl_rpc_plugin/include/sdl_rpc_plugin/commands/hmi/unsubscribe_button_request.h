@@ -44,8 +44,7 @@ namespace commands {
 
 namespace hmi {
 
-class UnsubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
-                                 public app_mngr::event_engine::EventObserver {
+class UnsubscribeButtonRequest : public app_mngr::commands::RequestToHMI {
  public:
   UnsubscribeButtonRequest(const app_mngr::commands::MessageSharedPtr& message,
                            app_mngr::ApplicationManager& application_manager,
@@ -57,7 +56,7 @@ class UnsubscribeButtonRequest : public app_mngr::commands::RequestToHMI,
 
   void Run() OVERRIDE;
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   void on_event(const application_manager::event_engine::Event& event) OVERRIDE;
 

@@ -69,6 +69,8 @@ TEST_F(UpdateSDLRequestTest, RUN_SUCCESS) {
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
 
+  InitEventDispatcher();
+
   UpdateSDLRequestPtr command(CreateCommand<UpdateSDLRequest>(command_msg));
 
   EXPECT_CALL(mock_policy_handler_, PTExchangeAtUserRequest(kCorrelationId));

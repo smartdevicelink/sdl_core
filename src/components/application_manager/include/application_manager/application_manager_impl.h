@@ -686,6 +686,15 @@ class ApplicationManagerImpl
                         const uint32_t corr_id,
                         const int32_t function_id) OVERRIDE;
 
+  bool RetainRequestInstance(const uint32_t connection_key,
+                             const uint32_t correlation_id) OVERRIDE;
+
+  bool RemoveRetainedRequest(const uint32_t connection_key,
+                             const uint32_t correlation_id) OVERRIDE;
+
+  bool IsStillWaitingForResponse(const uint32_t connection_key,
+                                 const uint32_t correlation_id) const OVERRIDE;
+
   void OnQueryAppsRequest(
       const connection_handler::DeviceHandle device) OVERRIDE;
 

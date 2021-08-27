@@ -53,8 +53,7 @@ SubscribeButtonRequest::SubscribeButtonRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {
+                   policy_handle) {
   hmi_apis::Common_ButtonName::eType button_name =
       static_cast<hmi_apis::Common_ButtonName::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -133,7 +132,7 @@ void SubscribeButtonRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void SubscribeButtonRequest::onTimeOut() {
+void SubscribeButtonRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
   application_manager_.AddExpiredButtonRequest(

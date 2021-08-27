@@ -92,6 +92,7 @@ void application_manager::request_controller::RequestInfo::updateEndTime() {
 void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
   timeout_msec_ = timeout_msec;
   updateEndTime();
+  request_->OnUpdateTimeOut();
 }
 
 bool RequestInfo::isExpired() {
@@ -195,6 +196,22 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
     }
   }
   return result;
+}
+
+std::list<RequestInfoPtr> RequestInfoSet::GetRequestsByConnectionKey(
+    const uint32_t connection_key) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(pending_requests_lock_);
+
+  std::list<RequestInfoPtr> output_list;
+  AppIdCompararator comparator(AppIdCompararator::Equal, connection_key);
+
+  std::copy_if(hash_sorted_pending_requests_.begin(),
+               hash_sorted_pending_requests_.end(),
+               std::back_inserter(output_list),
+               comparator);
+
+  return output_list;
 }
 
 bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {

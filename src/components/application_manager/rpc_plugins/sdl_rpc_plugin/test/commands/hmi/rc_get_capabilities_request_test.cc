@@ -73,6 +73,8 @@ TEST_F(RCGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
+  InitEventDispatcher();
+
   RequestToHMIPtr command(CreateCommand<RCGetCapabilitiesRequest>(command_msg));
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
   ASSERT_TRUE(command->Init());
@@ -88,6 +90,7 @@ TEST_F(RCGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 TEST_F(RCGetCapabilitiesRequestTest,
        onTimeOut_OnCapabilityInitialized_RemoveRCGetCapabilities) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<RCGetCapabilitiesRequest>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -96,7 +99,7 @@ TEST_F(RCGetCapabilitiesRequestTest,
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 }  // namespace rc_get_capabilities_request

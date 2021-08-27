@@ -440,7 +440,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
           am::commands::Command::SOURCE_SDL));
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest,
@@ -507,7 +507,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
           am::commands::Command::SOURCE_SDL));
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 TEST_F(ResetGlobalPropertiesRequestTest,
@@ -564,7 +564,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
           am::commands::Command::SOURCE_SDL));
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace reset_global_properties

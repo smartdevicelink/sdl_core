@@ -64,6 +64,7 @@ namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::CommandImpl;
 using am::event_engine::Event;
+using application_manager::event_engine::EventObserver;
 using sdl_rpc_plugin::commands::UpdateDeviceListRequest;
 
 typedef std::shared_ptr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
@@ -90,6 +91,8 @@ class UpdateDeviceListRequestTest
 };
 
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
+  InitEventDispatcher();
+
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   UpdateDeviceListRequestPtr command(
@@ -111,6 +114,8 @@ TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
 }
 
 TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESS) {
+  InitEventDispatcher();
+
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   UpdateDeviceListRequestPtr command(
@@ -132,6 +137,8 @@ TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsTrue_SUCCESS) {
 }
 
 TEST_F(UpdateDeviceListRequestTest, RUN_HMICooperatingReturnsFalse_UNSUCCESS) {
+  InitEventDispatcher();
+
   MessageSharedPtr command_msg = CreateCommandMsg();
 
   UpdateDeviceListRequestPtr command(

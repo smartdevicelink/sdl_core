@@ -113,7 +113,8 @@ class RCGetInteriorVehicleDataConsentTest
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
       , request_controller(mock_request_controler,
-                           mock_request_timeout_handler_)
+                           mock_request_timeout_handler_,
+                           event_dispatcher_)
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,

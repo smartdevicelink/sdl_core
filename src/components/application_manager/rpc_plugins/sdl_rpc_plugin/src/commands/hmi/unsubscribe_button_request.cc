@@ -53,8 +53,7 @@ UnsubscribeButtonRequest::UnsubscribeButtonRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {
+                   policy_handle) {
   hmi_apis::Common_ButtonName::eType button_name =
       static_cast<hmi_apis::Common_ButtonName::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -74,7 +73,7 @@ void UnsubscribeButtonRequest::Run() {
   SendRequest();
 }
 
-void UnsubscribeButtonRequest::onTimeOut() {
+void UnsubscribeButtonRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
   application_manager_.AddExpiredButtonRequest(

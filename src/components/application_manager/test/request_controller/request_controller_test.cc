@@ -51,6 +51,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
 #include "resumption/last_state.h"
 #include "utils/test_async_waiter.h"
 
@@ -63,6 +64,7 @@ using ::application_manager::request_controller::RequestControllerImpl;
 using ::application_manager::request_controller::RequestInfo;
 using test::components::application_manager_test::MockRequestTimeoutHandler;
 
+using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -109,7 +111,9 @@ class RequestControllerTestClass : public ::testing::Test {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
         .WillByDefault(Return(kThreadPoolSize));
     request_ctrl_ = std::make_shared<RequestControllerImpl>(
-        mock_request_controller_settings_, mock_request_timeout_handler_);
+        mock_request_controller_settings_,
+        mock_request_timeout_handler_,
+        mock_event_dispatcher_);
   }
 
   RequestPtr GetMockRequest(
@@ -159,6 +163,7 @@ class RequestControllerTestClass : public ::testing::Test {
 
   NiceMock<application_manager_test::MockRequestControlerSettings>
       mock_request_controller_settings_;
+  NiceMock<MockEventDispatcher> mock_event_dispatcher_;
   MockRequestTimeoutHandler mock_request_timeout_handler_;
   RequestControllerSPtr request_ctrl_;
   RequestPtr empty_mock_request_;
@@ -294,7 +299,7 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
-  EXPECT_CALL(*mock_request, onTimeOut())
+  EXPECT_CALL(*mock_request, HandleTimeOut())
       .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds

@@ -51,11 +51,11 @@ DeleteInteractionChoiceSetRequest::DeleteInteractionChoiceSetRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , response_result_codes_() {}
 
 DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {}
@@ -128,11 +128,6 @@ void DeleteInteractionChoiceSetRequest::on_event(
       SendDeleteInteractionChoiceSetResponse();
     }
   }
-}
-
-void DeleteInteractionChoiceSetRequest::onTimeOut() {
-  SDL_LOG_AUTO_TRACE();
-  SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
 }
 
 bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(

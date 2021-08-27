@@ -59,7 +59,7 @@ void VRGetLanguageRequest::Run() {
   SendRequest();
 }
 
-void VRGetLanguageRequest::onTimeOut() {
+void VRGetLanguageRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetLanguage);

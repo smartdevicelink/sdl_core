@@ -49,7 +49,7 @@ class RequestTimeoutHandlerImpl : public event_engine::EventObserver,
   void AddRequest(const uint32_t hmi_correlation_id,
                   const Request& request) OVERRIDE;
   void RemoveRequest(const uint32_t hmi_correlation_id) OVERRIDE;
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
 
  private:
   /**
