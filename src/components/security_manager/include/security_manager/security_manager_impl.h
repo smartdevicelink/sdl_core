@@ -226,17 +226,24 @@ class SecurityManagerImpl : public SecurityManager,
 
  private:
   /**
+   * @brief NextSequentialNumber get next sequential number for request
+   * @return next sequential number
+   */
+  uint32_t NextSequentialNumber();
+
+  /**
    * \brief Sends Handshake binary data to mobile application
    * \param connection_key Unique key used by other components as session
    * identifier
    * \param data pointer to binary data array
    * \param data_size size of binary data array
-   * \param seq_number received from Mobile Application
+   * \param custom_seq_number specific sequential number of request. If omitted,
+   * this will be automatically generated
    */
   void SendHandshakeBinData(const uint32_t connection_key,
                             const uint8_t* const data,
                             const size_t data_size,
-                            const uint32_t seq_number = 0);
+                            const uint32_t custom_seq_number = 0);
   /**
    * \brief Parse SecurityMessage as HandshakeData request
    * \param inMessage SecurityMessage with binary data of handshake
@@ -326,6 +333,8 @@ class SecurityManagerImpl : public SecurityManager,
   sync_primitives::Lock connections_lock_;
   std::set<uint32_t> awaiting_certificate_connections_;
   std::set<uint32_t> awaiting_time_connections_;
+
+  uint32_t current_seq_number_;
 
   mutable sync_primitives::Lock waiters_lock_;
   volatile bool waiting_for_certificate_;

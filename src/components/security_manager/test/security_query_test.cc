@@ -53,7 +53,7 @@ class SecurityQueryTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     // init_header used for SecurityQuery initialization
-    init_header.query_type = SecurityQuery::NOTIFICATION;
+    init_header.query_type = SecurityQuery::REQUEST;
     init_header.query_id = SecurityQuery::SEND_HANDSHAKE_DATA;
     init_header.seq_number = SEQ_NUMBER;
     init_header.json_size = 0u;
@@ -107,18 +107,17 @@ TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
  * Security QueryHeader shall construct with correct fields
  */
 TEST_F(SecurityQueryTest, QueryHeaderConstructor2) {
-  SecurityQuery::QueryHeader new_header(SecurityQuery::NOTIFICATION,
-                                        SecurityQuery::SEND_HANDSHAKE_DATA,
-                                        SEQ_NUMBER);
-  ASSERT_EQ(new_header.query_type, SecurityQuery::NOTIFICATION);
+  SecurityQuery::QueryHeader new_header(
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, SEQ_NUMBER);
+  ASSERT_EQ(new_header.query_type, SecurityQuery::REQUEST);
   ASSERT_EQ(new_header.query_id, SecurityQuery::SEND_HANDSHAKE_DATA);
   ASSERT_EQ(new_header.seq_number, SEQ_NUMBER);
   ASSERT_EQ(new_header.json_size, 0u);
 
-  SecurityQuery::QueryHeader new_header2(SecurityQuery::RESPONSE,
+  SecurityQuery::QueryHeader new_header2(SecurityQuery::NOTIFICATION,
                                          SecurityQuery::SEND_INTERNAL_ERROR,
                                          SEQ_NUMBER + 1);
-  ASSERT_EQ(new_header2.query_type, SecurityQuery::RESPONSE);
+  ASSERT_EQ(new_header2.query_type, SecurityQuery::NOTIFICATION);
   ASSERT_EQ(new_header2.query_id, SecurityQuery::SEND_INTERNAL_ERROR);
   ASSERT_EQ(new_header2.seq_number, SEQ_NUMBER + 1);
   ASSERT_EQ(new_header2.json_size, 0u);
@@ -385,9 +384,7 @@ TEST_F(SecurityQueryTest, Parse_InvalidQuery_UnknownId_Response) {
  */
 TEST_F(SecurityQueryTest, Parse_Handshake) {
   SecurityQuery::QueryHeader handshake_header(
-      SecurityQuery::NOTIFICATION,
-      SecurityQuery::SEND_HANDSHAKE_DATA,
-      SEQ_NUMBER);
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, SEQ_NUMBER);
   // some sample data
   uint8_t raw_data[] = {0x6, 0x7, 0x8};
   const size_t raw_data_size = sizeof(raw_data) / sizeof(raw_data[0]);
