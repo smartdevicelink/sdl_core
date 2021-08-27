@@ -858,10 +858,18 @@ class ApplicationManagerImpl
                     protocol_handler::ServiceType service_type) const OVERRIDE;
 
   /**
-   * @brief Ends opened navi services (audio/video) for application
+   * @brief Ends opened navi services audio and video for application
    * @param app_id Application id
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Ends opened navi service audio or video for application
+   * @param app_id Application id
+   * @param service_type Service type to check
+   */
+  void EndService(const uint32_t app_id,
+                  const protocol_handler::ServiceType service_type) OVERRIDE;
 
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
@@ -1333,10 +1341,12 @@ class ApplicationManagerImpl
                   const HmiStatePtr to);
 
   /**
-   * @brief Starts EndStream timer for a specified application
+   * @brief Starts EndStream timer for a specified application service type
    * @param app_id Application to process
+   * @param service_type Type of service to track
    */
-  void StartEndStreamTimer(const uint32_t app_id);
+  void StartEndStreamTimer(const uint32_t app_id,
+                           const protocol_handler::ServiceType service_type);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
@@ -1379,13 +1389,19 @@ class ApplicationManagerImpl
   bool ResetVrHelpTitleItems(ApplicationSharedPtr app) const;
 
  private:
-  /*
-   * NaviServiceStatusMap shows which navi service (audio/video) is opened
-   * for specified application. Two bool values in std::pair mean:
-   * 1st value - is video service opened or not
-   * 2nd value - is audio service opened or not
-   */
-  typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+  struct NaviServiceStatusDescriptor {
+    bool is_video_service_active_;
+    bool is_audio_service_active_;
+  };
+
+  struct NaviServiceDescriptor {
+    uint32_t app_id_;
+    protocol_handler::ServiceType service_type_;
+    TimerSPtr timer_to_stop_service_;
+  };
+
+  typedef std::map<uint32_t, NaviServiceStatusDescriptor> NaviServiceStatusMap;
+  typedef std::deque<NaviServiceDescriptor> NaviServicesDequeue;
 
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
@@ -1425,10 +1441,9 @@ class ApplicationManagerImpl
 
   /**
    * @brief Suspends streaming ability of application in case application's HMI
-   * level
-   * has been changed to not allowed for streaming
+   * level has been changed to not allowed for streaming
    */
-  void EndNaviStreaming();
+  void EndStreaming();
 
   /**
    * @brief Starts specified navi service for application
@@ -1461,8 +1476,10 @@ class ApplicationManagerImpl
    * @brief Disallows streaming for application, but doesn't close
    * opened services. Streaming ability could be restored by AllowStreaming();
    * @param app_id Application to proceed
+   * @param service_type Type of service to disallow
    */
-  void DisallowStreaming(uint32_t app_id);
+  void DisallowStreaming(const uint32_t app_id,
+                         const protocol_handler::ServiceType service_type);
 
   /**
    * @brief Types of directories used by Application Manager
@@ -1668,18 +1685,20 @@ class ApplicationManagerImpl
 
   HmiInterfacesImpl hmi_interfaces_;
 
-  NaviServiceStatusMap navi_service_status_;
   sync_primitives::Lock navi_service_status_lock_;
-  std::deque<uint32_t> navi_app_to_stop_;
+  NaviServiceStatusMap navi_service_status_;
+
   sync_primitives::Lock navi_app_to_stop_lock_;
-  std::deque<uint32_t> navi_app_to_end_stream_;
+  NaviServicesDequeue navi_app_to_stop_;
+
+  sync_primitives::Lock navi_app_to_end_stream_lock_;
+  NaviServicesDequeue navi_app_to_end_stream_;
+
+  sync_primitives::Lock streaming_timer_pool_lock_;
+  std::vector<TimerSPtr> streaming_timer_pool_;
+
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
-
-  std::vector<TimerSPtr> close_app_timer_pool_;
-  std::vector<TimerSPtr> end_stream_timer_pool_;
-  sync_primitives::Lock close_app_timer_pool_lock_;
-  sync_primitives::Lock end_stream_timer_pool_lock_;
 
   mutable sync_primitives::Lock wait_for_hmi_lock_;
   sync_primitives::ConditionalVariable wait_for_hmi_condvar_;

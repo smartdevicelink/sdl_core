@@ -517,10 +517,18 @@ class ApplicationManager {
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
   /**
-   * @brief Ends opened navi services (audio/video) for application
+   * @brief Ends opened navi services audio and video for application
    * @param app_id Application id
    */
   virtual void EndNaviServices(uint32_t app_id) = 0;
+
+  /**
+   * @brief Ends opened navi service audio or video for application
+   * @param app_id Application id
+   * @param service_type Service type to check
+   */
+  virtual void EndService(const uint32_t app_id,
+                          const protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief returns true if low voltage state is active

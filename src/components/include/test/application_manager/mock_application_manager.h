@@ -200,6 +200,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(GetNextMobileCorrelationID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(EndNaviServices, void(uint32_t app_id));
+  MOCK_METHOD2(EndService,
+               void(const uint32_t app_id,
+                    const protocol_handler::ServiceType service_type));
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
