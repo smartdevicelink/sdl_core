@@ -81,14 +81,19 @@ void BleServer::Run()
        while (connected_ && !stop_requested_) {
         buffer.resize(buffer_size);
         const int n = read(client_sock_, buffer.data(), buffer_size - 1);
-        buffer.resize(n);
-        callback_(buffer);
+        if(n > 0) {
+            buffer.resize(n);
+            callback_(buffer);
+        }
     }
 }
 
 void BleServer::Stop() {
     SDL_LOG_DEBUG("Requesting server to stop");
     stop_requested_ = true;
+    close(client_sock_);
+    close(server_sock_);
+    connected_ = false;
 }
 
 BleServer::~BleServer(){
