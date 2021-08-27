@@ -108,10 +108,6 @@ void FromMicRecorderAdapter::set_output_file(const std::string& output_file) {
   output_file_ = output_file;
 }
 
-void FromMicRecorderAdapter::set_duration(int32_t duration) {
-  duration_ = duration;
-}
-
 void FromMicRecorderAdapter::set_config(
     mobile_apis::SamplingRate::eType sampling_rate,
     mobile_apis::BitsPerSample::eType bits_per_sample,
