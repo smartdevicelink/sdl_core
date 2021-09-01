@@ -534,7 +534,7 @@ void ResumptionDataProcessorImpl::DeleteSubmenus(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
   for (const auto& smenu : sub_menu_map) {
     auto failed_submenu_request =
@@ -627,7 +627,7 @@ void ResumptionDataProcessorImpl::DeleteCommands(
   };
 
   auto accessor = application->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
   for (const auto& cmd : commands_map) {
     const auto cmd_id = extract_cmd_id(cmd.second);
@@ -719,7 +719,7 @@ void ResumptionDataProcessorImpl::DeleteChoicesets(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
   auto accessor = application->choice_set_map();
-  const auto& choices = accessor.GetData();
+  const auto choices = accessor.GetData();
   for (const auto& choice : choices) {
     auto failed_choice_set =
         FindResumptionChoiceSetRequest(choice.first, failed_requests);
@@ -881,7 +881,7 @@ void ResumptionDataProcessorImpl::DeleteButtonsSubscriptions(
   SDL_LOG_AUTO_TRACE();
   const ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
-  for (auto& btn : button_subscriptions) {
+  for (const auto& btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
     if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
       continue;
