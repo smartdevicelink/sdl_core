@@ -149,7 +149,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       uint16_t apps_size,
       policy_table::Priority prio,
       const std::string& section,
-      uint16_t memory_kb,
       uint32_t heart_beat_timeout_ms,
       policy_table::Strings& groups) const {
     if (section != "device") {
@@ -163,7 +162,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       EXPECT_EQ(0u, (*(apps_iter->second.nicknames)).size());
       EXPECT_EQ(prio, (apps_iter->second).priority);
       EXPECT_EQ(0u, (*(apps_iter->second.AppHMIType)).size());
-      EXPECT_EQ(memory_kb, (*(apps_iter->second.memory_kb)));
       EXPECT_EQ(heart_beat_timeout_ms,
                 (*(apps_iter->second.heart_beat_timeout_ms)));
     } else {
@@ -461,8 +459,8 @@ TEST_F(
     CheckPermissionsAllowed_SetValuesInAppGroupRpcFunctionalGroup_GetEqualParamsInCheckPermissionResult) {
   // Arrange
   const std::string query =
-      "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
-      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
+      "INSERT OR REPLACE INTO `application` (`id`, "
+      " `heart_beat_timeout_ms`) VALUES ('12345', 10); "
       "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
       "  VALUES (1, 'Base-4'); "
       "INSERT OR REPLACE INTO `app_group` (`application_id`,"
@@ -493,8 +491,8 @@ TEST_F(
     CheckPermissionsAllowedWithoutParameters_SetLimitedPermissions_ExpectEmptyListOfAllowedParams) {
   // Arrange
   const std::string query =
-      "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
-      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
+      "INSERT OR REPLACE INTO `application` (`id`, "
+      " `heart_beat_timeout_ms`) VALUES ('12345', 10); "
       "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
       "  VALUES (1, 'Base-4'); "
       "INSERT OR REPLACE INTO `app_group` (`application_id`,"
@@ -961,40 +959,40 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_pre_DataConsent =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'pre_DataConsent', 0, 0, 'NONE', "
       "'NONE', 0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_pre_DataConsent));
 
   const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
       "'COMMUNICATION', 0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
 
   const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
 
   std::string priority;
@@ -1051,40 +1049,40 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_pre_DataConsent =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'pre_DataConsent', 0, 0, 'NONE', "
       "'NONE', 0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_pre_DataConsent));
 
   const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
       "'COMMUNICATION', 0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
 
   const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
 
   const std::string query_insert =
@@ -1241,29 +1239,29 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_device =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'device', 0, 0, 'NONE', "
-      "'COMMUNICATION', 0, 0, 0, 64, 10) ";
+      "'COMMUNICATION', 0, 0, 0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_device));
 
   const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
   // Checks
   EXPECT_TRUE(reps->IsApplicationRepresented("default"));
@@ -1279,20 +1277,20 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '7777', 0, 0, 'NONE', 'NONE', 1, "
       "0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_7777));
 
   const std::string query_insert_app_12345 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'EMERGENCY', "
       "0, 0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_12345));
   // Checks
   EXPECT_TRUE(reps->IsApplicationRevoked("7777"));
@@ -1306,19 +1304,19 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "1, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_123 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '123', 1, 0, 'FULL', "
-      "'COMMUNICATION', 1, 1, 0, 64, 10) ";
+      "'COMMUNICATION', 1, 1, 0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_123));
   EXPECT_FALSE(reps->IsApplicationRepresented("7777"));
   EXPECT_FALSE(reps->IsApplicationRepresented("9999"));
@@ -1348,10 +1346,10 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( '12345', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
-      "1, 64, 10) ";
+      "1, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
   // Check
   EXPECT_FALSE(reps->IsDefaultPolicy("12345"));
@@ -1363,8 +1361,8 @@ TEST_F(SQLPTRepresentationTest,
   const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
-      "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
-      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 1, 0, 64, 10) ";
+      "`is_default`, `is_predata`, `heart_beat_timeout_ms`) "
+      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 1, 0, 10) ";
 
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
   // Check
@@ -1404,17 +1402,17 @@ TEST_F(SQLPTRepresentationTest,
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, "
       " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-      "`is_predata`, `memory_kb`, "
+      "`is_predata`, "
       " `heart_beat_timeout_ms`) VALUES( 'default', 0, 0, 'NONE', 'NONE', 0, "
       "0, "
-      "0, 64, 10) ";
+      "0, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_default));
 
   const std::string query_insert_app_1234567 =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
-      "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
-      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10) ";
+      "`is_default`, `is_predata`, `heart_beat_timeout_ms`) "
+      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app_1234567));
   EXPECT_FALSE(reps->IsDefaultPolicy("1234567"));
   // Act
@@ -1448,8 +1446,8 @@ TEST_F(SQLPTRepresentationTest,
   const std::string query_insert_app =
       "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, "
       "`steal_focus`, `default_hmi`, `priority_value`, `is_revoked`, "
-      "`is_default`, `is_predata`, `memory_kb`, `heart_beat_timeout_ms`) "
-      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 64, 10) ";
+      "`is_default`, `is_predata`, `heart_beat_timeout_ms`) "
+      "VALUES( '1234567', 0, 0, 'NONE', 'NONE', 0, 0, 1, 10) ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_app));
   const std::string query_select =
       "SELECT `is_default` FROM `application`WHERE`id`= '1234567' ";

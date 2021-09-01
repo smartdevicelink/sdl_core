@@ -272,7 +272,6 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
     , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
-    , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , certificate(impl::ValueMember(value__, "certificate"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
@@ -294,7 +293,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
   impl::WriteJsonField("RequestSubType", RequestSubType, &result__);
-  impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
@@ -329,9 +327,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!AppHMIType.is_valid()) {
-    return false;
-  }
-  if (!memory_kb.is_valid()) {
     return false;
   }
   if (!heart_beat_timeout_ms.is_valid()) {
@@ -396,9 +391,6 @@ bool ApplicationParams::struct_empty() const {
   if (RequestSubType.is_initialized()) {
     return false;
   }
-  if (memory_kb.is_initialized()) {
-    return false;
-  }
   if (heart_beat_timeout_ms.is_initialized()) {
     return false;
   }
@@ -460,9 +452,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
   }
-  if (!memory_kb.is_valid()) {
-    memory_kb.ReportErrors(&report__->ReportSubobject("memory_kb"));
-  }
   if (!heart_beat_timeout_ms.is_valid()) {
     heart_beat_timeout_ms.ReportErrors(
         &report__->ReportSubobject("heart_beat_timeout_ms"));
@@ -512,7 +501,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
   RequestSubType.SetPolicyTableType(pt_type);
-  memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);

@@ -101,7 +101,6 @@
         <param name="default_hmi" type="HmiLevel" />
         <param name="keep_context" type="Boolean" />
         <param name="steal_focus" type="Boolean" />
-        <param name="memory_kb" type="Integer" minvalue="1" maxvalue="65225" mandatory="false"/>
         <param name="watchdog_timer_ms" type="Integer" minvalue="1"
             maxvalue="65225" mandatory="false"/>
         <param name="certificate" type="String" minlength="0" maxlength="65535"
