@@ -1603,9 +1603,6 @@
          }
       },
       "module_config" : {
-         "device_certificates" : {
-            "HUU40DAS7F970UEI17A73JH32L41K32JH4L1K234H3K4" : "aldhfkahfgkafrblgjr"
-         },
          "endpoints" : {
             "0x07" : {
                "default" : [ "http://x.x.x.x:3000/api/1/policies" ]

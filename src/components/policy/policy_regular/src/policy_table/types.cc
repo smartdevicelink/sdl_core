@@ -729,7 +729,6 @@ ModuleConfig::~ModuleConfig() {}
 
 ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
-    , device_certificates(impl::ValueMember(value__, "device_certificates"))
     , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
     , full_app_id_supported(impl::ValueMember(value__, "full_app_id_supported"))
     , exchange_after_x_ignition_cycles(
@@ -756,8 +755,6 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
           impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
-  //  device_certificates = from.device_certificates;  // According to the
-  //  requirements this is optional.
   exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
   exchange_after_x_kilometers = from.exchange_after_x_kilometers;
   exchange_after_x_days = from.exchange_after_x_days;
@@ -931,10 +928,6 @@ bool ModuleConfig::struct_empty() const {
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
-  }
-  if (!device_certificates.is_valid()) {
-    device_certificates.ReportErrors(
-        &report__->ReportSubobject("device_certificates"));
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
