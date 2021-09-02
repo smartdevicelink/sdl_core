@@ -19,7 +19,7 @@ void DeleteWayPoints(ApplicationSharedPtr app,
 
 void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->commands_map();
-  const auto& commands_map = accessor.GetData();
+  const auto commands_map = accessor.GetData();
 
   for (const auto& cmd : commands_map) {
     auto delete_UI_msg = MessageHelper::CreateDeleteUICommandRequest(
@@ -37,7 +37,7 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 
 void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   auto accessor = app->sub_menu_map();
-  const auto& sub_menu_map = accessor.GetData();
+  const auto sub_menu_map = accessor.GetData();
 
   for (const auto& smenu : sub_menu_map) {
     MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, app_manager);
@@ -48,7 +48,7 @@ void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 void DeleteChoiceSets(ApplicationSharedPtr app,
                       ApplicationManager& app_manager) {
   auto accessor = app->choice_set_map();
-  const auto& choices = accessor.GetData();
+  const auto choices = accessor.GetData();
 
   for (const auto& choice : choices) {
     MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, app_manager);
