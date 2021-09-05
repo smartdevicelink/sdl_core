@@ -63,6 +63,9 @@ class BluetoothLeTransportAdapter : public TransportAdapterImpl {
 
   void SearchDeviceDone(const DeviceVector& devices) override;
 
+  void DisconnectDone(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) override;
+
   private:
     DeviceUID ble_active_device_uid_;
     ApplicationHandle ble_app_handle_;

@@ -100,6 +100,23 @@ void BluetoothLeTransportAdapter::SearchDeviceDone(const DeviceVector& devices) 
     TransportAdapterImpl::SearchDeviceDone(devices);
 }
 
+void BluetoothLeTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
+                                                 const ApplicationHandle& app_handle) {
+    if (ble_active_device_uid_ == device_handle ) {
+        const auto disconnect_result =
+                TransportAdapterImpl::Disconnect(ble_active_device_uid_, ble_app_handle_);
+        if (TransportAdapter::OK == disconnect_result) {
+            TransportAdapterImpl::DisconnectDone(ble_active_device_uid_, ble_app_handle_);
+            ble_active_device_uid_.clear();
+            ble_app_handle_ = 0;
+        }
+
+        return;
+    }
+
+    TransportAdapterImpl::DisconnectDone(device_handle, app_handle);
+}
+
 bool BluetoothLeTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
     if (!ble_active_device_uid_.empty()) {
         // BLE device connection is established on the Java side
