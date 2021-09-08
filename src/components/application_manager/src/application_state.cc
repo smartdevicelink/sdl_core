@@ -204,8 +204,12 @@ void ApplicationState::RemoveHMIState(const WindowID window_id,
 
 void ApplicationState::EraseHMIState(HmiStates& hmi_states,
                                      HmiStates::iterator it) {
-  if (hmi_states.begin() == it) {
-    (*it)->set_parent(nullptr);
+  if (hmi_states.begin() == it && hmi_states.size() > 1) {
+    HmiStates::iterator next = it;
+    ++next;
+    if (*next && (*next)->parent() == *it) {
+      (*next)->set_parent(nullptr);
+    }
   } else {
     HmiStates::iterator next = it;
     HmiStates::iterator prev = it;
