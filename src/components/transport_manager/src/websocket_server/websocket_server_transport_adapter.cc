@@ -100,8 +100,9 @@ TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
 void WebSocketServerTransportAdapter::Store() const {
   SDL_LOG_AUTO_TRACE();
   if (webengine_device_) {
-    resumption::LastState& data =
-        last_state_wrapper_->get_accessor().GetMutableData();
+    resumption::LastStateAccessor accessor =
+        last_state_wrapper_->get_accessor();
+    resumption::LastState& data = accessor.GetMutableData();
     Json::Value dictionary = data.dictionary();
     if (dictionary["TransportManager"].isMember("WebsocketServerAdapter")) {
       SDL_LOG_DEBUG(
