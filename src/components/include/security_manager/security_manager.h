@@ -69,6 +69,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
     ERROR_DECRYPTION_FAILED = 0x06,
     ERROR_ENCRYPTION_FAILED = 0x07,
     ERROR_SSL_INVALID_DATA = 0x08,
+    ERROR_HANDSHAKE_FAILED = 0x09,  // Handshake failed
+    ERROR_INVALID_CERT = 0x0A,      // Handshake failed because cert is invalid
+    ERROR_EXPIRED_CERT = 0x0B,      // Handshake failed because cert is expired
     ERROR_INTERNAL = 0xFF,
     ERROR_UNKNOWN_INTERNAL_ERROR = 0xFE  // error value for testing
   };
