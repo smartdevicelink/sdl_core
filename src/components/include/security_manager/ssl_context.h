@@ -73,7 +73,6 @@ class SSLContext {
     Handshake_Result_NotYetValid,
     Handshake_Result_CertNotSigned,
     Handshake_Result_AppIDMismatch,
-    Handshake_Result_AppNameMismatch,
   };
 
   struct HandshakeContext {
