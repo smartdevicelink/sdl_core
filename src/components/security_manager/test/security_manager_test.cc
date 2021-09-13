@@ -730,12 +730,13 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_InvalidData) {
 }
 /*
  * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
- * with correct handshake data Check Fail and sussecc states
+ * with correct handshake data Check Fail and success states
  */
 TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
   SetMockCryptoManager();
   // Count handshake calls
   const int handshake_emulates = 2;
+  const int internal_error_count = 1;
 
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
@@ -743,14 +744,14 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
   auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
-      .Times(handshake_emulates)
+      .Times(handshake_emulates + internal_error_count)
       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   times += handshake_emulates;
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
-      .Times(handshake_emulates)
+      .Times(handshake_emulates + internal_error_count)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
-  times += handshake_emulates;
+  times += handshake_emulates + internal_error_count;
 
   // Get size of raw message after
   const size_t raw_message_size = 15;
@@ -759,7 +760,14 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
                   RawMessageEqSize(raw_message_size), false, kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
-  times += handshake_emulates;
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_HANDSHAKE_FAILED),
+                  false,
+                  kIsFinal))
+      .Times(internal_error_count)
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
+  times += handshake_emulates + internal_error_count;
 
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
