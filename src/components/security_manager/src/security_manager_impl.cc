@@ -574,7 +574,7 @@ bool SecurityManagerImpl::ProcessHandshakeData(
         error_text = "Certificate is expired";
         break;
       case SSLContext::Handshake_Result_NotYetValid:
-        error_code = ERROR_EXPIRED_CERT;
+        error_code = ERROR_INVALID_CERT;
         error_text = "Certificate is not yet valid";
         break;
       case SSLContext::Handshake_Result_CertNotSigned:
