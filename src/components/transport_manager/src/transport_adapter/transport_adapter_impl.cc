@@ -1253,8 +1253,9 @@ void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
   DeviceMap::iterator i = devices_.find(device_handle);
   if (i != devices_.end()) {
     DeviceSptr device = i->second;
-    bool is_cloud_device = (GetDeviceType() == DeviceType::CLOUD_WEBSOCKET);
-    if (!device->keep_on_disconnect() || is_cloud_device) {
+    const bool is_cloud_device = (GetDeviceType() == DeviceType::CLOUD_WEBSOCKET);
+    const bool is_ble_device = (GetDeviceType() == DeviceType::BLUETOOTH_LE);
+    if (!device->keep_on_disconnect() || is_cloud_device || is_ble_device) {
       devices_.erase(i);
       for (TransportAdapterListenerList::iterator it = listeners_.begin();
            it != listeners_.end();

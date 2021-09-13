@@ -121,14 +121,17 @@ void BluetoothLeDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) 
       case BleProtocolActions::ON_DEVICE_DISCONNECTED:
       {
         const auto addr = BleControlProtocol::GetAddress(data);
-        auto remove_result = std::remove_if(found_devices_with_sdl_.begin(), 
-        found_devices_with_sdl_.end(), [&addr](DeviceSptr d){
-          
+        auto it_device = std::find_if(found_devices_with_sdl_.begin(),
+                                      found_devices_with_sdl_.end(), [&addr](DeviceSptr d){
           BluetoothLeDevice tDevice(addr, "");
           return d->IsSameAs(static_cast<Device*>(&tDevice));
         });
 
-        found_devices_with_sdl_.erase(remove_result, found_devices_with_sdl_.end());
+        if (it_device != found_devices_with_sdl_.end()) {
+          DeviceSptr device = *it_device;
+          found_devices_with_sdl_.erase(it_device);
+          controller_->DisconnectDone(device->unique_device_id(), 0);
+        }
       }
       break;
 
