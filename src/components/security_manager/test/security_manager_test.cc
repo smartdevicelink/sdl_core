@@ -760,11 +760,12 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
                   RawMessageEqSize(raw_message_size), false, kIsFinal))
       .Times(handshake_emulates)
       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
-  EXPECT_CALL(mock_protocol_handler,
-              SendMessageToMobileApp(
-                  InternalErrorWithErrId(SecurityManager::ERROR_HANDSHAKE_FAILED),
-                  false,
-                  kIsFinal))
+  EXPECT_CALL(
+      mock_protocol_handler,
+      SendMessageToMobileApp(
+          InternalErrorWithErrId(SecurityManager::ERROR_HANDSHAKE_FAILED),
+          false,
+          kIsFinal))
       .Times(internal_error_count)
       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
   times += handshake_emulates + internal_error_count;
