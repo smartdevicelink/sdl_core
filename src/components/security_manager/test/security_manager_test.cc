@@ -813,6 +813,97 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
   mock_sm_listener.release();
 }
 /*
+ * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
+ * with correct handshake data Check Fail and success states
+ */
+TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer_Invalid_Cert) {
+  SetMockCryptoManager();
+  // Count handshake calls
+  const int handshake_emulates = 4;
+
+  uint32_t connection_id = 0;
+  uint8_t session_id = 0;
+
+  auto waiter = TestAsyncWaiter::createInstance();
+  uint32_t times = 0;
+  // Each of these calls is run twice, once for the next handshake data request,
+  // once for the the internal error notification
+  EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
+      .Times(handshake_emulates)
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
+  times += handshake_emulates;
+  EXPECT_CALL(mock_session_observer,
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
+      .Times(handshake_emulates)
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
+  times += handshake_emulates;
+
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_EXPIRED_CERT),
+                  false,
+                  kIsFinal))
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
+  EXPECT_CALL(mock_protocol_handler,
+              SendMessageToMobileApp(
+                  InternalErrorWithErrId(SecurityManager::ERROR_INVALID_CERT),
+                  false,
+                  kIsFinal))
+      .Times(3)
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
+  times += 4;
+
+  // Listener is erased after first call
+  EXPECT_CALL(*mock_sm_listener,
+              OnHandshakeDone(kKey, SSLContext::Handshake_Result_CertExpired))
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
+  times++;
+
+  // Emulate SessionObserver and CryptoManager result
+  EXPECT_CALL(mock_ssl_context_exists, IsInitCompleted())
+      .Times(handshake_emulates)
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
+  times += handshake_emulates;
+  EXPECT_CALL(mock_session_observer, GetSSLContext(kKey, kControl))
+      .Times(handshake_emulates)
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter),
+                            Return(&mock_ssl_context_exists)));
+  times += handshake_emulates;
+
+  // Emulate DoHandshakeStep correct logics
+  EXPECT_CALL(
+      mock_ssl_context_exists,
+      DoHandshakeStep(HandshakeStepEq(handshake_data, handshake_data_size),
+                      handshake_data_size,
+                      _,
+                      _))
+      .WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                      SetArgPointee<3>(0),
+                      NotifyTestAsyncWaiter(waiter),
+                      Return(SSLContext::Handshake_Result_CertExpired)))
+      .WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                      SetArgPointee<3>(0),
+                      NotifyTestAsyncWaiter(waiter),
+                      Return(SSLContext::Handshake_Result_NotYetValid)))
+      .WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                      SetArgPointee<3>(0),
+                      NotifyTestAsyncWaiter(waiter),
+                      Return(SSLContext::Handshake_Result_AppIDMismatch)))
+      .WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                      SetArgPointee<3>(0),
+                      NotifyTestAsyncWaiter(waiter),
+                      Return(SSLContext::Handshake_Result_CertNotSigned)));
+  times += 4;  // matches to each single call above
+
+  EmulateMobileMessageHandshake(
+      handshake_data, handshake_data_size, handshake_emulates);
+
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+
+  // Listener was destroyed after OnHandshakeDone call
+  mock_sm_listener.release();
+}
+/*
  * Shall call all listeners on success end handshake
  * and return handshake data
  * Check Fail and sussecc states
