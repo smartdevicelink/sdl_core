@@ -121,12 +121,12 @@ class SecurityManagerImpl : public SecurityManager,
    * \param connection_key Unique key used by other components as session
    * identifier
    * \param error_id  unique error identifier
-   * \param erorr_text SSL impelmentation error text
+   * \param error_text SSL impelmentation error text
    * \param seq_number received from Mobile Application
    */
   void SendInternalError(const uint32_t connection_key,
                          const uint8_t& error_id,
-                         const std::string& erorr_text,
+                         const std::string& error_text,
                          const uint32_t seq_number) OVERRIDE;
 
   using SecurityManager::SendInternalError;

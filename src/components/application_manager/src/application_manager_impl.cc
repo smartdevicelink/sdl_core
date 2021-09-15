@@ -2447,7 +2447,6 @@ bool ApplicationManagerImpl::OnHandshakeDone(
           SSLContext::Handshake_Result_CertExpired,
           SSLContext::Handshake_Result_CertNotSigned,
           SSLContext::Handshake_Result_AppIDMismatch,
-          SSLContext::Handshake_Result_AppNameMismatch,
           SSLContext::Handshake_Result_NotYetValid)) {
     app->usage_report().RecordTLSError();
   }
