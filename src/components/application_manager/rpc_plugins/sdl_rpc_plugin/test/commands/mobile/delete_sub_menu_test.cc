@@ -67,6 +67,7 @@ using sdl_rpc_plugin::commands::DeleteSubMenuResponse;
 
 typedef std::shared_ptr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
 typedef std::shared_ptr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
+typedef std::shared_ptr<Event> EventPtr;
 
 MATCHER_P(CheckMessageResultCode, result_code, "") {
   return (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
@@ -89,8 +90,9 @@ namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kCorrelationId = 10u;
 const uint32_t kMenuId = 100u;
+const uint32_t kMenuIdChild = 101u;
 const uint32_t kGrammarId = 101u;
-const int32_t kCmdId = 102;
+const int32_t kCmdId = 102u;
 }  // namespace
 
 class DeleteSubMenuRequestTest
@@ -98,16 +100,239 @@ class DeleteSubMenuRequestTest
  public:
   DeleteSubMenuRequestTest()
       : commands_lock_(std::make_shared<sync_primitives::Lock>())
+      , sub_menu_lock_(std::make_shared<sync_primitives::RecursiveLock>())
       , accessor_(commands_map_, commands_lock_)
+      , sub_menu_accessor_(sub_menu_map_, sub_menu_lock_)
       , message_(CreateMessage())
       , command_(CreateCommand<DeleteSubMenuRequest>(message_))
       , mock_help_prompt_manager_(
             std::make_shared<am_test::MockHelpPromptManager>())
       , app_(CreateMockApp()) {}
 
+  /**
+   * @brief Generates submenu smart object with specified params
+   * @param menu_id id of the menu
+   * @param parent_id id of parent menu
+   * @return generated smart object
+   */
+  smart_objects::SmartObjectSPtr GenerateSubMenuMap(const uint32_t menu_id,
+                                                    const uint32_t parent_id) {
+    smart_objects::SmartObjectSPtr smartObjectPtr =
+        std::make_shared<smart_objects::SmartObject>();
+
+    smart_objects::SmartObject& object = *smartObjectPtr;
+
+    object[am::strings::position] = 1;
+    object[am::strings::menu_name] = "SubMenu " + std::to_string(menu_id);
+    object[am::strings::menu_id] = menu_id;
+    object[am::strings::parent_id] = parent_id;
+
+    return smartObjectPtr;
+  }
+
+  /**
+   * @brief Generates UI & VR commands smart object with specified params
+   * @param cmd_id id of the command
+   * @param parent_id id of parent command
+   * @return generated smart object
+   */
+  smart_objects::SmartObjectSPtr GenerateUiVrCommandMapChild(
+      const uint32_t cmd_id, const uint32_t parent_id) {
+    smart_objects::SmartObjectSPtr smartObjectPtr =
+        std::make_shared<smart_objects::SmartObject>();
+
+    smart_objects::SmartObject& object = *smartObjectPtr;
+
+    object[am::strings::cmd_id] = cmd_id;
+    object[am::strings::grammar_id] = kGrammarId;
+    object[am::strings::vr_commands] = "VR commands";
+    object[am::strings::type] = hmi_apis::Common_VRCommandType::Command;
+    object[am::strings::menu_params][am::hmi_request::parent_id] = parent_id;
+
+    return smartObjectPtr;
+  }
+
+  /**
+   * @brief Sets up expectations for a successful execution of submenu request
+   * @param next_function_id function id of the next request
+   */
+  void SetUpSubMenuRequestExpectations(
+      const hmi_apis::FunctionID::eType next_function_id) {
+    (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
+    (*message_)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    (*message_)[am::strings::params][am::strings::function_id] =
+        next_function_id;
+
+    smart_objects::SmartObject sub_menu =
+        (*message_)[am::strings::msg_params][am::strings::menu_id];
+    EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+    EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(sub_menu));
+
+    ON_CALL(*app_, sub_menu_map()).WillByDefault(Return(sub_menu_accessor_));
+    ON_CALL(*app_, commands_map()).WillByDefault(Return(accessor_));
+
+    EXPECT_CALL(*app_, app_id()).WillRepeatedly(Return(kConnectionKey));
+    EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+        .WillOnce(Return(kCorrelationId));
+
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(HMIResultCodeIs(next_function_id), _))
+        .WillOnce(Return(true));
+  }
+
+  /**
+   * @brief Prepares submenu response event with the specified params
+   * @param correlation_id correlation id
+   * @param menu_id id of the menu
+   * @return pointer to prepared event
+   */
+  EventPtr PrepareSubMenuResponseEvent(const uint32_t correlation_id,
+                                       const uint32_t menu_id) {
+    EventPtr menu_event =
+        std::make_shared<Event>(hmi_apis::FunctionID::UI_DeleteSubMenu);
+    (*message_)[am::strings::params][am::hmi_response::code] =
+        hmi_apis::Common_Result::SUCCESS;
+    (*message_)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+    (*message_)[am::strings::params][am::strings::correlation_id] =
+        correlation_id;
+    (*message_)[am::strings::msg_params][am::strings::menu_id] = menu_id;
+    menu_event->set_smart_object(*message_);
+
+    return menu_event;
+  }
+
+  /**
+   * @brief Sets up expectations for a successful execution of submenu
+   * subsequent response
+   * @param event pointer to event representing the response message
+   * @param next_function_id function id of the next request
+   */
+  void SetUpSubMenuSubsequentResponseExpectations(
+      EventPtr event, hmi_apis::FunctionID::eType next_function_id) {
+    const auto& event_so_ref = event->smart_object();
+    const auto correlation_id = event->smart_object_correlation_id();
+    const auto menu_id =
+        event_so_ref[am::strings::msg_params][am::strings::menu_id].asUInt();
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+    EXPECT_CALL(*app_, RemoveSubMenu(menu_id));
+
+    EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+        .WillOnce(Return(correlation_id + 1));
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(HMIResultCodeIs(next_function_id), _))
+        .WillOnce(Return(true));
+  }
+
+  /**
+   * @brief Prepares VR command response event with the specified params
+   * @param correlation_id correlation id
+   * @return pointer to prepared event
+   */
+  EventPtr PrepareVrCommandResponseEvent(const uint32_t correlation_id) {
+    EventPtr vr_event =
+        std::make_shared<Event>(hmi_apis::FunctionID::VR_DeleteCommand);
+    (*message_)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+    (*message_)[am::strings::params][am::hmi_response::code] =
+        hmi_apis::Common_Result::SUCCESS;
+    (*message_)[am::strings::params][am::strings::correlation_id] =
+        correlation_id;
+    vr_event->set_smart_object(*message_);
+
+    return vr_event;
+  }
+
+  /**
+   * @brief Sets up expectations for a successful execution of VR command
+   * subsequent response
+   * @param event pointer to event representing the response message
+   * @param next_function_id function id of the next request
+   */
+  void SetUpVrCommandSubsequentResponseExpectations(
+      EventPtr event, hmi_apis::FunctionID::eType next_function_id) {
+    const auto correlation_id = event->smart_object_correlation_id();
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+    EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+        .WillOnce(Return(correlation_id + 1));
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(HMIResultCodeIs(next_function_id), _))
+        .WillOnce(Return(true));
+  }
+
+  /**
+   * @brief Prepares UI command response event with the specified params
+   * @param correlation_id correlation id
+   * @param cmd_id id of the command
+   * @return pointer to prepared event
+   */
+  EventPtr PrepareUiCommandResponseEvent(const uint32_t correlation_id,
+                                         const uint32_t cmd_id) {
+    EventPtr ui_event =
+        std::make_shared<Event>(hmi_apis::FunctionID::UI_DeleteCommand);
+    (*message_)[am::strings::params][am::strings::correlation_id] =
+        correlation_id;
+    (*message_)[am::strings::params][am::hmi_response::code] =
+        hmi_apis::Common_Result::SUCCESS;
+    (*message_)[am::strings::msg_params][am::strings::app_id] = kConnectionKey;
+    (*message_)[am::strings::msg_params][am::strings::cmd_id] = cmd_id;
+    ui_event->set_smart_object(*message_);
+
+    return ui_event;
+  }
+
+  /**
+   * @brief Sets up expectations for a successful execution of UI command
+   * subsequent response
+   * @param event pointer to event representing the response message
+   * @param next_function_id function id of the next request
+   */
+  void SetUpUiCommandSubsequentResponseExpectations(
+      EventPtr event, hmi_apis::FunctionID::eType next_function_id) {
+    const auto correlation_id = event->smart_object_correlation_id();
+    const auto& event_so_ref = event->smart_object();
+    const auto cmd_id =
+        event_so_ref[am::strings::msg_params][am::strings::cmd_id].asUInt();
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+    EXPECT_CALL(*app_, RemoveCommand(cmd_id))
+        .WillOnce(DeleteCommand(&commands_map_));
+    EXPECT_CALL(*app_, help_prompt_manager())
+        .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+    EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandDeleted(cmd_id, false));
+
+    EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
+        .WillOnce(Return(correlation_id + 1));
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(HMIResultCodeIs(next_function_id), _))
+        .WillOnce(Return(true));
+  }
+
+  /**
+   * @brief Sets up expectations for a successful execution of submenu final
+   * response
+   * @param event pointer to event representing the response message
+   */
+  void SetUpSubMenuFinalResponseExpectations(EventPtr event) {
+    const auto& event_so_ref = event->smart_object();
+    const auto menu_id =
+        event_so_ref[am::strings::msg_params][am::strings::menu_id].asUInt();
+
+    EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
+    EXPECT_CALL(*app_, RemoveSubMenu(menu_id));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+                            am::commands::Command::SOURCE_SDL));
+  }
+
   am::CommandsMap commands_map_;
+  am::SubMenuMap sub_menu_map_;
   mutable std::shared_ptr<sync_primitives::Lock> commands_lock_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> sub_menu_lock_;
   DataAccessor<am::CommandsMap> accessor_;
+  DataAccessor<am::SubMenuMap> sub_menu_accessor_;
 
   MessageSharedPtr message_;
   DeleteSubMenuRequestPtr command_;
@@ -198,7 +423,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  smart_objects::SmartObject* invalid_sub_menu = NULL;
+  smart_objects::SmartObject invalid_sub_menu(smart_objects::SmartType_Null);
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(invalid_sub_menu));
 
@@ -210,97 +435,174 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   command_->Run();
 }
 
-TEST_F(DeleteSubMenuRequestTest, Run_SendHMIRequest_SUCCESS) {
-  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
-  (*message_)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-
-  smart_objects::SmartObject* sub_menu =
-      &((*message_)[am::strings::msg_params][am::strings::menu_id]);
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
-  EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(sub_menu));
-
-  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
-      .WillOnce(Return(kCorrelationId));
-
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteSubMenu), _))
-      .WillOnce(Return(true));
-  command_->Run();
-}
-
 TEST_F(DeleteSubMenuRequestTest, OnEvent_UnknownEventId_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  EXPECT_CALL(app_mngr_, application(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
+      .Times(0);
   command_->on_event(event);
 }
 
 TEST_F(DeleteSubMenuRequestTest, OnEvent_InvalidApp_UNSUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
-  (*message_)[am::strings::params][am::hmi_response::code] =
-      hmi_apis::Common_Result::eType::SUCCESS;
-  event.set_smart_object(*message_);
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
+
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->Run();
+
   MockAppPtr invalid_app;
+  EventPtr event = PrepareSubMenuResponseEvent(kCorrelationId, kMenuId);
+
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));
   EXPECT_CALL(*app_, RemoveSubMenu(_)).Times(0);
-  command_->on_event(event);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
+      .Times(0);
+
+  command_->on_event(*event);
 }
 
-TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
-  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
-  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
-  (*message_)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*message_)[am::strings::msg_params][am::strings::vr_commands] =
-      "vr_commands";
-  (*message_)[am::strings::msg_params][am::strings::cmd_id] = kCmdId;
-  (*message_)[am::strings::msg_params][am::strings::menu_params]
-             [am::hmi_request::parent_id] = kMenuId;
-  const hmi_apis::Common_Result::eType result_code =
-      hmi_apis::Common_Result::SUCCESS;
-  (*message_)[am::strings::params][am::hmi_response::code] = result_code;
-  event.set_smart_object(*message_);
+TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenuOnly_SUCCESS) {
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
 
-  commands_map_.insert(
-      std::make_pair(0, &((*message_)[am::strings::msg_params])));
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->Run();
 
-  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
+  EventPtr event = PrepareSubMenuResponseEvent(kCorrelationId, kMenuId);
+  SetUpSubMenuFinalResponseExpectations(event);
+  command_->on_event(*event);
+}
 
-  InSequence seq;
-  EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
-  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app_, get_grammar_id()).WillOnce(Return(kGrammarId));
+TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenuWithChildMenu_SUCCESS) {
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand), _))
-      .WillOnce(Return(true));
+  auto sub_menu_child_ptr = GenerateSubMenuMap(kMenuIdChild, kMenuId);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuIdChild, sub_menu_child_ptr.get()));
 
-  EXPECT_CALL(*app_, commands_map()).WillOnce(Return(accessor_));
-  EXPECT_CALL(*app_, app_id()).WillOnce(Return(kConnectionKey));
-  EXPECT_CALL(*app_, RemoveCommand(_)).WillOnce(DeleteCommand(&commands_map_));
-  EXPECT_CALL(*app_, help_prompt_manager())
-      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
-  EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandDeleted(kCmdId, false));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand), _))
-      .WillOnce(Return(true));
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->Run();
 
-  EXPECT_CALL(*app_, RemoveSubMenu(_));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL));
-  EXPECT_CALL(*app_, UpdateHash());
+  EventPtr event = PrepareSubMenuResponseEvent(kCorrelationId, kMenuIdChild);
+  SetUpSubMenuSubsequentResponseExpectations(
+      event, hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->on_event(*event);
 
-  DeleteSubMenuRequestPtr command =
-      CreateCommand<DeleteSubMenuRequest>(message_);
+  EventPtr event_final =
+      PrepareSubMenuResponseEvent(kCorrelationId + 1, kMenuId);
+  SetUpSubMenuFinalResponseExpectations(event_final);
+  command_->on_event(*event_final);
+}
 
-  command->Init();
-  command->on_event(event);
+TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenuWithVrAndUi_SUCCESS) {
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
+
+  auto command_ptr = GenerateUiVrCommandMapChild(kCmdId, kMenuId);
+  commands_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kCmdId, command_ptr.get()));
+
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::VR_DeleteCommand);
+  command_->Run();
+
+  EventPtr event_vr = PrepareVrCommandResponseEvent(kCorrelationId);
+  SetUpVrCommandSubsequentResponseExpectations(
+      event_vr, hmi_apis::FunctionID::UI_DeleteCommand);
+  command_->on_event(*event_vr);
+
+  EventPtr event_ui = PrepareUiCommandResponseEvent(kCorrelationId + 1, kCmdId);
+  SetUpUiCommandSubsequentResponseExpectations(
+      event_ui, hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->on_event(*event_ui);
+
+  EventPtr event_final =
+      PrepareSubMenuResponseEvent(kCorrelationId + 2, kMenuId);
+  SetUpSubMenuFinalResponseExpectations(event_final);
+  command_->on_event(*event_final);
+}
+
+TEST_F(DeleteSubMenuRequestTest,
+       OnEvent_DeleteSubmenuWithChildVrAndUi_SUCCESS) {
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
+
+  auto sub_menu_child_ptr = GenerateSubMenuMap(kMenuIdChild, kMenuId);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuIdChild, sub_menu_child_ptr.get()));
+
+  auto command_ptr = GenerateUiVrCommandMapChild(kCmdId, kMenuIdChild);
+  commands_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kCmdId, command_ptr.get()));
+
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::VR_DeleteCommand);
+  command_->Run();
+
+  EventPtr event_vr = PrepareVrCommandResponseEvent(kCorrelationId);
+  SetUpVrCommandSubsequentResponseExpectations(
+      event_vr, hmi_apis::FunctionID::UI_DeleteCommand);
+  command_->on_event(*event_vr);
+
+  EventPtr event_ui = PrepareUiCommandResponseEvent(kCorrelationId + 1, kCmdId);
+  SetUpUiCommandSubsequentResponseExpectations(
+      event_ui, hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->on_event(*event_ui);
+
+  EventPtr event_submenu =
+      PrepareSubMenuResponseEvent(kCorrelationId + 2, kMenuIdChild);
+  SetUpSubMenuSubsequentResponseExpectations(
+      event_submenu, hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->on_event(*event_submenu);
+
+  EventPtr event_final =
+      PrepareSubMenuResponseEvent(kCorrelationId + 3, kMenuId);
+  SetUpSubMenuFinalResponseExpectations(event_final);
+  command_->on_event(*event_final);
+}
+
+TEST_F(DeleteSubMenuRequestTest,
+       OnEvent_DeleteSubmenuVrAndUiWithChild_SUCCESS) {
+  auto sub_menu_ptr = GenerateSubMenuMap(kMenuId, 0);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuId, sub_menu_ptr.get()));
+
+  auto command_ptr = GenerateUiVrCommandMapChild(kCmdId, kMenuId);
+  commands_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kCmdId, command_ptr.get()));
+
+  auto sub_menu_child_ptr = GenerateSubMenuMap(kMenuIdChild, kMenuId);
+  sub_menu_map_.insert(std::pair<uint32_t, smart_objects::SmartObject*>(
+      kMenuIdChild, sub_menu_child_ptr.get()));
+
+  SetUpSubMenuRequestExpectations(hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->Run();
+
+  EventPtr event_submenu =
+      PrepareSubMenuResponseEvent(kCorrelationId, kMenuIdChild);
+  SetUpSubMenuSubsequentResponseExpectations(
+      event_submenu, hmi_apis::FunctionID::VR_DeleteCommand);
+  command_->on_event(*event_submenu);
+
+  EventPtr event_vr = PrepareVrCommandResponseEvent(kCorrelationId + 1);
+  SetUpVrCommandSubsequentResponseExpectations(
+      event_vr, hmi_apis::FunctionID::UI_DeleteCommand);
+  command_->on_event(*event_vr);
+
+  EventPtr event_ui = PrepareUiCommandResponseEvent(kCorrelationId + 2, kCmdId);
+  SetUpUiCommandSubsequentResponseExpectations(
+      event_ui, hmi_apis::FunctionID::UI_DeleteSubMenu);
+  command_->on_event(*event_ui);
+
+  EventPtr event_final =
+      PrepareSubMenuResponseEvent(kCorrelationId + 3, kMenuId);
+  SetUpSubMenuFinalResponseExpectations(event_final);
+  command_->on_event(*event_final);
 }
 
 TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
@@ -314,58 +616,6 @@ TEST_F(DeleteSubMenuResponseTest, Run_SUCCESS) {
       mock_rpc_service_,
       SendMessageToMobile(CheckMessageConnectionKey(kConnectionKey), _));
   command->Run();
-}
-
-TEST_F(DeleteSubMenuRequestTest,
-       DeleteSubmenu_CommandhaventVrCommadsAndMenuParams_DontSendHMIRequest) {
-  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
-  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
-  (*message_)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
-  event.set_smart_object(*message_);
-
-  commands_map_.insert(
-      std::make_pair(0, &((*message_)[am::strings::msg_params])));
-
-  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
-  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
-
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL));
-  command_->on_event(event);
-}
-
-TEST_F(DeleteSubMenuRequestTest,
-       DeleteSubmenu_NotAChildOfMenupartam_DontSendHMIRequest) {
-  Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
-  (*message_)[am::strings::msg_params][am::strings::menu_id] = kMenuId;
-  (*message_)[am::strings::msg_params][am::strings::menu_params]
-             [am::hmi_request::parent_id] = kMenuId + 1;
-  (*message_)[am::strings::params][am::strings::connection_key] =
-      kConnectionKey;
-  (*message_)[am::strings::params][am::hmi_response::code] =
-      am::mobile_api::Result::SUCCESS;
-  event.set_smart_object(*message_);
-
-  commands_map_.insert(
-      std::make_pair(0, &((*message_)[am::strings::msg_params])));
-
-  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
-  EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
-
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL));
-  command_->on_event(event);
 }
 
 }  // namespace delete_sub_menu_request

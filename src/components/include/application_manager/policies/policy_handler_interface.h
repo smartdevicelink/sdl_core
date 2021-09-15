@@ -77,8 +77,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
   virtual bool ClearUserConsent() = 0;
-  virtual bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                const std::string& url) = 0;
+
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
@@ -99,6 +98,18 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
 #else   // EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const PTUIterationType iteration_type) = 0;
+
+  /**
+   * @brief Get the next available PTU URL and the associated application for
+   * performing the PTU
+   * @param iteration_type The iteration type of the PTU.
+   * If this is a retry and a retry URL was cached, that URL will be returned
+   * @param app_id Filled with the ID of application used to perform the PTU on
+   * success
+   * @return The next available PTU URL on success, empty string on failure
+   */
+  virtual std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
+                                       uint32_t& app_id) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,
@@ -110,8 +121,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
       const RPCParams& rpc_params,
       CheckPermissionResult& result) = 0;
 
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
   virtual bool GetDefaultHmi(const std::string& device_id,
@@ -121,11 +132,19 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual Json::Value GetPolicyTableData() const = 0;
-  virtual std::string GetLockScreenIconUrl() const = 0;
+
+  /**
+   * @brief Gets lock screen icon URL for a requested application
+   * @param policy_app_id policy application id
+   * @return URL for a requested application
+   */
+  virtual std::string GetLockScreenIconUrl(
+      const std::string& policy_app_id = kDefaultId) const = 0;
+
   virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
 
@@ -141,7 +160,6 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
-  virtual void OnSystemReady() = 0;
   virtual const boost::optional<bool> LockScreenDismissalEnabledState()
       const = 0;
   virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
@@ -296,6 +314,12 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnSystemInfoChanged(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Save data from GetSystemInfo request to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code
@@ -306,9 +330,24 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                const std::string& language) = 0;
 
   /**
-   * @brief Send request to HMI to get update on system parameters
+   * @brief Save hardware version from GetSystemInfo request to policy table, if
+   * present
+   * @param hardware_version Hardware version
    */
-  virtual void OnSystemInfoUpdateRequired() = 0;
+  virtual void OnHardwareVersionReceived(
+      const std::string& hardware_version) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
+   * @brief Get information about last hardware version from PT
+   * @return hardware version from PT
+   */
+  virtual std::string GetHardwareVersionFromPT() const = 0;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -340,9 +379,38 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual void OnSystemError(int code) = 0;
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
   /**
-   * @brief Choose application id to be used for snapshot sending
-   * @return Application id or 0, if there are no applications registered
+   * @brief Chooses and stores random application id to be used for snapshot
+   * sending considering HMI level
+   * @param iteration_type The iteration type of the request. If RetryIteration,
+   * the previously chosen app ID (via ChoosePTUApplication or CacheRetryInfo)
+   * will be returned if available
+   * @return Application id or 0, if there are no suitable applications
+   */
+  virtual uint32_t ChoosePTUApplication(
+      const PTUIterationType iteration_type =
+          PTUIterationType::DefaultIteration) = 0;
+
+  /**
+   * @brief Update the cached URL and app ID used for policy retries
+   * @param app_id The ID of the application to be used for performing PTUs.
+   * If 0, the existing cached application will be cleared
+   * @param url The URL provided by the HMI to be used for performing PTU
+   * retries. If empty, the existing cached URL will be cleared and Core will
+   * choose which URLs to use on retry
+   * @param snapshot_path The PT snapshot path provided by the HMI. If empty,
+   * the existing cached snapshot path will be cleared.
+   */
+  virtual void CacheRetryInfo(
+      const uint32_t app_id = 0,
+      const std::string url = std::string(),
+      const std::string snapshot_path = std::string()) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+  /**
+   * @brief Retrieve potential application id to be used for snapshot sending
+   * @return Application id or 0, if there are no suitable applications
    */
   virtual uint32_t GetAppIdForSending() const = 0;
 
@@ -728,6 +796,15 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * notification receiving
    */
   virtual void OnSystemRequestReceived() const = 0;
+
+  /**
+   * @brief Triggers a PolicyTableUpdate on startup (only if an update is
+   * required)
+   *
+   * Currently, this function is only implemented for regular policies
+   * since the device consent is not enabled by default for external policies.
+   */
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
 
  private:
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,9 @@
 #include <memory>
 #include <set>
 #include <string>
+
 #include "application_manager/app_extension.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -137,9 +139,13 @@ struct Grid {
   }
 };
 
+class RCRPCPlugin;
+
 class RCAppExtension : public application_manager::AppExtension {
  public:
-  explicit RCAppExtension(application_manager::AppExtensionUID uid);
+  explicit RCAppExtension(application_manager::AppExtensionUID uid,
+                          RCRPCPlugin& plugin,
+                          application_manager::Application& application);
   ~RCAppExtension();
 
   /**
@@ -177,6 +183,36 @@ class RCAppExtension : public application_manager::AppExtension {
   std::set<ModuleUid> InteriorVehicleDataSubscriptions() const;
 
   /**
+   * @brief AddPendingSubscription adds pending subscription
+   * @param module interior data specification(zone, data type)
+   * @return true in case of pending subscription is successful added, otherwise
+   * false
+   */
+  bool AddPendingSubscription(const ModuleUid& module);
+
+  /**
+   * @brief RemovePendingSubscription removes some particular pending
+   * subscription
+   * @param module interior data specification(zone, data type)
+   */
+  void RemovePendingSubscription(const ModuleUid& module);
+
+  /**
+   * @brief RemovePendingSubscriptions removes all pending subscriptions
+   */
+  void RemovePendingSubscriptions();
+
+  /**
+   * @brief PendingSubscriptions list of preliminary subscriptoins
+   * That will be moved to subscriptions as soon as HMI will respond with
+   * success.
+   * Used for resumption to keep list of preliminary subscriptions and wait for
+   * HMI response
+   * @return list of preliminary subscriptions
+   */
+  std::set<ModuleUid> PendingSubscriptions();
+
+  /**
    * @brief GetUserLocation
    * @return grid of user location
    */
@@ -197,17 +233,33 @@ class RCAppExtension : public application_manager::AppExtension {
   void SetUserLocation(const Grid& grid);
 
  private:
+  /**
+   * @brief Checks if the application's pointer is valid and update the
+   * application's hash in this case
+   */
+  void UpdateHash();
+
   std::set<ModuleUid> subscribed_interior_vehicle_data_;
+
+  std::set<ModuleUid> pending_subscriptions_;
 
   Grid user_location_;
 
+  RCRPCPlugin& plugin_;
+
+  /**
+   * ApplicationSharedPtr needed for updating application's hash
+   */
+  application_manager::Application& application_;
+
   // AppExtension interface
  public:
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
-                              resumption_data) OVERRIDE;
-  void ProcessResumption(
-      const ns_smart_device_link::ns_smart_objects::SmartObject&
-          resumption_data) OVERRIDE;
+  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
+
+  void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
+
+  void RevertResumption(
+      const smart_objects::SmartObject& resumption_data) OVERRIDE;
 };
 
 typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;

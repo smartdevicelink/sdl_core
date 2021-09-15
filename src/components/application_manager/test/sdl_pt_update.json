@@ -75,20 +75,10 @@
                      "line2" : "permission(s)?",
                      "tts" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press Yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%'s use of your data. Please press Yes to allow or No to deny."
                   },
-                  "en-ie" : {
-                     "line1" : "Grant requested",
-                     "line2" : "permission(s)?",
-                     "tts" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press Yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%'s use of your data. Please press Yes to allow or No to deny."
-                  },
                   "en-us" : {
                      "line1" : "Grant Requested",
                      "line2" : "Permission(s)?",
                      "tts" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%'s use of your data. Please press yes to allow or no to deny."
-                  },
-                  "es-en" : {
-                     "line1" : "¿Otorgar permiso(s)",
-                     "line2" : "solicitado(s)?",
-                     "tts" : "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar."
                   },
                   "es-es" : {
                      "line1" : "¿Conceder permisos",
@@ -173,14 +163,8 @@
                   "en-gb" : {
                      "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press Yes to grant permissions or No to deny."
                   },
-                  "en-ie" : {
-                     "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press Yes to grant permissions or No to deny."
-                  },
                   "en-us" : {
                      "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press yes to grant permissions or no to deny."
-                  },
-                  "es-en" : {
-                     "tts" : "%appName% solicita la siguiente información y permisos del vehículo: %functionalGroupLabels%. Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles. Presione Sí para otorgar permisos y No para denegar."
                   },
                   "es-es" : {
                      "tts" : "%appName% está solicitando los siguientes permisos e información del vehículo: %functionalGroupLabels%. Puede cambiar estos permisos y escuchar descripciones detalladas en el menú de configuración de la aplicación móvil. Pulse sí para conceder el permiso o no para denegarlo."
@@ -237,14 +221,8 @@
                   "en-gb" : {
                      "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
                   },
-                  "en-ie" : {
-                     "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
-                  },
                   "en-us" : {
                      "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
-                  },
-                  "es-en" : {
-                     "tts" : "Las autorizaciones de la aplicación han cambiado. %appName% ya no puede acceder a %functionalGroupLabels%. Asegúrese de haber instalado la versión más reciente de la aplicación en su dispositivo móvil."
                   },
                   "es-es" : {
                      "tts" : "Las autorizaciones de la aplicación han cambiado. %appName% ya no puede acceder a %functionalGroupLabels%. Asegúrese de que tiene la versión más reciente de la aplicación instalada en su dispositivo móvil."
@@ -304,17 +282,9 @@
                      "line1" : "not authorized",
                      "tts" : "This version of %appName% is not authorized and will not work with SYNC."
                   },
-                  "en-ie" : {
-                     "line1" : "not authorized",
-                     "tts" : "This version of %appName% is not authorized and will not work with SYNC."
-                  },
                   "en-us" : {
                      "line1" : "Not Authorized",
                      "tts" : "This version of %appName% is not authorized and will not work with SYNC."
-                  },
-                  "es-en" : {
-                     "line1" : "no autorizada",
-                     "tts" : "Esta versión de %appName% no tiene autorización y no funcionará con SYNC."
                   },
                   "es-es" : {
                      "line1" : "No autorizada",
@@ -388,17 +358,9 @@
                      "line1" : "not supported",
                      "tts" : "This version of %appName% is not supported by SYNC."
                   },
-                  "en-ie" : {
-                     "line1" : "not supported",
-                     "tts" : "This version of %appName% is not supported by SYNC."
-                  },
                   "en-us" : {
                      "line1" : "Not Supported",
                      "tts" : "This version of %appName% is not supported by SYNC."
-                  },
-                  "es-en" : {
-                     "line1" : "no compatible",
-                     "tts" : "Esta versión de %appName% no es compatible con SYNC."
                   },
                   "es-es" : {
                      "line1" : "No compatible",
@@ -491,20 +453,10 @@
                      "line2" : "and Mobile Apps?",
                      "tts" : "Disabling automatic updates will also disable SYNC mobile apps. You will not be able to use any mobile apps with SYNC. Please press Yes to confirm or No to cancel."
                   },
-                  "en-ie" : {
-                     "line1" : "Disable auto-updates",
-                     "line2" : "and Mobile Apps?",
-                     "tts" : "Disabling automatic updates will also disable SYNC mobile apps. You will not be able to use any mobile apps with SYNC. Please press Yes to confirm or No to cancel."
-                  },
                   "en-us" : {
                      "line1" : "Disable Auto-Updates",
                      "line2" : "and Mobile Apps?",
                      "tts" : "Disabling automatic updates will also disable sync mobile apps. You will not be able to use any mobile apps with SYNC. Please press yes to confirm or no to cancel."
-                  },
-                  "es-en" : {
-                     "line1" : "¿Deshab. actualiz.",
-                     "line2" : "autom. y aplic. móv.?",
-                     "tts" : "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar."
                   },
                   "es-es" : {
                      "line1" : "¿Desact. actual. auto",
@@ -592,17 +544,9 @@
                      "label" : "Driving characteristics",
                      "tts" : "An app can access the following driving characteristics: Fuel consumption, MyKey, Seat belt status."
                   },
-                  "en-ie" : {
-                     "label" : "Driving characteristics",
-                     "tts" : "An app can access the following driving characteristics: Fuel consumption, MyKey, Seat belt status."
-                  },
                   "en-us" : {
                      "label" : "Driving Characteristics",
                      "tts" : "An app can access the following driving characteristics: Fuel Consumption, MyKey, Seat Belt Status."
-                  },
-                  "es-en" : {
-                     "label" : "Características del manejo",
-                     "tts" : "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad."
                   },
                   "es-es" : {
                      "label" : "Características de conducción",
@@ -676,17 +620,9 @@
                      "label" : "GPS and speed",
                      "tts" : "An app can access vehicle GPS and speed."
                   },
-                  "en-ie" : {
-                     "label" : "GPS and speed",
-                     "tts" : "An app can access vehicle GPS and speed."
-                  },
                   "en-us" : {
                      "label" : "GPS and speed",
                      "tts" : "An app can access vehicle GPS and speed."
-                  },
-                  "es-en" : {
-                     "label" : "GPS y velocidad",
-                     "tts" : "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo."
                   },
                   "es-es" : {
                      "label" : "GPS y velocidad",
@@ -760,17 +696,9 @@
                      "label" : "Push notifications",
                      "tts" : "An app can send notifications when running in the background."
                   },
-                  "en-ie" : {
-                     "label" : "Push notifications",
-                     "tts" : "An app can send notifications when running in the background."
-                  },
                   "en-us" : {
                      "label" : "Push notifications",
                      "tts" : "An app can send notifications when running in the background."
-                  },
-                  "es-en" : {
-                     "label" : "Notificaciones tipo Push",
-                     "tts" : "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano."
                   },
                   "es-es" : {
                      "label" : "Notificaciones push",
@@ -841,14 +769,8 @@
                   "en-gb" : {
                      "line1" : "Disable updates"
                   },
-                  "en-ie" : {
-                     "line1" : "Disable updates"
-                  },
                   "en-us" : {
                      "line1" : "Disable Updates"
-                  },
-                  "es-en" : {
-                     "line1" : "Deshab. actual."
                   },
                   "es-es" : {
                      "line1" : "Desact. actual."
@@ -905,14 +827,8 @@
                   "en-gb" : {
                      "line1" : "Enable Apps"
                   },
-                  "en-ie" : {
-                     "line1" : "Enable Apps"
-                  },
                   "en-us" : {
                      "line1" : "Enable Apps"
-                  },
-                  "es-en" : {
-                     "line1" : "Hab. aplic."
                   },
                   "es-es" : {
                      "line1" : "Activar apl."
@@ -969,14 +885,8 @@
                   "en-gb" : {
                      "line1" : "Request update"
                   },
-                  "en-ie" : {
-                     "line1" : "Request update"
-                  },
                   "en-us" : {
                      "line1" : "Request Update"
-                  },
-                  "es-en" : {
-                     "line1" : "Solicit. actualiz."
                   },
                   "es-es" : {
                      "line1" : "Solicitar actual."
@@ -1033,14 +943,8 @@
                   "en-gb" : {
                      "line1" : "Update needed"
                   },
-                  "en-ie" : {
-                     "line1" : "Update needed"
-                  },
                   "en-us" : {
                      "line1" : "Update Needed"
-                  },
-                  "es-en" : {
-                     "line1" : "Actualiz. neces."
                   },
                   "es-es" : {
                      "line1" : "Actu. necesaria"
@@ -1097,14 +1001,8 @@
                   "en-gb" : {
                      "line1" : "Updating..."
                   },
-                  "en-ie" : {
-                     "line1" : "Updating..."
-                  },
                   "en-us" : {
                      "line1" : "Updating..."
-                  },
-                  "es-en" : {
-                     "line1" : "Actualizando..."
                   },
                   "es-es" : {
                      "line1" : "Actualizando..."
@@ -1161,14 +1059,8 @@
                   "en-gb" : {
                      "line1" : "Up-to-date"
                   },
-                  "en-ie" : {
-                     "line1" : "Up-to-date"
-                  },
                   "en-us" : {
                      "line1" : "Up-To-Date"
-                  },
-                  "es-en" : {
-                     "line1" : "Actualizado"
                   },
                   "es-es" : {
                      "line1" : "Actualizada"
@@ -1228,17 +1120,9 @@
                      "label" : "Vehicle information",
                      "tts" : "An app can access the following vehicle information: Fuel level, Fuel economy, Engine RPMs, Odometer, VIN, Outside air temperature, Gear position, Tyre pressure."
                   },
-                  "en-ie" : {
-                     "label" : "Vehicle information",
-                     "tts" : "An app can access the following vehicle information: Fuel level, Fuel economy, Engine RPMs, Odometer, VIN, Outside air temperature, Gear position, Tyre pressure."
-                  },
                   "en-us" : {
                      "label" : "Vehicle information",
                      "tts" : "An app can access the following vehicle information: Fuel Level, Fuel Economy, Engine RPMs, Odometer, VIN, External Temperature, Gear Position, Tire Pressure."
-                  },
-                  "es-en" : {
-                     "label" : "Información del vehículo",
-                     "tts" : "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos."
                   },
                   "es-es" : {
                      "label" : "Información del vehículo",
@@ -1610,7 +1494,8 @@
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "OnVehicleData" : {
@@ -1629,7 +1514,8 @@
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "SubscribeVehicleData" : {
@@ -1647,7 +1533,8 @@
                      "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "UnsubscribeVehicleData" : {
@@ -1665,7 +1552,8 @@
                      "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                }
             },
@@ -1738,6 +1626,15 @@
             "NONE" : 0,
             "NORMAL" : 4,
             "VOICECOMM" : 10
+         },
+         "subtle_notifications_per_minute_by_priority": {
+            "COMMUNICATION": 15,
+            "EMERGENCY": 60,
+            "NAVIGATION": 20,
+            "PROJECTION": 20,
+            "NONE": 0,
+            "NORMAL": 10,
+            "VOICECOMM": 30
          },
          "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
          "timeout_after_x_seconds" : 60,

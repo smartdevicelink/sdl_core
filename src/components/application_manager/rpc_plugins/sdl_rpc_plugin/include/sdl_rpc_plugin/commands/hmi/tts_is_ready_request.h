@@ -35,6 +35,8 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
+#include <set>
+
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
@@ -43,8 +45,7 @@ namespace commands {
 /**
  * @brief TTSIsReadyRequest command class
  **/
-class TTSIsReadyRequest : public app_mngr::commands::RequestToHMI,
-                          public app_mngr::event_engine::EventObserver {
+class TTSIsReadyRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief TTSIsReadyRequest class constructor
@@ -75,12 +76,7 @@ class TTSIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut from requrst Controller
    */
-  void onTimeOut() OVERRIDE;
-
-  /**
-   * @brief Send request to HMI for fetching of cappabilities
-   */
-  void SendMessageToHMI();
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyRequest);

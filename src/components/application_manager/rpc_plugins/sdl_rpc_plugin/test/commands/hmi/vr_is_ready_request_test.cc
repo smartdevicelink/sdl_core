@@ -68,9 +68,8 @@ class VRIsReadyRequestTest
                          bool is_send_message_to_hmi,
                          bool is_message_contain_param,
                          am::HmiInterfaces::InterfaceState state) {
-    const bool is_send_message_by_timeout = false;
     if (is_send_message_to_hmi) {
-      ExpectSendMessagesToHMI(is_send_message_by_timeout);
+      ExpectSendMessagesToHMI();
     }
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_vr_cooperating(is_vr_cooperating_available));
@@ -91,7 +90,7 @@ class VRIsReadyRequestTest
         .WillOnce(Return(state));
   }
 
-  void ExpectSendMessagesToHMI(bool is_send_message_by_timeout) {
+  void ExpectSendMessagesToHMI() {
     smart_objects::SmartObjectSPtr language(
         new smart_objects::SmartObject(smart_objects::SmartType_Map));
     EXPECT_CALL(mock_message_helper_,
@@ -127,15 +126,32 @@ class VRIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
+  void HMICapabilitiesExpectations() {
+    EXPECT_CALL(
+        mock_hmi_capabilities_,
+        IsRequestsRequiredForCapabilities(hmi_apis::FunctionID::VR_GetLanguage))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::VR_GetSupportedLanguages))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::VR_GetCapabilities))
+        .WillOnce(Return(true));
+  }
+
   VRIsReadyRequestPtr command_;
 };
 
-TEST_F(VRIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+TEST_F(VRIsReadyRequestTest,
+       Run_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_vr_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::VR_IsReady);
   PrepareEvent(is_message_contain_param, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_vr_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -143,7 +159,8 @@ TEST_F(VRIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   command_->on_event(event);
 }
 
-TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
+TEST_F(VRIsReadyRequestTest,
+       Run_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_vr_cooperating_available = false;
   const bool is_send_message_to_hmi = false;
   const bool is_message_contain_param = true;
@@ -156,12 +173,14 @@ TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
   command_->on_event(event);
 }
 
-TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
+TEST_F(VRIsReadyRequestTest,
+       Run_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsnet) {
   const bool is_vr_cooperating_available = true;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::VR_IsReady);
   PrepareEvent(is_message_contain_param, event, is_vr_cooperating_available);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_vr_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -169,10 +188,11 @@ TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
   command_->on_event(event);
 }
 
-TEST_F(VRIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
-  const bool is_send_message_by_timeout = true;
-  ExpectSendMessagesToHMI(is_send_message_by_timeout);
-  command_->onTimeOut();
+TEST_F(VRIsReadyRequestTest,
+       Run_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
+  HMICapabilitiesExpectations();
+  ExpectSendMessagesToHMI();
+  command_->OnTimeOut();
 }
 
 }  // namespace vr_is_ready_request

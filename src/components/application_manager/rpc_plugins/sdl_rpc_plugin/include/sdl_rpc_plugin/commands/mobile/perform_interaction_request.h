@@ -38,6 +38,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -51,7 +52,7 @@ namespace commands {
  * @brief PerformInteractionRequest command class
  **/
 class PerformInteractionRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor
@@ -79,19 +80,9 @@ class PerformInteractionRequest
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /*
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   *
-   */
-  virtual void onTimeOut();
+  void OnTimeOut() FINAL;
 
  protected:
   /**
@@ -128,15 +119,13 @@ class PerformInteractionRequest
    * @return true if send response to mobile application otherwise
    * return false.
    */
-  bool ProcessVRResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  bool ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /**
    * @brief Sends PerformInteraction response to mobile side
    * @param message which should send to mobile side
    */
-  void ProcessUIResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  void ProcessUIResponse(const smart_objects::SmartObject& message);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -162,16 +151,6 @@ class PerformInteractionRequest
    * @param app_id Application ID
    */
   void SendUIShowVRHelpRequest(app_mngr::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
-   *
-   * @param app_id Application ID
-   *
-   * return Return TRUE if there are no similar menu names in choice set,
-   * otherwise FALSE
-   */
-  bool CheckChoiceSetMenuNames(app_mngr::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -277,11 +256,11 @@ class PerformInteractionRequest
       smart_objects::SmartObject& msg_param) const;
 
   mobile_apis::InteractionMode::eType interaction_mode_;
+
   std::int32_t ui_choice_id_received_;
   std::int32_t vr_choice_id_received_;
+  std::string ui_text_entry_received_;
 
-  bool ui_response_received_;
-  bool vr_response_received_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
   hmi_apis::Common_Result::eType vr_result_code_;

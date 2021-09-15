@@ -43,8 +43,8 @@ generate_function_to_interface_convert_map() {
   convert_map[Buttons_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonEvent] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[Buttons_OnButtonPress] = HmiInterfaces::HMI_INTERFACE_Buttons;
-  convert_map[Buttons_OnButtonSubscription] =
-      HmiInterfaces::HMI_INTERFACE_Buttons;
+  convert_map[Buttons_SubscribeButton] = HmiInterfaces::HMI_INTERFACE_Buttons;
+  convert_map[Buttons_UnsubscribeButton] = HmiInterfaces::HMI_INTERFACE_Buttons;
   convert_map[BasicCommunication_OnReady] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnStartDeviceDiscovery] =
@@ -132,8 +132,10 @@ generate_function_to_interface_convert_map() {
   convert_map[TTS_GetSupportedLanguages] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_GetLanguage] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_TTS;
-  convert_map[TTS_OnResetTimeout] = HmiInterfaces::HMI_INTERFACE_TTS;
+  convert_map[BasicCommunication_OnResetTimeout] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[UI_Alert] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_SubtleAlert] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Show] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_AddCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_DeleteCommand] = HmiInterfaces::HMI_INTERFACE_UI;
@@ -164,7 +166,6 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_EndAudioPassThru] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_IsReady] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ClosePopUp] = HmiInterfaces::HMI_INTERFACE_UI;
-  convert_map[UI_OnResetTimeout] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SendHapticData] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[Navigation_IsReady] = HmiInterfaces::HMI_INTERFACE_Navigation;
   convert_map[Navigation_SendLocation] =

@@ -85,6 +85,7 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_add_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_delete_command_request.h"
@@ -113,6 +114,7 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
+  InitEventDispatcher();
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
@@ -123,6 +125,8 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
+  InitEventDispatcher();
+
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
@@ -156,6 +160,7 @@ typedef Types<sdl_rpc_plugin::commands::hmi::DialNumberRequest,
               sdl_rpc_plugin::commands::UIAddCommandRequest,
               sdl_rpc_plugin::commands::UIAddSubmenuRequest,
               sdl_rpc_plugin::commands::UIAlertRequest,
+              sdl_rpc_plugin::commands::UISubtleAlertRequest,
               sdl_rpc_plugin::commands::UIChangeRegistrationRequest,
               sdl_rpc_plugin::commands::UIDeleteCommandRequest,
               sdl_rpc_plugin::commands::UIDeleteSubmenuRequest,
@@ -220,6 +225,8 @@ TYPED_TEST_CASE(RequestToHMICommandsTest3, RequestCommandsList3);
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
+  this->InitEventDispatcher();
+
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();
 
@@ -231,6 +238,8 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
+  this->InitEventDispatcher();
+
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
@@ -240,6 +249,8 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 
 TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
+
+  EXPECT_CALL(this->event_dispatcher_, remove_observer(_));
 
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();

@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -49,8 +51,8 @@ BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
                    hmi_capabilities,
                    policy_handler) {}
 
-void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+void BasicCommunicationGetSystemTimeRequest::OnTimeOut() {
+  SDL_LOG_AUTO_TRACE();
   application_manager_.protocol_handler().NotifyOnGetSystemTimeFailed();
 }
 

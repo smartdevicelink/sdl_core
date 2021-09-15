@@ -63,6 +63,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual uint16_t tts_global_properties_timeout() const = 0;
   virtual uint16_t max_supported_protocol_version() const = 0;
   virtual const uint32_t& default_timeout() const = 0;
+  virtual const uint32_t& default_timeout_compensation() const = 0;
   virtual const uint32_t& max_cmd_id() const = 0;
   virtual bool launch_hmi() const = 0;
   virtual const uint32_t& delete_file_in_none() const = 0;
@@ -72,8 +73,11 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& tts_delimiter() const = 0;
   virtual const uint32_t& put_file_in_none() const = 0;
   virtual const std::string& sdl_version() const = 0;
+  virtual const std::string& vr_help_title() const = 0;
   virtual const std::vector<std::string>& time_out_promt() const = 0;
+  virtual const std::vector<std::string>& help_prompt() const = 0;
   virtual const std::string& hmi_capabilities_file_name() const = 0;
+  virtual const std::string& hmi_capabilities_cache_file_name() const = 0;
   virtual const std::string& video_server_type() const = 0;
   virtual const std::string& audio_server_type() const = 0;
   virtual const std::string& server_address() const = 0;

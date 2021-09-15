@@ -66,6 +66,8 @@ class VISubscribeVehicleDataRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual void Run();
 
+  void OnTimeOut() OVERRIDE;
+
  private:
   CustomVehicleDataManager& custom_vehicle_data_manager_;
 

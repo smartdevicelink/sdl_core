@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetFileResponse::GetFileResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,8 +56,8 @@ GetFileResponse::GetFileResponse(
 GetFileResponse::~GetFileResponse() {}
 
 void GetFileResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_, "Sending GetFile response");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_INFO("Sending GetFile response");
   rpc_service_.SendMessageToMobile(message_);
 }
 

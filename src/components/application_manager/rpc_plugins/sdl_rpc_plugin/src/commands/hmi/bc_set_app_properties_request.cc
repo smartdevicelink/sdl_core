@@ -40,6 +40,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 BCSetAppPropertiesRequest::BCSetAppPropertiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ BCSetAppPropertiesRequest::BCSetAppPropertiesRequest(
                      policy_handler) {}
 
 void BCSetAppPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& properties =
       (*message_)[strings::msg_params][strings::properties];
 
@@ -81,9 +83,8 @@ void BCSetAppPropertiesRequest::Run() {
     application_manager_.GetRPCService().ManageHMICommand(notification);
   }
   if (is_new_app) {
-    LOG4CXX_ERROR(logger_,
-                  "Message contains unknow policyAppId: "
-                      << policy_app_id << ", PTU will be triggered");
+    SDL_LOG_ERROR("Message contains unknow policyAppId: "
+                  << policy_app_id << ", PTU will be triggered");
     policy_handler_.OnLocalAppAdded();
   }
 

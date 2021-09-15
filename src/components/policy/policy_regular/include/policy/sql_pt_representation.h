@@ -53,6 +53,7 @@ namespace policy {
 class SQLPTRepresentation : public virtual PTRepresentation {
  public:
   SQLPTRepresentation();
+  explicit SQLPTRepresentation(bool in_memory);
   ~SQLPTRepresentation();
   virtual void CheckPermissions(const PTString& app_id,
                                 const PTString& hmi_level,
@@ -75,7 +76,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const std::vector<std::string>& msg_codes, const std::string& language);
 
   virtual EndpointUrls GetUpdateUrls(int service_type);
-  virtual std::string GetLockScreenIconUrl() const;
   virtual int GetNotificationsNumber(const std::string& priority);
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority);
@@ -90,7 +90,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL);
   bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
-
+  bool SetMetaInfo(const std::string& ccpu_version) OVERRIDE;
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
 #ifdef BUILD_TESTS
   uint32_t open_counter() {
     return open_counter_;
@@ -248,6 +249,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveSecondsBetweenRetries(
       const policy_table::SecondsBetweenRetries& seconds);
   bool SaveNumberOfNotificationsPerMinute(
+      const policy_table::NumberOfNotificationsPerMinute& notifications);
+  bool SaveNumberOfSubtleNotificationsPerMinute(
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);

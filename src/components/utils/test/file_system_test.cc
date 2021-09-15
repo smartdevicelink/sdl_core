@@ -47,8 +47,8 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-StringArray MergeStringsToArray(const std::string& first,
-                                const std::string& second) {
+StringArray MergeStringsToArray(const std::string first,
+                                const std::string second) {
   StringArray array_of_strings;
   array_of_strings.reserve(2);
 
@@ -1111,15 +1111,6 @@ TEST(FileSystemTest, GetAvailableDiskSpace) {
   EXPECT_GE(available_space, GetAvailableDiskSpace("."));
   EXPECT_TRUE(RemoveDirectory("./Test directory"));
   EXPECT_FALSE(DirectoryExists("./Test directory"));
-}
-
-TEST(FileSystemTest, ConvertPathForURL) {
-  std::string path = "./Test directory";
-  EXPECT_NE(path, ConvertPathForURL(path));
-  std::string path_brackets = "./Test_directory_with(brackets)";
-  EXPECT_NE(path_brackets, ConvertPathForURL(path));
-  std::string another_path = "./Test_directory/new_directory_without_spaces";
-  EXPECT_EQ(another_path, ConvertPathForURL(another_path));
 }
 
 TEST(FileSystemTest, DirectorySize) {

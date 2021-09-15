@@ -31,10 +31,15 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_request.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
+
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -48,8 +53,24 @@ RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
 RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest() {}
 
 void RCGetInteriorVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
+}
+
+void RCGetInteriorVehicleDataRequest::OnTimeOut() {
+  SDL_LOG_TRACE("function_id: " << function_id()
+                                << " correlation_id: " << correlation_id());
+  using namespace application_manager;
+  event_engine::Event timeout_event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
+      function_id(),
+      correlation_id(),
+      hmi_apis::Common_Result::GENERIC_ERROR,
+      std::string("Timed out"));
+  timeout_event.set_smart_object(*error_response);
+  timeout_event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

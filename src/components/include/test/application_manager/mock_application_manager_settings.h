@@ -70,6 +70,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(tts_global_properties_timeout, uint16_t());
   MOCK_CONST_METHOD0(max_supported_protocol_version, uint16_t());
   MOCK_CONST_METHOD0(default_timeout, const uint32_t&());
+  MOCK_CONST_METHOD0(default_timeout_compensation, const uint32_t&());
   MOCK_CONST_METHOD0(max_cmd_id, const uint32_t&());
   MOCK_CONST_METHOD0(launch_hmi, bool());
   MOCK_CONST_METHOD0(delete_file_in_none, const uint32_t&());
@@ -78,8 +79,11 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(tts_delimiter, const std::string&());
   MOCK_CONST_METHOD0(put_file_in_none, const uint32_t&());
   MOCK_CONST_METHOD0(sdl_version, const std::string&());
+  MOCK_CONST_METHOD0(vr_help_title, const std::string&());
+  MOCK_CONST_METHOD0(help_prompt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(time_out_promt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(hmi_capabilities_file_name, const std::string&());
+  MOCK_CONST_METHOD0(hmi_capabilities_cache_file_name, const std::string&());
   MOCK_CONST_METHOD0(video_server_type, const std::string&());
   MOCK_CONST_METHOD0(audio_server_type, const std::string&());
   MOCK_CONST_METHOD0(server_address, const std::string&());

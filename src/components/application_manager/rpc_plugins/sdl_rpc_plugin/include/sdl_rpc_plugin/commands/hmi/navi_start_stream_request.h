@@ -43,8 +43,7 @@ namespace commands {
 /**
  * @brief NaviStartStreamRequest command class
  **/
-class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI,
-                               public app_mngr::event_engine::EventObserver {
+class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief NaviStartStreamRequest class constructor
@@ -70,20 +69,17 @@ class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief On event callback
    **/
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /**
-   * @brief onTimeOut from requrst Controller
-   */
-  virtual void onTimeOut();
+  void OnTimeOut() FINAL;
 
+ private:
   /**
    * @brief RetryStartSession resend HMI startSession request if needed.
    * If limit expired, set video_stream_retry_number counter to 0
    */
   void RetryStartSession();
 
- private:
   uint32_t retry_number_;
   DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);
 };

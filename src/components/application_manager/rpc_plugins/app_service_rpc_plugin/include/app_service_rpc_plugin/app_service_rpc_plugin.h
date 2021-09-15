@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_PLUGIN_INCLUDE_APP_SERVICE_PLUGIN_APP_SERVICE_RPC_PLUGIN_H
 
 #include "application_manager/command_factory.h"
+#include "utils/ilogger.h"
 
 namespace app_service_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -48,13 +49,6 @@ class AppServiceRpcPlugin : public plugins::RPCPlugin {
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler,
             resumption::LastStateWrapperPtr last_state) OVERRIDE;
-
-  DEPRECATED
-  bool Init(app_mngr::ApplicationManager& application_manager,
-            app_mngr::rpc_service::RPCService& rpc_service,
-            app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler,
-            resumption::LastState& last_state);
 
   bool IsAbleToProcess(
       const int32_t function_id,
@@ -75,7 +69,8 @@ class AppServiceRpcPlugin : public plugins::RPCPlugin {
 };
 }  // namespace app_service_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" application_manager::plugin_manager::RPCPlugin* Create(
+    logger::Logger* logger_instance);
 extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_PLUGIN_INCLUDE_APP_SERVICE_PLUGIN_APP_SERVICE_PLUGIN_H

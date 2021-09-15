@@ -30,13 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_request_test.h"
-
 #include <stdint.h>
+
 #include <string>
 #include <vector>
-#include "gtest/gtest.h"
 
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "gtest/gtest.h"
 #include "hmi/activate_app_request.h"
 #include "hmi/activate_app_response.h"
 #include "hmi/add_statistics_info_notification.h"
@@ -92,7 +97,6 @@
 #include "hmi/on_audio_data_streaming_notification.h"
 #include "hmi/on_button_event_notification.h"
 #include "hmi/on_button_press_notification.h"
-#include "hmi/on_button_subscription_notification.h"
 #include "hmi/on_device_chosen_notification.h"
 #include "hmi/on_device_state_changed_notification.h"
 #include "hmi/on_driver_distraction_notification.h"
@@ -109,6 +113,7 @@
 #include "hmi/on_ready_notification.h"
 #include "hmi/on_received_policy_update.h"
 #include "hmi/on_record_start_notification.h"
+#include "hmi/on_reset_timeout_notification.h"
 #include "hmi/on_resume_audio_source_notification.h"
 #include "hmi/on_sdl_close_notification.h"
 #include "hmi/on_sdl_consent_needed_notification.h"
@@ -120,13 +125,11 @@
 #include "hmi/on_system_info_changed_notification.h"
 #include "hmi/on_system_request_notification.h"
 #include "hmi/on_tts_language_change_notification.h"
-#include "hmi/on_tts_reset_timeout_notification.h"
 #include "hmi/on_tts_started_notification.h"
 #include "hmi/on_tts_stopped_notification.h"
 #include "hmi/on_ui_command_notification.h"
 #include "hmi/on_ui_keyboard_input_notification.h"
 #include "hmi/on_ui_language_change_notification.h"
-#include "hmi/on_ui_reset_timeout_notification.h"
 #include "hmi/on_ui_touch_event_notification.h"
 #include "hmi/on_update_device_list.h"
 #include "hmi/on_video_data_streaming_notification.h"
@@ -144,6 +147,8 @@
 #include "hmi/sdl_get_user_friendly_message_response.h"
 #include "hmi/sdl_policy_update.h"
 #include "hmi/sdl_policy_update_response.h"
+#include "hmi/subscribe_button_request.h"
+#include "hmi/subscribe_button_response.h"
 #include "hmi/tts_change_registration_request.h"
 #include "hmi/tts_change_registration_response.h"
 #include "hmi/tts_get_capabilities_request.h"
@@ -200,6 +205,10 @@
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_request.h"
 #include "hmi/ui_slider_response.h"
+#include "hmi/ui_subtle_alert_request.h"
+#include "hmi/ui_subtle_alert_response.h"
+#include "hmi/unsubscribe_button_request.h"
+#include "hmi/unsubscribe_button_response.h"
 #include "hmi/update_app_list_request.h"
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_request.h"
@@ -222,12 +231,6 @@
 #include "hmi/vr_is_ready_response.h"
 #include "hmi/vr_perform_interaction_request.h"
 #include "hmi/vr_perform_interaction_response.h"
-
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_event_dispatcher.h"
 
 namespace am = application_manager;
 
@@ -257,14 +260,10 @@ class HMICommandsTest : public components::commands_test::CommandRequestTest<
   typedef Command CommandType;
 
   void InitCommand(const uint32_t& timeout) OVERRIDE {
+    CommandRequestTest<kIsNice>::InitCommand(timeout);
+
     stream_retry_.first = 0;
     stream_retry_.second = 0;
-    EXPECT_CALL(app_mngr_settings_, default_timeout())
-        .WillOnce(ReturnRef(timeout));
-    ON_CALL(app_mngr_, event_dispatcher())
-        .WillByDefault(ReturnRef(event_dispatcher_));
-    ON_CALL(app_mngr_, get_settings())
-        .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, start_stream_retry_amount())
         .WillByDefault(ReturnRef(stream_retry_));
   }
@@ -449,11 +448,9 @@ typedef Types<commands::NaviIsReadyResponse,
 
 typedef Types<commands::hmi::OnButtonEventNotification,
               commands::hmi::OnButtonPressNotification,
-              commands::hmi::OnButtonSubscriptionNotification,
               commands::OnNaviTBTClientStateNotification,
               commands::hmi::OnUIKeyBoardInputNotification,
               commands::hmi::OnUITouchEventNotification,
-              commands::hmi::OnUIResetTimeoutNotification,
               commands::NaviStartStreamResponse,
               commands::NaviStartStreamRequest,
               commands::NaviStopStreamResponse,
@@ -484,7 +481,7 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnReceivedPolicyUpdate,
               commands::OnPolicyUpdate,
               commands::OnDeviceStateChangedNotification,
-              commands::hmi::OnTTSResetTimeoutNotification,
+              commands::hmi::OnResetTimeoutNotification,
               commands::hmi::DialNumberResponse,
               commands::hmi::DialNumberRequest,
               commands::OnEventChangedNotification,
@@ -499,7 +496,13 @@ typedef Types<commands::AllowAllAppsRequest,
               commands::AllowAppRequest,
               commands::AllowAppResponse,
               commands::BCGetFilePathRequest,
-              commands::BCGetFilePathResponse>
+              commands::BCGetFilePathResponse,
+              commands::hmi::SubscribeButtonRequest,
+              commands::hmi::SubscribeButtonResponse,
+              commands::UISubtleAlertResponse,
+              commands::UISubtleAlertRequest,
+              commands::hmi::UnsubscribeButtonRequest,
+              commands::hmi::UnsubscribeButtonResponse>
     HMICommandsListFifth;
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);

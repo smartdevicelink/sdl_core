@@ -24,6 +24,7 @@ file(GLOB SOURCES
 
 set(LIBRARIES
   sdl_rpc_plugin_static
+  Resumption
   gmock
 )
 

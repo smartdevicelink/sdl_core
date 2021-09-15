@@ -42,9 +42,14 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/request_timeout_handler.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
 
@@ -84,11 +89,15 @@ class RPCService;
 namespace rpc_handler {
 class RPCHandler;
 }
-
+namespace request_controller {
+class RequestTimeoutHandler;
+class RequestController;
+}  // namespace request_controller
 class Application;
 class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
+struct ResetGlobalPropertiesResult;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsSorter {
@@ -108,6 +117,11 @@ struct ApplicationsPolicyAppIdSorter {
     }
     return lhs->policy_app_id() < rhs->policy_app_id();
   }
+};
+
+struct ExpiredButtonRequestData {
+  uint32_t app_id_;
+  hmi_apis::Common_ButtonName::eType button_name_;
 };
 
 typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
@@ -130,10 +144,6 @@ typedef ApplicationSet::const_iterator ApplicationSetConstIt;
 class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
-
-  DEPRECATED
-  virtual bool Init(resumption::LastState&,
-                    media_manager::MediaManager* media_manager) = 0;
 
   /**
    * Inits application manager
@@ -205,9 +215,6 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
-
-  DEPRECATED virtual ApplicationSharedPtr application_by_name(
-      const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
@@ -344,29 +351,77 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @param app_id Application id
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+  virtual bool IsAppSubscribedForWayPoints(uint32_t app_id) const = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param app Application reference
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(Application& app) const = 0;
 
   /**
    * @brief Subscribe Application for way points
-   * @param Application pointer
+   * @param app_id Application id
+   * @param response_from_hmi True if a successful HMI response was received
+   * when subscribing
    */
-  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+  virtual void SubscribeAppForWayPoints(uint32_t app_id,
+                                        bool response_from_hmi = true) = 0;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param app Application pointer
+   * @param response_from_hmi True if a successful HMI response was received
+   * when subscribing
+   */
+  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app,
+                                        bool response_from_hmi = true) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
-   * @param Application pointer
+   * @param app_id Application id
+   * @param response_from_hmi True if a successful HMI response was received
+   * when unsubscribing
    */
-  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) = 0;
+  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id,
+                                           bool response_from_hmi = true) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param app Application pointer
+   * @param response_from_hmi True if a successful HMI response was received
+   * when unsubscribing
+   */
+  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app,
+                                           bool response_from_hmi = true) = 0;
+
+  /**
+   * @brief Is SDL Core subscribed to HMI waypoints
+   * @return true if SDL Core is subscribed to HMI waypoints, otherwise false
+   */
+  virtual bool IsSubscribedToHMIWayPoints() const = 0;
 
   /**
    * @brief Is Any Application is subscribed for way points
    * @return true if some app is subscribed otherwise false
    */
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
+
+  /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   * @param app_id the app ID of the provider sending the way points update or 0
+   * if the HMI is the provider
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message,
+      uint32_t app_id = 0) = 0;
 
   /**
    * @brief Get subscribed for way points
@@ -450,6 +505,10 @@ class ApplicationManager {
 
   virtual rpc_service::RPCService& GetRPCService() const = 0;
   virtual rpc_handler::RPCHandler& GetRPCHandler() const = 0;
+  virtual request_controller::RequestTimeoutHandler&
+  get_request_timeout_handler() const = 0;
+  virtual request_controller::RequestController& get_request_controller()
+      const = 0;
   virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
@@ -458,10 +517,18 @@ class ApplicationManager {
   virtual uint32_t GenerateNewHMIAppID() = 0;
 
   /**
-   * @brief Ends opened navi services (audio/video) for application
+   * @brief Ends opened navi services audio and video for application
    * @param app_id Application id
    */
   virtual void EndNaviServices(uint32_t app_id) = 0;
+
+  /**
+   * @brief Ends opened navi service audio or video for application
+   * @param app_id Application id
+   * @param service_type Service type to check
+   */
+  virtual void EndService(const uint32_t app_id,
+                          const protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief returns true if low voltage state is active
@@ -485,7 +552,13 @@ class ApplicationManager {
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
-  virtual void OnHMIStartedCooperation() = 0;
+  virtual void OnHMIReady() = 0;
+
+  /**
+   * @brief Send GetCapabilities requests for
+   * each interface (VR, TTS, UI etc) to HMI
+   */
+  virtual void RequestForInterfacesAvailability() = 0;
 
   virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
 
@@ -504,6 +577,13 @@ class ApplicationManager {
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  /*
+   * @brief Hold or respond to all pending RAI requests
+   * @param hmi_cooperating new state to be set
+   */
+  virtual void SetHMICooperating(const bool hmi_cooperating) = 0;
+
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications
@@ -513,9 +593,24 @@ class ApplicationManager {
    */
   virtual void IviInfoUpdated(const std::string& vehicle_info, int value) = 0;
 
+  /**
+   * @brief Creates the application object for a newly registered application.
+   * This method performs initialiation of the app object by setting properties
+   * and starting the resumption process if applicable.
+   * @param request_for_registration Smart Object RegisterAppInterfaceRequest
+   * message received from mobile.
+   */
   virtual ApplicationSharedPtr RegisterApplication(
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) = 0;
+  /**
+   * @brief Completes initialization process by adding the app to the
+   * applications accessor. App is now accessible by all other Core components.
+   * @param application ApplicationSharedPtr for newly registered application.
+   * @param connection_key Internal application id of registering application.
+   */
+  virtual void FinalizeAppRegistration(ApplicationSharedPtr application,
+                                       const uint32_t connection_key) = 0;
 
   virtual void SendUpdateAppList() = 0;
 
@@ -543,7 +638,33 @@ class ApplicationManager {
 
   virtual bool IsStopping() const = 0;
 
+  /**
+   * @brief Waits for HMI readiness and blocks thread if it's not ready yet
+   * @return true if HMI is ready and cooperating, otherwise returns false
+   */
+  virtual bool WaitForHmiIsReady() = 0;
+
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets application's global properties to default values
+   * @param global_properties_ids container with global properties IDs to reset
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating success global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets all application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,
@@ -596,6 +717,36 @@ class ApplicationManager {
                                 const uint32_t corr_id,
                                 const int32_t function_id) = 0;
 
+  /**
+   * @brief RetainRequestInstance retains request instance by its
+   * connection+correlation key
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   * @return true if request was rerained. false if the request with such
+   * connection+correlation key was not found
+   */
+  virtual bool RetainRequestInstance(const uint32_t connection_key,
+                                     const uint32_t correlation_id) = 0;
+
+  /**
+   * @brief RemoveRetainedRequest removes request instance retained before
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   */
+  virtual bool RemoveRetainedRequest(const uint32_t connection_key,
+                                     const uint32_t correlation_id) = 0;
+
+  /**
+   * @brief IsStillWaitingForResponse check if request is still waiting for
+   * response
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   * @return true if request is still waiting for response, otherwise returns
+   * false
+   */
+  virtual bool IsStillWaitingForResponse(
+      const uint32_t connection_key, const uint32_t correlation_id) const = 0;
+
   /*
    * @brief Closes application by id
    *
@@ -618,7 +769,7 @@ class ApplicationManager {
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  virtual void updateRequestTimeout(uint32_t connection_key,
+  virtual void UpdateRequestTimeout(uint32_t connection_key,
                                     uint32_t mobile_correlation_id,
                                     uint32_t new_timeout_value) = 0;
 
@@ -699,6 +850,9 @@ class ApplicationManager {
    */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
+  virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() = 0;
+
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
@@ -752,7 +906,7 @@ class ApplicationManager {
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param state Shows if streaming started or stopped
+   * @param state True if streaming started, false if streaming stopped.
    */
   virtual void OnAppStreaming(uint32_t app_id,
                               protocol_handler::ServiceType service_type,
@@ -788,22 +942,30 @@ class ApplicationManager {
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
    * @param app_id the application's id which should stop streaming.
+   * @param service_type Service type to check
    */
-  virtual void ForbidStreaming(uint32_t app_id) = 0;
+  virtual void ForbidStreaming(uint32_t app_id,
+                               protocol_handler::ServiceType service_type) = 0;
 
   /**
-   * @brief Called when application completes streaming configuration
+   * @brief Called when application successfully completes streaming
+   * configuration
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
    */
-  virtual void OnStreamingConfigured(
+  virtual void OnStreamingConfigurationSuccessful(
+      uint32_t app_id, protocol_handler::ServiceType service_type) = 0;
+
+  /**
+   * @brief Called when application fails streaming configuration
+   * @param app_id Streaming application id
+   * @param rejected_params list of rejected parameter names
+   * @param reason NACK reason
+   */
+  virtual void OnStreamingConfigurationFailed(
       uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
   // Extract the app ID to use internally based on the UseFullAppID .ini setting
@@ -820,6 +982,43 @@ class ApplicationManager {
   virtual bool IsSOStructValid(
       const hmi_apis::StructIdentifiers::eType struct_id,
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief Unsubscribe application specified in message from softbuttons.
+   * @param response_message - Response message received from HMI.
+   * @return bool - Result of unsubscribing process.
+   */
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response_message) = 0;
+
+  /**
+   * @brief Save subscribe/unsubscribe button request after timeout to ensure
+   * possibility to align mobile subscription/unsubscription status with actual
+   * subscription/unsubscription status on HMI
+   * @param app_id Application id from request message
+   * @param corr_id Correlation id
+   * @param button_name name of button to subscribe/unsubscribe
+   */
+  virtual void AddExpiredButtonRequest(
+      const uint32_t app_id,
+      const int32_t corr_id,
+      const hmi_apis::Common_ButtonName::eType button_name) = 0;
+
+  /**
+   * @brief Return optional structure with information regarding
+   * subscribe/unsubscribe button request data
+   * @param corr_id Correlation id
+   * @return optional structure with subscribe/unsubscribe button request data
+   */
+  virtual utils::Optional<ExpiredButtonRequestData> GetExpiredButtonRequestData(
+      const int32_t corr_id) const = 0;
+
+  /**
+   * @brief Delete data about already processed expired subscribe/unsubscribe
+   * button request in case if HMI send response to expired request
+   * @param corr_id Correlation id
+   */
+  virtual void DeleteExpiredButtonRequest(const int32_t corr_id) = 0;
 };
 
 }  // namespace application_manager

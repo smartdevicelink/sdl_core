@@ -47,27 +47,29 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 namespace str = strings;
 
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
-                         params.application_manager_,
-                         params.rpc_service_,
-                         params.hmi_capabilities_,
-                         params.policy_handler_)
+    : RequestFromMobileImpl(message,
+                            params.application_manager_,
+                            params.rpc_service_,
+                            params.hmi_capabilities_,
+                            params.policy_handler_)
     , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No such application : " << connection_key());
+    SDL_LOG_ERROR("No such application : " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -89,7 +91,7 @@ void GetVehicleDataRequest::Run() {
       continue;
     }
     hmi_msg_params[name] = msg_params[name];
-    params_count++;
+    ++params_count;
   }
 
   const int minimal_params_count = 1;
@@ -110,7 +112,7 @@ void GetVehicleDataRequest::Run() {
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {
@@ -123,6 +125,12 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
+
+      if (message[strings::msg_params].keyExists(strings::tire_pressure)) {
+        ApplicationSharedPtr app =
+            application_manager_.application(connection_key());
+        MessageHelper::AddDefaultParamsToTireStatus(app, message);
+      }
 
       auto data_not_available_with_params = [this, &result_code, &message]() {
         if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
@@ -162,6 +170,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           }
         }
 
+        if (MessageHelper::RemoveEmptyMessageParams(
+                message[strings::msg_params]) > 0) {
+          mobile_result_code = mobile_apis::Result::WARNINGS;
+          response_info = app_mngr::commands::MergeInfos(
+              response_info, "Some vehicle data items could not be retrieved");
+        }
+
         if (message[strings::msg_params].empty() &&
             hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
           response_info = "Failed to retrieve data from vehicle";
@@ -178,7 +193,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
@@ -188,7 +203,7 @@ bool GetVehicleDataRequest::CheckFrequency(Application& app) {
   if (app.AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    SDL_LOG_ERROR("GetVehicleData frequency is too high.");
     return false;
   }
   return true;

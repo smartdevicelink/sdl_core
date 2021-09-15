@@ -31,7 +31,9 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
-#include "application_manager/message_helper.h"
+
+#include <set>
+
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 
@@ -40,6 +42,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIIsReadyRequest::VIIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -47,24 +51,23 @@ VIIsReadyRequest::VIIsReadyRequest(
                    params.application_manager_,
                    params.rpc_service_,
                    params.hmi_capabilities_,
-                   params.policy_handler_)
-    , EventObserver(application_manager_.event_dispatcher()) {}
+                   params.policy_handler_) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
 void VIIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribe_on_event(hmi_apis::FunctionID::VehicleInfo_IsReady,
                      correlation_id());
   SendRequest();
 }
 
 void VIIsReadyRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_IsReady: {
-      LOG4CXX_DEBUG(logger_, "VehicleInfo_IsReady event");
+      SDL_LOG_DEBUG("VehicleInfo_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_IsReady);
       const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_,
@@ -74,35 +77,32 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
       HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_ivi_cooperating(is_available);
       policy_handler_.OnVIIsReady();
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VehicleInfo_IsReady);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
-        LOG4CXX_INFO(
-            logger_,
+        SDL_LOG_INFO(
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
+        hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+            hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
         return;
       }
-      SendMessageToHMI();
 
+      RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
 }
 
-void VIIsReadyRequest::onTimeOut() {
+void VIIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
-}
-
-void VIIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_type(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_type);
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_IsReady);
+  RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
 }
 
 }  // namespace commands

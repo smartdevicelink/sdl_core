@@ -35,42 +35,49 @@
 
 #include <stdint.h>
 #include <limits>
+#include <string>
 
 namespace utils {
 
 /**
- * Convert int64 value to long long int value
+ * @brief Convert int64 value to long long int value
  * Using when int64 value should be assign to JSON value
+ * @param value to be converted
+ * @return conversion result
  */
 long long int ConvertInt64ToLongLongInt(const int64_t value);
 
 /**
- * Convert long long int value to int64 value
+ * @brief Convert long long int value to int64 value
+ * @param value to be converted
+ * @return conversion result
  */
 int64_t ConvertLongLongIntToInt64(const long long int value);
 
 /**
- * Convert uint64 value to unsigned long long int value
+ * @brief Convert uint64 value to unsigned long long int value
  * Using when uint64 value should be assign to JSON value
+ * @param value to be converted
+ * @return conversion result
  */
 unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
 
 /**
- * Convert unsigned long long int value to uint64 value
+ * @brief Convert unsigned long long int value to uint64 value
+ * @param value to be converted
+ * @return conversion result
  */
 uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
 
 /**
- * Convert one number value to another type value
+ * @brief Convert binary data to a string value
+ * @param data raw binary data
+ * @param data_size string length. Required to check whether the data is a
+ * printable string.
+ * @return conversion result
  */
-template <typename InputType, typename OutputType>
-OutputType SafeStaticCast(const InputType value) {
-  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
-                   std::numeric_limits<OutputType>::min());
-  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
-                   std::numeric_limits<OutputType>::max());
-  return static_cast<OutputType>(value);
-}
+std::string ConvertBinaryDataToString(const uint8_t* data,
+                                      const size_t data_size);
 
 }  // namespace utils
 

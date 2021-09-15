@@ -65,6 +65,8 @@ class NaviSubscribeWayPointsRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual void Run() OVERRIDE;
 
+  void OnTimeOut() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviSubscribeWayPointsRequest);
 };

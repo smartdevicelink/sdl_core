@@ -34,7 +34,7 @@
 
 <interfaces name="SmartDeviceLink HMI API">
 
-<interface name="Common" version="2.1.0" date="2019-03-18">
+<interface name="Common" version="2.2.0" date="2021-04-14">
 
 <enum name="Result">
     <element name="SUCCESS" value="0"/>
@@ -77,6 +77,12 @@
       A widget is a small window that the app can create to provide information and softbuttons for a quick app control.
     </description>
   </element>
+</enum>
+
+<enum name="CapacityUnit">
+    <element name="LITERS" />
+    <element name="KILOWATTHOURS" />
+    <element name="KILOGRAMS" />
 </enum>
 
 <enum name="PredefinedWindows">
@@ -334,6 +340,7 @@
   <element name="SYSTEM" />
   <element name="PROJECTION" />
   <element name="REMOTE_CONTROL" />
+  <element name="WEB_VIEW" />
 </enum>
 
 <enum name="CloudConnectionStatus">
@@ -534,6 +541,9 @@
   <element name="CLOSE_CLOUD_CONNECTION">
     <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
   </element>
+  <element name="RESOURCE_CONSTRAINT">
+    <description>By getting this value, SDL should unregister the application to allow the HMI to close the application.</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
@@ -622,16 +632,34 @@
     <description> Optional location address (if applicable) for SendLocation.</description>
   </element>
   <element name="phoneNumber">
-    <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
+    <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
-  <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-  <element name="turnText"/>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
+  <element name="timeToDestination">
+    <description>Optional time to destination field for ShowConstantTBT</description>
   </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
+  <element name="turnText">
+    <description>Turn text for turnList parameter of UpdateTurnList</description>
+  </element>
+  <element name="subtleAlertText1">
+    <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
+  </element>
+  <element name="subtleAlertText2">
+    <description>The second line of the subtle alert text field; applies to `SubtleAlert` `alertText2`</description>
+  </element>
+  <element name="subtleAlertSoftButtonText">
+    <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
+  </element>
+  <element name="menuCommandSecondaryText">
+      <description>Secondary text for AddCommand</description>
+  </element>
+  <element name="menuCommandTertiaryText">
+      <description>Tertiary text for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryText">
+      <description>Secondary text for AddSubMenu</description>
+  </element>
+  <element name="menuSubMenuTertiaryText">
+      <description>Tertiary text for AddSubMenu</description>
   </element>
 </enum>
 
@@ -716,6 +744,18 @@
   </element>
   <element name="alertIcon">
     <description>The image field for Alert</description>
+  </element>
+  <element name="subMenuIcon">
+    <description>The image field for AddSubMenu.menuIcon</description>
+  </element>
+  <element name="subtleAlertIcon">
+    <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
+  </element>
+  <element name="menuCommandSecondaryImage">
+    <description>The secondary image field for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryImage">
+    <description>The secondary image field for AddSubMenu</description>
   </element>
 </enum>
 
@@ -807,6 +847,11 @@
   </element>
 </enum>
 
+<enum name="AppCapabilityType">
+  <description>Enumerations of all available app capability types</description>
+  <element name="VIDEO_STREAMING"/>
+</enum>
+
 <!--IVI part-->
 <enum name="ElectronicParkBrakeStatus">
   <element name="CLOSED">
@@ -856,14 +901,6 @@
     </element>
 </enum>
 
-<struct name="FuelRange">
-    <param name="type" type="Common.FuelType" mandatory="false"/>
-    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
-        <description>
-            The estimate range in KM the vehicle can travel based on fuel level and consumption.
-        </description>
-    </param>
-</struct>
 
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -886,6 +923,27 @@
   <description> The data is not supported.</description>
   </element>
 </enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+    <param name="level" type="Float" minvalue="-6" maxvalue="1000000" mandatory="false">
+       <description>The relative remaining capacity of this fuel type (percentage).</description>
+    </param>
+    <param name="levelState" type="Common.ComponentVolumeStatus" mandatory="false">
+        <description>The fuel level state</description>
+    </param>
+    <param name="capacity" type="Float" minvalue="0" maxvalue="1000000" mandatory="false">
+       <description>The absolute capacity of this fuel type.</description>
+    </param>
+    <param name="capacityUnit" type="Common.CapacityUnit" mandatory="false">
+       <description>The unit of the capacity of this fuel type such as liters for gasoline or kWh for batteries.</description>
+    </param>
+</struct>
 
 <enum name="TPMS">
   <element name="UNKNOWN">
@@ -926,6 +984,7 @@
     <description>No gear</description>
   </element>
   <element name="DRIVE">
+    <description>Regular Drive mode</description>
   </element>
   <element name="SPORT">
     <description>Drive Sport mode</description>
@@ -949,9 +1008,41 @@
   </element>
   <element name="EIGHTH">
   </element>
+  <element name="NINTH">
+  </element>
+  <element name="TENTH">
+  </element>
   <element name="UNKNOWN">
   </element>
   <element name="FAULT">
+  </element>
+</enum>
+
+<enum name="TransmissionType">
+  <description>Type of transmission used in the vehicle.</description>
+  <element name="MANUAL">
+    <description>Manual transmission.</description>
+  </element>
+  <element name="AUTOMATIC">
+    <description>Automatic transmission.</description>
+  </element>
+  <element name="SEMI_AUTOMATIC">
+    <description>Semi automatic transmission.</description>
+  </element>
+  <element name="DUAL_CLUTCH">
+    <description>Dual clutch transmission.</description>
+  </element>
+  <element name="CONTINUOUSLY_VARIABLE">
+    <description>Continuously variable transmission(CVT).</description>
+  </element>
+  <element name="INFINITELY_VARIABLE">
+    <description>Infinitely variable transmission.</description>
+  </element>
+  <element name="ELECTRIC_VARIABLE">
+    <description>Electric variable transmission.</description>
+  </element>
+  <element name="DIRECT_DRIVE">
+    <description>Direct drive between engine and wheels.</description>
   </element>
 </enum>
 
@@ -1137,7 +1228,9 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_CLIMATEDATA"/>
   <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
   <element name="VEHICLEDATA_ODOMETER" />
@@ -1162,6 +1255,10 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
+  <element name="VEHICLEDATA_WINDOWSTATUS"/>
+  <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
+  <element name="VEHICLEDATA_SEATOCCUPANCY"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1251,6 +1348,7 @@
   <element name="QWERTY" />
   <element name="QWERTZ" />
   <element name="AZERTY" />
+  <element name="NUMERIC"/>
 </enum>
 
 <enum name="KeyboardEvent">
@@ -1260,6 +1358,15 @@
   <element name="ENTRY_VOICE" />
   <element name="ENTRY_CANCELLED" />
   <element name="ENTRY_ABORTED" />
+  <element name="INPUT_KEY_MASK_ENABLED"/>
+  <element name="INPUT_KEY_MASK_DISABLED"/>
+</enum>
+
+<enum name="KeyboardInputMask">
+  <description>Enumeration listing possible input character masking.</description>
+  <element name="ENABLE_INPUT_KEY_MASK" />
+  <element name="DISABLE_INPUT_KEY_MASK" />
+  <element name="USER_CHOICE_INPUT_KEY_MASK" />
 </enum>
 
 <enum name="KeypressMode">
@@ -1432,16 +1539,25 @@
 <enum name="CharacterSet">
   <description>The list of potential character sets</description>
   <element name="TYPE2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="TYPE5SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID1SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
+  </element>
+  <element name="ASCII">
+    <description>ASCII as defined in https://en.wikipedia.org/wiki/ASCII as defined in codes 0-127. Non-printable characters such as tabs and back spaces are ignored</description>
+  </element>
+  <element name="ISO_8859_1">
+    <description>Latin-1, as defined in https://en.wikipedia.org/wiki/ISO/IEC_8859-1</description>
+  </element>
+  <element name="UTF_8">
+    <description>The UTF-8 character set that uses variable bytes per code point. See https://en.wikipedia.org/wiki/UTF-8 for more details. This is the preferred character set</description>
   </element>
 </enum>
 
@@ -1459,6 +1575,7 @@
 <enum name="MethodName">
   <description>Defines the type of the request which causes text-to-speech prompt</description>
   <element name="ALERT" />
+  <element name="SUBTLE_ALERT" />
   <element name="SPEAK" />
   <element name="AUDIO_PASS_THRU" />
   <element name="ALERT_MANEUVER" />
@@ -1656,7 +1773,6 @@
 <!-- End of Policies -->
 
 <!-- Remote Control -->
-
 <struct name="Grid">
     <description>Describes a location (origin coordinates and span) of a vehicle component.</description>
     <param name="col" type="Integer" mandatory="true" minvalue="-1" maxvalue="100">
@@ -1673,15 +1789,30 @@
     </param>
 </struct>
 
+<struct name="WindowState">
+  <param name="approximatePosition" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The approximate percentage that the window is open - 0 being fully closed, 100 being fully open</description>
+  </param>
+  <param name="deviation" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The percentage deviation of the approximatePosition. e.g. If the approximatePosition is 50 and the deviation is 10, then the window's location is somewhere between 40 and 60.</description>
+  </param>
+</struct>
+
+<struct name="WindowStatus">
+  <description>Describes the status of a window of a door/liftgate etc.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="state" type="Common.WindowState" mandatory="true"/>      
+</struct>
+
 <struct name="ModuleInfo">
     <description>Information about a RC module</description>
     <param name="moduleId" type="String" maxlength="100" mandatory="true">
         <description> uuid of a module. "moduleId + moduleType" uniquely identify a module.</description>
     </param>
-    <param name="location" type="Grid" mandatory="false">
+    <param name="location" type="Common.Grid" mandatory="false">
        <description>Location of a module.</description>
     </param>
-    <param name="serviceArea" type="Grid" mandatory="false">
+    <param name="serviceArea" type="Common.Grid" mandatory="false">
        <description>Service area of a module. </description>
     </param>
     <param name="allowMultipleAccess" type="Boolean" mandatory="false" defvalue="true">
@@ -1691,7 +1822,7 @@
 
 <struct name="SeatLocation">
     <description>Describes the location of a seat.</description>
-    <param name="grid" type="Grid"  mandatory="false">
+    <param name="grid" type="Common.Grid"  mandatory="false">
     </param>
 </struct>
 
@@ -1701,9 +1832,24 @@
     <param name="columns" type="Integer" minvalue="1" maxvalue="100" mandatory="false"></param>
     <param name="levels" type="Integer" minvalue="1" maxvalue="100" defvalue="1" mandatory="false">   
     </param>
-    <param name="seats" type="SeatLocation" array="true" mandatory="false">
+    <param name="seats" type="Common.SeatLocation" array="true" mandatory="false">
         <description>Contains a list of SeatLocation in the vehicle</description>
     </param>
+</struct>
+
+<struct name="SeatStatus">
+  <description>Describes the status of a parameter of seat.</description>
+  <param name="seatLocation" type="Common.SeatLocation" mandatory="true"/>
+  <param name="conditionActive" type="Boolean" mandatory="true"/>
+</struct>
+
+<struct name="SeatOccupancy">
+  <param name="seatsOccupied" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are occupied.</description>
+  </param>
+  <param name="seatsBelted" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are belted.</description>
+  </param>
 </struct>
 
 <enum name="ModuleType">
@@ -1734,8 +1880,8 @@
 
     <struct name="MassageModeData">
       <description>Specify the mode of a massage zone.</description>
-      <param name="massageZone" type="MassageZone" mandatory="true"></param>
-      <param name="massageMode" type="MassageMode" mandatory="true"></param>
+      <param name="massageZone" type="Common.MassageZone" mandatory="true"></param>
+      <param name="massageMode" type="Common.MassageMode" mandatory="true"></param>
     </struct>
 
     <enum name="MassageCushion">
@@ -1749,13 +1895,13 @@
 
     <struct name="MassageCushionFirmness">
       <description>The intensity or firmness of a cushion.</description>
-      <param name="cushion" type="MassageCushion" mandatory="true"></param>
+      <param name="cushion" type="Common.MassageCushion" mandatory="true"></param>
       <param name="firmness" type="Integer" minvalue="0" maxvalue="100" mandatory="true"></param>
     </struct>
 
     <enum name="SeatMemoryActionType">
       <element name="SAVE">
-        <description>Save current seat postions and settings to seat memory.</description>
+        <description>Save current seat positions and settings to seat memory.</description>
       </element>
       <element name="RESTORE">
         <description>Restore / apply the seat memory settings to the current seat. </description>
@@ -1768,7 +1914,7 @@
     <struct name="SeatMemoryAction">
       <param name="id" type="Integer" minvalue="1" maxvalue="10" mandatory="true"/>
       <param name="label" type="String" maxlength="100" mandatory="false"/>
-      <param name="action" type="SeatMemoryActionType" mandatory="true"/>
+      <param name="action" type="Common.SeatMemoryActionType" mandatory="true"/>
     </struct>
 
     <enum name="SupportedSeat">
@@ -1779,7 +1925,7 @@
 
     <struct name="SeatControlData">
       <description>Seat control data corresponds to "SEAT" ModuleType. </description>
-      <param name="id" type="SupportedSeat" mandatory="false"></param>
+      <param name="id" type="Common.SupportedSeat" mandatory="false"></param>
       <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
       <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
       <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
@@ -1795,9 +1941,9 @@
       <param name="headSupportVerticalPosition" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
 
       <param name="massageEnabled" type="Boolean" mandatory="false"></param>
-      <param name="massageMode" type="MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
-      <param name="massageCushionFirmness" type="MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
-      <param name="memory" type="SeatMemoryAction" mandatory="false"></param>
+      <param name="massageMode" type="Common.MassageModeData" minsize="1" maxsize="2" array="true" mandatory="false"></param>
+      <param name="massageCushionFirmness" type="Common.MassageCushionFirmness" minsize="1" maxsize="5" array="true" mandatory="false"></param>
+      <param name="memory" type="Common.SeatMemoryAction" mandatory="false"></param>
     </struct>
 
     <struct name="SeatControlCapabilities">
@@ -1807,7 +1953,7 @@
         It should not be used to identify a module by mobile application.
         </description>
       </param>
-      <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+      <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
           <description>Information about a RC module, including its id. </description>
       </param>
       <param name="heatingEnabledAvailable" type="Boolean" mandatory="false">
@@ -1961,13 +2107,13 @@
      <param name="stationShortName" type="String" minlength="4" maxlength="7"  mandatory="false">
          <description>Identifies the 4-alpha-character station call sign plus an optional (-FM) extension</description>
      </param>
-     <param name="stationIDNumber" type="StationIDNumber"  mandatory="false">
+     <param name="stationIDNumber" type="Common.StationIDNumber"  mandatory="false">
          <description>Used for network Application. Consists of Country Code and FCC Facility ID.</description>
      </param>
      <param name="stationLongName" type="String" minlength="0" maxlength="56"  mandatory="false">
          <description>Identifies the station call sign or other identifying information in the long format.</description>
      </param>
-     <param name="stationLocation" type="GPSData" mandatory="false">
+     <param name="stationLocation" type="Common.GPSData" mandatory="false">
          <description>Provides the 3-dimensional geographic station location.</description>
      </param>
      <param name="stationMessage" type="String" minlength="0" maxlength="56"  mandatory="false">
@@ -2011,7 +2157,7 @@
    </param>
    <param name="state" type="Common.RadioState" mandatory="false">
    </param>
-   <param name="sisData" type="SisData" mandatory="false">
+   <param name="sisData" type="Common.SisData" mandatory="false">
        <description>Read-only Station Information Service (SIS) data provides basic information about the station such as call sign, as well as information not displayable to the consumer such as the station identification number</description>
    </param>
  </struct>
@@ -2021,7 +2167,7 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the radio control module.</description>
    </param>
-   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+   <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
        <description>Information about a RC module, including its id. </description>
    </param>
    <param name="radioEnableAvailable" type="Boolean" mandatory="false">
@@ -2100,7 +2246,7 @@
    </param>
    <param name="siriusxmRadioAvailable" type="Boolean" mandatory="false">
      <description>
-       Availability of sirius XM radio.
+       Availability of Sirius XM radio.
        True: Available, False: Not Available, Not present: Not Available.
      </description>
    </param>
@@ -2126,7 +2272,7 @@
  </enum>
 
  <struct name="Temperature">
-    <param name="unit" type="TemperatureUnit" mandatory="true" >
+    <param name="unit" type="Common.TemperatureUnit" mandatory="true" >
       <description>Temperature Unit</description>
     </param>
     <param name="value" type="Float" mandatory="true" >
@@ -2147,7 +2293,7 @@
    </param>
    <param name="autoModeEnable" type="Boolean" mandatory="false">
    </param>
-   <param name="defrostZone" type="DefrostZone" mandatory="false">
+   <param name="defrostZone" type="Common.DefrostZone" mandatory="false">
    </param>
    <param name="dualModeEnable" type="Boolean" mandatory="false">
    </param>
@@ -2176,7 +2322,7 @@
    <param name="moduleName" type="String" maxlength="100" mandatory="true" >
      <description>The short name or a short description of the climate control module.</description>
    </param>
-   <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+   <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
        <description>Information about a RC module, including its id. </description>
    </param>
    <param name="currentTemperatureAvailable" type="Boolean" mandatory="false">
@@ -2291,7 +2437,7 @@
  </struct>
 
  <struct name="AudioControlData">
-     <param name="source" type="PrimaryAudioSource" mandatory="false">
+     <param name="source" type="Common.PrimaryAudioSource" mandatory="false">
          <description>
            In a getter response or a notification, it is the current primary audio source of the system.
            In a setter request, it is the target audio source that the system shall switch to.
@@ -2310,7 +2456,7 @@
      <param name="volume" type="Integer" mandatory="false" minvalue="0" maxvalue="100">
          <description>Reflects the volume of audio, from 0%-100%.</description>
      </param>
-     <param name="equalizerSettings" type="EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
+     <param name="equalizerSettings" type="Common.EqualizerSettings" minsize="1" maxsize="100" mandatory="false" array="true">
          <description>Defines the list of supported channels (band) and their current/desired settings on HMI</description>
      </param>
  </struct>
@@ -2322,7 +2468,7 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
      <param name="sourceAvailable" type="Boolean" mandatory="false">
@@ -2459,7 +2605,7 @@
  </enum>
 
  <struct name="LightCapabilities">
-     <param name="name" type="LightName" mandatory="true" />
+     <param name="name" type="Common.LightName" mandatory="true" />
      <param name="statusAvailable" type="Boolean" mandatory="false">
        <description>
          Indicates if the status (ON/OFF) can be set remotely. App shall not use read-only values (RAMP_UP/RAMP_DOWN/UNKNOWN/INVALID) in a setInteriorVehicleData request.
@@ -2484,25 +2630,25 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
-     <param name="supportedLights" type="LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
+     <param name="supportedLights" type="Common.LightCapabilities" minsize="1" maxsize="100" array="true" mandatory="true">
      <description> An array of available light names that are controllable. </description>
      </param>
  </struct>
 
  <struct name="LightState">
-     <param name="id" type="LightName" mandatory="true">
+     <param name="id" type="Common.LightName" mandatory="true">
          <description>The name of a light or a group of lights. </description>
      </param>
-     <param name="status" type="LightStatus" mandatory="true"/>
+     <param name="status" type="Common.LightStatus" mandatory="true"/>
      <param name="density" type="Float" minvalue="0" maxvalue="1" mandatory="false" />
-     <param name="color" type="RGBColor" mandatory="false" />
+     <param name="color" type="Common.RGBColor" mandatory="false" />
  </struct>
 
  <struct name="LightControlData">
-     <param name="lightState" type="LightState" mandatory="true" minsize="1" maxsize="100" array="true">
+     <param name="lightState" type="Common.LightState" mandatory="true" minsize="1" maxsize="100" array="true">
          <description>An array of LightNames and their current or desired status. No change to the status of the LightNames that are not listed in the array.</description>
      </param>
  </struct>
@@ -2519,9 +2665,9 @@
 
  <struct name="HMISettingsControlData">
      <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
-     <param name="displayMode" type="DisplayMode" mandatory="false"></param>
-     <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
-     <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
+     <param name="displayMode" type="Common.DisplayMode" mandatory="false"></param>
+     <param name="temperatureUnit" type="Common.TemperatureUnit" mandatory="false"></param>
+     <param name="distanceUnit" type="Common.DistanceUnit" mandatory="false"></param>
  </struct>
 
  <struct name="HMISettingsControlCapabilities">
@@ -2531,7 +2677,7 @@
            It should not be used to identify a module by mobile application.
          </description>
      </param>
-     <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+     <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
          <description>Information about a RC module, including its id. </description>
      </param>
      <param name="distanceUnitAvailable" type="Boolean" mandatory="false">
@@ -2556,13 +2702,13 @@
    </param>
    <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
    </param>
-   <param name="seatControlData" type="SeatControlData" mandatory="false">
+   <param name="seatControlData" type="Common.SeatControlData" mandatory="false">
    </param>
-   <param name="audioControlData" type="AudioControlData" mandatory="false">
+   <param name="audioControlData" type="Common.AudioControlData" mandatory="false">
    </param>
-   <param name="lightControlData" type="LightControlData" mandatory="false">
+   <param name="lightControlData" type="Common.LightControlData" mandatory="false">
    </param>
-   <param name="hmiSettingsControlData" type="HMISettingsControlData" mandatory="false">
+   <param name="hmiSettingsControlData" type="Common.HMISettingsControlData" mandatory="false">
    </param>
  </struct>
 
@@ -2579,7 +2725,11 @@
     <description>The name that identifies the field. See TextFieldName.</description>
   </param>
   <param name="characterSet" type="Common.CharacterSet" mandatory="true">
-    <description>The character set that is supported in this field. See CharacterSet.</description>
+    <description>
+      The set of characters that are supported by this text field.
+      All text is sent in UTF-8 format, but not all systems may support all of the characters expressed by UTF-8.
+      All systems will support at least ASCII, but they may support more, either the LATIN-1 character set, or the full UTF-8 character set.
+    </description>
   </param>
   <param name="width" type="Integer" minvalue="1" maxvalue="500" mandatory="true">
     <description>The number of characters in one row of this field.</description>
@@ -2594,7 +2744,7 @@
     <param name="name" type="Common.ButtonName" mandatory="true">
         <description>The name of the Button from the ButtonName enum</description>
     </param>
-    <param name="moduleInfo" type="ModuleInfo" mandatory="false">
+    <param name="moduleInfo" type="Common.ModuleInfo" mandatory="false">
         <description>Information about a RC module, including its id. </description>
     </param>
     <param name="shortPressAvailable" type="Boolean" mandatory="true">
@@ -2736,8 +2886,8 @@
       Currently only predefined window template layouts are defined.
     </description>
   </param>
-  <param name="dayColorScheme" type="TemplateColorScheme" mandatory="false" />
-  <param name="nightColorScheme" type="TemplateColorScheme" mandatory="false" />
+  <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false" />
+  <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false" />
 </struct>
 
 <struct name="HMIApplication">
@@ -2817,7 +2967,7 @@
 <struct name="MenuParams">
   <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
     <description>unique ID of the sub menu, the command must be added to.</description>
-    <description>If not provided, the command must be added to the top level of the in application menu.</description>
+    <description>If not provided or 0, the command must be added to the top level of the in application menu.</description>
   </param>
   <param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
     <description>Position within the items that are at the top level of the in application menu.</description>
@@ -2828,6 +2978,12 @@
   </param>
   <param name="menuName" type="String" maxlength="500" mandatory="true">
     <description>The name of the sub menu/command.</description>
+  </param>
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional secondary text to display</description>
+  </param>
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional tertiary text to display</description>
   </param>
 </struct>
 
@@ -3061,15 +3217,24 @@
   </param>
   <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false">
     <description>
-      Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+      Allows an app to pre-populate the text field with a list of suggested or completed entries as the user types. 
       If empty, the auto-complete list will be removed from the screen.
+    </description>
+  </param>
+  <param name="maskInputCharacters" type="Common.KeyboardInputMask" mandatory="false">
+    <description>Allows an app to mask entered characters on HMI</description>
+  </param>
+  <param name="customKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
+    <description>
+      Array of special characters to show in customizable keys.
+      If omitted, keyboard will show default special characters
     </description>
   </param>
 </struct>
 
 <struct name="Turn">
   <param name="navigationText" type="Common.TextFieldStruct" mandatory="false">
-    <description>Uses navigationText from TextFieldStruct.</description>
+    <description>Describes the `Turn` using `TextFieldName` `turnText`</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
@@ -3115,7 +3280,7 @@
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
   </param>
-  <param name="tpms" type="TPMS" mandatory="false">
+  <param name="tpms" type="Common.TPMS" mandatory="false">
       <description>The status of TPMS according to the particular tire.</description>
   </param>
   <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
@@ -3221,6 +3386,44 @@
   </param>
 </struct>
 
+<struct name="StabilityControlsStatus">
+	<param name="escSystem" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle stability control is ON, else false</description>
+	</param>
+	<param name="trailerSwayControl" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle trailer sway control is ON, else false</description>
+	</param>
+</struct>
+
+<enum name="DoorStatusType">
+  <element name="CLOSED"/>
+  <element name="LOCKED"/>
+  <element name="AJAR"/>
+  <element name="REMOVED"/>
+</enum>
+
+<struct name="DoorStatus">
+  <description>Describes the status of a parameter of door.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+</struct>
+
+<struct name="GateStatus">
+  <description>Describes the status of a parameter of trunk/hood/etc.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+</struct>
+
+<struct name="RoofStatus">
+  <description>
+    Describes the status of a parameter of roof, convertible roof, sunroof/moonroof etc.
+    If roof is open (AJAR), state will determine percentage of roof open.
+  </description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+  <param name="state" type="Common.WindowState" mandatory="false"/>
+</struct>
+
 <struct name="BodyInformation">
   <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>Must be true if the park brake is active</description>
@@ -3232,16 +3435,25 @@
     <description>The status of the ignition. See IgnitionStatus.</description>
   </param>
   <param name="driverDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatDrv_B_Actl".</description>
+    <description>References signal "DrStatDrv_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="passengerDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatPsngr_B_Actl".</description>
+    <description>References signal "DrStatPsngr_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatRl_B_Actl".</description>
+    <description>References signal "DrStatRl_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatRr_B_Actl".</description>
+    <description>References signal "DrStatRr_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
+  </param>
+  <param name="doorStatuses" type="Common.DoorStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for doors if Ajar/Closed/Locked</description>
+  </param>
+  <param name="gateStatuses" type="Common.GateStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for trunk/hood/etc. if Ajar/Closed/Locked</description>
+  </param>
+  <param name="roofStatuses" type="Common.RoofStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for roof/convertible roof/sunroof/moonroof etc., if Closed/Ajar/Removed etc.</description>
   </param>
 </struct>
 
@@ -3426,7 +3638,7 @@
 </struct>
 
   <struct name="LocationDetails">
-    <param name="coordinate" type="Coordinate" mandatory="false">
+    <param name="coordinate" type="Common.Coordinate" mandatory="false">
       <description>Latitude/Longitude of the location.</description>
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
@@ -3441,10 +3653,10 @@
     <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
       <description>Phone number of location / establishment.</description>
     </param>
-    <param name="locationImage" type="Image" mandatory="false">
+    <param name="locationImage" type="Common.Image" mandatory="false">
       <description>Image / icon of intended location.</description>
     </param>
-    <param name="searchAddress" type="OASISAddress" mandatory="false">
+    <param name="searchAddress" type="Common.OASISAddress" mandatory="false">
       <description>Address to be used by navigation engines for search</description>
     </param>
   </struct>
@@ -3493,12 +3705,57 @@
     <param name="scale" type="Float" minvalue="1" maxvalue="10" mandatory="false">
       <description>The scaling factor the app should use to change the size of the projecting view.</description>
     </param>
+    <param name="preferredFPS" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
+      <description>The preferred frame rate per second of the head unit. The mobile application / app library may take other factors into account that constrain the frame rate lower than this value, but it should not perform streaming at a higher frame rate than this value.</description>
+    </param>
+    <param name="additionalVideoStreamingCapabilities" type="Common.VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
+    </param>
   </struct>
 
+  <struct name="AppCapability">
+    <param name="appCapabilityType" type="Common.AppCapabilityType" mandatory="true">
+        <description>
+            Used as a descriptor of what data to expect in this struct.
+            The corresponding param to this enum should be included and the only other param included.
+        </description>
+    </param>
+    <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
+        <description>Describes supported capabilities for video streaming </description>
+    </param>
+  </struct>
+
+  <struct name="DynamicUpdateCapabilities">
+    <param name="supportedDynamicImageFieldNames" type="Common.ImageFieldName" array="true" mandatory="false" minsize="1">
+      <description>An array of ImageFieldName values for which the system supports sending OnFileUpdate notifications. If you send an Image struct for that image field with a name without having uploaded the image data using PutFile that matches that name, the system will request that you upload the data with PutFile at a later point when the HMI needs it. The HMI will then display the image in the appropriate field. If not sent, assume false.</description>
+    </param>
+
+    <param name="supportsDynamicSubMenus" type="Boolean" mandatory="false">
+      <description>If true, the head unit supports dynamic sub-menus by sending OnUpdateSubMenu notifications. If true, you should not send AddCommands that attach to a parentID for an AddSubMenu until OnUpdateSubMenu is received with the menuID. At that point, you should send all AddCommands with a parentID that match the menuID. If not set, assume false.</description>
+    </param>
+  </struct>
 
   <struct name="WindowTypeCapabilities">
     <param name="type" type="Common.WindowType" mandatory="true" />
     <param name="maximumNumberOfWindows" type="Integer" mandatory="true" />
+  </struct>
+
+  <struct name="KeyboardLayoutCapability">
+    <description>
+      Describes the capabilities of a single keyboard layout.
+    </description>
+    <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true"/>
+    <param name="numConfigurableKeys" type="Integer" minvalue="0" maxvalue="10" mandatory="true">
+      <description>Number of keys available for special characters, App can customize as per their needs.</description>
+    </param>
+  </struct>
+
+  <struct name="KeyboardCapabilities">
+    <param name="maskInputCharactersSupported" type="Boolean" mandatory="false">
+      <description>Availability of capability to mask input characters using keyboard. True: Available, False: Not Available</description>
+    </param>
+    <param name="supportedKeyboards" type="Common.KeyboardLayoutCapability" minsize="1" maxsize="1000" array="true" mandatory="false">
+      <description>Capabilities of supported keyboard layouts by HMI.</description>
+    </param>
   </struct>
 
   <struct name="WindowCapability">
@@ -3508,13 +3765,13 @@
         or omitted for the main window on the main display.
       </description>
     </param>
-    <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="textFields" type="Common.TextField" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>A set of all fields that support text data. See TextField</description>
     </param>
-    <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>A set of all fields that support images. See ImageField</description>
     </param>
-    <param name="imageTypeSupported" type="ImageType" array="true" minsize="0" maxsize="1000" mandatory="false">
+    <param name="imageTypeSupported" type="Common.ImageType" array="true" minsize="0" maxsize="1000" mandatory="false">
       <description>Provides information about image types supported by the system.</description>
     </param>
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" mandatory="false">
@@ -3523,26 +3780,32 @@
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
       <description>The number of on-window custom presets available (if any); otherwise omitted.</description>
     </param>
-    <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="buttonCapabilities" type="Common.ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The number of buttons and the capabilities of each on-window button.</description>
     </param>
-    <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The number of soft buttons available on-window and the capabilities for each button.</description>
     </param>
     <param name="menuLayoutsAvailable" type="Common.MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
+    </param>
+    <param name="dynamicUpdateCapabilities" type="Common.DynamicUpdateCapabilities" mandatory="false">
+      <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
+    </param>
+    <param name="keyboardCapabilities" type="Common.KeyboardCapabilities" mandatory="false">
+      <description>See KeyboardCapabilities</description>
     </param>
   </struct>
 
   <struct name="DisplayCapability">
     <description>Contains information about the display capabilities.</description>
     <param name="displayName" type="String" mandatory="false" />
-    <param name="windowTypeSupported" type="WindowTypeCapabilities" array="true" minsize="1" mandatory="false">
+    <param name="windowTypeSupported" type="Common.WindowTypeCapabilities" array="true" minsize="1" mandatory="false">
       <description>
         Informs the application how many windows the app is allowed to create per type.
       </description>
     </param>
-    <param name="windowCapabilities" type="WindowCapability" array="true" minsize="1" maxsize="1000" mandatory="false">
+    <param name="windowCapabilities" type="Common.WindowCapability" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>
         Contains a list of capabilities of all windows related to the app.
         Once the app has registered the capabilities of all windows are provided.
@@ -3551,43 +3814,55 @@
         Following cases will cause only affected windows to be included:
         1. App creates a new window. After the window is created, a system capability notification will be sent
         related only to the created window.
-        2. App sets a new layout to the window. The new layout changes window capabilties.
+        2. App sets a new layout to the window. The new layout changes window capabilities.
         The notification will reflect those changes to the single window.
       </description>
     </param>
   </struct>
 
+  <struct name="DriverDistractionCapability">
+      <param name="menuLength" type="Integer" mandatory="false">
+          <description>The number of items allowed in a Choice Set or Command menu while the driver is distracted</description>
+      </param>
+      <param name="subMenuDepth" type="Integer" minvalue="1" mandatory="false">
+          <description>The depth of submenus allowed when the driver is distracted. e.g. 3 == top level menu -> submenu -> submenu; 1 == top level menu only</description>
+      </param>
+  </struct>
+
   <struct name="SystemCapabilities">
-      <param name="navigationCapability" type="NavigationCapability" mandatory="false">
+      <param name="navigationCapability" type="Common.NavigationCapability" mandatory="false">
       </param>
-      <param name="phoneCapability" type="PhoneCapability" mandatory="false">
+      <param name="phoneCapability" type="Common.PhoneCapability" mandatory="false">
       </param>
-      <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+      <param name="videoStreamingCapability" type="Common.VideoStreamingCapability" mandatory="false">
+      </param>
+      <param name="driverDistractionCapability" type="Common.DriverDistractionCapability" mandatory="false">
+        <description>Describes capabilities when the driver is distracted</description>
       </param>
   </struct>
 
   <struct name="RemoteControlCapabilities">
-    <param name="climateControlCapabilities" type="ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="climateControlCapabilities" type="Common.ClimateControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC climate controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
     </param>
-    <param name="radioControlCapabilities" type="RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="radioControlCapabilities" type="Common.RadioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>If included, the platform supports RC radio controls. For this baseline version, maxsize=1. i.e. only one climate control module is supported.</description >
     </param>
-    <param name="buttonCapabilities" type="ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
+    <param name="buttonCapabilities" type="Common.ButtonCapabilities"  mandatory="false" minsize="1" maxsize="100" array="true" >
       <description>If included, the platform supports RC button controls with the included button names.</description >
     </param>
-    <param name="seatControlCapabilities" type="SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="seatControlCapabilities" type="Common.SeatControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
       <description>
       If included, the platform supports seat controls.
       </description >
     </param>
-    <param name="audioControlCapabilities" type="AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
+    <param name="audioControlCapabilities" type="Common.AudioControlCapabilities" mandatory="false" minsize="1" maxsize="100" array="true">
         <description> If included, the platform supports audio controls. </description >
     </param>
-    <param name="hmiSettingsControlCapabilities" type="HMISettingsControlCapabilities" mandatory="false">
+    <param name="hmiSettingsControlCapabilities" type="Common.HMISettingsControlCapabilities" mandatory="false">
         <description> If included, the platform supports hmi setting controls. </description >
     </param>
-    <param name="lightControlCapabilities" type="LightControlCapabilities" mandatory="false">
+    <param name="lightControlCapabilities" type="Common.LightControlCapabilities" mandatory="false">
         <description> If included, the platform supports light controls. </description >
     </param>
   </struct>
@@ -4089,6 +4364,7 @@
         <element name="APP_SERVICES" />
         <element name="SEAT_LOCATION"/>
         <element name="DISPLAYS"/>
+        <element name="DRIVER_DISTRACTION" />
     </enum>
 
     <struct name="SystemCapability">
@@ -4119,9 +4395,12 @@
             </description>
         </param>
         <param name="displayCapabilities" type="Common.DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false"/>
-        <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
+        <param name="seatLocationCapability" type="Common.SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
+        <param name="driverDistractionCapability" type="Common.DriverDistractionCapability" mandatory="false">
+            <description>Describes capabilities when the driver is distracted</description>
+        </param>      
     </struct>
     
     <enum name="HybridAppPreference">
@@ -4131,6 +4410,75 @@
         <element name="BOTH"/>
     </enum>
 
+    <struct name="AppProperties">
+      <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
+          <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
+      </param>
+      <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
+      <param name="enabled" type="Boolean" mandatory="false">
+          <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
+      </param>
+      <param name="authToken" type="String" maxlength="65535" mandatory="false">
+          <description>Used to authenticate connection on app activation</description>
+      </param>
+      <param name="transportType" type="String" maxlength="100" mandatory="false">
+          <description>
+            Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
+            See "endpoint" for details.
+          </description>
+      </param>
+      <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
+          <description>Specifies the user preference to use one specific app type or all available types</description>
+      </param>
+      <param name="endpoint" type="String" maxlength="65535" mandatory="false">
+          <description>
+            If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
+            If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
+          </description>
+      </param>
+    </struct>
+
+    <struct name="ClimateData">
+      <param name="externalTemperature" type="Common.Temperature" mandatory="false">
+        <description>The external temperature in degrees celsius</description>
+      </param>
+      <param name="cabinTemperature" type="Common.Temperature" mandatory="false">
+        <description>Internal ambient cabin temperature in degrees celsius</description>
+      </param>
+      <param name="atmosphericPressure" type="Float" minvalue="0" maxvalue="2000" mandatory="false">
+        <description>Current atmospheric pressure in mBar</description>
+      </param>
+    </struct>
+
+    <struct name="GearStatus">
+      <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
+        <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
+      </param>
+      <param name="actualGear" type="Common.PRNDL" mandatory="false">
+        <description>Actual Gear in use by the transmission</description>
+      </param>
+      <param name="transmissionType" type="Common.TransmissionType" mandatory="false">
+        <description>Tells the transmission type</description>
+      </param>
+    </struct>
+
+    <enum name="SeekIndicatorType">
+      <element name="TRACK" />
+      <element name="TIME" />
+    </enum>
+
+    <struct name="SeekStreamingIndicator">
+      <description>
+        The seek next / skip previous subscription buttons' content
+      </description>
+      <param name="type" type="Common.SeekIndicatorType" mandatory="true" />
+      <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
+        <description>
+          If the type is TIME, this number of seconds may be present alongside the skip indicator.
+          It will indicate the number of seconds that the currently playing media will skip forward or backward.
+        </description>
+      </param>
+    </struct>
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -4176,10 +4524,9 @@
       </param>
       <param name="appID" type="Integer" mandatory="false">
         <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonPress notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
         </description>
       </param>
     </function>
@@ -4193,54 +4540,59 @@
         </param>
         <param name="appID" type="Integer" mandatory="false">
             <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
             </description>
         </param>
     </function>
-    <function name="OnButtonSubscription" messagetype="notification">
+    <function name="SubscribeButton" messagetype="request">
       <description>
-        Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application
+        Subscribes to buttons.
       </description>
-      <param name="name" type="Common.ButtonName" mandatory="true" />
-      <param name="isSubscribed" type="Boolean" mandatory="true">
-        <description>
-          Defines whether the named button has status of 'subscribed' or 'unsubscribed':
-          If "true" - the named button is subscribed.
-          If "false" - the named button is unsubscribed.
-        </description>
-      </param>
       <param name="appID" type="Integer" mandatory="true">
-        <description>
-          The ID of application that relates to this button-subscription status change.
-        </description>
+        <description>The ID of the application requesting this button subscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to subscribe.</description>
       </param>
     </function>
+    <function name="SubscribeButton" messagetype="response"> </function>
+    <function name="UnsubscribeButton" messagetype="request">
+      <description>
+        Unsubscribes from buttons.
+      </description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>The ID of the application requesting this button unsubscription. </description>
+      </param>
+      <param name="buttonName" type="Common.ButtonName" mandatory="true">
+        <description>Name of the button to unsubscribe from.</description>
+      </param>
+    </function>
+    <function name="UnsubscribeButton" messagetype="response"></function>
 </interface>
 
-<interface name="BasicCommunication" version="2.1.0" date="2019-03-18">
-<function name="OnServiceUpdate" messagetype="notification">
-  <description>
-    Must be sent by SDL to HMI when there is an update on status of certain services.
-    Services supported with current version: Video
-  </description>
-  <param name="serviceType" type="Common.ServiceType" mandatory="true">
-    <description>Specifies the service which has been updated.</description>
-  </param>
-  <param name="serviceEvent" type="Common.ServiceEvent" mandatory="false">
-    <description>Specifies service update event.</description>
-  </param>
-  <param name="reason" type="Common.ServiceStatusUpdateReason" mandatory="false">
-    <description>
-      The reason for a service event. Certain events may not have a reason, such as when a service is ACCEPTED (which is the normal expected behavior).
-    </description>
-  </param>
-   <param name="appID" type="Integer" mandatory="false">
-       <description>ID of the application which triggered the update.</description>
-   </param>
-</function>
+<interface name="BasicCommunication" version="2.2.0" date="2021-04-14">
+    <function name="OnServiceUpdate" messagetype="notification">
+      <description>
+        Must be sent by SDL to HMI when there is an update on status of certain services.
+        Services supported with current version: Video
+      </description>
+      <param name="serviceType" type="Common.ServiceType" mandatory="true">
+        <description>Specifies the service which has been updated.</description>
+      </param>
+      <param name="serviceEvent" type="Common.ServiceEvent" mandatory="false">
+        <description>Specifies service update event.</description>
+      </param>
+      <param name="reason" type="Common.ServiceStatusUpdateReason" mandatory="false">
+        <description>
+          The reason for a service event. Certain events may not have a reason, such as when a service is ACCEPTED (which is the normal expected behavior).
+        </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="false">
+          <description>ID of the application which triggered the update.</description>
+      </param>
+    </function>
     <function name="GetSystemTime" messagetype="request">
       <description>Request from SDL to HMI to obtain current UTC time.</description>
     </function>
@@ -4303,6 +4655,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
+      <description>DEPRECATED - This RPC is not implemented</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
@@ -4436,6 +4789,27 @@
     </function>
     <function name="DialNumber" messagetype="response">
     </function>
+    <function name="OnResetTimeout" messagetype="notification">
+      <description>
+        HMI must send this notification to SDL for method instance for which timeout needs to be reset
+      </description>
+      <param name="requestID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Id between HMI and SDL which SDL used to send the request for method in question, for which timeout needs to be reset.
+        </description>
+      </param>
+      <param name="methodName" type="String" mandatory="true">
+        <description>
+          Name of the function for which timeout needs to be reset
+        </description>
+      </param>
+      <param name="resetPeriod" type="Integer" minvalue="0" maxvalue="1000000" mandatory="false">
+        <description>
+          Timeout period in milliseconds, for the method for which timeout needs to be reset.
+          If omitted, timeout would be reset by defaultTimeout specified in smartDeviceLink.ini
+        </description>
+      </param>
+    </function>
     <!-- Policies -->
 
     <!-- SyncP RPC-->
@@ -4452,7 +4826,7 @@
           This parameter is filled for supporting OEM proprietary data exchanges.
         </description>
       </param>
-      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
+      <param name="url" type="String" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -4609,6 +4983,9 @@
     <param name="wersCountryCode" type="String" maxlength="500" mandatory="true">
       <description>Country code from the Ford system WERS (i.e.WAEGB).</description>
     </param>
+    <param name="systemHardwareVersion" type="String" maxlength="500" mandatory="false">
+      <description>The hardware version of the system</description>
+    </param>
   </function>
   <function name="OnSystemInfoChanged" messagetype="notification">
     <description>Issued by system to SDL to notify that some system param has changed. Currently applied for Sync Language.</description>
@@ -4650,59 +5027,17 @@
     </param>
   </function>
   
-  <struct name="AppProperties">
-    <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
-        <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
-    </param>
-    <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
-    <param name="enabled" type="Boolean" mandatory="false">
-        <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
-    </param>
-    <param name="authToken" type="String" maxlength="65535" mandatory="false">
-        <description>Used to authenticate connection on app activation</description>
-    </param>
-    <param name="transportType" type="String" maxlength="100" mandatory="false">
-        <description>
-          Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
-          See "endpoint" for details.
-        </description>
-    </param>
-    <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
-        <description>Specifies the user preference to use one specific app type or all available types</description>
-    </param>
-    <param name="endpoint" type="String" maxlength="65535" mandatory="false">
-        <description>
-          If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
-          If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
-        </description>
-    </param>
-  </struct>
-  
   <function name="SetAppProperties" messagetype="request">
     <description>
       HMI >SDL. RPC used to enable/disable an application and set authentication data
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
     </param>
   </function> 
   
   <function name="SetAppProperties" messagetype="response">
     <description>The response to SetAppProperties</description>
-    <param name="success" type="Boolean" platform="documentation" mandatory="true">
-      <description>true if successful; false if failed</description>
-    </param>
-    <param name="resultCode" type="Common.Result" platform="documentation" mandatory="true">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="DISALLOWED"/>
-      <element name="WARNINGS"/>
-      <element name="DATA_NOT_AVAILABLE"/>
-    </param>
   </function>
   
   <function name="GetAppProperties" messagetype="request">
@@ -4710,29 +5045,17 @@
       HMI >SDL. RPC used to get the current properties of an application
     </description>
     <param name="policyAppID" type="String" maxlength="100" mandatory="false">
-      If specified the response will contain the properties of the specified app ID.
-      Otherwise if omitted all app properties will be returned at once.
+      <description>
+        If specified the response will contain the properties of the specified app ID.
+        Otherwise if omitted all app properties will be returned at once.
+      </description>
     </param>
   </function>
   
   <function name="GetAppProperties" messagetype="response">
     <description>The response to GetAppProperties</description>
-    <param name="properties" type="AppProperties" array="true" minsize="1" mandatory="false">
+    <param name="properties" type="Common.AppProperties" array="true" minsize="1" mandatory="false">
       <description>The requested application properties</description>
-    </param>
-    <param name="success" type="Boolean" platform="documentation" mandatory="true">
-      <description>true if successful; false if failed</description>
-    </param>
-    <param name="resultCode" type="Common.Result" platform="documentation" mandatory="true">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="DISALLOWED"/>
-      <element name="WARNINGS"/>
-      <element name="DATA_NOT_AVAILABLE"/>
     </param>
   </function>
   
@@ -4740,13 +5063,22 @@
     <description>
       SDL >HMI. RPC used to inform HMI about app properties change (such as auth token).
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
+    </param>
+  </function>
+
+  <function name="OnAppCapabilityUpdated" messagetype="notification">
+    <description>A notification to inform HMI that a specific app capability has changed.</description>
+    <param name="appCapability" type="Common.AppCapability" mandatory="true">
+        <description>The app capability that has been updated</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
     </param>
   </function>
 </interface>
 
-<interface name="VR" version="1.1.0" date="2017-04-27">
+<interface name="VR" version="1.2.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
@@ -5012,21 +5344,9 @@
   </function>
   <function name="SetGlobalProperties" messagetype="response">
   </function>
-  <function name="OnResetTimeout" messagetype="notification">
-    <description>
-      Sender: HMI->SDL. HMI must send this notification every 10 sec. in case the 'methodName'
-      results long processing on HMI
-    </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that concerns the 'methodName'.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>The name of the method, the renew of timeout is required for</description>
-    </param>
-  </function>
 </interface>
 
-<interface name="UI" version="1.4.0" date="2019-07-24">
+<interface name="UI" version="1.5.0" date="2021-04-14">
   <function name="Alert" messagetype="request">
     <description>Request from SDL to show an alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
@@ -5063,6 +5383,51 @@
   <function name="Alert" messagetype="response">
     <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
       <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
+    </param>
+  </function>
+
+  <function name="SubtleAlert" messagetype="request">
+    <description>Request from SDL to show a subtle alert message on the display.</description>
+    <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="2">
+      <description>Array of lines of alert text fields. See TextFieldStruct. Uses subtleAlertText1, subtleAlertText2.</description>
+    </param>
+    <param name="alertIcon" type="Common.Image" mandatory="false">
+      <description>
+        Image to be displayed for the corresponding alert. See Image. 
+        If omitted, no (or the default if applicable) icon should be displayed.
+      </description>
+    </param>
+    <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000">
+      <description>Timeout in milliseconds.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="2" array="true">
+      <description>App defined SoftButtons</description>
+    </param>
+    <param name="alertType" type="Common.AlertType" mandatory="true">
+      <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
+  </function>
+
+  <function name="SubtleAlert" messagetype="response">
+    <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
+      <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
+    </param>
+  </function>
+
+  <function name="OnSubtleAlertPressed" messagetype="notification">
+    <description>
+      Sent when the alert itself is touched (outside of a soft button). Touching (or otherwise selecting) the alert should open the app before sending this notification.
+    </description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that is related to this RPC.</description>
     </param>
   </function>
 
@@ -5238,6 +5603,9 @@
       <description>Image to be displayed for representing the command. See Image.</description>
       <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
     </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+      <description>Optional secondary image struct for menu cell</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
@@ -5265,10 +5633,13 @@
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
-      <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
+      <description>Position, parentID, and name of menu to be added.</description>
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
       <description>The image field for AddSubMenu</description>
+    </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+        <description>Optional secondary image struct for menu cell</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
@@ -5353,7 +5724,7 @@
     </param>
     <param name="functionID" type="Integer" mandatory="true">
       <description>
-        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.
+        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), 26 (SliderID), and 64 (SubtleAlertID) are permitted.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5381,6 +5752,19 @@
     </param>
     <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
       <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
+    </param>
+    <param name="forwardSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the forward seek button to either skip forward a set amount of time or to the next track.</description>
+    </param>
+    <param name="backSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the backward seek button to either skip back a set amount of time or to the previous track.</description>
+    </param>
+    <param name="countRate" type="Float" minvalue="0.1" maxvalue="100.0" defvalue="1.0" mandatory="false">
+      <description>
+        The value of this parameter is the amount that the media clock timer will advance per 1.0 seconds of real time.
+        Values less than 1.0 will therefore advance the timer slower than real-time, while values greater than 1.0 will advance the timer faster than real-time.
+        e.g. If this parameter is set to `0.5`, the timer will advance one second per two seconds real-time, or at 50% speed. If this parameter is set to `2.0`, the timer will advance two seconds per one second real-time, or at 200% speed.
+      </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
@@ -5469,6 +5853,7 @@
     <param name="systemCapabilities" type="Common.SystemCapabilities" mandatory="false">
       <description>Specifies system capabilities. See SystemCapabilities</description>
     </param>
+    <param name="pcmStreamCapabilities" type="Common.AudioPassThruCapabilities" mandatory="false"/>
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
@@ -5658,15 +6043,6 @@
   <function name="ClosePopUp" messagetype="response">
     <description>Provides the result of operation.</description>
   </function>
-  <function name="OnResetTimeout" messagetype="notification">
-    <description>HMI must provide SDL with notifications specific to the current Turn-By-Turn client status on the module</description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>Id of application that invoked notifcation.</description>
-    </param>
-    <param name="methodName" type="String" mandatory="true">
-      <description>Currently used method name on which was triggered action</description>
-    </param>
-  </function>
   <function name="OnRecordStart" messagetype="notification">
     <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
     <param name="appID" type="Integer" mandatory="true">
@@ -5689,9 +6065,36 @@
   </function>
   <function name="SendHapticData" messagetype="response">
   </function>
+
+  <function name="OnUpdateFile" messagetype="notification">
+    <description>For the HMI to tell Core that a file needs to be retrieved from the app.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>File reference name.</description>
+    </param>
+  </function>
+
+  <function name="OnUpdateSubMenu" messagetype="notification">
+    <description>For the HMI to tell Core that a submenu needs updating</description>
+
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>This menuID must match a menuID in the current menu structure</description>
+    </param>
+
+    <param name="updateSubCells" type="Boolean" mandatory="false">
+      <description>If not set, assume false. If true, the app should send AddCommands with parentIDs matching the menuID. These AddCommands will then be attached to the submenu and displayed if the submenu is selected.</description>
+    </param>
+  </function>
+
 </interface>
 
-<interface name="Navigation" version="1.5.0" date="2017-08-15">
+<interface name="Navigation" version="1.6.0" date="2021-04-14">
 
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
@@ -5755,12 +6158,10 @@
     <param name="nextTurnIcon" type="Common.Image" mandatory="false">
     </param>
     <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (from previous maneuver).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) until next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) from previous maneuver to next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="maneuverComplete" type="Boolean" mandatory="false">
       <description>If and when a maneuver has completed while an AlertManeuver is active, SDL will send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
@@ -5829,7 +6230,7 @@
   </function>
   <function name="StartStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5848,7 +6249,7 @@
   </function>
   <function name="StartAudioStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5917,7 +6318,7 @@
 
 </interface>
 
-<interface name="VehicleInfo" version="2.1.0" date="2019-03-18">
+<interface name="VehicleInfo" version="2.2.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
   </function>
@@ -6014,25 +6415,34 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6075,6 +6485,18 @@
     </param>
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6107,25 +6529,34 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6169,6 +6600,18 @@
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -6193,9 +6636,6 @@
     <description>
       This function is used to unsubscribe the notifications from the subscribeVehicleData function.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
@@ -6206,25 +6646,34 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6268,6 +6717,18 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6299,25 +6760,34 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6360,6 +6830,18 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6393,19 +6875,25 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
@@ -6413,8 +6901,11 @@
     <param name="vin" type="Boolean" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6458,6 +6949,18 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6489,19 +6992,25 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
@@ -6509,8 +7018,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6553,6 +7065,18 @@
     </param>
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6586,19 +7110,25 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
@@ -6606,8 +7136,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6651,6 +7184,18 @@
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
     </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -6674,7 +7219,7 @@
 </interface>
 
  <!-- Policies -->
-<interface name="SDL" version="1.2.0" date="2018-09-05">
+<interface name="SDL" version="1.3.0" date="2021-04-14">
 <function name="ActivateApp" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
     </param>
@@ -6855,7 +7400,7 @@
     </function>
 </interface>
 
-<interface name="RC" version="2.0.0" date="2018-09-05">
+<interface name="RC" version="2.1.0" date="2021-04-14">
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response should provide information about presence of any of remote controllable module and its readiness to cooperate with SDL.</description>
   </function>
@@ -6978,7 +7523,7 @@
 
 </interface>
 
-<interface name="AppService" version="1.0.0" date="2019-03-18">
+<interface name="AppService" version="1.1.0" date="2021-04-14">
     <description>Interface used for interacting with app services as a producer or consumer</description>
     <function name="PublishAppService" messagetype="request">
         <description>

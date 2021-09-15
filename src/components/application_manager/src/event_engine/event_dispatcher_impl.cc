@@ -44,6 +44,7 @@ EventDispatcherImpl::EventDispatcherImpl() : observers_event_() {}
 EventDispatcherImpl::~EventDispatcherImpl() {}
 
 void EventDispatcherImpl::raise_event(const Event& event) {
+  ObserverVector observers;
   AutoLock observer_lock(observer_lock_);
   {
     AutoLock state_lock(state_lock_);
@@ -51,22 +52,25 @@ void EventDispatcherImpl::raise_event(const Event& event) {
     // check if event is notification
     if (hmi_apis::messageType::notification == event.smart_object_type()) {
       const uint32_t notification_correlation_id = 0;
-      observers_ = observers_event_[event.id()][notification_correlation_id];
+      observers = observers_event_[event.id()][notification_correlation_id];
     }
 
     if (hmi_apis::messageType::response == event.smart_object_type() ||
         hmi_apis::messageType::error_response == event.smart_object_type()) {
-      observers_ =
+      observers =
           observers_event_[event.id()][event.smart_object_correlation_id()];
     }
   }
 
-  // Call observers
-  while (!observers_.empty()) {
-    EventObserver* temp = *observers_.begin();
-    observers_.erase(observers_.begin());
+  while (!observers.empty()) {
+    EventObserver* temp = *observers.begin();
+    observers.erase(observers.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->on_event(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 
@@ -78,7 +82,7 @@ void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
 }
 
 struct IdCheckFunctor {
-  IdCheckFunctor(const unsigned long id) : target_id(id) {}
+  explicit IdCheckFunctor(const unsigned long id) : target_id(id) {}
 
   bool operator()(const EventObserver* obs) const {
     return (obs->id() == target_id);
@@ -87,6 +91,15 @@ struct IdCheckFunctor {
  private:
   const unsigned long target_id;
 };
+
+void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
+                                          const int32_t hmi_correlation_id) {
+  AutoLock auto_lock(state_lock_);
+  auto& observers = observers_event_[event_id][hmi_correlation_id];
+  for (auto observer : observers) {
+    remove_observer_from_vector(*observer);
+  }
+}
 
 void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
                                           EventObserver& observer) {
@@ -148,7 +161,11 @@ void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
     EventObserver* temp = *mobile_observers_.begin();
     mobile_observers_.erase(mobile_observers_.begin());
     AutoUnlock unlock_observer(observer_lock);
-    temp->on_event(event);
+
+    if (temp->IncrementReferenceCount()) {
+      temp->HandleOnEvent(event);
+      temp->DecrementReferenceCount();
+    }
   }
 }
 

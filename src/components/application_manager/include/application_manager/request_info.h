@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <set>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "commands/request_to_hmi.h"
 
 #include "utils/date_time.h"
@@ -127,7 +127,7 @@ struct RequestInfo {
   }
   uint64_t hash();
   static uint64_t GenerateHash(uint32_t var1, uint32_t var2);
-  static uint32_t HmiConnectionKey;
+  static constexpr uint32_t kHmiConnectionKey = 0;
 
  protected:
   RequestPtr request_;
@@ -180,6 +180,11 @@ typedef std::set<RequestInfoPtr, RequestInfoHashComparator>
  */
 class RequestInfoSet {
  public:
+  /**
+   * @brief destructor
+   */
+  ~RequestInfoSet();
+
   /*
    * @brief Add requests into colletion by log(n) time
    * @param request_info - request to add
@@ -194,7 +199,7 @@ class RequestInfoSet {
    * @return founded request or shared_ptr with NULL
    */
   RequestInfoPtr Find(const uint32_t connection_key,
-                      const uint32_t correlation_id);
+                      const uint32_t correlation_id) const;
 
   /*
    * @brief Get request with smalest end_time_
@@ -207,6 +212,15 @@ class RequestInfoSet {
    * @return founded request or shared_ptr with NULL
    */
   RequestInfoPtr FrontWithNotNullTimeout();
+
+  /**
+   * @brief GetRequestsByConnectionKey gets all pending requests by provided
+   * connection key
+   * @param connection_key connection key for related requests
+   * @return list of all pending requests for a specified connection key
+   */
+  std::list<RequestInfoPtr> GetRequestsByConnectionKey(
+      const uint32_t connection_key);
 
   /*
    * @brief Erase request from colletion by log(n) time
@@ -264,7 +278,7 @@ class RequestInfoSet {
   TimeSortedRequestInfoSet time_sorted_pending_requests_;
   HashSortedRequestInfoSet hash_sorted_pending_requests_;
 
-  sync_primitives::Lock pending_requests_lock_;
+  mutable sync_primitives::Lock pending_requests_lock_;
 };
 
 /**

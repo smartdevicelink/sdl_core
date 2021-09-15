@@ -45,7 +45,6 @@
 #include "sdl_rpc_plugin/commands/hmi/on_audio_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_button_subscription_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_chosen_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_driver_distraction_notification.h"
@@ -61,6 +60,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/on_record_start_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_resume_audio_source_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_close_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_consent_needed_notification.h"
@@ -72,13 +72,12 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
@@ -91,6 +90,7 @@
 #include "utils/signals.h"
 
 #include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
@@ -100,10 +100,13 @@
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "resumption/mock_last_state.h"
 #include "smart_objects/smart_object.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 #include "transport_manager/mock_transport_manager.h"
@@ -125,6 +128,7 @@ using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
+using ::test::components::application_manager_test::MockAppServiceManager;
 using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
 using ::testing::InSequence;
@@ -214,7 +218,11 @@ class HMICommandsNotificationsTest
   HMICommandsNotificationsTest()
       : applications_lock_(std::make_shared<sync_primitives::Lock>())
       , applications_(application_set_, applications_lock_)
-      , app_ptr_(NULL) {}
+      , app_ptr_(NULL)
+      , mock_last_state_(std::make_shared<resumption_test::MockLastState>())
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_))
+      , mock_app_service_manager_(app_mngr_, last_state_wrapper_) {}
 
   ~HMICommandsNotificationsTest() {
     // Fix DataAccessor release and WinQt crash
@@ -242,20 +250,21 @@ class HMICommandsNotificationsTest
 
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
+  std::shared_ptr<resumption_test::MockLastState> mock_last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
+  MockAppServiceManager mock_app_service_manager_;
 
   void InitCommand(const uint32_t& default_timeout) OVERRIDE {
+    CommandsTest<kIsNice>::InitCommand(default_timeout);
+
     app_ = ConfigureApp(&app_ptr_, kAppId_, NOT_MEDIA, NOT_NAVI, NOT_VC);
-    EXPECT_CALL(app_mngr_, get_settings())
-        .WillOnce(ReturnRef(app_mngr_settings_));
-    EXPECT_CALL(app_mngr_settings_, default_timeout())
-        .WillOnce(ReturnRef(default_timeout));
-    ON_CALL(app_mngr_, event_dispatcher())
-        .WillByDefault(ReturnRef(mock_event_dispatcher_));
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
     ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
-    ON_CALL(mock_message_helper_, MobileLanguageToString(kMobileLanguage))
-        .WillByDefault(Return(kDefaultLanguage));
+    ON_CALL(app_mngr_, GetAppServiceManager())
+        .WillByDefault(ReturnRef(mock_app_service_manager_));
+    ON_CALL(app_mngr_, connection_handler())
+        .WillByDefault(ReturnRef(mock_connection_handler_));
   }
 
   am::ApplicationSharedPtr ConfigureApp(NiceMock<MockApplication>** app_mock,
@@ -328,7 +337,6 @@ class HMIOnNotificationsEventDispatcher
 
 typedef Types<OnAppPermissionChangedNotification,
               OnAudioDataStreamingNotification,
-              hmi::OnButtonSubscriptionNotification,
               OnFileRemovedNotification,
               OnPutFileNotification,
               OnResumeAudioSourceNotification,
@@ -347,12 +355,10 @@ typedef Types<
                 hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated>,
     CommandPair<OnEventChangedNotification,
                 hmi_apis::FunctionID::BasicCommunication_OnEventChanged>,
-    CommandPair<hmi::OnTTSResetTimeoutNotification,
-                hmi_apis::FunctionID::TTS_OnResetTimeout>,
+    CommandPair<hmi::OnResetTimeoutNotification,
+                hmi_apis::FunctionID::BasicCommunication_OnResetTimeout>,
     CommandPair<OnTTSStartedNotification, hmi_apis::FunctionID::TTS_Started>,
     CommandPair<OnTTSStoppedNotification, hmi_apis::FunctionID::TTS_Stopped>,
-    CommandPair<hmi::OnUIResetTimeoutNotification,
-                hmi_apis::FunctionID::UI_OnResetTimeout>,
     CommandPair<OnVRStartedNotification, hmi_apis::FunctionID::VR_Started>,
     CommandPair<OnVRStoppedNotification, hmi_apis::FunctionID::VR_Stopped> >
     HMIOnNotificationsEventDispatcherTypes;
@@ -426,6 +432,8 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   std::shared_ptr<Command> command =
       CreateCommand<OnNaviWayPointChangeNotification>(message);
+  EXPECT_CALL(mock_app_service_manager_, FindWayPointsHandler())
+      .WillOnce(Return(nullptr));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
@@ -479,13 +487,29 @@ TEST_F(HMICommandsNotificationsTest, OnUITouchEventSendNotificationToMobile) {
 }
 
 TEST_F(HMICommandsNotificationsTest,
+       OnUISubtleAlertPressedSendNotificationToMobile) {
+  MessageSharedPtr message = CreateMessage();
+  std::shared_ptr<Command> command =
+      CreateCommand<OnUISubtleAlertPressedNotification>(message);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  command->Run();
+  EXPECT_EQ(
+      static_cast<int32_t>(mobile_apis::FunctionID::OnSubtleAlertPressedID),
+      (*message)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(static_cast<int32_t>(am::MessageType::kNotification),
+            (*message)[am::strings::params][am::strings::message_type].asInt());
+}
+
+TEST_F(HMICommandsNotificationsTest,
        OnAppRegisteredNotificationSendNotificationToHmi) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
   std::shared_ptr<Command> command =
       CreateCommand<OnAppRegisteredNotification>(message);
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -507,7 +531,8 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnAppUnregisteredNotification>(message);
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(_));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -529,7 +554,8 @@ TEST_F(HMICommandsNotificationsTest, OnButtonPressNotificationEventDispatcher) {
       CreateCommand<hmi::OnButtonPressNotification>(message);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -545,8 +571,9 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
   std::shared_ptr<Command> command =
       CreateCommand<OnReadyNotification>(message);
 
-  EXPECT_CALL(app_mngr_, OnHMIStartedCooperation());
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, OnHMIReady());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   command->Run();
@@ -767,7 +794,6 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnSystemInfoChangedNotification>(message);
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_));
   EXPECT_CALL(mock_policy_handler_, OnSystemInfoChanged(_));
   command->Run();
 }
@@ -957,7 +983,7 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, OnSuspend());
@@ -1009,18 +1035,15 @@ TEST_F(HMICommandsNotificationsTest,
       static_cast<int32_t>(am::MessageType::kNotification);
   (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
 
-  std::vector<hmi_apis::Common_ApplicationExitReason::eType> reason_list;
-  reason_list.push_back(hmi_apis::Common_ApplicationExitReason::
-                            UNAUTHORIZED_TRANSPORT_REGISTRATION);
-  reason_list.push_back(
-      hmi_apis::Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE);
+  using ExitReason = hmi_apis::Common_ApplicationExitReason::eType;
+  std::vector<ExitReason> reason_list = {
+      ExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION,
+      ExitReason::UNSUPPORTED_HMI_RESOURCE};
 
-  std::vector<mobile_apis::AppInterfaceUnregisteredReason::eType>
-      mobile_reason_list;
-  mobile_reason_list.push_back(
-      mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
-  mobile_reason_list.push_back(
-      mobile_apis::AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE);
+  using UnregisteredReason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  std::vector<UnregisteredReason> mobile_reason_list = {
+      UnregisteredReason::APP_UNAUTHORIZED,
+      UnregisteredReason::UNSUPPORTED_HMI_RESOURCE};
 
   std::vector<mobile_apis::AppInterfaceUnregisteredReason::eType>::iterator
       it_mobile_reason = mobile_reason_list.begin();
@@ -1051,6 +1074,47 @@ TEST_F(HMICommandsNotificationsTest,
                     kAppId_, mobile_apis::Result::SUCCESS, false, false));
     command->Run();
   }
+}
+
+TEST_F(HMICommandsNotificationsTest,
+       OnExitApplicationNotificationResourceConstraintReason) {
+  auto message = CreateMessage();
+  (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
+  const auto notification = std::make_shared<smart_objects::SmartObject>();
+  (*notification)[am::strings::params][am::strings::function_id] =
+      static_cast<int32_t>(
+          mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
+  (*notification)[am::strings::params][am::strings::message_type] =
+      static_cast<int32_t>(am::MessageType::kNotification);
+  (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
+
+  using ExitReason = hmi_apis::Common_ApplicationExitReason::eType;
+  auto hmi_reason = ExitReason::RESOURCE_CONSTRAINT;
+
+  using UnregisteredReason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  auto mobile_reason = UnregisteredReason::RESOURCE_CONSTRAINT;
+
+  (*message)[am::strings::msg_params][am::strings::reason] = hmi_reason;
+  const auto command = CreateCommand<OnExitApplicationNotification>(message);
+
+  (*notification)[am::strings::msg_params][am::strings::reason] =
+      static_cast<int32_t>(mobile_reason);
+
+  am::plugin_manager::MockRPCPluginManager mock_rpc_plugin_manager_;
+  EXPECT_CALL(app_mngr_, GetPluginManager())
+      .WillRepeatedly(ReturnRef(mock_rpc_plugin_manager_));
+
+  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
+  EXPECT_CALL(
+      mock_message_helper_,
+      GetOnAppInterfaceUnregisteredNotificationToMobile(kAppId_, mobile_reason))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(notification, Command::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
 }
 
 TEST_F(HMICommandsNotificationsTest,
@@ -1229,11 +1293,10 @@ TEST_F(HMICommandsNotificationsTest,
 
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   EXPECT_CALL(app_mngr_settings_, max_cmd_id()).WillOnce(ReturnRef(kMaxCmdId));
-  EXPECT_CALL(app_mngr_, get_settings())
-      .WillOnce(ReturnRef(app_mngr_settings_));
   EXPECT_CALL(*app_ptr_, is_perform_interaction_active())
       .WillOnce(Return(kIsPerformInteractionActive));
-  EXPECT_CALL(app_mngr_, event_dispatcher());
+  EXPECT_CALL(app_mngr_, event_dispatcher())
+      .WillOnce(ReturnRef(mock_event_dispatcher_));
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
@@ -1824,7 +1887,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(
@@ -1854,7 +1917,7 @@ TEST_F(HMICommandsNotificationsTest,
   typedef boost::optional<bool> OptionalBool;
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(
@@ -1882,7 +1945,9 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
   typedef boost::optional<bool> OptionalBool;
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
+  ON_CALL(*app_ptr_, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
+
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(

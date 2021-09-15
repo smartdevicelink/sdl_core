@@ -40,14 +40,14 @@ namespace application_manager {
 
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
+SDL_CREATE_LOG_VARIABLE("RequestController")
 
-uint32_t RequestInfo::HmiConnectionKey = 0;
+constexpr uint32_t RequestInfo::kHmiConnectionKey;
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectionKey;
+  app_id_ = RequestInfo::kHmiConnectionKey;
 }
 
 HMIRequestInfo::HMIRequestInfo(RequestPtr request,
@@ -55,7 +55,7 @@ HMIRequestInfo::HMIRequestInfo(RequestPtr request,
                                const uint64_t timeout_msec)
     : RequestInfo(request, HMIRequest, start_time, timeout_msec) {
   correlation_id_ = request_->correlation_id();
-  app_id_ = RequestInfo::HmiConnectionKey;
+  app_id_ = RequestInfo::kHmiConnectionKey;
 }
 
 MobileRequestInfo::MobileRequestInfo(RequestPtr request,
@@ -92,6 +92,7 @@ void application_manager::request_controller::RequestInfo::updateEndTime() {
 void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
   timeout_msec_ = timeout_msec;
   updateEndTime();
+  request_->OnUpdateTimeOut();
 }
 
 bool RequestInfo::isExpired() {
@@ -116,37 +117,44 @@ FakeRequestInfo::FakeRequestInfo(uint32_t app_id, uint32_t correaltion_id) {
   correlation_id_ = correaltion_id;
 }
 
+RequestInfoSet::~RequestInfoSet() {
+  sync_primitives::AutoLock lock(pending_requests_lock_);
+  auto it = time_sorted_pending_requests_.begin();
+  while (!time_sorted_pending_requests_.empty()) {
+    Erase(*it);
+    it = time_sorted_pending_requests_.begin();
+  }
+}
+
 bool RequestInfoSet::Add(RequestInfoPtr request_info) {
   DCHECK_OR_RETURN(request_info, false);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Add request app_id = " << request_info->app_id()
-                              << "; corr_id = " << request_info->requestId());
+  SDL_LOG_DEBUG("Add request app_id = " << request_info->app_id()
+                                        << "; corr_id = "
+                                        << request_info->requestId());
   sync_primitives::AutoLock lock(pending_requests_lock_);
   CheckSetSizes();
-  const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_resilt =
+  const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_result =
       hash_sorted_pending_requests_.insert(request_info);
-  if (insert_resilt.second == true) {
-    const std::pair<TimeSortedRequestInfoSet::iterator, bool>& insert_resilt =
+  if (insert_result.second == true) {
+    const std::pair<TimeSortedRequestInfoSet::iterator, bool>& insert_result =
         time_sorted_pending_requests_.insert(request_info);
-    DCHECK(insert_resilt.second);
-    if (!insert_resilt.second) {
+    DCHECK(insert_result.second);
+    if (!insert_result.second) {
       return false;
     }
     CheckSetSizes();
     return true;
   } else {
-    LOG4CXX_ERROR(logger_,
-                  "Request with app_id = "
-                      << request_info->app_id() << "; corr_id "
-                      << request_info->requestId() << " Already exist ");
+    SDL_LOG_ERROR("Request with app_id = "
+                  << request_info->app_id() << "; corr_id "
+                  << request_info->requestId() << " Already exist ");
   }
   CheckSetSizes();
   return false;
 }
 
 RequestInfoPtr RequestInfoSet::Find(const uint32_t connection_key,
-                                    const uint32_t correlation_id) {
+                                    const uint32_t correlation_id) const {
   RequestInfoPtr result;
 
   // Request info for searching in request info set by log_n time
@@ -174,7 +182,7 @@ RequestInfoPtr RequestInfoSet::Front() {
 }
 
 RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_requests_lock_);
   RequestInfoPtr result;
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
@@ -190,10 +198,26 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
   return result;
 }
 
+std::list<RequestInfoPtr> RequestInfoSet::GetRequestsByConnectionKey(
+    const uint32_t connection_key) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(pending_requests_lock_);
+
+  std::list<RequestInfoPtr> output_list;
+  AppIdCompararator comparator(AppIdCompararator::Equal, connection_key);
+
+  std::copy_if(hash_sorted_pending_requests_.begin(),
+               hash_sorted_pending_requests_.end(),
+               std::back_inserter(output_list),
+               comparator);
+
+  return output_list;
+}
+
 bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
   DCHECK(request_info);
   if (!request_info) {
-    LOG4CXX_ERROR(logger_, "NULL ponter request_info");
+    SDL_LOG_ERROR("NULL ponter request_info");
     return false;
   }
   CheckSetSizes();
@@ -205,14 +229,14 @@ bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
         time_sorted_pending_requests_.find(request_info);
     DCHECK(it != time_sorted_pending_requests_.end());
     if (it == time_sorted_pending_requests_.end()) {
-      LOG4CXX_ERROR(logger_, "Can't find request in time_sorted_requests_");
+      SDL_LOG_ERROR("Can't find request in time_sorted_requests_");
       return false;
     }
     const RequestInfoPtr found = *it;
     DCHECK(request_info == found);
     time_sorted_pending_requests_.erase(it);
     CheckSetSizes();
-    return 1 == erased_count;
+    return true;
   }
   CheckSetSizes();
   return false;
@@ -225,7 +249,7 @@ bool RequestInfoSet::RemoveRequest(const RequestInfoPtr request_info) {
 
 uint32_t RequestInfoSet::RemoveRequests(
     const RequestInfoSet::AppIdCompararator& filter) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t erased = 0;
 
   sync_primitives::AutoLock lock(pending_requests_lock_);
@@ -237,22 +261,22 @@ uint32_t RequestInfoSet::RemoveRequests(
     HashSortedRequestInfoSet::iterator to_erase = it++;
     Erase(*to_erase);
     it = std::find_if(it, hash_sorted_pending_requests_.end(), filter);
-    erased++;
+    ++erased;
   }
   CheckSetSizes();
   return erased;
 }
 
 uint32_t RequestInfoSet::RemoveByConnectionKey(uint32_t connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return RemoveRequests(
       AppIdCompararator(AppIdCompararator::Equal, connection_key));
 }
 
 uint32_t RequestInfoSet::RemoveMobileRequests() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return RemoveRequests(AppIdCompararator(AppIdCompararator::NotEqual,
-                                          RequestInfo::HmiConnectionKey));
+                                          RequestInfo::kHmiConnectionKey));
 }
 
 const size_t RequestInfoSet::Size() {

@@ -46,6 +46,7 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/message.h"
 #include "connection_handler/device.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
@@ -106,6 +107,8 @@ struct AppFile {
   mobile_apis::FileType::eType file_type;
 };
 typedef std::map<std::string, AppFile> AppFilesMap;
+typedef std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+    ButtonSubscriptionsMap;
 class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
@@ -170,9 +173,14 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoice;
 typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 
 /**
- * @brief Defines id of SoftButton
+ * @brief Defines id of SoftButtons for specified WindowID
  */
-typedef std::set<std::pair<uint32_t, WindowID> > SoftButtonID;
+typedef std::pair<WindowID, std::set<uint32_t> > WindowSoftButtons;
+
+/**
+ * @brief Defines id of SoftButtons related to a specified WindowID
+ */
+typedef std::set<WindowSoftButtons> SoftButtonIDs;
 
 /**
  * @brief Defines set of buttons subscription
@@ -198,6 +206,7 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
+  virtual const smart_objects::SmartObject* menu_layout() const = 0;
   virtual smart_objects::SmartObject day_color_scheme() const = 0;
   virtual smart_objects::SmartObject night_color_scheme() const = 0;
   virtual std::string display_layout() const = 0;
@@ -237,6 +246,8 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& keyboard_props) = 0;
   virtual void set_menu_title(const smart_objects::SmartObject& menu_title) = 0;
   virtual void set_menu_icon(const smart_objects::SmartObject& menu_icon) = 0;
+  virtual void set_menu_layout(
+      const smart_objects::SmartObject& menu_layout) = 0;
 
   virtual uint32_t audio_stream_retry_number() const = 0;
 
@@ -348,7 +359,7 @@ class DynamicApplicationData {
   /*
    * @brief Finds command with the specified command id
    */
-  virtual smart_objects::SmartObject* FindCommand(uint32_t cmd_id) = 0;
+  virtual smart_objects::SmartObject FindCommand(uint32_t cmd_id) = 0;
 
   /*
    * @brief Adds a menu to the application
@@ -364,12 +375,7 @@ class DynamicApplicationData {
   /*
    * @brief Finds menu with the specified id
    */
-  virtual smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const = 0;
-
-  /*
-   * @brief Returns true if sub menu with such name already exist
-   */
-  virtual bool IsSubMenuNameAlreadyExist(const std::string& name) = 0;
+  virtual smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const = 0;
 
   /*
    * @brief Adds a interaction choice set to the application
@@ -406,7 +412,7 @@ class DynamicApplicationData {
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  virtual smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id) = 0;
+  virtual smart_objects::SmartObject FindChoiceSet(uint32_t choice_set_id) = 0;
 
   /*
    * @brief Adds perform interaction choice set to the application
@@ -519,6 +525,11 @@ class DynamicApplicationData {
 class Application : public virtual InitialApplicationData,
                     public virtual DynamicApplicationData {
  public:
+  /**
+   * @brief The StreamingState enum defines current streaming state
+   */
+  enum class StreamingState { kStopped, kStarted, kSuspended };
+
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
   Application() : is_greyed_out_(false) {}
@@ -609,6 +620,9 @@ class Application : public virtual InitialApplicationData,
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
 
+  virtual void set_webengine_projection_enabled(const bool option) = 0;
+  virtual bool webengine_projection_enabled() const = 0;
+
   virtual bool video_streaming_approved() const = 0;
   virtual void set_video_streaming_approved(bool state) = 0;
   virtual bool audio_streaming_approved() const = 0;
@@ -667,6 +681,8 @@ class Application : public virtual InitialApplicationData,
   virtual bool app_allowed() const = 0;
   virtual bool has_been_activated() const = 0;
   virtual bool set_activated(bool is_active) = 0;
+  virtual bool is_ready() const = 0;
+  virtual bool set_is_ready(bool is_ready) = 0;
 
   virtual const Version& version() const = 0;
   virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;
@@ -953,10 +969,10 @@ class Application : public virtual InitialApplicationData,
    * Alert, Show, ScrollableMessage, ShowConstantTBT, AlertManeuver,
    * UpdateTurnList
    * @param cmd_id Unique command id from mobile API
-   * @param list of softbuttons were created by command.
+   * @param window_softbuttons list of softbuttons were created by command.
    */
-  virtual void SubscribeToSoftButtons(int32_t cmd_id,
-                                      const SoftButtonID& softbuttons_id) = 0;
+  virtual void SubscribeToSoftButtons(
+      int32_t cmd_id, const WindowSoftButtons& window_softbuttons) = 0;
 
   /**
    * @brief Retreives window id on which given button is created

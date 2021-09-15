@@ -26,8 +26,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_request.h"
+
 #include <cstring>
 #include <string>
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
@@ -37,30 +39,30 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AlertManeuverRequest::AlertManeuverRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 AlertManeuverRequest::~AlertManeuverRequest() {}
 
 void AlertManeuverRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
-    LOG4CXX_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
+    SDL_LOG_ERROR("AlertManeuverRequest::Request without parameters!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -69,15 +71,15 @@ void AlertManeuverRequest::Run() {
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app.get()) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
-                  "text contains only whitespace in ttsChunks");
+    SDL_LOG_ERROR(
+        "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
+        "text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -91,7 +93,7 @@ void AlertManeuverRequest::Run() {
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SDL_LOG_ERROR("Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
     return;
   }
@@ -107,9 +109,8 @@ void AlertManeuverRequest::Run() {
         MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_ERROR(
-          logger_,
-          "MessageHelper::VerifyTtsFiles return " << verification_result);
+      SDL_LOG_ERROR("MessageHelper::VerifyTtsFiles return "
+                    << verification_result);
       SendResponse(false,
                    mobile_apis::Result::FILE_NOT_FOUND,
                    "One or more files needed for tts_chunks are not present");
@@ -143,6 +144,7 @@ void AlertManeuverRequest::Run() {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+    msg_params[strings::app_id] = app->app_id();
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
     msg_params[hmi_request::speak_type] =
@@ -154,12 +156,12 @@ void AlertManeuverRequest::Run() {
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   hmi_apis::FunctionID::eType event_id = event.id();
   switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
+      SDL_LOG_INFO("Received Navigation_AlertManeuver event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
       pending_requests_.Remove(event_id);
       navi_alert_maneuver_result_code_ =
@@ -169,35 +171,29 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      SDL_LOG_INFO("Received TTS_Speak event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+
       pending_requests_.Remove(event_id);
       tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, info_tts_);
       break;
     }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       SendResponse(
-          false, mobile_apis::Result::INVALID_ENUM, "Received unknown event");
+          false, mobile_apis::Result::INVALID_ENUM, "Received unknown event ");
       return;
     }
   }
 
-  if (!pending_requests_.IsFinal(event_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  "There are some pending responses from HMI."
-                  "AlertManeuverRequest still waiting.");
+  if (IsPendingResponseExist()) {
+    SDL_LOG_DEBUG("Command still wating for HMI response");
     return;
   }
+
   std::string return_info;
   mobile_apis::Result::eType result_code;
   const bool result = PrepareResponseParameters(result_code, return_info);
@@ -214,7 +210,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
 bool AlertManeuverRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& return_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
 
   app_mngr::commands::ResponseInfo navigation_alert_info(
@@ -235,7 +231,8 @@ bool AlertManeuverRequest::PrepareResponseParameters(
                   application_manager_.hmi_interfaces().GetInterfaceState(
                       HmiInterfaces::HMI_INTERFACE_TTS)))) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    return_info = app_mngr::commands::MergeInfos(
+        navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
     return result;
   }
   result_code =
@@ -246,7 +243,7 @@ bool AlertManeuverRequest::PrepareResponseParameters(
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using smart_objects::SmartArray;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -258,7 +255,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     for (; it_tts_chunk != tts_chunks_arr->end(); ++it_tts_chunk) {
       const char* tts_chunk_text = (*it_tts_chunk)[strings::text].asCharArray();
       if (strlen(tts_chunk_text) && !CheckSyntax(tts_chunk_text)) {
-        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+        SDL_LOG_ERROR("Invalid tts_chunks syntax check failed");
         return true;
       }
     }
@@ -277,7 +274,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
       const char* soft_button_text =
           (*it_soft_button)[strings::text].asCharArray();
       if (!CheckSyntax(soft_button_text)) {
-        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+        SDL_LOG_ERROR("Invalid soft_buttons syntax check failed");
         return true;
       }
     }

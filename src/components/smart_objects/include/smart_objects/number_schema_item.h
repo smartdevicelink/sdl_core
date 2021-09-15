@@ -68,7 +68,7 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -78,9 +78,11 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
+
+  TypeID GetType() OVERRIDE;
 
  private:
   /**
@@ -133,6 +135,7 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
                  typeid(int32_t),
                  typeid(uint32_t),
                  typeid(int64_t),
+                 typeid(uint64_t),
                  typeid(double))) {
     return true;
   }
@@ -142,7 +145,7 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 template <typename NumberType>
 errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (!isValidNumberType(Object.getType())) {
@@ -152,14 +155,29 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     std::string validation_info =
         "Incorrect type, expected: " + SmartObject::typeToString(expectedType) +
         ", got: " + SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
+
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<int64_t, int32_t>(Object.asInt());
+    if (Object.asInt() < std::numeric_limits<int32_t>::min() ||
+        Object.asInt() > std::numeric_limits<int32_t>::max()) {
+      const std::string validation_info =
+          "Value " + Object.asString() + " out of int32 range";
+      report->set_validation_info(validation_info);
+      return errors::OUT_OF_RANGE;
+    }
+    value = Object.asInt();
   } else if (typeid(uint32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<uint64_t, uint32_t>(Object.asUInt());
+    if (Object.asInt() < std::numeric_limits<uint32_t>::min() ||
+        Object.asInt() > std::numeric_limits<uint32_t>::max()) {
+      const std::string validation_info =
+          "Value " + Object.asString() + " out of uint32 range";
+      report->set_validation_info(validation_info);
+      return errors::OUT_OF_RANGE;
+    }
+    value = Object.asUInt();
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
@@ -176,7 +194,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too small, got: " << value
            << ", minimum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
@@ -185,10 +203,15 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too large, got: " << value
            << ", maximum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
   return errors::OK;
+}
+
+template <typename NumberType>
+TypeID TNumberSchemaItem<NumberType>::GetType() {
+  return TYPE_NUMBER;
 }
 
 template <typename NumberType>
@@ -222,6 +245,9 @@ SmartType TNumberSchemaItem<uint32_t>::getSmartType() const;
 
 template <>
 SmartType TNumberSchemaItem<int64_t>::getSmartType() const;
+
+template <>
+SmartType TNumberSchemaItem<uint64_t>::getSmartType() const;
 
 template <>
 SmartType TNumberSchemaItem<double>::getSmartType() const;

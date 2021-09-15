@@ -31,12 +31,15 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
+
 #include "utils/logger.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -53,9 +56,15 @@ ButtonGetCapabilitiesRequest::ButtonGetCapabilitiesRequest(
 ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {}
 
 void ButtonGetCapabilitiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
+}
+
+void ButtonGetCapabilitiesRequest::OnTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
 }
 
 }  // namespace commands

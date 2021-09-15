@@ -66,6 +66,8 @@ class UIAddSubmenuRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual void Run();
 
+  void OnTimeOut() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(UIAddSubmenuRequest);
 };

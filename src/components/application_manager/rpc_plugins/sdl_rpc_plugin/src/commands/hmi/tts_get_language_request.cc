@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 TTSGetLanguageRequest::TTSGetLanguageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,11 +54,16 @@ TTSGetLanguageRequest::TTSGetLanguageRequest(
 TTSGetLanguageRequest::~TTSGetLanguageRequest() {}
 
 void TTSGetLanguageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
+void TTSGetLanguageRequest::OnTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetLanguage);
+}
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

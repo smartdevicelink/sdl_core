@@ -36,8 +36,8 @@
 
 #include <strings.h>
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 
@@ -52,7 +52,7 @@ namespace custom_str = utils::custom_string;
  * @brief ChangeRegistrationRequest command class
  **/
 class ChangeRegistrationRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
@@ -75,12 +75,7 @@ class ChangeRegistrationRequest
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
   /*
@@ -103,13 +98,6 @@ class ChangeRegistrationRequest
    * @return true if language supported by TTS, otherwise false
    */
   bool IsLanguageSupportedByTTS(const int32_t& hmi_display_lang);
-
-  /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
 
   /**
    * @brief Checks change_registration params(ttsName, appname,
@@ -163,8 +151,6 @@ class ChangeRegistrationRequest
 
     const custom_str::CustomString& newItem_;
   };
-
-  app_mngr::commands::Pending pending_requests_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;

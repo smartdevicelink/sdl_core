@@ -89,9 +89,7 @@ class PolicyEventObserverTest : public ::testing::Test {
     EXPECT_CALL(policy_handler_mock_,
                 PTUpdatedAt(Counters::KILOMETERS, field_value))
         .Times(pt_updated_calls_number);
-    EXPECT_CALL(policy_handler_mock_, OnSystemReady())
-        .Times(on_system_ready_calls_number);
-    policy_event_observer_->on_event(*event_);
+    policy_event_observer_->HandleOnEvent(*event_);
   }
 
   void DeleteEvent() {
@@ -123,15 +121,6 @@ TEST_F(PolicyEventObserverTest,
   CookSmartObject(hmi_apis::Common_Result::SUCCESS, field_name, field_value);
   // Check
   CheckResultsOnEvent(1u, 0u);
-}
-
-TEST_F(PolicyEventObserverTest,
-       OnEvent_EventBasicCommunication_OnReady_ExpectOnSystemReady) {
-  // Arrange
-  CreateEvent(Event::EventID::BasicCommunication_OnReady);
-  CookSmartObject(hmi_apis::Common_Result::SUCCESS, field_name, field_value);
-  // Check
-  CheckResultsOnEvent(0u, 1u);
 }
 
 }  // namespace policy_test

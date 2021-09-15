@@ -54,9 +54,6 @@ using namespace ::protocol_handler;
 class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
  public:
   explicit RawMessageMatcher(RawMessagePtr ptr);
-
-  virtual bool MatchAndExplain(const RawMessagePtr ptr,
-                               MatchResultListener* listener) const;
   virtual void DescribeTo(std::ostream* os) const;
   virtual void DescribeNegationTo(std::ostream* os) const;
 

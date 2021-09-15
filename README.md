@@ -1,5 +1,8 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-[![Build Status](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/badge/icon)](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/)
+[![Github Actions Build Status](https://github.com/smartdevicelink/sdl_core/actions/workflows/sdl_core_github_ci.yml/badge.svg)](https://github.com/smartdevicelink/sdl_core/actions/workflows/sdl_core_github_ci.yml)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/badge/icon?subject=Smoke%20tests)](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/)
+[![Jenkins Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/badge/icon?subject=Coding%20style)](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/)
 
 # SmartDeviceLink (SDL)
 
@@ -11,14 +14,14 @@ SmartDeviceLink (SDL) is a standard set of protocols and messages that connect a
 
 ## SDL Core
 
-The Core component of SDL runs on a vehicle's computing system (head unit). Core’s primary responsibility is to route messages between connected smartphone applications and the vehicle HMI. It can connect a smartphone to a vehicle's head unit via a variety of transport protocols such as Bluetooth, USB, Android AOA, and TCP. Once a connection is established, Core discovers compatible applications and displays them to the driver for interaction via voice or display. The Core component is configured to follow a set of policies defined in its local policy database and updated by a [policy server](https://www.github.com/smartdevicelink/sdl_server). The messaging between a connected application and SDL Core is defined by the [Mobile API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/MOBILE_API.xml) and the messaging between SDL Core and the vehicle is defined by the [HMI API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/HMI_API.xml).
+The Core component of SDL runs on a vehicle's computing system (head unit). Core’s primary responsibility is to route messages between connected smartphone applications and the vehicle HMI. It can connect a smartphone to a vehicle's head unit via a variety of transport protocols such as Bluetooth, USB, Android AOA, and TCP. Once a connection is established, Core discovers compatible applications and displays them to the driver for interaction via voice or display. The Core component is configured to follow a set of policies defined in its local policy database and updated by a [policy server](https://www.github.com/smartdevicelink/sdl_server). The messaging between a connected application and SDL Core is defined by the [Mobile API](https://github.com/smartdevicelink/rpc_spec/blob/master/MOBILE_API.xml) and the messaging between SDL Core and the vehicle is defined by the [HMI API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/HMI_API.xml).
 
 Pull Requests Welcome!
 
 ## Environment
 Currently supported:
-* Ubuntu Linux 16.04 with GCC 5.4.x
-* Ubuntu Linux 18.04 with GCC 7.3.x
+* Ubuntu Linux 18.04 with GCC 7.5.x
+* Ubuntu Linux 20.04 with GCC 9.3.x
 * [C++11 standard](https://github.com/smartdevicelink/sdl_evolution/issues/132)
 
 ## Getting Started

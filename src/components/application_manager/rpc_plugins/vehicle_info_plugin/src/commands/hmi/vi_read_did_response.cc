@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIReadDIDResponse::VIReadDIDResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -49,7 +51,7 @@ VIReadDIDResponse::VIReadDIDResponse(
 VIReadDIDResponse::~VIReadDIDResponse() {}
 
 void VIReadDIDResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_ReadDID);
   event.set_smart_object(*message_);

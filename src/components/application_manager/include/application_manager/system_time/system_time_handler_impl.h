@@ -70,7 +70,8 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
    * in order to send system time query and GetSystemTimeResponse in order
    * to retrieve utc time and notify all the listeners with new time value.
    */
-  void on_event(const application_manager::event_engine::Event& event) FINAL;
+  void HandleOnEvent(
+      const application_manager::event_engine::Event& event) FINAL;
 
   /**
    * @brief DoSystemTimeQuery sends the appropriate request to the system

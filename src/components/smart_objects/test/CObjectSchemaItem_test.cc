@@ -89,6 +89,9 @@ namespace Keys {
 const char RESULT_CODE[] = "resultCode";
 const char INFO[] = "info";
 const char SUCCESS[] = "success";
+const char STRUCT[] = "struct";
+const char OPTIONAL_PARAM[] = "optionalParam";
+const char MANDATORY_PARAM[] = "mandatoryParam";
 }  // namespace Keys
 
 class ObjectSchemaItemTest : public ::testing::Test {
@@ -127,6 +130,12 @@ class ObjectSchemaItemTest : public ::testing::Test {
                                                TSchemaItemParameter<int>(2)),
                 true);
 
+    Members structMembersMap;
+    structMembersMap[Keys::OPTIONAL_PARAM] = SMember(
+        TEnumSchemaItem<FunctionID::eType>::create(function_values), false);
+    structMembersMap[Keys::MANDATORY_PARAM] = SMember(
+        TEnumSchemaItem<FunctionID::eType>::create(function_values), true);
+
     Members schemaMembersMap;
     schemaMembersMap[Keys::RESULT_CODE] = SMember(
         TEnumSchemaItem<ResultType::eType>::create(resultCode_values), false);
@@ -135,6 +144,8 @@ class ObjectSchemaItemTest : public ::testing::Test {
                                           TSchemaItemParameter<size_t>(10)),
                 false);
     schemaMembersMap[Keys::SUCCESS] = SMember(CBoolSchemaItem::create(), false);
+    schemaMembersMap[Keys::STRUCT] =
+        SMember(CObjectSchemaItem::create(structMembersMap), false);
 
     // Create fake param that has breaking history changes
     std::vector<SMember> fake_param_history_vector;
@@ -249,22 +260,22 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
   obj[S_MSG_PARAMS][Keys::SUCCESS] = 0xABC;
 
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_CORRELATION_ID] = -0xFF1;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 1;
@@ -431,7 +442,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
   // Invalide state after enum convertion
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
@@ -458,7 +469,7 @@ TEST_F(ObjectSchemaItemTest, validation_empty_params) {
   schema_item->unapplySchema(obj);
   // Invalide state after enum convertion
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
@@ -521,6 +532,97 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
   }
 }
 
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_non_mandatory_param) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 1;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // The unknown enum value was filtered. Validation should pass in this case.
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(Keys::RESULT_CODE));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = "FUTURE";
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_TRUE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  EXPECT_FALSE(obj[S_PARAMS].keyExists(S_FUNCTION_ID));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_non_mandatory_subparam) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 1;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::OPTIONAL_PARAM] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // The unknown enum value was filtered.
+  // Validation should pass in this case.
+  ASSERT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::STRUCT));
+  EXPECT_FALSE(obj[S_MSG_PARAMS][Keys::STRUCT].keyExists(Keys::OPTIONAL_PARAM));
+  EXPECT_TRUE(obj[S_MSG_PARAMS][Keys::STRUCT].keyExists(Keys::MANDATORY_PARAM));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory_subparam) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 1;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // The struct containing the unknown enum value was filtered.
+  // Validation should pass in this case.
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(Keys::STRUCT));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
 }  // namespace smart_object_test
 }  // namespace components
 }  // namespace test
@@ -529,20 +631,20 @@ namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
 namespace FunctionID = test::components::smart_object_test::FunctionID;
-typedef EnumConversionHelper<FunctionID::eType> FunctionConvertor;
+typedef EnumConversionHelper<FunctionID::eType> FunctionConverter;
 
 template <>
-const FunctionConvertor::EnumToCStringMap
-    FunctionConvertor::enum_to_cstring_map_ =
-        FunctionConvertor::InitEnumToCStringMap();
+const FunctionConverter::EnumToCStringMap
+    FunctionConverter::enum_to_cstring_map_ =
+        FunctionConverter::InitEnumToCStringMap();
 
 template <>
-const FunctionConvertor::CStringToEnumMap
-    FunctionConvertor::cstring_to_enum_map_ =
-        FunctionConvertor::InitCStringToEnumMap();
+const FunctionConverter::CStringToEnumMap
+    FunctionConverter::cstring_to_enum_map_ =
+        FunctionConverter::InitCStringToEnumMap();
 
 template <>
-const char* const FunctionConvertor::cstring_values_[] = {"Function0",
+const char* const FunctionConverter::cstring_values_[] = {"Function0",
                                                           "Function1",
                                                           "Function2",
                                                           "Function3",
@@ -551,7 +653,7 @@ const char* const FunctionConvertor::cstring_values_[] = {"Function0",
                                                           "Function6"};
 
 template <>
-const FunctionID::eType FunctionConvertor::enum_values_[] = {
+const FunctionID::eType FunctionConverter::enum_values_[] = {
     FunctionID::Function0,
     FunctionID::Function1,
     FunctionID::Function2,
@@ -563,20 +665,20 @@ const FunctionID::eType FunctionConvertor::enum_values_[] = {
 // ----------------------------------------------------------------------------
 
 namespace ResultType = test::components::smart_object_test::ResultType;
-typedef EnumConversionHelper<ResultType::eType> ResultTypeConvertor;
+typedef EnumConversionHelper<ResultType::eType> ResultTypeConverter;
 
 template <>
-const ResultTypeConvertor::EnumToCStringMap
-    ResultTypeConvertor::enum_to_cstring_map_ =
-        ResultTypeConvertor::InitEnumToCStringMap();
+const ResultTypeConverter::EnumToCStringMap
+    ResultTypeConverter::enum_to_cstring_map_ =
+        ResultTypeConverter::InitEnumToCStringMap();
 
 template <>
-const ResultTypeConvertor::CStringToEnumMap
-    ResultTypeConvertor::cstring_to_enum_map_ =
-        ResultTypeConvertor::InitCStringToEnumMap();
+const ResultTypeConverter::CStringToEnumMap
+    ResultTypeConverter::cstring_to_enum_map_ =
+        ResultTypeConverter::InitCStringToEnumMap();
 
 template <>
-const char* const ResultTypeConvertor::cstring_values_[] = {
+const char* const ResultTypeConverter::cstring_values_[] = {
     "APPLICATION_NOT_REGISTERED",
     "SUCCESS",
     "TOO_MANY_PENDING_REQUESTS",
@@ -589,7 +691,7 @@ const char* const ResultTypeConvertor::cstring_values_[] = {
     "DISALLOWED"};
 
 template <>
-const ResultType::eType ResultTypeConvertor::enum_values_[] = {
+const ResultType::eType ResultTypeConverter::enum_values_[] = {
     ResultType::APPLICATION_NOT_REGISTERED,
     ResultType::SUCCESS,
     ResultType::TOO_MANY_PENDING_REQUESTS,

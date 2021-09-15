@@ -87,7 +87,9 @@ class ServiceStatusUpdateHandlerTest
       case ServiceStatus::PROTECTION_ENFORCED: {
         return Common_ServiceEvent::REQUEST_REJECTED;
       }
-      default: { return Common_ServiceEvent::INVALID_ENUM; }
+      default: {
+        return Common_ServiceEvent::INVALID_ENUM;
+      }
     }
   }
 

@@ -32,11 +32,14 @@
 
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -51,7 +54,7 @@ VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
 VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
 void VISubscribeVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   auto& msg_params = (*message_)[strings::msg_params];
 
@@ -72,6 +75,20 @@ void VISubscribeVehicleDataRequest::Run() {
   }
 
   SendRequest();
+}
+
+void VISubscribeVehicleDataRequest::OnTimeOut() {
+  event_engine::Event timeout_event(
+      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
+  SDL_LOG_AUTO_TRACE();
+
+  auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
+      function_id(),
+      correlation_id(),
+      hmi_apis::Common_Result::GENERIC_ERROR,
+      std::string("Timed out"));
+  timeout_event.set_smart_object(*error_response);
+  timeout_event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

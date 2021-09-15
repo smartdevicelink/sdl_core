@@ -45,6 +45,9 @@ ${CMAKE_CURRENT_SOURCE_DIR}/interior_data_cache_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/rc_consent_manager_impl_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/grid_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/rc_helpers_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/rc_app_extension_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/rc_pending_resumption_handler_test.cc
+${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
@@ -60,7 +63,7 @@ set(LIBRARIES
   gmock_main
 )
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})

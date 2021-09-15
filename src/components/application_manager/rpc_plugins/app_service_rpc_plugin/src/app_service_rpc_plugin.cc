@@ -38,7 +38,7 @@
 #include "application_manager/smart_object_keys.h"
 
 namespace app_service_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace strings = application_manager::strings;
 namespace plugins = application_manager::plugin_manager;
@@ -51,18 +51,6 @@ bool AppServiceRpcPlugin::Init(
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
     resumption::LastStateWrapperPtr last_state) {
-  UNUSED(last_state);
-  application_manager_ = &app_manager;
-  command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
-      app_manager, rpc_service, hmi_capabilities, policy_handler));
-  return true;
-}
-
-bool AppServiceRpcPlugin::Init(app_mngr::ApplicationManager& app_manager,
-                               app_mngr::rpc_service::RPCService& rpc_service,
-                               app_mngr::HMICapabilities& hmi_capabilities,
-                               policy::PolicyHandlerInterface& policy_handler,
-                               resumption::LastState& last_state) {
   UNUSED(last_state);
   application_manager_ = &app_manager;
   command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
@@ -107,14 +95,15 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 }  // namespace app_service_rpc_plugin
 
-extern "C" __attribute__((visibility("default")))
-application_manager::plugin_manager::RPCPlugin*
-Create() {
+using RPCPlugin = application_manager::plugin_manager::RPCPlugin;
+// cppcheck-suppress unusedFunction
+extern "C" __attribute__((visibility("default"))) RPCPlugin* Create(
+    logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
 
-extern "C" __attribute__((visibility("default"))) void Delete(
-    application_manager::plugin_manager::RPCPlugin* data) {
+// cppcheck-suppress unusedFunction
+extern "C" __attribute__((visibility("default"))) void Delete(RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(app_service_rpc_plugin::logger_);
 }

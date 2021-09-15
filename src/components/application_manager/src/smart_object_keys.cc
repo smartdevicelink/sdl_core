@@ -85,6 +85,7 @@ const char* user_location = "userLocation";
 const char* num_ticks = "numTicks";
 const char* slider_footer = "sliderFooter";
 const char* menu_id = "menuID";
+const char* parent_id = "parentID";
 const char* menu_name = "menuName";
 const char* menu_layout = "menuLayout";
 const char* menu_layouts_available = "menuLayoutsAvailable";
@@ -137,6 +138,9 @@ const char* minutes = "minutes";
 const char* seconds = "seconds";
 const char* update_mode = "updateMode";
 const char* audioStreamingIndicator = "audioStreamingIndicator";
+const char* seek_time = "seekTime";
+const char* forward_seek_indicator = "forwardSeekIndicator";
+const char* back_seek_indicator = "backSeekIndicator";
 const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
@@ -163,6 +167,8 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
+const char* driver_distraction_capability = "driverDistractionCapability";
+const char* driver_distraction = "driverDistraction";
 const char* rc_capability = "remoteControlCapability";
 const char* seat_location_capability = "seatLocationCapability";
 const char* app_services_capabilities = "appServicesCapabilities";
@@ -191,6 +197,8 @@ const char* policy_type = "policyType";
 const char* property = "property";
 const char* displays = "displays";
 const char* seat_location = "seatLocation";
+const char* app_capability = "appCapability";
+const char* app_capability_type = "appCapabilityType";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -260,11 +268,20 @@ const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
 const char* fuel_range = "fuelRange";
 const char* cloud_app_vehicle_id = "cloudAppVehicleID";
+const char* climate_data = "climateData";
 const char* external_temp = "externalTemperature";
 const char* turn_signal = "turnSignal";
 const char* vin = "vin";
+const char* gearStatus = "gearStatus";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
+const char* pressure_telltale = "pressureTelltale";
+const char* left_front = "leftFront";
+const char* right_front = "rightFront";
+const char* left_rear = "leftRear";
+const char* right_rear = "rightRear";
+const char* inner_left_rear = "innerLeftRear";
+const char* inner_right_rear = "innerRightRear";
 const char* odometer = "odometer";
 const char* belt_status = "beltStatus";
 const char* electronic_park_brake_status = "electronicParkBrakeStatus";
@@ -276,6 +293,7 @@ const char* head_lamp_status = "headLampStatus";
 const char* engine_torque = "engineTorque";
 const char* acc_pedal_pos = "accPedalPosition";
 const char* steering_wheel_angle = "steeringWheelAngle";
+const char* stability_controls_status = "stabilityControlsStatus";
 const char* e_call_info = "eCallInfo";
 const char* airbag_status = "airbagStatus";
 const char* emergency_event = "emergencyEvent";
@@ -298,9 +316,13 @@ const char* video_streaming = "videoStreaming";
 const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
+const char* system_hardware_version = "systemHardwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";
+const char* window_status = "windowStatus";
+const char* hands_off_steering = "handsOffSteering";
+const char* seat_occupancy = "seatOccupancy";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";
@@ -432,11 +454,31 @@ const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
 const char* const diagonal_screen_size = "diagonalScreenSize";
 const char* const pixel_per_inch = "pixelPerInch";
 const char* const scale = "scale";
+const char* const additional_video_streaming_capabilities =
+    "additionalVideoStreamingCapabilities";
 const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
+const char* const preferred_fps = "preferredFPS";
+
+// OnResetTimeout
+const char* const request_id = "requestID";
+const char* const reset_period = "resetPeriod";
 }  // namespace strings
+
+namespace hmi_interface {
+const char* basic_communication = "BasicCommunication";
+const char* buttons = "Buttons";
+const char* navigation = "Navigation";
+const char* sdl = "SDL";
+const char* tts = "TTS";
+const char* ui = "UI";
+const char* vr = "VR";
+const char* rc = "RC";
+const char* vehicle_info = "VehicleInfo";
+const char* app_service = "AppService";
+}  // namespace hmi_interface
 
 namespace json {
 const char* appId = "appId";
@@ -521,6 +563,8 @@ const char* method_name = "methodName";
 const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_list = "autoCompleteList";
+const char* mask_input_characters = "maskInputCharacters";
+const char* custom_keys = "customKeys";
 const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";
@@ -547,6 +591,7 @@ const char* capabilities = "capabilities";
 const char* speech_capabilities = "speechCapabilities";
 const char* prerecorded_speech_capabilities = "prerecordedSpeechCapabilities";
 const char* preset_bank_capabilities = "presetBankCapabilities";
+const char* on_screen_presets_available = "onScreenPresetsAvailable";
 const char* allowed = "allowed";
 const char* vehicle_type = "vehicleType";
 const char* did_result = "didResult";
@@ -557,6 +602,9 @@ const char* image_capabilities = "imageCapabilities";
 const char* display_type = "displayType";
 const char* display_name = "displayName";
 const char* text_fields = "textFields";
+const char* keyboard_capabilities = "keyboardCapabilities";
+const char* supported_keyboards = "supportedKeyboards";
+const char* num_configurable_keys = "numConfigurableKeys";
 const char* media_clock_formats = "mediaClockFormats";
 const char* graphic_supported = "graphicSupported";
 const char* image_fields = "imageFields";

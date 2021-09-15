@@ -46,17 +46,18 @@ namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
                                ApplicationManager& application_manager,
                                rpc_service::RPCService& rpc_service,
                                HMICapabilities& hmi_capabilities,
                                policy::PolicyHandlerInterface& policy_handler)
-    : CommandImpl(message,
-                  application_manager,
-                  rpc_service,
-                  hmi_capabilities,
-                  policy_handler)
-    , EventObserver(application_manager.event_dispatcher()) {
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {
   // Replace HMI app id with Mobile connection id
   ReplaceHMIWithMobileAppId(*message);
 }
@@ -77,6 +78,8 @@ void RequestFromHMI::on_event(const event_engine::Event& event) {}
 
 void RequestFromHMI::on_event(const event_engine::MobileEvent& event) {}
 
+void RequestFromHMI::OnTimeOut() {}
+
 void RequestFromHMI::SendResponse(
     const bool success,
     const uint32_t correlation_id,
@@ -96,7 +99,19 @@ void RequestFromHMI::SendResponse(
   }
 
   (*message)[strings::msg_params][strings::success] = success;
-  (*message)[strings::msg_params][strings::result_code] = result_code;
+  if ((result_code == hmi_apis::Common_Result::SUCCESS ||
+       result_code == hmi_apis::Common_Result::WARNINGS) &&
+      !warning_info().empty()) {
+    bool has_info = (*message)[strings::params].keyExists(strings::error_msg);
+    (*message)[strings::params][strings::error_msg] =
+        has_info ? (*message)[strings::params][strings::error_msg].asString() +
+                       "\n" + warning_info()
+                 : warning_info();
+    (*message)[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    (*message)[strings::msg_params][strings::result_code] = result_code;
+  }
 
   rpc_service_.ManageHMICommand(message, source);
 }
@@ -129,49 +144,12 @@ void RequestFromHMI::FillCommonParametersOfSO(
   (message)[strings::params][strings::correlation_id] = correlation_id;
 }
 
-bool RequestFromHMI::IsMobileResultSuccess(
-    mobile_apis::Result::eType result_code) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
-  return Compare<mobile_apis::Result::eType, EQ, ONE>(
-      result_code,
-      mobile_apis::Result::SUCCESS,
-      mobile_apis::Result::WARNINGS,
-      mobile_apis::Result::WRONG_LANGUAGE,
-      mobile_apis::Result::RETRY,
-      mobile_apis::Result::SAVED);
-}
-
-bool RequestFromHMI::IsHMIResultSuccess(
-    hmi_apis::Common_Result::eType result_code,
-    HmiInterfaces::InterfaceID interface) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
-  if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          result_code,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED)) {
-    return true;
-  }
-
-  const HmiInterfaces::InterfaceState state =
-      application_manager_.hmi_interfaces().GetInterfaceState(interface);
-  if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
-      (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
-    return true;
-  }
-  return false;
-}
-
 void RequestFromHMI::SendProviderRequest(
     const mobile_apis::FunctionID::eType& mobile_function_id,
     const hmi_apis::FunctionID::eType& hmi_function_id,
     const smart_objects::SmartObject* msg,
     bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   bool hmi_destination = false;
   ApplicationSharedPtr app;
   // Default error code and error message
@@ -198,16 +176,16 @@ void RequestFromHMI::SendProviderRequest(
   }
 
   if (hmi_destination) {
-    LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
+    SDL_LOG_DEBUG("Sending Request to HMI Provider");
     application_manager_.IncreaseForwardedRequestTimeout(
-        application_manager::request_controller::RequestInfo::HmiConnectionKey,
+        application_manager::request_controller::RequestInfo::kHmiConnectionKey,
         correlation_id());
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
   }
 
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
+    SDL_LOG_DEBUG("Invalid App Provider pointer");
     SendErrorResponse(correlation_id(),
                       static_cast<hmi_apis::FunctionID::eType>(function_id()),
                       error_code,
@@ -216,9 +194,9 @@ void RequestFromHMI::SendProviderRequest(
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
+  SDL_LOG_DEBUG("Sending Request to Mobile Provider");
   application_manager_.IncreaseForwardedRequestTimeout(
-      application_manager::request_controller::RequestInfo::HmiConnectionKey,
+      application_manager::request_controller::RequestInfo::kHmiConnectionKey,
       correlation_id());
   SendMobileRequest(
       mobile_function_id, app, &(*msg)[strings::msg_params], use_events);
@@ -251,14 +229,13 @@ void RequestFromHMI::SendMobileRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "RequestFromHMI subscribe_on_event "
-                      << function_id << " " << mobile_correlation_id);
+    SDL_LOG_DEBUG("RequestFromHMI subscribe_on_event "
+                  << function_id << " " << mobile_correlation_id);
     subscribe_on_event(function_id, mobile_correlation_id);
   }
   if (!rpc_service_.ManageMobileCommand(
           result, commands::Command::CommandSource::SOURCE_SDL)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
+    SDL_LOG_ERROR("Unable to send request to mobile");
   }
 }
 
@@ -284,25 +261,24 @@ void RequestFromHMI::SendHMIRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "RequestFromHMI subscribe_on_event " << function_id << " "
+    SDL_LOG_DEBUG("RequestFromHMI subscribe_on_event " << function_id << " "
                                                        << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
             result, commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
-      LOG4CXX_ERROR(logger_, "Unable to send request");
+      SDL_LOG_ERROR("Unable to send request");
     }
   } else {
-    LOG4CXX_DEBUG(logger_, "Interface is not available");
+    SDL_LOG_DEBUG("Interface is not available");
   }
 }
 
 bool RequestFromHMI::ProcessHMIInterfacesAvailability(
     const uint32_t hmi_correlation_id,
     const hmi_apis::FunctionID::eType& function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   HmiInterfaces::InterfaceID interface =
       hmi_interfaces.GetInterfaceFromFunction(function_id);

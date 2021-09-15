@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_set>
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_state.h"
@@ -102,6 +103,10 @@ class StateControllerImpl : public event_engine::EventObserver,
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType default_level) OVERRIDE;
 
+  // EventObserver interface
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::MobileEvent& event) OVERRIDE;
+
   void OnAppWindowAdded(
       ApplicationSharedPtr app,
       const WindowID window_id,
@@ -119,17 +124,22 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
 
-  // EventObserver interface
-  void on_event(const event_engine::Event& event) OVERRIDE;
-  void on_event(const event_engine::MobileEvent& event) OVERRIDE;
-
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
+  void DeactivateApp(ApplicationSharedPtr app,
+                     const WindowID window_id) OVERRIDE;
+
+  void ResumePostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  void DropPostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  PostponedActivationController& GetPostponedActivationController() OVERRIDE;
 
  private:
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
                                 hmi_apis::Common_HMILevel::eType level,
                                 bool send_policy_priority);
+
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED
@@ -272,13 +282,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param ID state identifier
    */
   void TempStateStopped(HmiState::StateID ID);
-
-  /**
-   * @brief Sets BACKGROUND or LIMITED hmi level to application
-   * depends on application type
-   * @param app Application to deactivate
-   */
-  void DeactivateApp(ApplicationSharedPtr app, const WindowID window_id);
 
   /**
    * Function to remove temporary HmiState for application
@@ -426,7 +429,15 @@ class StateControllerImpl : public event_engine::EventObserver,
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
   std::map<uint32_t, HmiStatePtr> waiting_for_response_;
+
+  typedef std::pair<WindowID, HmiStatePtr> WindowStatePair;
+  typedef std::list<WindowStatePair> WindowStatePairs;
+  std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
+
+  std::unordered_set<uint32_t> apps_with_pending_hmistatus_notification_;
+  mutable sync_primitives::Lock apps_with_pending_hmistatus_notification_lock_;
   ApplicationManager& app_mngr_;
+  PostponedActivationController postponed_activation_controller_;
 };
 }  // namespace application_manager
 

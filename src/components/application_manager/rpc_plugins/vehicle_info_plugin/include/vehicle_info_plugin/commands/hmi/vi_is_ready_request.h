@@ -44,8 +44,7 @@ namespace commands {
 /**
  * @brief VIIsReadyRequest command class
  **/
-class VIIsReadyRequest : public app_mngr::commands::RequestToHMI,
-                         public app_mngr::event_engine::EventObserver {
+class VIIsReadyRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VIIsReadyRequest class constructor
@@ -73,12 +72,7 @@ class VIIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut from requrst Controller
    */
-  void onTimeOut() OVERRIDE;
-
-  /**
-   * @brief Send request to HMI for fetching of cappabilities
-   */
-  void SendMessageToHMI();
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIIsReadyRequest);

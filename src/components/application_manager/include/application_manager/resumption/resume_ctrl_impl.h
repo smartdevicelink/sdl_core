@@ -44,6 +44,7 @@
 #include "application_manager/application.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/resumption_data.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
@@ -56,8 +57,7 @@ namespace resumption {
  * @brief Contains logic for storage/restore data of applications.
  */
 
-class ResumeCtrlImpl : public ResumeCtrl,
-                       public app_mngr::event_engine::EventObserver {
+class ResumeCtrlImpl : public ResumeCtrl {
  public:
   /**
    * @brief allows to create ResumeCtrlImpl object
@@ -68,12 +68,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief allows to destroy ResumeCtrlImpl object
    */
   ~ResumeCtrlImpl();
-
-  /**
-   * @brief Event, that raised if application get resumption response from HMI
-   * @param event : event object, that contains smart_object with HMI message
-   */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Save all applications info to the file system
@@ -89,12 +83,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
   /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
-   * @return true if success, otherwise return false
    */
-  bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
-
-  void RestoreWidgetsHMIState(
-      const smart_objects::SmartObject& response_message) OVERRIDE;
+  void RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Set application HMI Level as stored in policy
@@ -116,15 +106,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
   bool SetAppHMIState(app_mngr::ApplicationSharedPtr application,
                       const mobile_apis::HMILevel::eType hmi_level,
                       bool check_policy = true) OVERRIDE;
-
-  /**
-   * @brief RestoreAppWidgets add widgets for the application
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  size_t RestoreAppWidgets(
-      application_manager::ApplicationSharedPtr application,
-      const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -181,21 +162,13 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   void StopRestoreHmiLevelTimer();
 
-  /**
-   * @brief Start timer for resumption applications
-   *        Restore D1-D5 data
-   * @param application that is need to be restored
-   * @return true if it was saved, otherwise return false
-   */
   bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                       const std::string& hash) OVERRIDE;
+                       const std::string& hash,
+                       ResumptionCallBack callback) OVERRIDE;
 
-  /**
-   * @brief Start timer for resumption applications
-   *        Does not restore D1-D5 data
-   * @param application that is need to be restored
-   * @return true if it was saved, otherwise return false
-   */
+  void HandleOnTimeOut(const uint32_t correlation_id,
+                       const hmi_apis::FunctionID::eType) OVERRIDE;
+
   bool StartResumptionOnlyHMILevel(
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
@@ -260,9 +233,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Resume HMI Level and audio streaming state if needed
    * @param application - application to restore hmi level
    * and audio streaming state
-   * @return true if success otherwise false
    */
-  bool StartAppHmiStateResumption(
+  void StartAppHmiStateResumption(
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
@@ -283,8 +255,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * app_id Application to remove
    */
   void RemoveFromResumption(uint32_t app_id) OVERRIDE;
-
-  DEPRECATED bool Init(resumption::LastState& last_state) FINAL;
 
   /**
    * @brief Initialization data for Resume controller
@@ -310,7 +280,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
                               const std::string& device_id) const OVERRIDE;
 
   void StartWaitingForDisplayCapabilitiesUpdate(
-      app_mngr::ApplicationSharedPtr application) OVERRIDE;
+      app_mngr::ApplicationSharedPtr application,
+      const bool is_resume_app) OVERRIDE;
 
   /**
    * @brief geter for launch_time_
@@ -329,6 +300,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * SDL receives onAwakeSDL notification
    */
   void StartSavePersistentDataTimer() OVERRIDE;
+
+  ResumptionDataProcessor& resumption_data_processor();
 
 #ifdef BUILD_TESTS
   void set_resumption_storage(
@@ -354,9 +327,12 @@ class ResumeCtrlImpl : public ResumeCtrl,
   /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
+   * @param callback callback, which contains logic for sending response
+   * to mobile and updating hash
    * @return true if success, otherwise return false
    */
-  bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application);
+  bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application,
+                              ResumptionCallBack callback);
 
   /**
    * @brief SaveDataOnTimer :
@@ -370,67 +346,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * persistent data timer to avoid further persisting
    */
   void FinalPersistData();
-
-  /**
-   * @brief AddFiles allows to add files for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddFiles(app_mngr::ApplicationSharedPtr application,
-                const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubmenues allows to add sub menues for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubmenues(app_mngr::ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddCommands allows to add commands for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddCommands(app_mngr::ApplicationSharedPtr application,
-                   const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddChoicesets allows to add choice sets for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddChoicesets(app_mngr::ApplicationSharedPtr application,
-                     const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief SetGlobalProperties allows to restore global properties.
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void SetGlobalProperties(app_mngr::ApplicationSharedPtr application,
-                           const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubscriptions allows to restore subscriptions
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubscriptions(app_mngr::ApplicationSharedPtr application,
-                        const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddWayPointsSubscription allows to restore subscription
-   * for WayPoints
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
-                                const smart_objects::SmartObject& saved_app);
 
   /**
    * @brief Checks if saved HMI level is allowed for resumption
@@ -541,21 +456,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   void SetLastIgnOffTime(time_t ign_off_time);
 
-  /**
-   * @brief Process specified HMI request
-   * @param request Request to process
-   * @param use_events Process request events or not flag
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ProcessHMIRequest(smart_objects::SmartObjectSPtr request = NULL,
-                         bool use_events = false);
-
-  /**
-   * @brief Process list of HMI requests using ProcessHMIRequest method
-   * @param requests List of requests to process
-   */
-  void ProcessHMIRequests(const smart_objects::SmartObjectList& requests);
-
   void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
   /**
@@ -635,6 +535,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  std::unique_ptr<ResumptionDataProcessor> resumption_data_processor_;
   /**
    *@brief Mapping correlation id to request
    *wait for on event response from HMI to resume HMI Level

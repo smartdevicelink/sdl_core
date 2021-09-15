@@ -63,10 +63,9 @@ class TTSGetSupportedLanguagesRequest
    **/
   virtual ~TTSGetSupportedLanguagesRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetSupportedLanguagesRequest);

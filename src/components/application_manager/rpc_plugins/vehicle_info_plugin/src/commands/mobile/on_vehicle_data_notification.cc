@@ -45,6 +45,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnVehicleDataNotification::OnVehicleDataNotification(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -58,7 +60,7 @@ OnVehicleDataNotification::OnVehicleDataNotification(
 OnVehicleDataNotification::~OnVehicleDataNotification() {}
 
 void OnVehicleDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::vector<ApplicationSharedPtr> notify_apps;
   std::vector<ApplicationSharedPtr>::iterator notified_app_it =
@@ -68,9 +70,11 @@ void OnVehicleDataNotification::Run() {
   custom_vehicle_data_manager_.CreateMobileMessageParams(
       (*message_)[strings::msg_params]);
 
+  MessageHelper::RemoveEmptyMessageParams((*message_)[strings::msg_params]);
+
   const auto& param_names = (*message_)[strings::msg_params].enumerate();
   for (const auto& name : param_names) {
-    LOG4CXX_DEBUG(logger_, "vehicle_data name: " << name);
+    SDL_LOG_DEBUG("vehicle_data name: " << name);
     auto vehicle_data_value = (*message_)[strings::msg_params][name].asInt();
     application_manager_.IviInfoUpdated(name, vehicle_data_value);
 
@@ -84,31 +88,66 @@ void OnVehicleDataNotification::Run() {
         application_manager_.applications(), subscribed_to_ivi_predicate);
     for (const auto& app : applications) {
       if (!app) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SDL_LOG_ERROR("NULL pointer");
         continue;
       }
+
+      smart_objects::SmartObject output_message = *message_;
+      if (strings::tire_pressure == name) {
+        MessageHelper::AddDefaultParamsToTireStatus(app, output_message);
+      }
+
       notified_app_it = find(notify_apps.begin(), notify_apps.end(), app);
       if (notified_app_it == notify_apps.end()) {
         notify_apps.push_back(app);
         smart_objects::SmartObject msg_param =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_param[name] = (*message_)[strings::msg_params][name];
+        msg_param[name] = output_message[strings::msg_params][name];
         appSO.push_back(msg_param);
       } else {
         size_t idx = std::distance(notify_apps.begin(), notified_app_it);
-        appSO[idx][name] = (*message_)[strings::msg_params][name];
+        appSO[idx][name] = output_message[strings::msg_params][name];
       }
     }
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Number of Notifications to be send: " << notify_apps.size());
+  for (size_t idx = 0; idx < notify_apps.size(); ++idx) {
+    CommandParametersPermissions params_permissions;
+    application_manager_.CheckPolicyPermissions(
+        notify_apps[idx],
+        window_id(),
+        MessageHelper::StringifiedFunctionID(
+            mobile_api::FunctionID::OnVehicleDataID),
+        appSO[idx].enumerate(),
+        &params_permissions);
+    if (params_permissions.allowed_params.empty() &&
+        params_permissions.disallowed_params.empty() &&
+        params_permissions.undefined_params.empty()) {
+      SDL_LOG_DEBUG(
+          "No parameter permissions provided, all params are allowed");
+    } else {
+      for (const auto& param : appSO[idx].enumerate()) {
+        const auto& allowed_params = params_permissions.allowed_params;
+        auto param_allowed = allowed_params.find(param);
+        if (allowed_params.end() == param_allowed) {
+          SDL_LOG_DEBUG("Param " << param
+                                 << " is not allowed by policy for app "
+                                 << notify_apps[idx]->app_id()
+                                 << ". It will be ignored.");
+          appSO[idx].erase(param);
+        }
+      }
+    }
 
-  for (size_t idx = 0; idx < notify_apps.size(); idx++) {
-    LOG4CXX_INFO(logger_,
-                 "Send OnVehicleData PRNDL notification to "
-                     << notify_apps[idx]->name().c_str() << " application id "
-                     << notify_apps[idx]->app_id());
+    if (appSO[idx].empty()) {
+      SDL_LOG_DEBUG("App " << notify_apps[idx]->app_id()
+                           << " will be skipped: there is nothing to notify.");
+      continue;
+    }
+
+    SDL_LOG_INFO("Send OnVehicleData notification to "
+                 << notify_apps[idx]->name().c_str() << " application id "
+                 << notify_apps[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =
         notify_apps[idx]->app_id();
     (*message_)[strings::msg_params] = appSO[idx];

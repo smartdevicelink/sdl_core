@@ -58,7 +58,7 @@ typedef std::shared_ptr<UpdateSDLRequest> UpdateSDLRequestPtr;
 namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kCorrelationId = 1u;
-const std::string kStrNumber = "123";
+const std::string kStrNumber{"123"};
 }  // namespace
 
 class UpdateSDLRequestTest : public CommandsTest<CommandsTestMocks::kIsNice> {};
@@ -68,6 +68,8 @@ TEST_F(UpdateSDLRequestTest, RUN_SUCCESS) {
   (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
+
+  InitEventDispatcher();
 
   UpdateSDLRequestPtr command(CreateCommand<UpdateSDLRequest>(command_msg));
 

@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_BUTTON_EVENT_NOTIFICATION_H_
 
 #include "application_manager/application.h"
+#include "application_manager/commands/button_notification_to_mobile.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
 
@@ -50,7 +51,7 @@ namespace mobile {
  * to mobile device that some button was pressed on HMI.
  **/
 class OnButtonEventNotification
-    : public app_mngr::commands::CommandNotificationImpl {
+    : public app_mngr::commands::ButtonNotificationToMobile {
  public:
   /**
    * @brief OnButtonEventNotification class constructor
@@ -68,18 +69,13 @@ class OnButtonEventNotification
    **/
   virtual ~OnButtonEventNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
+ protected:
   /*
    * @brief Sends button event notification to mobile device
    *
    * @param app Application to receive notification
    */
-  void SendButtonEvent(app_mngr::ApplicationConstSharedPtr app);
+  void SendButtonNotification(app_mngr::ApplicationSharedPtr app) OVERRIDE;
 
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };

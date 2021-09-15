@@ -37,6 +37,8 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCSetGlobalPropertiesRequest::RCSetGlobalPropertiesRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -47,7 +49,7 @@ RCSetGlobalPropertiesRequest::RCSetGlobalPropertiesRequest(
                                        params.policy_handler_) {}
 
 void RCSetGlobalPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
 }
 

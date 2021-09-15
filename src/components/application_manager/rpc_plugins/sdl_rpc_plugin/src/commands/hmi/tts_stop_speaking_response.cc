@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 TTSStopSpeakingResponse::TTSStopSpeakingResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ TTSStopSpeakingResponse::TTSStopSpeakingResponse(
 TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {}
 
 void TTSStopSpeakingResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_StopSpeaking);
   event.set_smart_object(*message_);

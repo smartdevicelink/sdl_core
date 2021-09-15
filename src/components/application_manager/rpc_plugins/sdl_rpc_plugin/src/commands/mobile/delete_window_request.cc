@@ -39,17 +39,19 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 DeleteWindowRequest::DeleteWindowRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 DeleteWindowRequest::~DeleteWindowRequest() {}
 
@@ -58,13 +60,12 @@ bool DeleteWindowRequest::CheckWindowId(
   const WindowID window_id =
       (*message_)[strings::msg_params][strings::window_id].asInt();
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id) {
-    LOG4CXX_ERROR(logger_, "Main application window can't be deleted");
+    SDL_LOG_ERROR("Main application window can't be deleted");
     return false;
   }
 
   if (!app->WindowIdExists(window_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "Window with id #" << window_id << " does not exist");
+    SDL_LOG_ERROR("Window with id #" << window_id << " does not exist");
     return false;
   }
 
@@ -85,13 +86,13 @@ void DeleteWindowRequest::DeleteWindow(
 }
 
 void DeleteWindowRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -109,10 +110,10 @@ void DeleteWindowRequest::Run() {
 }
 
 void DeleteWindowRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (hmi_apis::FunctionID::UI_DeleteWindow != event.id()) {
-    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 
@@ -120,25 +121,26 @@ void DeleteWindowRequest::on_event(const event_engine::Event& event) {
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  LOG4CXX_INFO(logger_, "Received DeleteWindow event");
+  SDL_LOG_INFO("Received DeleteWindow event");
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
   const smart_objects::SmartObject& response_message = event.smart_object();
-  const auto result_code = CommandRequestImpl::GetMobileResultCode(
+  const auto result_code = RequestFromMobileImpl::GetMobileResultCode(
       static_cast<hmi_apis::Common_Result::eType>(
           response_message[strings::params][hmi_response::code].asInt()));
 
-  const bool is_success = IsMobileResultSuccess(result_code);
+  const bool is_success =
+      app_mngr::commands::IsMobileResultSuccess(result_code);
   std::string response_info;
   GetInfo(response_message, response_info);
 
   if (!is_success) {
-    LOG4CXX_ERROR(logger_, "DeleteWindow request has failed on HMI side");
+    SDL_LOG_ERROR("DeleteWindow request has failed on HMI side");
     SendResponse(is_success,
                  result_code,
                  response_info.empty() ? nullptr : response_info.c_str());

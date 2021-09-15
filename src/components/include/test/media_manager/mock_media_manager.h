@@ -41,12 +41,13 @@ namespace media_manager_test {
 
 class MockMediaManager : public media_manager::MediaManager {
  public:
-  MOCK_METHOD1(PlayA2DPSource, void(int32_t application_key));
-  MOCK_METHOD1(StopA2DPSource, void(int32_t application_key));
-  MOCK_METHOD3(StartMicrophoneRecording,
+  MOCK_METHOD6(StartMicrophoneRecording,
                void(int32_t application_key,
                     const std::string& outputFileName,
-                    int32_t duration));
+                    int32_t duration,
+                    mobile_apis::SamplingRate::eType,
+                    mobile_apis::BitsPerSample::eType,
+                    mobile_apis::AudioType::eType));
   MOCK_METHOD1(StopMicrophoneRecording, void(int32_t application_key));
   MOCK_METHOD2(StartStreaming,
                void(int32_t application_key,

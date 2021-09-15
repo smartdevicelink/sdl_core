@@ -39,6 +39,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
@@ -53,7 +54,7 @@ namespace commands {
  * @brief SubscribeVehicleDataRequest command class
  **/
 class SubscribeVehicleDataRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief SubscribeVehicleDataRequest class constructor
@@ -108,9 +109,8 @@ class SubscribeVehicleDataRequest
    * @param app Pointer to application sent subscribe request
    * @param msg_params 'message_parameters' response section reference
    */
-  bool SubscribePendingVehicleData(
-      app_mngr::ApplicationSharedPtr app,
-      const smart_objects::SmartObject& msg_params);
+  bool SubscribePendingVehicleData(app_mngr::ApplicationSharedPtr app,
+                                   smart_objects::SmartObject& msg_params);
 
   /**
    * @brief Checks if current application and other applications

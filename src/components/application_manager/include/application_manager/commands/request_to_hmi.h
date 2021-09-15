@@ -35,6 +35,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
 
@@ -61,7 +62,7 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface);
 
-class RequestToHMI : public CommandImpl {
+class RequestToHMI : public CommandRequestImpl {
  public:
   RequestToHMI(const MessageSharedPtr& message,
                ApplicationManager& application_manager,
@@ -74,6 +75,21 @@ class RequestToHMI : public CommandImpl {
   virtual void Run();
   void SendRequest();
 
+  /**
+   * @brief Updates required requests that should be send to the HMI to get
+   * required HMI capabilities
+   * @param interface_name Interface name (e.g. UI, TTS, VR, RC or VehicleInfo)
+   */
+  void UpdateRequiredInterfaceCapabilitiesRequests(
+      const std::string& interface_name);
+
+  /**
+   * @brief According to the specified interface sends appropriate requests to
+   * HMI for fetching of capabilities
+   * @param interface_name Interface name (e.g. UI, TTS, VR, RC or VehicleInfo)
+   */
+  void RequestInterfaceCapabilities(const char* interface_name);
+
   /*
    * @brief Retrieves application ID
    */
@@ -83,6 +99,22 @@ class RequestToHMI : public CommandImpl {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
+
+  /**
+   * @brief Updates required requests that should be send to
+   * the HMI to get required HMI capabilities according to the passed function
+   * ids
+   * @param requests_to_send_to_hmi Collection of the function ids
+   */
+  void UpdateRequestsRequiredForCapabilities(
+      const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi);
+
+  /**
+   * @brief Sends request to HMI for fetching of capabilities according to the
+   * passed function ids
+   */
+  void RequestCapabilities(
+      const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi);
 };
 
 }  // namespace commands

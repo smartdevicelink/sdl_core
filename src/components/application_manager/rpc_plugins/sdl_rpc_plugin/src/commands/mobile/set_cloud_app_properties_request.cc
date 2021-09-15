@@ -7,26 +7,28 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SetCloudAppPropertiesRequest::SetCloudAppPropertiesRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 SetCloudAppPropertiesRequest::~SetCloudAppPropertiesRequest() {}
 
 void SetCloudAppPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -58,7 +60,7 @@ void SetCloudAppPropertiesRequest::Run() {
 
 void SetCloudAppPropertiesRequest::on_event(
     const app_mngr::event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SetCloudAppPropertiesRequest on_event");
+  SDL_LOG_INFO("SetCloudAppPropertiesRequest on_event");
 }
 
 }  // namespace commands

@@ -40,7 +40,7 @@ namespace policy {
 using namespace application_manager;
 class PolicyHandler;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+SDL_CREATE_LOG_VARIABLE("PolicyHandler")
 
 PolicyEventObserver::PolicyEventObserver(
     policy::PolicyHandlerInterface* const policy_handler,
@@ -49,15 +49,16 @@ PolicyEventObserver::PolicyEventObserver(
 
 void PolicyEventObserver::set_policy_handler(
     PolicyHandlerInterface* const policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
-  LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
+  SDL_LOG_DEBUG("Set policy handler " << policy_handler);
   policy_handler_ = policy_handler;
 }
 
-void PolicyEventObserver::on_event(const event_engine::MobileEvent& event) {}
+void PolicyEventObserver::HandleOnEvent(
+    const event_engine::MobileEvent& event) {}
 
-void PolicyEventObserver::on_event(const event_engine::Event& event) {
+void PolicyEventObserver::HandleOnEvent(const event_engine::Event& event) {
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
   if (!policy_handler_) {
     return;
@@ -70,12 +71,9 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
       break;
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      policy_handler_->OnSystemReady();
-      unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+    default: {
       break;
     }
-    default: { break; }
   }
 }
 

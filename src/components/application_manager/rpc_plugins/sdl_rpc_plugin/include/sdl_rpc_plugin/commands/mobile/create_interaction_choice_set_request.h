@@ -37,7 +37,7 @@
 #include <string>
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
@@ -53,7 +53,7 @@ namespace commands {
  * @brief CreateInteractionChoiceSetRequest command class
  **/
 class CreateInteractionChoiceSetRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief CreateInteractionChoiceSetRequest class constructor
@@ -77,18 +77,9 @@ class CreateInteractionChoiceSetRequest
    **/
   void Run() FINAL;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -137,12 +128,6 @@ class CreateInteractionChoiceSetRequest
   volatile bool error_from_hmi_;
   sync_primitives::Lock error_from_hmi_lock_;
 
-  /**
-   * @brief Flag shows if request already was expired by timeout
-   */
-  volatile bool is_timed_out_;
-  sync_primitives::Lock is_timed_out_lock_;
-
   sync_primitives::RecursiveLock vr_commands_lock_;
   /*
    * @brief Sends VR AddCommand request to HMI
@@ -160,56 +145,6 @@ class CreateInteractionChoiceSetRequest
    */
   mobile_apis::Result::eType CheckChoiceSet(
       app_mngr::ApplicationConstSharedPtr app);
-
-  /*
-   * @brief Predicate for using with CheckChoiceSet method to compare choice ID
-   *param
-   *
-   * return TRUE if there is coincidence of choice ID, otherwise FALSE
-   */
-  struct CoincidencePredicateChoiceID {
-    CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[app_mngr::strings::choice_id].asUInt() == newItem_;
-    }
-
-    const uint32_t newItem_;
-  };
-
-  /*
-   * @brief Predicate for using with CheckChoiceSet method to compare menu name
-   *param
-   *
-   * return TRUE if there is coincidence of menu name, otherwise FALSE
-   */
-  struct CoincidencePredicateMenuName {
-    CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[app_mngr::strings::menu_name].asString() == newItem_;
-    }
-
-    const std::string& newItem_;
-  };
-
-  /*
-   * @brief Predicate for using with CheckChoiceSet method to compare VR
-   *commands param
-   *
-   * return TRUE if there is coincidence of VR commands, otherwise FALSE
-   */
-  struct CoincidencePredicateVRCommands {
-    CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return compareStr(obj, newItem_);
-    }
-
-    const smart_objects::SmartObject& newItem_;
-  };
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.

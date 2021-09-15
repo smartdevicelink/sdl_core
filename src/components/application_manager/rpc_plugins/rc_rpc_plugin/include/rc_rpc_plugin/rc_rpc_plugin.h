@@ -37,11 +37,13 @@
 
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_capabilities_manager.h"
 #include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "utils/ilogger.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -63,12 +65,6 @@ class RCRPCPlugin : public plugins::RPCPlugin {
             policy::PolicyHandlerInterface& policy_handler,
             resumption::LastStateWrapperPtr last_state) OVERRIDE;
 
-  DEPRECATED
-  bool Init(app_mngr::ApplicationManager& app_manager,
-            app_mngr::rpc_service::RPCService& rpc_service,
-            app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler,
-            resumption::LastState& last_state) OVERRIDE;
   /**
    * @param int32_t command id
    * @param CommandSource source
@@ -102,6 +98,33 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send Subscribe vehicle data requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   */
+  void ProcessResumptionSubscription(app_mngr::Application& app,
+                                     RCAppExtension& ext);
+
+  /**
+   * @brief Reverts resumption data, clears all pending resumption and sends
+   * unsubscribe interior vehicle data requests to HMI
+   * @param subscriptions Module data that SDL should unsubscribe off
+   */
+  void RevertResumption(const std::set<ModuleUid>& subscriptions);
+
+  /**
+   * @brief IsOtherAppsSubscribed check if any app except passed is subscribed
+   * to a given module
+   * @param module module to check
+   * @param app_id app to ignore subscription
+   * @return true if any app except passed is subscribed to module, otherwise
+   * false
+   */
+  bool IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                             const uint32_t app_id);
+
   static const uint32_t kRCPluginID = 153;
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
@@ -117,10 +140,14 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
   std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
+  using PendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::PendingResumptionHandler>;
+  PendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace rc_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" application_manager::plugin_manager::RPCPlugin* Create(
+    logger::Logger* logger_instance);
 extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_

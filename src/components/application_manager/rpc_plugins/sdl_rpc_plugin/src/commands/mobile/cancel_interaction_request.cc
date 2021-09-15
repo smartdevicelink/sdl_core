@@ -41,22 +41,24 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 CancelInteractionRequest::CancelInteractionRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 CancelInteractionRequest::~CancelInteractionRequest() {}
 
 void CancelInteractionRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*message_)[strings::msg_params][strings::func_id].asInt());
@@ -66,9 +68,10 @@ void CancelInteractionRequest::Run() {
               function_id,
               mobile_apis::FunctionID::PerformInteractionID,
               mobile_apis::FunctionID::AlertID,
+              mobile_apis::FunctionID::SubtleAlertID,
               mobile_apis::FunctionID::ScrollableMessageID,
               mobile_apis::FunctionID::SliderID)) {
-    LOG4CXX_ERROR(logger_, "Bad function ID" << function_id);
+    SDL_LOG_ERROR("Bad function ID " << function_id);
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -86,10 +89,10 @@ void CancelInteractionRequest::Run() {
 }
 
 void CancelInteractionRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (event.id() != hmi_apis::FunctionID::UI_CancelInteraction) {
-    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 

@@ -171,13 +171,11 @@ bool MessageQueue<T, Q>::IsShuttingDown() const {
 
 template <typename T, class Q>
 void MessageQueue<T, Q>::push(const T& element) {
-  {
-    sync_primitives::AutoLock auto_lock(queue_lock_);
-    if (shutting_down_) {
-      return;
-    }
-    queue_.push(element);
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  if (shutting_down_) {
+    return;
   }
+  queue_.push(element);
   queue_new_items_.Broadcast();
 }
 

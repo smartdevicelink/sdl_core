@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_APP_SERVICE_INTERACTION_REQUEST_H_
 
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 
 namespace app_service_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -45,7 +45,7 @@ namespace commands {
  * @brief PerformAppServiceInteractionRequest command class
  **/
 class PerformAppServiceInteractionRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformAppServiceInteractionRequest class constructor

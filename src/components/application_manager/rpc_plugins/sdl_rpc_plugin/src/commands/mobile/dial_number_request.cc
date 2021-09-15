@@ -41,22 +41,24 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 DialNumberRequest::DialNumberRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 DialNumberRequest::~DialNumberRequest() {}
 
 bool DialNumberRequest::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   default_timeout_ = 0;
 
@@ -64,13 +66,13 @@ bool DialNumberRequest::Init() {
 }
 
 void DialNumberRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -78,15 +80,14 @@ void DialNumberRequest::Run() {
   std::string number =
       (*message_)[strings::msg_params][strings::number].asString();
   if (!CheckSyntax(number)) {
-    LOG4CXX_ERROR(logger_, "Invalid incoming data");
+    SDL_LOG_ERROR("Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   StripNumberParam(number);
   if (number.empty()) {
-    LOG4CXX_ERROR(logger_,
-                  "After strip number param is empty. Invalid incoming data");
+    SDL_LOG_ERROR("After strip number param is empty. Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -102,12 +103,12 @@ void DialNumberRequest::Run() {
 }
 
 void DialNumberRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     return;
   }
 
@@ -115,15 +116,15 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
-      LOG4CXX_INFO(logger_, "Received DialNumber event");
+      SDL_LOG_INFO("Received DialNumber event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_BasicCommunication);
-      result_code = CommandRequestImpl::GetMobileResultCode(
+      result_code = RequestFromMobileImpl::GetMobileResultCode(
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt()));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

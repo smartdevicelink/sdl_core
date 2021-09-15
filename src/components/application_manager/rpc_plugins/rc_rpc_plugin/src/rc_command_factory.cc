@@ -62,7 +62,7 @@
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule")
 namespace application_manager {
 using rc_rpc_plugin::InteriorDataCache;
 using rc_rpc_plugin::RCCommandParams;
@@ -71,7 +71,7 @@ using rc_rpc_plugin::ResourceAllocationManager;
 template <typename RCCommandType>
 class RCCommandCreator : public CommandCreator {
  public:
-  RCCommandCreator(const RCCommandParams& params) : params_(params) {}
+  explicit RCCommandCreator(const RCCommandParams& params) : params_(params) {}
 
  private:
   bool CanBeCreated() const override {
@@ -92,7 +92,8 @@ struct RCInvalidCommand {};
 template <>
 class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
  public:
-  RCCommandCreator(const RCCommandParams& params) {
+  // cppcheck-suppress unusedFunction //Used in RCCommandCreatorFactory
+  explicit RCCommandCreator(const RCCommandParams& params) {
     UNUSED(params);
   }
 
@@ -109,11 +110,12 @@ class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
 };
 
 struct RCCommandCreatorFactory {
-  RCCommandCreatorFactory(const RCCommandParams& params) : params_(params) {}
+  explicit RCCommandCreatorFactory(const RCCommandParams& params)
+      : params_(params) {}
 
   template <typename RCCommandType>
   CommandCreator& GetCreator() {
-    LOG4CXX_AUTO_TRACE(logger_);
+    SDL_LOG_AUTO_TRACE();
     static RCCommandCreator<RCCommandType> res(params_);
     return res;
   }
@@ -178,9 +180,8 @@ bool RCCommandFactory::IsAbleToProcess(
 CommandCreator& RCCommandFactory::get_mobile_command_creator(
     const mobile_apis::FunctionID::eType id,
     const mobile_apis::messageType::eType message_type) const {
-  LOG4CXX_DEBUG(logger_,
-                "get_mobile_command_creator function_id: "
-                    << id << " message_type: " << message_type);
+  SDL_LOG_DEBUG("get_mobile_command_creator function_id: "
+                << id << " message_type: " << message_type);
   RCCommandCreatorFactory rc_factory(params_);
   switch (id) {
     case mobile_apis::FunctionID::ButtonPressID: {
@@ -216,7 +217,8 @@ CommandCreator& RCCommandFactory::get_mobile_command_creator(
                  : rc_factory.GetCreator<
                        commands::GetInteriorVehicleDataConsentResponse>();
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -229,7 +231,8 @@ CommandCreator& RCCommandFactory::get_mobile_notification_creator(
       return rc_factory
           .GetCreator<commands::OnInteriorVehicleDataNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -258,7 +261,8 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
       }
       break;
     }
-    default: {}
+    default: {
+    }
   }
   return rc_factory.GetCreator<RCInvalidCommand>();
 }
@@ -266,8 +270,7 @@ CommandCreator& RCCommandFactory::get_mobile_creator_factory(
 CommandCreator& RCCommandFactory::get_hmi_creator_factory(
     const hmi_apis::FunctionID::eType id,
     const hmi_apis::messageType::eType message_type) const {
-  LOG4CXX_DEBUG(logger_,
-                "CreateHMICommand function_id: " << id << " message_type: "
+  SDL_LOG_DEBUG("CreateHMICommand function_id: " << id << " message_type: "
                                                  << message_type);
 
   RCCommandCreatorFactory rc_factory(params_);
@@ -314,7 +317,9 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
                  : rc_factory
                        .GetCreator<commands::RCSetGlobalPropertiesResponse>();
     }
-    default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
+    default: {
+      return rc_factory.GetCreator<RCInvalidCommand>();
+    }
   }
 }
 }  // namespace rc_rpc_plugin
