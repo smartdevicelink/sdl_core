@@ -2404,6 +2404,9 @@ const impl::TransportTypes transportTypes = {
     std::make_pair(std::string("IAP_BLUETOOTH"),
                    impl::TransportDescription(
                        impl::TransportType::TT_BLUETOOTH, true, false)),
+    std::make_pair(std::string("BLUETOOTH_LE"),
+                   impl::TransportDescription(
+                       impl::TransportType::TT_BLUETOOTH_LE, true, false)),
     std::make_pair(
         std::string("IAP_USB"),
         impl::TransportDescription(impl::TransportType::TT_USB, true, false)),
@@ -2611,7 +2614,8 @@ const std::string ProtocolHandlerImpl::TransportTypeFromTransport(
   std::string transport_type;
 
   if (transport.CompareIgnoreCase("IAP_BLUETOOTH") ||
-      transport.CompareIgnoreCase("SPP_BLUETOOTH")) {
+      transport.CompareIgnoreCase("SPP_BLUETOOTH") ||
+      transport.CompareIgnoreCase("BLUETOOTH_LE")) {
     transport_type = "Bluetooth";
   } else if (transport.CompareIgnoreCase("IAP_USB") ||
              transport.CompareIgnoreCase("AOA_USB") ||
