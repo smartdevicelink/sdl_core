@@ -93,6 +93,8 @@ DeviceTypes devicesType = {
                    hmi_apis::Common_TransportType::USB_IOS),
     std::make_pair(std::string("BLUETOOTH"),
                    hmi_apis::Common_TransportType::BLUETOOTH),
+    std::make_pair(std::string("BLUETOOTH_LE"),
+                   hmi_apis::Common_TransportType::BLUETOOTH_LE),
     std::make_pair(std::string("BLUETOOTH_IOS"),
                    hmi_apis::Common_TransportType::BLUETOOTH),
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI),

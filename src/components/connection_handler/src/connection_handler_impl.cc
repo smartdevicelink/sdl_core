@@ -955,6 +955,8 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("AOA_USB");
   } else if (connection_type == "BLUETOOTH") {
     return std::string("SPP_BLUETOOTH");
+  } else if (connection_type == "BLUETOOTH_LE") {
+    return std::string("BLUETOOTH_LE");
   } else if (connection_type == "USB_IOS") {
     return std::string("IAP_USB");
   } else if (connection_type == "BLUETOOTH_IOS") {
