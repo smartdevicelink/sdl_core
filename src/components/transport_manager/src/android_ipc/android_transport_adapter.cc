@@ -52,7 +52,8 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-AndroidTransportAdapter::AndroidTransportAdapter(
+template<AndroidTransportType T>
+AndroidTransportAdapter<T>::AndroidTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
@@ -61,36 +62,41 @@ AndroidTransportAdapter::AndroidTransportAdapter(
           NULL,
           last_state_wrapper,
           settings)
-    , ble_active_device_uid_()
-    , ble_app_handle_(0)
+    , active_device_uid_()
+    , app_handle_(0)
     { }
 
-DeviceType AndroidTransportAdapter::GetDeviceType() const {
+template<AndroidTransportType T>
+DeviceType AndroidTransportAdapter<T>::GetDeviceType() const {
   return BLUETOOTH_LE;
 }
 
-void AndroidTransportAdapter::Store() const {
+template<AndroidTransportType T>
+void AndroidTransportAdapter<T>::Store() const {
 }
 
-bool AndroidTransportAdapter::Restore() {
+template<AndroidTransportType T>
+bool AndroidTransportAdapter<T>::Restore() {
   return true;
 }
 
-AndroidTransportAdapter::~AndroidTransportAdapter(){
+template<AndroidTransportType T>
+AndroidTransportAdapter<T>::~AndroidTransportAdapter(){
     SDL_LOG_DEBUG("Destroying Android transport adapter");
 }
 
-void AndroidTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
+template<AndroidTransportType T>
+void AndroidTransportAdapter<T>::SearchDeviceDone(const DeviceVector& devices) {
     for (const DeviceSptr& device : devices) {
         if (dynamic_cast<AndroidIpcDevice*>(device.get()) != nullptr) {
-            ble_active_device_uid_ = device->unique_device_id();
-            SDL_LOG_DEBUG("New active Android Ipc device found: " << ble_active_device_uid_);
+            active_device_uid_ = device->unique_device_id();
+            SDL_LOG_DEBUG("New active Android Ipc device found: " << active_device_uid_);
 
 
             const auto apps_list = device->GetApplicationList();
             if (!apps_list.empty()) {
-                ble_app_handle_ = apps_list.front();
-                SDL_LOG_DEBUG("New active Android ipc device app handle: " << ble_app_handle_);
+                app_handle_ = apps_list.front();
+                SDL_LOG_DEBUG("New active Android ipc device app handle: " << app_handle_);
             }
 
             break;
@@ -100,15 +106,16 @@ void AndroidTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
     TransportAdapterImpl::SearchDeviceDone(devices);
 }
 
-void AndroidTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
+template<AndroidTransportType T>
+void AndroidTransportAdapter<T>::DisconnectDone(const DeviceUID& device_handle,
                                                  const ApplicationHandle& app_handle) {
-    if (ble_active_device_uid_ == device_handle ) {
+    if (active_device_uid_ == device_handle ) {
         const auto disconnect_result =
-                TransportAdapterImpl::Disconnect(ble_active_device_uid_, ble_app_handle_);
+                TransportAdapterImpl::Disconnect(active_device_uid_, app_handle_);
         if (TransportAdapter::OK == disconnect_result) {
-            TransportAdapterImpl::DisconnectDone(ble_active_device_uid_, ble_app_handle_);
-            ble_active_device_uid_.clear();
-            ble_app_handle_ = 0;
+            TransportAdapterImpl::DisconnectDone(active_device_uid_, app_handle_);
+            active_device_uid_.clear();
+            app_handle_ = 0;
         }
 
         return;
@@ -117,14 +124,18 @@ void AndroidTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
     TransportAdapterImpl::DisconnectDone(device_handle, app_handle);
 }
 
-bool AndroidTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
-    if (!ble_active_device_uid_.empty()) {
+template<AndroidTransportType T>
+bool AndroidTransportAdapter<T>::ToBeAutoConnected(DeviceSptr device) const {
+    if (!active_device_uid_.empty()) {
         // Android Ipc device connection is established on the Java side
-        return device->unique_device_id() == ble_active_device_uid_;
+        return device->unique_device_id() == active_device_uid_;
     }
 
     return false;
 }
+
+template class AndroidTransportAdapter<AndroidTransportType::BLE>;
+template class AndroidTransportAdapter<AndroidTransportType::BT>;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

@@ -60,7 +60,7 @@ TransportAdapter::Error AndroidConnectionFactory::CreateConnection(
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    SDL_LOG_ERROR("Bluetooth LE connection::Start() failed with error: " << error);
+    SDL_LOG_ERROR("Android Ipc connection::Start() failed with error: " << error);
   }
   return error;
 }

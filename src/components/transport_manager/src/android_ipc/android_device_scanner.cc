@@ -57,12 +57,12 @@ SDL_CREATE_LOG_VARIABLE("TransportManager")
 AndroidDeviceScanner::AndroidDeviceScanner(
     TransportAdapterController* controller)
     : controller_(controller)
-    , ipc_control_receiver_( LocalSocketReceiver::ControlSocketName,
-     std::bind(&AndroidDeviceScanner::ProcessMessage, this, std::placeholders::_1)) {
+    , ipc_control_receiver_(std::make_shared<LocalSocketReceiver>( LocalSocketReceiver::ControlSocketName,
+     std::bind(&AndroidDeviceScanner::ProcessMessage, this, std::placeholders::_1))) {
 
   ipc_control_receiver_thread_ = std::thread([&]() {
-    ipc_control_receiver_.Init();
-    ipc_control_receiver_.Run();
+    ipc_control_receiver_->Init();
+    ipc_control_receiver_->Run();
     });
 }
 
@@ -81,7 +81,7 @@ void AndroidDeviceScanner::UpdateTotalDeviceList() {
 
 void AndroidDeviceScanner::Terminate() {
   SDL_LOG_AUTO_TRACE();
-  ipc_control_receiver_.Stop();
+  ipc_control_receiver_->Stop();
   if(ipc_control_receiver_thread_.joinable()) {
     ipc_control_receiver_thread_.join();
   }

@@ -41,9 +41,15 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+ enum class AndroidTransportType {
+   BLE,
+   BT
+ }; 
+
 /**
  * @brief Transport adapter that use bluetooth low energy transport.
  */
+template<AndroidTransportType T>
 class AndroidTransportAdapter : public TransportAdapterImpl {
  public:
 
@@ -67,8 +73,11 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
                       const ApplicationHandle& app_handle) override;
 
   private:
-    DeviceUID ble_active_device_uid_;
-    ApplicationHandle ble_app_handle_;
+    DeviceUID active_device_uid_;
+    ApplicationHandle app_handle_;
+
+    const AndroidTransportType transportType = T;
+
 };
 
 }  // namespace transport_adapter

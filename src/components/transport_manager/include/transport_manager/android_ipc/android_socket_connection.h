@@ -83,8 +83,8 @@ class AndroidSocketConnection : public Connection {
     ApplicationHandle app_handle_;
     TransportAdapterController* controller_;
 
-    LocalSocketSender sender_;
-    LocalSocketReceiver receiver_;
+    std::shared_ptr<IpcSender> sender_;
+    std::shared_ptr<IpcReceiver> receiver_;
 
     std::thread receiver_thread_;
     std::thread sender_thread_;

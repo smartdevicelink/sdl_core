@@ -74,7 +74,7 @@ TransportAdapterFactory::TransportAdapterFactory() {
 #ifdef BLUETOOTH_LE_SUPPORT
   ta_bluetooth_le_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings) {
-    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
+    return new transport_adapter::AndroidTransportAdapter<transport_adapter::AndroidTransportType::BLE>(last_state_wrapper,
                                                             settings);
   };
 #endif

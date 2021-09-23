@@ -50,10 +50,10 @@ AndroidSocketConnection::AndroidSocketConnection(
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , controller_(controller)
-    , sender_(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
-                  std::bind(&AndroidSocketConnection::OnClientConnectionDone, this, std::placeholders::_1))
-    , receiver_(LocalSocketReceiver::WriterSocketName,
-                    std::bind(&AndroidSocketConnection::ProcessMessage, this, std::placeholders::_1))
+    , sender_(std::make_shared<LocalSocketSender>(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
+                  std::bind(&AndroidSocketConnection::OnClientConnectionDone, this, std::placeholders::_1)))
+    , receiver_(std::make_shared<LocalSocketReceiver>(LocalSocketReceiver::WriterSocketName,
+                    std::bind(&AndroidSocketConnection::ProcessMessage, this, std::placeholders::_1)))
     {}
 
 AndroidSocketConnection::~AndroidSocketConnection() {}
@@ -92,18 +92,18 @@ void AndroidSocketConnection::OnClientConnectionDone(const bool is_connected) {
 TransportAdapter::Error
 AndroidSocketConnection::SendData(::protocol_handler::RawMessagePtr message) {
     SDL_LOG_AUTO_TRACE();
-    sender_.Send(message);
+    sender_->Send(message);
     return TransportAdapter::OK;
 }
 
 TransportAdapter::Error AndroidSocketConnection::Disconnect() {
     SDL_LOG_DEBUG("Disconnecting from Java adapter");
-    sender_.Stop();
+    sender_->Stop();
     if (sender_thread_.joinable()) {
         sender_thread_.join();
     }
 
-    receiver_.Stop();
+    receiver_->Stop();
     if (receiver_thread_.joinable()) {
         receiver_thread_.join();
     }
@@ -115,12 +115,12 @@ TransportAdapter::Error AndroidSocketConnection::Start() {
     SDL_LOG_DEBUG("Initializing Android IPC connection threads");
 
     receiver_thread_ = std::thread([&]() {
-        receiver_.Init();
-        receiver_.Run();
+        receiver_->Init();
+        receiver_->Run();
     });
     sender_thread_ = std::thread([&]() {
-        sender_.Init();
-        sender_.Run();
+        sender_->Init();
+        sender_->Run();
     });
 
     return TransportAdapter::OK;

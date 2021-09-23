@@ -92,7 +92,7 @@ class AndroidDeviceScanner : public DeviceScanner {
 
   DeviceVector found_devices_with_sdl_;
 
-  LocalSocketReceiver ipc_control_receiver_;
+  std::shared_ptr<IpcReceiver> ipc_control_receiver_;
   std::thread ipc_control_receiver_thread_;
 };
 
