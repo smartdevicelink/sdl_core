@@ -1,4 +1,4 @@
-#include "transport_manager/bluetooth_le/ble_client.h"
+#include "transport_manager/android_ipc/local_socket_sender.h"
 
 #include <thread>
 #include <utility>
@@ -13,7 +13,7 @@ namespace{
 namespace transport_manager {
 namespace transport_adapter {
 
-BleClient::BleClient(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback)
+LocalSocketSender::LocalSocketSender(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback)
     : socket_id_(-1)
     , connected_(false)
     , message_queue_()
@@ -21,7 +21,7 @@ BleClient::BleClient(OnDataSentCallback&& sent_callback, OnConnectedCallback&& c
     , sent_callback_(sent_callback)
 {}
 
-void BleClient::Init()
+void LocalSocketSender::Init()
 {
     SDL_LOG_AUTO_TRACE();
 
@@ -50,7 +50,7 @@ void BleClient::Init()
     connected_callback_(connected_);
 }
 
-void BleClient::Run()
+void LocalSocketSender::Run()
 {
     SDL_LOG_AUTO_TRACE();
     while(connected_ && !message_queue_.IsShuttingDown()) {
@@ -70,14 +70,14 @@ void BleClient::Run()
     }
 }
 
-BleClient::~BleClient()
+LocalSocketSender::~LocalSocketSender()
 {
     if(connected_){
         close(socket_id_);
     }
 }
 
-bool BleClient::TryToConnect(sockaddr_un& addr, socklen_t len) {
+bool LocalSocketSender::TryToConnect(sockaddr_un& addr, socklen_t len) {
     const int connect_attempts = 10;
     const int attempt_interval_ms = 500;
 
@@ -99,12 +99,12 @@ bool BleClient::TryToConnect(sockaddr_un& addr, socklen_t len) {
     return false;
 }
 
-void BleClient::Stop() {
+void LocalSocketSender::Stop() {
     SDL_LOG_DEBUG("Requesting client to stop");
     message_queue_.Shutdown();
 }
 
-void BleClient::Send(::protocol_handler::RawMessagePtr message) {
+void LocalSocketSender::Send(::protocol_handler::RawMessagePtr message) {
     message_queue_.push(message);
 }
 

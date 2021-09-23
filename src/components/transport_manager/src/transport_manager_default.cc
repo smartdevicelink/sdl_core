@@ -41,7 +41,7 @@
 #endif
 
 #ifdef BLUETOOTH_LE_SUPPORT
-#include "transport_manager/bluetooth_le/bluetooth_le_transport_adapter.h"
+#include "transport_manager/android_ipc/android_transport_adapter.h"
 #endif
 
 #if defined(USB_SUPPORT)
@@ -74,7 +74,7 @@ TransportAdapterFactory::TransportAdapterFactory() {
 #ifdef BLUETOOTH_LE_SUPPORT
   ta_bluetooth_le_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings) {
-    return new transport_adapter::BluetoothLeTransportAdapter(last_state_wrapper,
+    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
                                                             settings);
   };
 #endif

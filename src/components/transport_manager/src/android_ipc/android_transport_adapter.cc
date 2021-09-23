@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_transport_adapter.cc
- * \brief BluetoothLeransportAdapter class source file.
+ * \file android_transport_adapter.cc
+ * \brief AndroidTransportAdapter class source file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -41,9 +41,9 @@
 #include <iomanip>
 #include <set>
 
-#include "transport_manager/bluetooth_le/bluetooth_le_transport_adapter.h"
-#include "transport_manager/bluetooth_le/bluetooth_le_device_scanner.h"
-#include "transport_manager/bluetooth_le/bluetooth_le_connection_factory.h"
+#include "transport_manager/android_ipc/android_transport_adapter.h"
+#include "transport_manager/android_ipc/android_device_scanner.h"
+#include "transport_manager/android_ipc/android_connection_factory.h"
 
 #include "utils/logger.h"
 
@@ -52,12 +52,12 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-BluetoothLeTransportAdapter::BluetoothLeTransportAdapter(
+AndroidTransportAdapter::AndroidTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
-          new BluetoothLeDeviceScanner(this),
-          new BluetoothLeConnectionFactory(this),
+          new AndroidDeviceScanner(this),
+          new AndroidConnectionFactory(this),
           NULL,
           last_state_wrapper,
           settings)
@@ -65,32 +65,32 @@ BluetoothLeTransportAdapter::BluetoothLeTransportAdapter(
     , ble_app_handle_(0)
     { }
 
-DeviceType BluetoothLeTransportAdapter::GetDeviceType() const {
+DeviceType AndroidTransportAdapter::GetDeviceType() const {
   return BLUETOOTH_LE;
 }
 
-void BluetoothLeTransportAdapter::Store() const {
+void AndroidTransportAdapter::Store() const {
 }
 
-bool BluetoothLeTransportAdapter::Restore() {
+bool AndroidTransportAdapter::Restore() {
   return true;
 }
 
-BluetoothLeTransportAdapter::~BluetoothLeTransportAdapter(){
-    SDL_LOG_DEBUG("Destroying BLE transport adapter");
+AndroidTransportAdapter::~AndroidTransportAdapter(){
+    SDL_LOG_DEBUG("Destroying Android transport adapter");
 }
 
-void BluetoothLeTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
+void AndroidTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
     for (const DeviceSptr& device : devices) {
-        if (dynamic_cast<BluetoothLeDevice*>(device.get()) != nullptr) {
+        if (dynamic_cast<AndroidIpcDevice*>(device.get()) != nullptr) {
             ble_active_device_uid_ = device->unique_device_id();
-            SDL_LOG_DEBUG("New active BLE device found: " << ble_active_device_uid_);
+            SDL_LOG_DEBUG("New active Android Ipc device found: " << ble_active_device_uid_);
 
 
             const auto apps_list = device->GetApplicationList();
             if (!apps_list.empty()) {
                 ble_app_handle_ = apps_list.front();
-                SDL_LOG_DEBUG("New active BLE device app handle: " << ble_app_handle_);
+                SDL_LOG_DEBUG("New active Android ipc device app handle: " << ble_app_handle_);
             }
 
             break;
@@ -100,7 +100,7 @@ void BluetoothLeTransportAdapter::SearchDeviceDone(const DeviceVector& devices) 
     TransportAdapterImpl::SearchDeviceDone(devices);
 }
 
-void BluetoothLeTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
+void AndroidTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
                                                  const ApplicationHandle& app_handle) {
     if (ble_active_device_uid_ == device_handle ) {
         const auto disconnect_result =
@@ -117,9 +117,9 @@ void BluetoothLeTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
     TransportAdapterImpl::DisconnectDone(device_handle, app_handle);
 }
 
-bool BluetoothLeTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
+bool AndroidTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
     if (!ble_active_device_uid_.empty()) {
-        // BLE device connection is established on the Java side
+        // Android Ipc device connection is established on the Java side
         return device->unique_device_id() == ble_active_device_uid_;
     }
 

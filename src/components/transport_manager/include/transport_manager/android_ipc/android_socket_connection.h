@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_socket_connection.h
- * \brief BluetoothLeSocketConnection class header file.
+ * \file android_socket_connection.h
+ * \brief AndroidSocketConnection class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,12 +33,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_SOCKET_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_SOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_
 
 #include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/bluetooth_le/ble_client.h"
-#include "transport_manager/bluetooth_le/ble_server.h"
+#include "transport_manager/android_ipc/local_socket_sender.h"
+#include "transport_manager/android_ipc/local_socket_receiver.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -48,7 +48,7 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over bluetooth LE sockets.
  */
-class BluetoothLeSocketConnection : public Connection {
+class AndroidSocketConnection : public Connection {
  public:
   /**
    * @brief Constructor.
@@ -57,11 +57,11 @@ class BluetoothLeSocketConnection : public Connection {
    * @param app_handle Handle of device.
    * @param controller Pointer to the device adapter controller.
    */
-  BluetoothLeSocketConnection(const DeviceUID& device_uid,
+  AndroidSocketConnection(const DeviceUID& device_uid,
                             const ApplicationHandle& app_handle,
                             TransportAdapterController* controller);
 
-  ~BluetoothLeSocketConnection() override;
+  ~AndroidSocketConnection() override;
 
   TransportAdapter::Error SendData(
             ::protocol_handler::RawMessagePtr message) override;
@@ -83,15 +83,15 @@ class BluetoothLeSocketConnection : public Connection {
     ApplicationHandle app_handle_;
     TransportAdapterController* controller_;
 
-    BleClient ble_client_;
-    BleServer ble_server_;
+    LocalSocketSender sender_;
+    LocalSocketReceiver receiver_;
 
-    std::thread ble_server_thread_;
-    std::thread ble_client_thread_;
+    std::thread receiver_thread_;
+    std::thread sender_thread_;
 
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_SOCKET_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_

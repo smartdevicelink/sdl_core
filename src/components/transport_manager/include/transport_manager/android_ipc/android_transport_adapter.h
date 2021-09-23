@@ -1,4 +1,6 @@
 /*
+ * \file android_transport_adapter.h
+ * \brief BluetoothLeAdapter class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -31,45 +33,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/bluetooth_le/bluetooth_le_device.h"
-#include "transport_manager/common.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_TRANSPORT_ADAPTER_H_
 
-#include "utils/logger.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-const ApplicationHandle kDefaultAppHandle = 1u;
+/**
+ * @brief Transport adapter that use bluetooth low energy transport.
+ */
+class AndroidTransportAdapter : public TransportAdapterImpl {
+ public:
 
-  /**
-   * @brief Constructor.
-   *
-   * @param device_address Bluetooth address.
-   * @param device_name Human-readable device name.
-   **/
-  BluetoothLeDevice::BluetoothLeDevice(const std::string& device_address,
-                  const char* device_name)
-    : Device(device_name, device_address)
-    , address_(device_address)
-    , applications_list_({kDefaultAppHandle}) { }
+  AndroidTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
+                            const TransportManagerSettings& settings);
 
-  bool BluetoothLeDevice::IsSameAs(const Device* other) const {
-      SDL_LOG_AUTO_TRACE();
-      const BluetoothLeDevice* other_bluetooth_device =
-      dynamic_cast<const BluetoothLeDevice*>(other);
-      if(other_bluetooth_device) {
-        return other_bluetooth_device->address_ == address_;
-      }
+    ~AndroidTransportAdapter() override;
 
-      SDL_LOG_TRACE("Compare with no BLE device !");
+    bool ToBeAutoConnected(DeviceSptr device) const override;
+ protected:
 
-      return false;
-  }
+  DeviceType GetDeviceType() const override;
 
-  ApplicationList BluetoothLeDevice::GetApplicationList() const {
-      return applications_list_;
-  }
+  void Store() const override;
 
-}
-}
+  bool Restore() override;
+
+  void SearchDeviceDone(const DeviceVector& devices) override;
+
+  void DisconnectDone(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) override;
+
+  private:
+    DeviceUID ble_active_device_uid_;
+    ApplicationHandle ble_app_handle_;
+};
+
+}  // namespace transport_adapter
+}  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_TRANSPORT_ADAPTER_H_

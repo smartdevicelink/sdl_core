@@ -1,4 +1,4 @@
-#include "transport_manager/bluetooth_le/ble_server.h"
+#include "transport_manager/android_ipc/local_socket_receiver.h"
 #include <thread>
 #include "utils/logger.h"
 
@@ -12,15 +12,15 @@ namespace{
 namespace transport_manager {
 namespace transport_adapter {
 
-constexpr char BleServer::WriterSocketName[];
-constexpr char BleServer::ControlSocketName[];
+constexpr char LocalSocketReceiver::WriterSocketName[];
+constexpr char LocalSocketReceiver::ControlSocketName[];
 
-BleServer::BleServer(const std::string& socket_name, MessageDelegate&& callback)
+LocalSocketReceiver::LocalSocketReceiver(const std::string& socket_name, MessageDelegate&& callback)
     : socket_name_(socket_name)
     , callback_(callback)
 {}
 
-void BleServer::Init()
+void LocalSocketReceiver::Init()
 {
     SDL_LOG_AUTO_TRACE();
     connected_ = false;
@@ -74,7 +74,7 @@ void BleServer::Init()
     connected_ = true;
 }
 
-void BleServer::Run()
+void LocalSocketReceiver::Run()
 {
     SDL_LOG_AUTO_TRACE();
 
@@ -88,7 +88,7 @@ void BleServer::Run()
     }
 }
 
-void BleServer::Stop() {
+void LocalSocketReceiver::Stop() {
     SDL_LOG_DEBUG("Requesting server to stop");
     stop_requested_ = true;
     close(client_sock_);
@@ -96,7 +96,7 @@ void BleServer::Stop() {
     connected_ = false;
 }
 
-BleServer::~BleServer(){
+LocalSocketReceiver::~LocalSocketReceiver(){
     if(connected_){
         close(client_sock_);
         close(server_sock_);

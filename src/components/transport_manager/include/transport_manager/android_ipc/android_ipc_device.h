@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_device.h
- * \brief BluetoothLeDevice class header file.
+ * \file android_ipc_device.h
+ * \brief AndroidIpcDevice class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_IPC_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_IPC_DEVICE_H_
 
 #include <vector>
 
@@ -47,7 +47,7 @@ namespace transport_adapter {
 /**
  * @brief Information about device that use bluetooth transport.
  */
-class BluetoothLeDevice : public Device {
+class AndroidIpcDevice : public Device {
  public:
 
   /**
@@ -56,7 +56,7 @@ class BluetoothLeDevice : public Device {
    * @param device_address Bluetooth address.
    * @param device_name Human-readable device name.
    **/
-  BluetoothLeDevice(const std::string& device_address,
+  AndroidIpcDevice(const std::string& device_address,
                   const char* device_name);
 
   bool IsSameAs(const Device* other) const override;
@@ -79,4 +79,4 @@ class BluetoothLeDevice : public Device {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_IPC_DEVICE_H_

@@ -1,6 +1,4 @@
 /*
- * \file bluetooth_le_connection_factory.h
- * \brief BluetoothLeConnectionFactory class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,44 +31,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
+#include "transport_manager/android_ipc/android_ipc_device.h"
+#include "transport_manager/common.h"
 
-#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-class TransportAdapterController;
+const ApplicationHandle kDefaultAppHandle = 1u;
 
-/**
- * @brief Create connections.
- */
-class BluetoothLeConnectionFactory : public ServerConnectionFactory {
- public:
   /**
    * @brief Constructor.
    *
-   * @param controller Pointer to the device adapter controller.
-   */
-  BluetoothLeConnectionFactory(TransportAdapterController* controller);
+   * @param device_address Bluetooth address.
+   * @param device_name Human-readable device name.
+   **/
+  AndroidIpcDevice::AndroidIpcDevice(const std::string& device_address,
+                  const char* device_name)
+    : Device(device_name, device_address)
+    , address_(device_address)
+    , applications_list_({kDefaultAppHandle}) { }
 
- protected:
+  bool AndroidIpcDevice::IsSameAs(const Device* other) const {
+      SDL_LOG_AUTO_TRACE();
+      const AndroidIpcDevice* other_bluetooth_device =
+      dynamic_cast<const AndroidIpcDevice*>(other);
+      if(other_bluetooth_device) {
+        return other_bluetooth_device->address_ == address_;
+      }
 
-  TransportAdapter::Error Init() override;
+      SDL_LOG_TRACE("Compare with no Android Ipc device !");
 
-  TransportAdapter::Error CreateConnection(
-      const DeviceUID& device_uid, const ApplicationHandle& app_handle) override;
+      return false;
+  }
 
-  void Terminate() override;
+  ApplicationList AndroidIpcDevice::GetApplicationList() const {
+      return applications_list_;
+  }
 
-  bool IsInitialised() const override;
-
- private:
-  TransportAdapterController* controller_;
-};
-
-}  // namespace transport_adapter
-}  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
+}
+}

@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_transport_adapter.h
- * \brief BluetoothLeAdapter class header file.
+ * \file android_connection_factory.cc
+ * \brief AndroidConnectionFactory class source file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,45 +33,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTHLE_BLUETOOTHLE_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTHLE_BLUETOOTHLE_TRANSPORT_ADAPTER_H_
-
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/android_ipc/android_connection_factory.h"
+#include "transport_manager/android_ipc/android_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-/**
- * @brief Transport adapter that use bluetooth low energy transport.
- */
-class BluetoothLeTransportAdapter : public TransportAdapterImpl {
- public:
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-  BluetoothLeTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                            const TransportManagerSettings& settings);
+AndroidConnectionFactory::AndroidConnectionFactory(
+    TransportAdapterController* controller)
+    : controller_(controller) {}
 
-    ~BluetoothLeTransportAdapter() override;
+TransportAdapter::Error AndroidConnectionFactory::Init() {
+  return TransportAdapter::OK;
+}
 
-    bool ToBeAutoConnected(DeviceSptr device) const override;
- protected:
+TransportAdapter::Error AndroidConnectionFactory::CreateConnection(
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  SDL_LOG_AUTO_TRACE();
+  std::shared_ptr<AndroidSocketConnection> connection =
+      std::make_shared<AndroidSocketConnection>(
+          device_uid, app_handle, controller_);
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  TransportAdapter::Error error = connection->Start();
+  if (TransportAdapter::OK != error) {
+    SDL_LOG_ERROR("Bluetooth LE connection::Start() failed with error: " << error);
+  }
+  return error;
+}
 
-  DeviceType GetDeviceType() const override;
+void AndroidConnectionFactory::Terminate() {}
 
-  void Store() const override;
-
-  bool Restore() override;
-
-  void SearchDeviceDone(const DeviceVector& devices) override;
-
-  void DisconnectDone(const DeviceUID& device_handle,
-                      const ApplicationHandle& app_handle) override;
-
-  private:
-    DeviceUID ble_active_device_uid_;
-    ApplicationHandle ble_app_handle_;
-};
+bool AndroidConnectionFactory::IsInitialised() const {
+  return true;
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTHLE_BLUETOOTHLE_TRANSPORT_ADAPTER_H_
