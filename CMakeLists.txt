@@ -340,6 +340,11 @@ if (BUILD_BLE_SUPPORT)
   message(STATUS "Bluetooth Low Energy support enabled")
 endif()
 
+if (BUILD_ANDROID_BT_SUPPORT)
+  add_definitions(-DANDROID_BT_SUPPORT)
+  message(STATUS "Bluetooth for Android support enabled")
+endif()
+
 if (BUILD_CLOUD_APP_SUPPORT)
   add_definitions(-DCLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   message(STATUS "Cloud app websocket support enabled")
