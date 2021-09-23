@@ -4,11 +4,16 @@
 #include <utility>
 #include "utils/logger.h"
 
-SDL_CREATE_LOG_VARIABLE("Ble_Client")
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <atomic>
 
-namespace{
-    const char* socket_name =  "./localBleReader";
-}
+SDL_CREATE_LOG_VARIABLE("local_socket_sender")
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -21,14 +26,14 @@ LocalSocketSender::LocalSocketSender(OnDataSentCallback&& sent_callback, OnConne
     , sent_callback_(sent_callback)
 {}
 
-void LocalSocketSender::Init()
+void LocalSocketSender::Init(const std::string& socket_name)
 {
     SDL_LOG_AUTO_TRACE();
 
     struct sockaddr_un addr{};
     addr.sun_family = AF_LOCAL;
     addr.sun_path[0] = '\0';
-    strcpy(&addr.sun_path[1], socket_name );
+    strcpy(&addr.sun_path[1], socket_name.c_str() );
     socklen_t len = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&addr.sun_path[1]);
     int err;
 

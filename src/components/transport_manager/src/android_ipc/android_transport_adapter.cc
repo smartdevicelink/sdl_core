@@ -52,10 +52,10 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-template<AndroidTransportType T>
-AndroidTransportAdapter<T>::AndroidTransportAdapter(
+AndroidTransportAdapter::AndroidTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
-    const TransportManagerSettings& settings)
+    const TransportManagerSettings& settings,
+    AndroidTransportType transport_type)
     : TransportAdapterImpl(
           new AndroidDeviceScanner(this),
           new AndroidConnectionFactory(this),
@@ -64,29 +64,25 @@ AndroidTransportAdapter<T>::AndroidTransportAdapter(
           settings)
     , active_device_uid_()
     , app_handle_(0)
+    , transport_type_(transport_type)
     { }
 
-template<AndroidTransportType T>
-DeviceType AndroidTransportAdapter<T>::GetDeviceType() const {
+DeviceType AndroidTransportAdapter::GetDeviceType() const {
   return BLUETOOTH_LE;
 }
 
-template<AndroidTransportType T>
-void AndroidTransportAdapter<T>::Store() const {
+void AndroidTransportAdapter::Store() const {
 }
 
-template<AndroidTransportType T>
-bool AndroidTransportAdapter<T>::Restore() {
+bool AndroidTransportAdapter::Restore() {
   return true;
 }
 
-template<AndroidTransportType T>
-AndroidTransportAdapter<T>::~AndroidTransportAdapter(){
+AndroidTransportAdapter::~AndroidTransportAdapter(){
     SDL_LOG_DEBUG("Destroying Android transport adapter");
 }
 
-template<AndroidTransportType T>
-void AndroidTransportAdapter<T>::SearchDeviceDone(const DeviceVector& devices) {
+void AndroidTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
     for (const DeviceSptr& device : devices) {
         if (dynamic_cast<AndroidIpcDevice*>(device.get()) != nullptr) {
             active_device_uid_ = device->unique_device_id();
@@ -106,8 +102,7 @@ void AndroidTransportAdapter<T>::SearchDeviceDone(const DeviceVector& devices) {
     TransportAdapterImpl::SearchDeviceDone(devices);
 }
 
-template<AndroidTransportType T>
-void AndroidTransportAdapter<T>::DisconnectDone(const DeviceUID& device_handle,
+void AndroidTransportAdapter::DisconnectDone(const DeviceUID& device_handle,
                                                  const ApplicationHandle& app_handle) {
     if (active_device_uid_ == device_handle ) {
         const auto disconnect_result =
@@ -124,8 +119,7 @@ void AndroidTransportAdapter<T>::DisconnectDone(const DeviceUID& device_handle,
     TransportAdapterImpl::DisconnectDone(device_handle, app_handle);
 }
 
-template<AndroidTransportType T>
-bool AndroidTransportAdapter<T>::ToBeAutoConnected(DeviceSptr device) const {
+bool AndroidTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
     if (!active_device_uid_.empty()) {
         // Android Ipc device connection is established on the Java side
         return device->unique_device_id() == active_device_uid_;
@@ -134,8 +128,46 @@ bool AndroidTransportAdapter<T>::ToBeAutoConnected(DeviceSptr device) const {
     return false;
 }
 
-template class AndroidTransportAdapter<AndroidTransportType::BLE>;
-template class AndroidTransportAdapter<AndroidTransportType::BT>;
+std::string AndroidTransportAdapter::GetSenderSocketName() const {
+    switch(transport_type_) {
+        case AndroidTransportType::BLE:
+            return "./localBleReader";
+        break;
+
+        case AndroidTransportType::BT:
+            return "./localBtReader";
+        break;
+    }
+
+    return "";
+}
+
+std::string AndroidTransportAdapter::GetReceiverSocketName() const{
+    switch(transport_type_) {
+        case AndroidTransportType::BLE:
+            return "./localBleWriter";
+        break;
+
+        case AndroidTransportType::BT:
+            return "./localBtWriter";
+        break;
+    }
+
+    return "";
+}
+
+std::string AndroidTransportAdapter::GetControlReceiverSocketName() const{
+    switch(transport_type_) {
+        case AndroidTransportType::BLE:
+            return "./localBleControl";
+        break;
+
+        case AndroidTransportType::BT:
+            return "./localBtControl";
+        break;
+    }
+    return "";
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

@@ -49,16 +49,21 @@ namespace transport_adapter {
 /**
  * @brief Transport adapter that use bluetooth low energy transport.
  */
-template<AndroidTransportType T>
 class AndroidTransportAdapter : public TransportAdapterImpl {
  public:
 
   AndroidTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                            const TransportManagerSettings& settings);
+                            const TransportManagerSettings& settings,
+                            AndroidTransportType transport_type);
 
-    ~AndroidTransportAdapter() override;
+  ~AndroidTransportAdapter() override;
 
-    bool ToBeAutoConnected(DeviceSptr device) const override;
+  bool ToBeAutoConnected(DeviceSptr device) const override;
+
+  std::string GetSenderSocketName() const;
+  std::string GetReceiverSocketName() const;
+  std::string GetControlReceiverSocketName() const;
+
  protected:
 
   DeviceType GetDeviceType() const override;
@@ -75,8 +80,7 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
   private:
     DeviceUID active_device_uid_;
     ApplicationHandle app_handle_;
-
-    const AndroidTransportType transportType = T;
+    AndroidTransportType transport_type_;
 
 };
 

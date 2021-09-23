@@ -1,16 +1,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_LOCAL_SOCKET_SENDER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_LOCAL_SOCKET_SENDER_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <atomic>
 
 #include "protocol/raw_message.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -31,7 +23,7 @@ public:
     LocalSocketSender(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback);
     ~LocalSocketSender();
 
-    void Init() override;
+    void Init(const std::string& socket_name) override;
     void Run() override;
     void Stop() override;
     void Send(::protocol_handler::RawMessagePtr message) override;

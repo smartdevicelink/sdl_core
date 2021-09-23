@@ -12,7 +12,7 @@ public:
 
     virtual ~IpcSender() {}
 
-    virtual void Init() = 0;
+    virtual void Init(const std::string& socket_name) = 0;
     virtual void Run() = 0;
     virtual void Stop() = 0;
     virtual void Send(::protocol_handler::RawMessagePtr message) = 0;

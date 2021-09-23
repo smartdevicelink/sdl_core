@@ -35,6 +35,7 @@
 
 #include "transport_manager/android_ipc/android_ipc_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/android_ipc/android_transport_adapter.h"
 
 #include "utils/logger.h"
 
@@ -52,7 +53,7 @@ AndroidSocketConnection::AndroidSocketConnection(
     , controller_(controller)
     , sender_(std::make_shared<LocalSocketSender>(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
                   std::bind(&AndroidSocketConnection::OnClientConnectionDone, this, std::placeholders::_1)))
-    , receiver_(std::make_shared<LocalSocketReceiver>(LocalSocketReceiver::WriterSocketName,
+    , receiver_(std::make_shared<LocalSocketReceiver>(
                     std::bind(&AndroidSocketConnection::ProcessMessage, this, std::placeholders::_1)))
     {}
 
@@ -115,11 +116,11 @@ TransportAdapter::Error AndroidSocketConnection::Start() {
     SDL_LOG_DEBUG("Initializing Android IPC connection threads");
 
     receiver_thread_ = std::thread([&]() {
-        receiver_->Init();
+        receiver_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetReceiverSocketName());
         receiver_->Run();
     });
     sender_thread_ = std::thread([&]() {
-        sender_->Init();
+        sender_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetSenderSocketName());
         sender_->Run();
     });
 

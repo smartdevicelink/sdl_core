@@ -78,15 +78,15 @@ TransportAdapterFactory::TransportAdapterFactory() {
 #ifdef BLUETOOTH_LE_SUPPORT
   ta_bluetooth_le_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings) {
-    return new transport_adapter::AndroidTransportAdapter<transport_adapter::AndroidTransportType::BLE>(last_state_wrapper,
-                                                            settings);
+    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
+                                                            settings, transport_adapter::AndroidTransportType::BLE);
   };
 #endif
 #ifdef ANDROID_BT_SUPPORT
   ta_android_bt_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings) {
-    return new transport_adapter::AndroidTransportAdapter<transport_adapter::AndroidTransportType::BT>(last_state_wrapper,
-                                                            settings);
+    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
+                                                            settings, transport_adapter::AndroidTransportType::BT);
   };
 #endif
   ta_tcp_creator_ = [](const uint16_t port,
