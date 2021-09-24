@@ -64,8 +64,9 @@ AndroidTransportAdapter::AndroidTransportAdapter(
           settings)
     , active_device_uid_()
     , app_handle_(0)
-    , transport_type_(transport_type)
-    { }
+    , transport_type_(transport_type) {
+        SDL_LOG_DEBUG("AndroidTransportAdapter created for transport type : " << (int)transport_type);
+    }
 
 DeviceType AndroidTransportAdapter::GetDeviceType() const {
   return BLUETOOTH_LE;
