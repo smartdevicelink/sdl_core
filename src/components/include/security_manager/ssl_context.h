@@ -38,6 +38,7 @@
 #include <cstddef>  // for size_t typedef
 #include <string>
 #include "utils/custom_string.h"
+#include "utils/time64.h"
 
 // TODO(EZamakhov): update brief info
 /**
@@ -86,7 +87,7 @@ class SSLContext {
 
     custom_str::CustomString expected_sn;
     custom_str::CustomString expected_cn;
-    time_t system_time;
+    TIME_TYPE system_time;
   };
 
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
@@ -111,7 +112,7 @@ class SSLContext {
    * @return True if certificate expiration date received
    * otherwise False
    */
-  virtual bool GetCertificateDueDate(time_t& due_date) const = 0;
+  virtual bool GetCertificateDueDate(TIME_TYPE& due_date) const = 0;
   virtual bool HasCertificate() const = 0;
   virtual size_t get_max_block_size(size_t mtu) const = 0;
   virtual std::string LastError() const = 0;

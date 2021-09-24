@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/system_time_handler.h"
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_TIME64_H
+#define SRC_COMPONENTS_INCLUDE_UTILS_TIME64_H
 
-namespace utils {
+#include <chrono>
 
-SystemTimeHandler::SystemTimeHandler() {}
+#if defined(__ANDROID__) && !defined(__LP64__)
+#include <time64.h>
+typedef time64_t TIME_TYPE;
+#define GMTIME(time) gmtime64(time)
+#define LOCALTIME(time) localtime64(time)
+#define MKTIME(time) mktime64(time)
+#else
+#include <ctime>
+typedef time_t TIME_TYPE;
+#define GMTIME(time) gmtime(time)
+#define LOCALTIME(time) localtime(time)
+#define MKTIME(time) mktime(time)
+#endif
 
-SystemTimeHandler::~SystemTimeHandler() {}
+template <typename DURATION_TYPE>
+double get_duration_diff(TIME_TYPE from, TIME_TYPE to) {
+    const DURATION_TYPE time_from(from);
+    const DURATION_TYPE time_to(to);
 
-void SystemTimeHandler::QuerySystemTime() {
-  DoSystemTimeQuery();
+    return std::chrono::duration_cast<DURATION_TYPE>(time_from - time_to).count();
 }
 
-void SystemTimeHandler::SubscribeOnSystemTime(SystemTimeListener* listener) {
-  DoSubscribe(listener);
-}
-
-void SystemTimeHandler::UnsubscribeFromSystemTime(
-    SystemTimeListener* listener) {
-  DoUnsubscribe(listener);
-}
-
-TIME_TYPE SystemTimeHandler::GetUTCTime() {
-  return FetchSystemTime();
-}
-
-bool SystemTimeHandler::system_time_can_be_received() const {
-  return utc_time_can_be_received();
-}
-
-}  // namespace utils
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_TIME64_H

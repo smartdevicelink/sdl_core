@@ -33,7 +33,6 @@
 
 #include <assert.h>
 #include <memory.h>
-#include <time.h>
 #include <algorithm>
 #include <map>
 #include <vector>
@@ -43,6 +42,7 @@
 #include <openssl/ssl.h>
 
 #include "utils/macro.h"
+#include "utils/time64.h"
 
 namespace security_manager {
 
@@ -114,11 +114,11 @@ size_t des_cbc3_sha_max_block_size(size_t mtu) {
     return 0;
   return ((mtu - 29) & 0xfffffff8) - 5;
 }
-time_t get_time_zone_offset(time_t in_time) {
-  tm gmt_cert_tm = *gmtime(&in_time);
-  tm local_cert_tm = *localtime(&in_time);
+TIME_TYPE get_time_zone_offset(TIME_TYPE in_time) {
+  tm gmt_cert_tm = *GMTIME(&in_time);
+  tm local_cert_tm = *LOCALTIME(&in_time);
 
-  return mktime(&local_cert_tm) - mktime(&gmt_cert_tm);
+  return MKTIME(&local_cert_tm) - MKTIME(&gmt_cert_tm);
 }
 }  // namespace
 
@@ -235,11 +235,11 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   ASN1_TIME* notBefore = X509_get_notBefore(cert);
   ASN1_TIME* notAfter = X509_get_notAfter(cert);
 
-  time_t start = convert_asn1_time_to_time_t(notBefore);
-  time_t end = convert_asn1_time_to_time_t(notAfter);
+  TIME_TYPE start = convert_asn1_time_to_time_t(notBefore);
+  TIME_TYPE end = convert_asn1_time_to_time_t(notAfter);
 
-  const double start_seconds = difftime(hsh_context_.system_time, start);
-  const double end_seconds = difftime(end, hsh_context_.system_time);
+  const double start_seconds = get_duration_diff<std::chrono::seconds>(hsh_context_.system_time, start);
+  const double end_seconds = get_duration_diff<std::chrono::seconds>(end, hsh_context_.system_time);
 
   if (start_seconds < 0) {
     SDL_LOG_ERROR("Certificate is not yet valid. Time before validity "
@@ -281,7 +281,7 @@ int CryptoManagerImpl::SSLContextImpl::get_number_from_char_buf(
   return val;
 }
 
-time_t CryptoManagerImpl::SSLContextImpl::convert_asn1_time_to_time_t(
+TIME_TYPE CryptoManagerImpl::SSLContextImpl::convert_asn1_time_to_time_t(
     ASN1_TIME* time_to_convert) const {
   struct tm cert_time;
   memset(&cert_time, 0, sizeof(struct tm));
@@ -319,8 +319,8 @@ time_t CryptoManagerImpl::SSLContextImpl::convert_asn1_time_to_time_t(
     cert_time.tm_sec = sec;
   }
 
-  const time_t local_cert_time = mktime(&cert_time);
-  const time_t time_offset = get_time_zone_offset(local_cert_time);
+  const TIME_TYPE local_cert_time = MKTIME(&cert_time);
+  const TIME_TYPE time_offset = get_time_zone_offset(local_cert_time);
 
   return local_cert_time + time_offset;
 }
@@ -540,7 +540,7 @@ bool CryptoManagerImpl::SSLContextImpl::IsHandshakePending() const {
 }
 
 bool CryptoManagerImpl::SSLContextImpl::GetCertificateDueDate(
-    time_t& due_date) const {
+    TIME_TYPE& due_date) const {
   SDL_LOG_AUTO_TRACE();
 
   X509* cert = SSL_get_certificate(connection_);

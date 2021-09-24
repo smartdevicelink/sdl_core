@@ -94,7 +94,7 @@ void SystemTimeHandlerImpl::DoUnsubscribe(utils::SystemTimeListener* listener) {
   system_time_listener_ = NULL;
 }
 
-time_t SystemTimeHandlerImpl::FetchSystemTime() {
+TIME_TYPE SystemTimeHandlerImpl::FetchSystemTime() {
   SDL_LOG_AUTO_TRACE();
   return last_time_;
 }
@@ -176,8 +176,8 @@ void SystemTimeHandlerImpl::ProcessSystemTimeResponse(
   // tm_year - number of years since 1900
   system_time.tm_year = system_time_so[time_keys::year].asInt() - 1900;
 
-  // Normalize and convert time from 'tm' format to 'time_t'
-  last_time_ = mktime(&system_time);
+  // Normalize and convert time from 'tm' format to 'TIME_TYPE'
+  last_time_ = MKTIME(&system_time);
 
   sync_primitives::AutoLock lock(system_time_listener_lock_);
   if (system_time_listener_) {

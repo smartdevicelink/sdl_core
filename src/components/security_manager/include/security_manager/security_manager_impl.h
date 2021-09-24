@@ -288,7 +288,7 @@ class SecurityManagerImpl : public SecurityManager,
    * crypto manager with updated time in order to check certificate validity
    * @param utc_time the current system time.
    */
-  void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
+  void OnSystemTimeArrived(const TIME_TYPE utc_time) OVERRIDE;
 
   /**
    * @brief OnSystemTimeFailed Notify about system request failure

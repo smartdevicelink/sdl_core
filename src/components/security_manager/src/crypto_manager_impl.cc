@@ -42,6 +42,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
 #include "security_manager/security_manager.h"
 #include "utils/atomic.h"
@@ -364,19 +365,18 @@ std::string CryptoManagerImpl::LastError() const {
 }
 
 bool CryptoManagerImpl::IsCertificateUpdateRequired(
-    const time_t system_time, const time_t certificates_time) const {
+    const TIME_TYPE system_time, const TIME_TYPE certificates_time) const {
   SDL_LOG_AUTO_TRACE();
 
-  const double seconds = difftime(certificates_time, system_time);
-
+  const double seconds = get_duration_diff<std::chrono::seconds>(certificates_time, system_time);
   const size_t maxsize = 40;
   char certificate_utc_time[maxsize];
   std::strftime(
-      certificate_utc_time, maxsize, "%c", gmtime(&certificates_time));
+      certificate_utc_time, maxsize, "%c", GMTIME(&certificates_time));
   SDL_LOG_DEBUG("Certificate UTC time: " << certificate_utc_time);
 
   char host_utc_time[maxsize];
-  std::strftime(host_utc_time, maxsize, "%c", gmtime(&system_time));
+  std::strftime(host_utc_time, maxsize, "%c", GMTIME(&system_time));
   SDL_LOG_DEBUG("Host UTC time: " << host_utc_time);
 
   SDL_LOG_DEBUG("Seconds before expiration: " << seconds);

@@ -278,7 +278,7 @@ void SecurityManagerImpl::ProceedHandshake(
     return;
   }
 
-  time_t cert_due_date;
+  TIME_TYPE cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     SDL_LOG_ERROR("Failed to get certificate due date!");
     PostponeHandshake(connection_key);
@@ -333,7 +333,7 @@ bool SecurityManagerImpl::IsCertificateUpdateRequired(
       CreateSSLContext(connection_key, kUseExisting);
   DCHECK_OR_RETURN(ssl_context, true);
   SDL_LOG_DEBUG("Set SSL context to connection_key " << connection_key);
-  time_t cert_due_date;
+  TIME_TYPE cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     SDL_LOG_ERROR("Failed to get certificate due date!");
     return true;
@@ -375,7 +375,7 @@ bool SecurityManagerImpl::OnCertificateUpdated(const std::string& data) {
   return true;
 }
 
-void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
+void SecurityManagerImpl::OnSystemTimeArrived(const TIME_TYPE utc_time) {
   SDL_LOG_AUTO_TRACE();
   {
     sync_primitives::AutoLock lock(waiters_lock_);

@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
-#include <time.h>
 #include "application_manager/policies/policy_handler_observer.h"
 #include "security_manager/security_manager_settings.h"
+#include <utils/time64.h>
 
 /**
  * \class security_manager::CryptoManager
@@ -75,7 +75,7 @@ class CryptoManager : public policy::PolicyHandlerObserver {
    * otherwise False
    */
   virtual bool IsCertificateUpdateRequired(
-      const time_t system_time, const time_t certificates_time) const = 0;
+      const TIME_TYPE system_time, const TIME_TYPE certificates_time) const = 0;
   /**
    * \brief Crypto manager settings getter
    * \return pointer to crypto manager settings class

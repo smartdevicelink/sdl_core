@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_TIME_HANDLER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_TIME_HANDLER_H_
 
-#include <time.h>
+#include <utils/time64.h>
 
 namespace utils {
 
@@ -49,7 +49,7 @@ class SystemTimeListener {
    * in utc format
    * @param utc_time current system time.
    */
-  virtual void OnSystemTimeArrived(const time_t utc_time) = 0;
+  virtual void OnSystemTimeArrived(const TIME_TYPE utc_time) = 0;
 
   /**
    * @brief OnSystemTimeFailed Notify about system request failure
@@ -99,7 +99,7 @@ class SystemTimeHandler {
    * GetSystemTime request
    * @return utc time.
    */
-  time_t GetUTCTime();
+  TIME_TYPE GetUTCTime();
 
   /**
    * @brief ResetPendingSystemTimeRequests resets waiting for system time
@@ -146,7 +146,7 @@ class SystemTimeHandler {
    * for the GetSystemTime request.
    * @return utc time.
    */
-  virtual time_t FetchSystemTime() = 0;
+  virtual TIME_TYPE FetchSystemTime() = 0;
 
   /**
    * @brief Checks if UTC time is ready to provided by HMI

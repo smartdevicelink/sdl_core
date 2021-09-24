@@ -46,6 +46,7 @@
 
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/time64.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
@@ -70,7 +71,7 @@ class CryptoManagerImpl : public CryptoManager {
                  size_t* out_data_size) OVERRIDE;
     bool IsInitCompleted() const OVERRIDE;
     bool IsHandshakePending() const OVERRIDE;
-    bool GetCertificateDueDate(time_t& due_date) const OVERRIDE;
+    bool GetCertificateDueDate(TIME_TYPE& due_date) const OVERRIDE;
     bool HasCertificate() const OVERRIDE;
     size_t get_max_block_size(size_t mtu) const OVERRIDE;
     std::string LastError() const OVERRIDE;
@@ -112,11 +113,11 @@ class CryptoManagerImpl : public CryptoManager {
     int get_number_from_char_buf(char* buf, int* idx) const;
     /**
      * @brief Converts time from ASN1 format (used in OpenSSL)
-     * to time_t data type
-     * @param time_to_convert time to be converted
-     * @return time in time_t format
+     * to TIME_TYPE data type
+     * @param time64_to_convert time to be converted
+     * @return time in TIME_TYPE format
      */
-    time_t convert_asn1_time_to_time_t(ASN1_TIME* time_to_convert) const;
+    TIME_TYPE convert_asn1_time_to_time_t(ASN1_TIME* time_to_convert) const;
 
     SSL* connection_;
     BIO* bioIn_;
@@ -146,7 +147,7 @@ class CryptoManagerImpl : public CryptoManager {
   void ReleaseSSLContext(SSLContext* context) OVERRIDE;
   std::string LastError() const OVERRIDE;
   bool IsCertificateUpdateRequired(
-      const time_t system_time, const time_t certificates_time) const OVERRIDE;
+      const TIME_TYPE system_time, const TIME_TYPE certificates_time) const OVERRIDE;
   virtual const CryptoManagerSettings& get_settings() const OVERRIDE;
 
  private:

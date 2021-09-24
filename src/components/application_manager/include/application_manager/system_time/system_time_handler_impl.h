@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SYSTEM_TIME_SYSTEM_TIME_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SYSTEM_TIME_SYSTEM_TIME_HANDLER_IMPL_H_
 
-#include <time.h>
 #include <vector>
 
 #include "application_manager/application_manager.h"
@@ -41,6 +40,7 @@
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/system_time_handler.h"
+#include "utils/time64.h"
 
 namespace application_manager {
 
@@ -106,7 +106,7 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
    * argument is valid
    * @return the time value returned by system.
    */
-  time_t FetchSystemTime() FINAL;
+  TIME_TYPE FetchSystemTime() FINAL;
 
   /**
    * @brief SendTimeRequest sends the request to the system
@@ -154,7 +154,7 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
   volatile bool awaiting_get_system_time_;
 
   // Varible used to store result for GetSystemTime request
-  time_t last_time_;
+  TIME_TYPE last_time_;
 
   sync_primitives::Lock system_time_listener_lock_;
   utils::SystemTimeListener* system_time_listener_;
