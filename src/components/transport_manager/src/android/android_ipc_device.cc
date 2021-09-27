@@ -1,6 +1,4 @@
 /*
- * \file android_connection_factory.cc
- * \brief AndroidConnectionFactory class source file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,43 +31,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/android_ipc/android_connection_factory.h"
-#include "transport_manager/android_ipc/android_socket_connection.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/android/android_ipc_device.h"
+#include "transport_manager/common.h"
+
 #include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-AndroidConnectionFactory::AndroidConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller) {}
+const ApplicationHandle kDefaultAppHandle = 1u;
 
-TransportAdapter::Error AndroidConnectionFactory::Init() {
-  return TransportAdapter::OK;
-}
+  /**
+   * @brief Constructor.
+   *
+   * @param device_address Bluetooth address.
+   * @param device_name Human-readable device name.
+   **/
+  AndroidIpcDevice::AndroidIpcDevice(const std::string& device_address,
+                  const char* device_name)
+    : Device(device_name, device_address)
+    , address_(device_address)
+    , applications_list_({kDefaultAppHandle}) { }
 
-TransportAdapter::Error AndroidConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  SDL_LOG_AUTO_TRACE();
-  std::shared_ptr<AndroidSocketConnection> connection =
-      std::make_shared<AndroidSocketConnection>(
-          device_uid, app_handle, controller_);
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-  TransportAdapter::Error error = connection->Start();
-  if (TransportAdapter::OK != error) {
-    SDL_LOG_ERROR("Android Ipc connection::Start() failed with error: " << error);
+  bool AndroidIpcDevice::IsSameAs(const Device* other) const {
+      SDL_LOG_AUTO_TRACE();
+      const AndroidIpcDevice* other_bluetooth_device =
+      dynamic_cast<const AndroidIpcDevice*>(other);
+      if(other_bluetooth_device) {
+        return other_bluetooth_device->address_ == address_;
+      }
+
+      SDL_LOG_TRACE("Compare with no Android Ipc device !");
+
+      return false;
   }
-  return error;
+
+  ApplicationList AndroidIpcDevice::GetApplicationList() const {
+      return applications_list_;
+  }
+
 }
-
-void AndroidConnectionFactory::Terminate() {}
-
-bool AndroidConnectionFactory::IsInitialised() const {
-  return true;
 }
-
-}  // namespace transport_adapter
-}  // namespace transport_manager

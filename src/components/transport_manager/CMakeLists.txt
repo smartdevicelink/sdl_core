@@ -152,14 +152,14 @@ list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 if(BUILD_BLE_SUPPORT)
   list(APPEND SOURCES
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_transport_adapter.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_connection_factory.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_socket_connection.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_device_scanner.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_ipc_device.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/local_socket_sender.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/local_socket_receiver.cc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc/android_ipc_control_protocol.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_transport_adapter.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_connection_factory.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_socket_connection.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_device_scanner.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_ipc_device.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/local_socket_sender.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/local_socket_receiver.cc
+    ${COMPONENTS_DIR}/transport_manager/src/android/android_ipc_control_protocol.cc
     )
 
     if (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -168,8 +168,8 @@ if(BUILD_BLE_SUPPORT)
 
 else()
   list(APPEND EXCLUDE_PATHS
-    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/android_ipc
-    ${COMPONENTS_DIR}/transport_manager/src/android_ipc
+    ${COMPONENTS_DIR}/transport_manager/include/transport_manager/android
+    ${COMPONENTS_DIR}/transport_manager/src/android
   )
 endif()
 

@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/android_ipc/android_device_scanner.h"
+#include "transport_manager/android/android_device_scanner.h"
 
 #include <errno.h>
 #include <sys/socket.h>
@@ -43,9 +43,9 @@
 #include <sstream>
 #include <vector>
 
-#include "transport_manager/android_ipc/android_ipc_device.h"
-#include "transport_manager/android_ipc/android_transport_adapter.h"
-#include "transport_manager/android_ipc/android_ipc_control_protocol.h"
+#include "transport_manager/android/android_ipc_device.h"
+#include "transport_manager/android/android_transport_adapter.h"
+#include "transport_manager/android/android_ipc_control_protocol.h"
 
 #include "utils/logger.h"
 
@@ -57,7 +57,7 @@ SDL_CREATE_LOG_VARIABLE("TransportManager")
 AndroidDeviceScanner::AndroidDeviceScanner(
     TransportAdapterController* controller)
     : controller_(controller)
-    , ipc_control_receiver_(std::make_shared<LocalSocketReceiver>(
+    , ipc_control_receiver_(new LocalSocketReceiver(
      std::bind(&AndroidDeviceScanner::ProcessMessage, this, std::placeholders::_1))) {
 
   ipc_control_receiver_thread_ = std::thread([&]() {

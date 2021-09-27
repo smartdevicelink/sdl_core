@@ -1,4 +1,4 @@
-#include "transport_manager/android_ipc/local_socket_sender.h"
+#include "transport_manager/android/local_socket_sender.h"
 
 #include <thread>
 #include <utility>

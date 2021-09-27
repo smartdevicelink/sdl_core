@@ -1,6 +1,6 @@
 /*
- * \file android_connection_factory.h
- * \brief AndroidConnectionFactory class header file.
+ * \file android_connection_factory.cc
+ * \brief AndroidConnectionFactory class source file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,44 +33,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_CONNECTION_FACTORY_H_
-
-#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/android/android_connection_factory.h"
+#include "transport_manager/android/android_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class TransportAdapterController;
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-/**
- * @brief Create connections.
- */
-class AndroidConnectionFactory : public ServerConnectionFactory {
- public:
-  /**
-   * @brief Constructor.
-   *
-   * @param controller Pointer to the device adapter controller.
-   */
-  AndroidConnectionFactory(TransportAdapterController* controller);
+AndroidConnectionFactory::AndroidConnectionFactory(
+    AndroidTransportAdapter* controller)
+    : controller_(controller) {}
 
- protected:
+TransportAdapter::Error AndroidConnectionFactory::Init() {
+  return TransportAdapter::OK;
+}
 
-  TransportAdapter::Error Init() override;
+TransportAdapter::Error AndroidConnectionFactory::CreateConnection(
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  SDL_LOG_AUTO_TRACE();
+  std::shared_ptr<AndroidSocketConnection> connection =
+      std::make_shared<AndroidSocketConnection>(
+          device_uid, app_handle, controller_);
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  TransportAdapter::Error error = connection->Start();
+  if (TransportAdapter::OK != error) {
+    SDL_LOG_ERROR("Android Ipc connection::Start() failed with error: " << error);
+  }
+  return error;
+}
 
-  TransportAdapter::Error CreateConnection(
-      const DeviceUID& device_uid, const ApplicationHandle& app_handle) override;
+void AndroidConnectionFactory::Terminate() {}
 
-  void Terminate() override;
-
-  bool IsInitialised() const override;
-
- private:
-  TransportAdapterController* controller_;
-};
+bool AndroidConnectionFactory::IsInitialised() const {
+  return true;
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_CONNECTION_FACTORY_H_

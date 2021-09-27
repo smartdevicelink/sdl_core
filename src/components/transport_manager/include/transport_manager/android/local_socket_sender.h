@@ -1,5 +1,5 @@
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_LOCAL_SOCKET_SENDER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_LOCAL_SOCKET_SENDER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_LOCAL_SOCKET_SENDER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_LOCAL_SOCKET_SENDER_H_
 
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -7,7 +7,7 @@
 #include "protocol/raw_message.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include <utils/threads/message_loop_thread.h>
-#include "transport_manager/android_ipc/ipc_sender.h"
+#include "transport_manager/android/ipc_sender.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -41,4 +41,4 @@ private:
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_LOCAL_SOCKET_SENDER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_LOCAL_SOCKET_SENDER_H_

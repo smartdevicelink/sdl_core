@@ -31,11 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/android_ipc/android_socket_connection.h"
+#include "transport_manager/android/android_socket_connection.h"
 
-#include "transport_manager/android_ipc/android_ipc_device.h"
+#include "transport_manager/android/android_ipc_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/android_ipc/android_transport_adapter.h"
+#include "transport_manager/android/android_transport_adapter.h"
 
 #include "utils/logger.h"
 
@@ -46,14 +46,14 @@ SDL_CREATE_LOG_VARIABLE("TransportManager")
 AndroidSocketConnection::AndroidSocketConnection(
     const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
+    AndroidTransportAdapter* controller)
     : Connection()
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , controller_(controller)
-    , sender_(std::make_shared<LocalSocketSender>(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
+    , sender_(new LocalSocketSender(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
                   std::bind(&AndroidSocketConnection::OnClientConnectionDone, this, std::placeholders::_1)))
-    , receiver_(std::make_shared<LocalSocketReceiver>(
+    , receiver_(new LocalSocketReceiver(
                     std::bind(&AndroidSocketConnection::ProcessMessage, this, std::placeholders::_1)))
     {}
 
@@ -116,11 +116,11 @@ TransportAdapter::Error AndroidSocketConnection::Start() {
     SDL_LOG_DEBUG("Initializing Android IPC connection threads");
 
     receiver_thread_ = std::thread([&]() {
-        receiver_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetReceiverSocketName());
+        receiver_->Init(controller_->GetReceiverSocketName());
         receiver_->Run();
     });
     sender_thread_ = std::thread([&]() {
-        sender_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetSenderSocketName());
+        sender_->Init(controller_->GetSenderSocketName());
         sender_->Run();
     });
 

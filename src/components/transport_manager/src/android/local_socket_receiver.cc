@@ -1,4 +1,4 @@
-#include "transport_manager/android_ipc/local_socket_receiver.h"
+#include "transport_manager/android/local_socket_receiver.h"
 #include <thread>
 #include "utils/logger.h"
 
@@ -22,10 +22,7 @@ namespace{
 namespace transport_manager {
 namespace transport_adapter {
 
-//constexpr char LocalSocketReceiver::WriterSocketName[];
-//constexpr char LocalSocketReceiver::ControlSocketName[];
-
-LocalSocketReceiver::LocalSocketReceiver(/*const std::string& socket_name,*/ MessageDelegate&& callback)
+LocalSocketReceiver::LocalSocketReceiver( MessageDelegate&& callback)
     : callback_(callback)
 {}
 

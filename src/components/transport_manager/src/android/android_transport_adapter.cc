@@ -41,9 +41,9 @@
 #include <iomanip>
 #include <set>
 
-#include "transport_manager/android_ipc/android_transport_adapter.h"
-#include "transport_manager/android_ipc/android_device_scanner.h"
-#include "transport_manager/android_ipc/android_connection_factory.h"
+#include "transport_manager/android/android_transport_adapter.h"
+#include "transport_manager/android/android_device_scanner.h"
+#include "transport_manager/android/android_connection_factory.h"
 
 #include "utils/logger.h"
 
@@ -51,6 +51,27 @@ namespace transport_manager {
 namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
+
+namespace {
+    std::string getTransportName(AndroidTransportType transport_type)
+    {
+        switch(transport_type) {
+            case AndroidTransportType::BLE:
+                return "Bluetooth Low Energy";
+            break;
+
+            case AndroidTransportType::BT:
+                return "Bluetooth";
+            break;
+
+            default:
+                SDL_LOG_ERROR("Unknown android transport type");
+            break;
+        }
+
+        return "Unknown";
+    }
+}
 
 AndroidTransportAdapter::AndroidTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
@@ -65,11 +86,23 @@ AndroidTransportAdapter::AndroidTransportAdapter(
     , active_device_uid_()
     , app_handle_(0)
     , transport_type_(transport_type) {
-        SDL_LOG_DEBUG("AndroidTransportAdapter created for transport type : " << (int)transport_type);
+        SDL_LOG_DEBUG("AndroidTransportAdapter created for transport type : " << getTransportName(transport_type));
     }
 
 DeviceType AndroidTransportAdapter::GetDeviceType() const {
-  return BLUETOOTH_LE;
+    switch(transport_type_)
+    {
+        case AndroidTransportType::BLE:
+            return DeviceType::BLUETOOTH_LE;
+            break;
+
+        case AndroidTransportType::BT:
+            return DeviceType::BLUETOOTH;
+            break;
+    }
+    
+    SDL_LOG_ERROR("Unknown android transport type");
+    return DeviceType::UNKNOWN;
 }
 
 void AndroidTransportAdapter::Store() const {

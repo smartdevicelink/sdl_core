@@ -1,4 +1,4 @@
-#include "transport_manager/android_ipc/android_ipc_control_protocol.h"
+#include "transport_manager/android/android_ipc_control_protocol.h"
 
 #include "utils/logger.h"
 #include "utils/jsoncpp_reader_wrapper.h"

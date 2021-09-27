@@ -33,12 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_SOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_SOCKET_CONNECTION_H_
 
 #include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/android_ipc/local_socket_sender.h"
-#include "transport_manager/android_ipc/local_socket_receiver.h"
+#include "transport_manager/android/local_socket_sender.h"
+#include "transport_manager/android/local_socket_receiver.h"
+#include "transport_manager/android/android_transport_adapter.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -59,7 +60,7 @@ class AndroidSocketConnection : public Connection {
    */
   AndroidSocketConnection(const DeviceUID& device_uid,
                             const ApplicationHandle& app_handle,
-                            TransportAdapterController* controller);
+                            AndroidTransportAdapter* controller);
 
   ~AndroidSocketConnection() override;
 
@@ -81,10 +82,10 @@ class AndroidSocketConnection : public Connection {
 
     DeviceUID device_uid_;
     ApplicationHandle app_handle_;
-    TransportAdapterController* controller_;
+    AndroidTransportAdapter* controller_;
 
-    std::shared_ptr<IpcSender> sender_;
-    std::shared_ptr<IpcReceiver> receiver_;
+    std::unique_ptr<IpcSender> sender_;
+    std::unique_ptr<IpcReceiver> receiver_;
 
     std::thread receiver_thread_;
     std::thread sender_thread_;
@@ -94,4 +95,4 @@ class AndroidSocketConnection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_SOCKET_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_SOCKET_CONNECTION_H_

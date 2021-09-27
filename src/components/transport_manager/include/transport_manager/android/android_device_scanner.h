@@ -33,12 +33,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_
 
-#include "transport_manager/android_ipc/android_ipc_device.h"
+#include "transport_manager/android/android_ipc_device.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
-#include "transport_manager/android_ipc/local_socket_receiver.h"
+#include "transport_manager/android/local_socket_receiver.h"
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
@@ -92,10 +92,10 @@ class AndroidDeviceScanner : public DeviceScanner {
 
   DeviceVector found_devices_with_sdl_;
 
-  std::shared_ptr<IpcReceiver> ipc_control_receiver_;
+  std::unique_ptr<IpcReceiver> ipc_control_receiver_;
   std::thread ipc_control_receiver_thread_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_IPC_ANDROID_DEVICE_SCANNER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_

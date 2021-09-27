@@ -40,12 +40,8 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-#ifdef BLUETOOTH_LE_SUPPORT
-#include "transport_manager/android_ipc/android_transport_adapter.h"
-#endif
-
-#ifdef ANDROID_BT_SUPPORT
-#include "transport_manager/android_ipc/android_transport_adapter.h"
+#if defined(BLUETOOTH_LE_SUPPORT) || defined(ANDROID_BT_SUPPORT)
+#include "transport_manager/android/android_transport_adapter.h"
 #endif
 
 #if defined(USB_SUPPORT)
