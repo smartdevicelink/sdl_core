@@ -137,6 +137,7 @@ bool RequestToHMI::Init() {
 }
 
 bool RequestToHMI::CleanUp() {
+  unsubscribe_from_all_hmi_events();
   return true;
 }
 
