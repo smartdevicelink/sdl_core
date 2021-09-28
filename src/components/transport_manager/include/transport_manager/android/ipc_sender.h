@@ -14,7 +14,7 @@ public:
 
     /**
     * @brief Initialize sender
-    * @param socket_name local socket name
+    * @param ipc_name local socket name
     */
     virtual void Init(const std::string& ipc_name) = 0;
 
