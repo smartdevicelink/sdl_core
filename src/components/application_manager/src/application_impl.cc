@@ -224,6 +224,9 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
       case mobile_apis::AppHMIType::WEB_VIEW:
         set_webengine_projection_enabled(true);
         break;
+      case mobile_apis::AppHMIType::REMOTE_CONTROL:
+        set_remote_control_supported(true);
+        break;
       default:
         break;
     }
