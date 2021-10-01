@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_device.h
- * \brief BluetoothLeDevice class header file.
+ * \file android_device_scanner.h
+ * \brief AndroidDeviceScanner class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,50 +33,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_
 
-#include <vector>
+#include "transport_manager/android/android_ipc_device.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/android/local_socket_receiver.h"
 
-#include "transport_manager/common.h"
-#include "transport_manager/transport_adapter/device.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/threads/thread_delegate.h"
+
+class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
+class TransportAdapterController;
 
 /**
- * @brief Information about device that use bluetooth transport.
+ * @brief Scan for devices using android platform approaches
  */
-class BluetoothLeDevice : public Device {
+class AndroidDeviceScanner : public DeviceScanner {
  public:
-
   /**
    * @brief Constructor.
-   *
-   * @param device_address Bluetooth address.
-   * @param device_name Human-readable device name.
-   **/
-  BluetoothLeDevice(const std::string& device_address,
-                  const char* device_name);
+   * @param controller Transport adapter controller
+   */
+  AndroidDeviceScanner(TransportAdapterController* controller);
+  /**
+   * @brief Destructor.
+   */
+  ~AndroidDeviceScanner();
 
-  bool IsSameAs(const Device* other) const override;
+ protected:
 
-  ApplicationList GetApplicationList() const override;
+  void Terminate() override;
+
+  TransportAdapter::Error Init() override;
+
+  TransportAdapter::Error Scan() override;
+
+  bool IsInitialised() const override;
 
  private:
   /**
-   * @brief Device bluetooth address.
-   **/
-  std::string address_;
+   * @brief Summarizes the total list of devices (paired and scanned) and
+   * notifies controller
+   */
+  void UpdateTotalDeviceList();
 
   /**
-   * @brief List of available apps to interact with (only single app for now)
+   * @brief Processing messages received from ble_control_server_
+   * @param data Message data in json format
    */
-  ApplicationList applications_list_;
+  void ProcessMessage(const std::vector<uint8_t>& data);
 
+  TransportAdapterController* controller_;
+
+  DeviceVector found_devices_with_sdl_;
+
+  std::unique_ptr<IpcReceiver> ipc_control_receiver_;
+  std::thread ipc_control_receiver_thread_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_

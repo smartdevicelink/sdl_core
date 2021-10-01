@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_device_scanner.cc
- * \brief BluetoothLeDeviceScanner class header file.
+ * \file android_device_scanner.cc
+ * \brief AndroidDeviceScanner class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/bluetooth_le/bluetooth_le_device_scanner.h"
+#include "transport_manager/android/android_device_scanner.h"
 
 #include <errno.h>
 #include <sys/socket.h>
@@ -43,9 +43,9 @@
 #include <sstream>
 #include <vector>
 
-#include "transport_manager/bluetooth_le/bluetooth_le_device.h"
-#include "transport_manager/bluetooth_le/bluetooth_le_transport_adapter.h"
-#include "transport_manager/bluetooth_le/ble_control_protocol.h"
+#include "transport_manager/android/android_ipc_device.h"
+#include "transport_manager/android/android_transport_adapter.h"
+#include "transport_manager/android/android_ipc_control_protocol.h"
 
 #include "utils/logger.h"
 
@@ -54,23 +54,23 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-BluetoothLeDeviceScanner::BluetoothLeDeviceScanner(
+AndroidDeviceScanner::AndroidDeviceScanner(
     TransportAdapterController* controller)
     : controller_(controller)
-    , ble_control_server_( BleServer::ControlSocketName,
-     std::bind(&BluetoothLeDeviceScanner::ProcessMessage, this, std::placeholders::_1)) {
+    , ipc_control_receiver_(new LocalSocketReceiver(
+     std::bind(&AndroidDeviceScanner::ProcessMessage, this, std::placeholders::_1))) {
 
-  ble_control_server_thread_ = std::thread([&]() {
-    ble_control_server_.Init();
-    ble_control_server_.Run();
+  ipc_control_receiver_thread_ = std::thread([&]() {
+    ipc_control_receiver_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetControlReceiverSocketName());
+    ipc_control_receiver_->Run();
     });
 }
 
-BluetoothLeDeviceScanner::~BluetoothLeDeviceScanner() {
+AndroidDeviceScanner::~AndroidDeviceScanner() {
   Terminate();
 }
 
-void BluetoothLeDeviceScanner::UpdateTotalDeviceList() {
+void AndroidDeviceScanner::UpdateTotalDeviceList() {
   SDL_LOG_AUTO_TRACE();
   DeviceVector devices;
   devices.insert(devices.end(),
@@ -79,38 +79,38 @@ void BluetoothLeDeviceScanner::UpdateTotalDeviceList() {
   controller_->SearchDeviceDone(devices);
 }
 
-void BluetoothLeDeviceScanner::Terminate() {
+void AndroidDeviceScanner::Terminate() {
   SDL_LOG_AUTO_TRACE();
-  ble_control_server_.Stop();
-  if(ble_control_server_thread_.joinable()) {
-    ble_control_server_thread_.join();
+  ipc_control_receiver_->Stop();
+  if(ipc_control_receiver_thread_.joinable()) {
+    ipc_control_receiver_thread_.join();
   }
 }
 
-TransportAdapter::Error BluetoothLeDeviceScanner::Init() {
+TransportAdapter::Error AndroidDeviceScanner::Init() {
   return TransportAdapter::OK;
 }
 
-TransportAdapter::Error BluetoothLeDeviceScanner::Scan() {
-  return ble_control_server_thread_.joinable() ? TransportAdapter::OK : TransportAdapter::FAIL;
+TransportAdapter::Error AndroidDeviceScanner::Scan() {
+  return ipc_control_receiver_thread_.joinable() ? TransportAdapter::OK : TransportAdapter::FAIL;
 }
 
-bool BluetoothLeDeviceScanner::IsInitialised() const {
-  return ble_control_server_thread_.joinable();
+bool AndroidDeviceScanner::IsInitialised() const {
+  return ipc_control_receiver_thread_.joinable();
 }
 
-void BluetoothLeDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) {
+void AndroidDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) {
   if (data.size() > 0) {
     SDL_LOG_DEBUG("Control message:  " << data.data());
 
-    const auto action = BleControlProtocol::GetMessageActionType(data);
+    const auto action = AndroidIpcControlProtocol::GetMessageActionType(data);
 
     switch(action){
-      case BleProtocolActions::ON_DEVICE_CONNECTED:
+      case AndroidIpcProtocolActions::ON_DEVICE_CONNECTED:
       {
-        DeviceSptr device_ptr(new BluetoothLeDevice(
-            BleControlProtocol::GetAddress(data),
-            BleControlProtocol::GetName(data).c_str() ));
+        DeviceSptr device_ptr(new AndroidIpcDevice(
+                AndroidIpcControlProtocol::GetAddress(data),
+                AndroidIpcControlProtocol::GetName(data).c_str() ));
 
         found_devices_with_sdl_.push_back(device_ptr);
 
@@ -118,12 +118,12 @@ void BluetoothLeDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) 
       }
       break;
 
-      case BleProtocolActions::ON_DEVICE_DISCONNECTED:
+      case AndroidIpcProtocolActions::ON_DEVICE_DISCONNECTED:
       {
-        const auto addr = BleControlProtocol::GetAddress(data);
+        const auto addr = AndroidIpcControlProtocol::GetAddress(data);
         auto it_device = std::find_if(found_devices_with_sdl_.begin(),
                                       found_devices_with_sdl_.end(), [&addr](DeviceSptr d){
-          BluetoothLeDevice tDevice(addr, "");
+          AndroidIpcDevice tDevice(addr, "");
           return d->IsSameAs(static_cast<Device*>(&tDevice));
         });
 

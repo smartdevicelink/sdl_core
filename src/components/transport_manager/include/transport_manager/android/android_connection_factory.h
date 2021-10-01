@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_device_scanner.h
- * \brief BluetoothLeDeviceScanner class header file.
+ * \file android_connection_factory.h
+ * \brief AndroidConnectionFactory class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,69 +33,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_CONNECTION_FACTORY_H_
 
-#include "transport_manager/bluetooth_le/bluetooth_le_device.h"
-#include "transport_manager/transport_adapter/device_scanner.h"
-#include "transport_manager/bluetooth_le/ble_server.h"
-
-#include "utils/conditional_variable.h"
-#include "utils/lock.h"
-#include "utils/threads/thread_delegate.h"
-
-class Thread;
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-class TransportAdapterController;
+
+class AndroidTransportAdapter;
 
 /**
- * @brief Scan for devices using bluetooth LE.
+ * @brief Create connections.
  */
-class BluetoothLeDeviceScanner : public DeviceScanner {
+class AndroidConnectionFactory : public ServerConnectionFactory {
  public:
   /**
    * @brief Constructor.
-   * @param controller Transport adapter controller
+   *
+   * @param controller Pointer to the device adapter controller.
    */
-  BluetoothLeDeviceScanner(TransportAdapterController* controller);
-  /**
-   * @brief Destructor.
-   */
-  ~BluetoothLeDeviceScanner();
+  AndroidConnectionFactory(AndroidTransportAdapter* controller);
 
  protected:
 
-  void Terminate() override;
-
   TransportAdapter::Error Init() override;
 
-  TransportAdapter::Error Scan() override;
+  TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_uid, const ApplicationHandle& app_handle) override;
+
+  void Terminate() override;
 
   bool IsInitialised() const override;
 
  private:
-  /**
-   * @brief Summarizes the total list of devices (paired and scanned) and
-   * notifies controller
-   */
-  void UpdateTotalDeviceList();
-
-  /**
-   * @brief Processing messages received from ble_control_server_
-   * @param data Message data in json format
-   */
-  void ProcessMessage(const std::vector<uint8_t>& data);
-
-  TransportAdapterController* controller_;
-
-  DeviceVector found_devices_with_sdl_;
-
-  BleServer ble_control_server_;
-  std::thread ble_control_server_thread_;
+  AndroidTransportAdapter* controller_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_CONNECTION_FACTORY_H_

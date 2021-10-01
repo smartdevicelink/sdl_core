@@ -40,8 +40,8 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-#ifdef BLUETOOTH_LE_SUPPORT
-#include "transport_manager/bluetooth_le/bluetooth_le_transport_adapter.h"
+#if defined(BLUETOOTH_LE_SUPPORT) || defined(ANDROID_BT_SUPPORT)
+#include "transport_manager/android/android_transport_adapter.h"
 #endif
 
 #if defined(USB_SUPPORT)
@@ -74,8 +74,15 @@ TransportAdapterFactory::TransportAdapterFactory() {
 #ifdef BLUETOOTH_LE_SUPPORT
   ta_bluetooth_le_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings) {
-    return new transport_adapter::BluetoothLeTransportAdapter(last_state_wrapper,
-                                                            settings);
+    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
+                                                            settings, transport_adapter::AndroidTransportType::BLE);
+  };
+#endif
+#ifdef ANDROID_BT_SUPPORT
+  ta_android_bt_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                             const TransportManagerSettings& settings) {
+    return new transport_adapter::AndroidTransportAdapter(last_state_wrapper,
+                                                            settings, transport_adapter::AndroidTransportType::BT);
   };
 #endif
   ta_tcp_creator_ = [](const uint16_t port,
@@ -146,6 +153,17 @@ int TransportManagerDefault::Init(
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_bluetooth_le);
 #endif  // BLUETOOTH_LE_SUPPORT
+
+#if defined(ANDROID_BT_SUPPORT)
+  auto ta_android_bt =
+      ta_factory_.ta_android_bt_creator_(last_state_wrapper, settings);
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta_android_bt->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_android_bt);
+#endif  // ANDROID_BT_SUPPORT
 
   auto ta_tcp =
       ta_factory_.ta_tcp_creator_(settings.transport_manager_tcp_adapter_port(),

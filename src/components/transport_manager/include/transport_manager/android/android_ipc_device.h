@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_connection_factory.h
- * \brief BluetoothLeConnectionFactory class header file.
+ * \file android_ipc_device.h
+ * \brief AndroidIpcDevice class header file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,44 +33,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_IPC_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_IPC_DEVICE_H_
 
-#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include <vector>
+
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class TransportAdapterController;
-
 /**
- * @brief Create connections.
+ * @brief Information about device that use bluetooth transport.
  */
-class BluetoothLeConnectionFactory : public ServerConnectionFactory {
+class AndroidIpcDevice : public Device {
  public:
+
   /**
    * @brief Constructor.
    *
-   * @param controller Pointer to the device adapter controller.
-   */
-  BluetoothLeConnectionFactory(TransportAdapterController* controller);
+   * @param device_address Bluetooth address.
+   * @param device_name Human-readable device name.
+   **/
+  AndroidIpcDevice(const std::string& device_address,
+                  const char* device_name);
 
- protected:
+  bool IsSameAs(const Device* other) const override;
 
-  TransportAdapter::Error Init() override;
-
-  TransportAdapter::Error CreateConnection(
-      const DeviceUID& device_uid, const ApplicationHandle& app_handle) override;
-
-  void Terminate() override;
-
-  bool IsInitialised() const override;
+  ApplicationList GetApplicationList() const override;
 
  private:
-  TransportAdapterController* controller_;
+  /**
+   * @brief Device bluetooth address.
+   **/
+  std::string address_;
+
+  /**
+   * @brief List of available apps to interact with (only single app for now)
+   */
+  ApplicationList applications_list_;
+
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_LE_BLUETOOTH_LE_CONNECTION_FACTORY_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_IPC_DEVICE_H_

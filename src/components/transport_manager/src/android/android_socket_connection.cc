@@ -31,10 +31,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/bluetooth_le/bluetooth_le_socket_connection.h"
+#include "transport_manager/android/android_socket_connection.h"
 
-#include "transport_manager/bluetooth_le/bluetooth_le_device.h"
+#include "transport_manager/android/android_ipc_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/android/android_transport_adapter.h"
 
 #include "utils/logger.h"
 
@@ -42,23 +43,23 @@ namespace transport_manager {
 namespace transport_adapter {
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-BluetoothLeSocketConnection::BluetoothLeSocketConnection(
+AndroidSocketConnection::AndroidSocketConnection(
     const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
+    AndroidTransportAdapter* controller)
     : Connection()
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , controller_(controller)
-    , ble_client_(std::bind(&BluetoothLeSocketConnection::OnMessageSent, this, std::placeholders::_1),
-                  std::bind(&BluetoothLeSocketConnection::OnClientConnectionDone, this, std::placeholders::_1))
-    , ble_server_(BleServer::WriterSocketName,
-                    std::bind(&BluetoothLeSocketConnection::ProcessMessage, this, std::placeholders::_1))
+    , sender_(new LocalSocketSender(std::bind(&AndroidSocketConnection::OnMessageSent, this, std::placeholders::_1),
+                  std::bind(&AndroidSocketConnection::OnClientConnectionDone, this, std::placeholders::_1)))
+    , receiver_(new LocalSocketReceiver(
+                    std::bind(&AndroidSocketConnection::ProcessMessage, this, std::placeholders::_1)))
     {}
 
-BluetoothLeSocketConnection::~BluetoothLeSocketConnection() {}
+AndroidSocketConnection::~AndroidSocketConnection() {}
 
-void BluetoothLeSocketConnection::ProcessMessage(const std::vector<uint8_t>& data) {
+void AndroidSocketConnection::ProcessMessage(const std::vector<uint8_t>& data) {
     if (data.size() > 0) {
         SDL_LOG_DEBUG("Received " << data.size() << " bytes from Java adapter");
         ::protocol_handler::RawMessagePtr frame(
@@ -69,7 +70,7 @@ void BluetoothLeSocketConnection::ProcessMessage(const std::vector<uint8_t>& dat
     }
 }
 
-void BluetoothLeSocketConnection::OnMessageSent(protocol_handler::RawMessagePtr msg) {
+void AndroidSocketConnection::OnMessageSent(protocol_handler::RawMessagePtr msg) {
     if (msg) {
         SDL_LOG_DEBUG("Successfully sent " << msg->data_size() << " bytes to Java adapter");
         controller_->DataSendDone(device_uid_, app_handle_, msg);
@@ -79,7 +80,7 @@ void BluetoothLeSocketConnection::OnMessageSent(protocol_handler::RawMessagePtr 
     }
 }
 
-void BluetoothLeSocketConnection::OnClientConnectionDone(const bool is_connected) {
+void AndroidSocketConnection::OnClientConnectionDone(const bool is_connected) {
     if (is_connected) {
         SDL_LOG_DEBUG("Successfully connected to Java adapter");
         controller_->ConnectDone(device_uid_, app_handle_);
@@ -90,37 +91,37 @@ void BluetoothLeSocketConnection::OnClientConnectionDone(const bool is_connected
 }
 
 TransportAdapter::Error
-BluetoothLeSocketConnection::SendData(::protocol_handler::RawMessagePtr message) {
+AndroidSocketConnection::SendData(::protocol_handler::RawMessagePtr message) {
     SDL_LOG_AUTO_TRACE();
-    ble_client_.Send(message);
+    sender_->Send(message);
     return TransportAdapter::OK;
 }
 
-TransportAdapter::Error BluetoothLeSocketConnection::Disconnect() {
+TransportAdapter::Error AndroidSocketConnection::Disconnect() {
     SDL_LOG_DEBUG("Disconnecting from Java adapter");
-    ble_client_.Stop();
-    if (ble_client_thread_.joinable()) {
-        ble_client_thread_.join();
+    sender_->Stop();
+    if (sender_thread_.joinable()) {
+        sender_thread_.join();
     }
 
-    ble_server_.Stop();
-    if (ble_server_thread_.joinable()) {
-        ble_server_thread_.join();
+    receiver_->Stop();
+    if (receiver_thread_.joinable()) {
+        receiver_thread_.join();
     }
 
     return TransportAdapter::OK;
 }
 
-TransportAdapter::Error BluetoothLeSocketConnection::Start() {
-    SDL_LOG_DEBUG("Initializing BLE connection threads");
+TransportAdapter::Error AndroidSocketConnection::Start() {
+    SDL_LOG_DEBUG("Initializing Android IPC connection threads");
 
-    ble_server_thread_ = std::thread([&]() {
-        ble_server_.Init();
-        ble_server_.Run();
+    receiver_thread_ = std::thread([&]() {
+        receiver_->Init(controller_->GetReceiverSocketName());
+        receiver_->Run();
     });
-    ble_client_thread_ = std::thread([&]() {
-        ble_client_.Init();
-        ble_client_.Run();
+    sender_thread_ = std::thread([&]() {
+        sender_->Init(controller_->GetSenderSocketName());
+        sender_->Run();
     });
 
     return TransportAdapter::OK;

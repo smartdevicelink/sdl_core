@@ -1,6 +1,16 @@
-#include "transport_manager/bluetooth_le/ble_server.h"
+#include "transport_manager/android/local_socket_receiver.h"
 #include <thread>
 #include "utils/logger.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 SDL_CREATE_LOG_VARIABLE("Ble_Server")
 
@@ -12,15 +22,11 @@ namespace{
 namespace transport_manager {
 namespace transport_adapter {
 
-constexpr char BleServer::WriterSocketName[];
-constexpr char BleServer::ControlSocketName[];
-
-BleServer::BleServer(const std::string& socket_name, MessageDelegate&& callback)
-    : socket_name_(socket_name)
-    , callback_(callback)
+LocalSocketReceiver::LocalSocketReceiver( MessageDelegate&& callback)
+    : callback_(callback)
 {}
 
-void BleServer::Init()
+void LocalSocketReceiver::Init(const std::string& socket_name)
 {
     SDL_LOG_AUTO_TRACE();
     connected_ = false;
@@ -31,22 +37,22 @@ void BleServer::Init()
     socklen_t len;
     server_sockaddr.sun_family = AF_LOCAL;
     server_sockaddr.sun_path[0] = '\0';
-    strcpy(&server_sockaddr.sun_path[1], socket_name_.c_str() );
+    strcpy(&server_sockaddr.sun_path[1], socket_name.c_str() );
     len = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&server_sockaddr.sun_path[1]);
     int err;
 
     server_sock_ = socket(PF_LOCAL, SOCK_STREAM, 0);
     if (server_sock_ < 0) {
         err = errno;
-        SDL_LOG_ERROR("Cannot open socket: " << strerror(err) << " " << socket_name_);
+        SDL_LOG_ERROR("Cannot open socket: " << strerror(err) << " " << socket_name);
         return;
     }
 
-    unlink(socket_name_.c_str());
+    unlink(socket_name.c_str());
     int rc = bind(server_sock_, (struct sockaddr *) &server_sockaddr, len);
     if (rc < 0){
         err = errno;
-        SDL_LOG_ERROR("BIND ERROR: " << strerror(err) << " " << socket_name_);
+        SDL_LOG_ERROR("BIND ERROR: " << strerror(err) << " " << socket_name);
         close(server_sock_);
         return;
     }
@@ -55,17 +61,17 @@ void BleServer::Init()
     rc = listen(server_sock_, backlog);
     if (rc < 0){
         err = errno;
-        SDL_LOG_ERROR("LISTEN ERROR: " << strerror(err) << " " << socket_name_);
+        SDL_LOG_ERROR("LISTEN ERROR: " << strerror(err) << " " << socket_name);
         close(server_sock_);
         return;
     }
 
-    SDL_LOG_INFO("Socket listening... " << socket_name_);
+    SDL_LOG_INFO("Socket listening... " << socket_name);
 
     client_sock_ = accept(server_sock_, (struct sockaddr *) &client_sockaddr, &len);
     if (client_sock_ < 0){
         err = errno;
-        SDL_LOG_ERROR("ACCEPT ERROR: " << strerror(err) << " " << socket_name_);
+        SDL_LOG_ERROR("ACCEPT ERROR: " << strerror(err) << " " << socket_name);
         close(server_sock_);
         close(client_sock_);
         return;
@@ -74,7 +80,7 @@ void BleServer::Init()
     connected_ = true;
 }
 
-void BleServer::Run()
+void LocalSocketReceiver::Run()
 {
     SDL_LOG_AUTO_TRACE();
 
@@ -88,7 +94,7 @@ void BleServer::Run()
     }
 }
 
-void BleServer::Stop() {
+void LocalSocketReceiver::Stop() {
     SDL_LOG_DEBUG("Requesting server to stop");
     stop_requested_ = true;
     close(client_sock_);
@@ -96,7 +102,7 @@ void BleServer::Stop() {
     connected_ = false;
 }
 
-BleServer::~BleServer(){
+LocalSocketReceiver::~LocalSocketReceiver(){
     if(connected_){
         close(client_sock_);
         close(server_sock_);

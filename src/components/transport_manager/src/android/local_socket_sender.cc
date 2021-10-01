@@ -1,19 +1,24 @@
-#include "transport_manager/bluetooth_le/ble_client.h"
+#include "transport_manager/android/local_socket_sender.h"
 
 #include <thread>
 #include <utility>
 #include "utils/logger.h"
 
-SDL_CREATE_LOG_VARIABLE("Ble_Client")
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <atomic>
 
-namespace{
-    const char* socket_name =  "./localBleReader";
-}
+SDL_CREATE_LOG_VARIABLE("local_socket_sender")
 
 namespace transport_manager {
 namespace transport_adapter {
 
-BleClient::BleClient(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback)
+LocalSocketSender::LocalSocketSender(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback)
     : socket_id_(-1)
     , connected_(false)
     , message_queue_()
@@ -21,14 +26,14 @@ BleClient::BleClient(OnDataSentCallback&& sent_callback, OnConnectedCallback&& c
     , sent_callback_(sent_callback)
 {}
 
-void BleClient::Init()
+void LocalSocketSender::Init(const std::string& socket_name)
 {
     SDL_LOG_AUTO_TRACE();
 
     struct sockaddr_un addr{};
     addr.sun_family = AF_LOCAL;
     addr.sun_path[0] = '\0';
-    strcpy(&addr.sun_path[1], socket_name );
+    strcpy(&addr.sun_path[1], socket_name.c_str() );
     socklen_t len = offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&addr.sun_path[1]);
     int err;
 
@@ -50,7 +55,7 @@ void BleClient::Init()
     connected_callback_(connected_);
 }
 
-void BleClient::Run()
+void LocalSocketSender::Run()
 {
     SDL_LOG_AUTO_TRACE();
     while(connected_ && !message_queue_.IsShuttingDown()) {
@@ -70,14 +75,14 @@ void BleClient::Run()
     }
 }
 
-BleClient::~BleClient()
+LocalSocketSender::~LocalSocketSender()
 {
     if(connected_){
         close(socket_id_);
     }
 }
 
-bool BleClient::TryToConnect(sockaddr_un& addr, socklen_t len) {
+bool LocalSocketSender::TryToConnect(sockaddr_un& addr, socklen_t len) {
     const int connect_attempts = 10;
     const int attempt_interval_ms = 500;
 
@@ -99,12 +104,12 @@ bool BleClient::TryToConnect(sockaddr_un& addr, socklen_t len) {
     return false;
 }
 
-void BleClient::Stop() {
+void LocalSocketSender::Stop() {
     SDL_LOG_DEBUG("Requesting client to stop");
     message_queue_.Shutdown();
 }
 
-void BleClient::Send(::protocol_handler::RawMessagePtr message) {
+void LocalSocketSender::Send(::protocol_handler::RawMessagePtr message) {
     message_queue_.push(message);
 }
 

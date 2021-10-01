@@ -1,6 +1,6 @@
 /*
- * \file bluetooth_le_connection_factory.cc
- * \brief BluetoothLeConnectionFactory class source file.
+ * \file android_connection_factory.cc
+ * \brief AndroidConnectionFactory class source file.
  *
  * Copyright (c) 2021, Ford Motor Company
  * All rights reserved.
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/bluetooth_le/bluetooth_le_connection_factory.h"
-#include "transport_manager/bluetooth_le/bluetooth_le_socket_connection.h"
+#include "transport_manager/android/android_connection_factory.h"
+#include "transport_manager/android/android_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/logger.h"
 
@@ -43,31 +43,31 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-BluetoothLeConnectionFactory::BluetoothLeConnectionFactory(
-    TransportAdapterController* controller)
+AndroidConnectionFactory::AndroidConnectionFactory(
+    AndroidTransportAdapter* controller)
     : controller_(controller) {}
 
-TransportAdapter::Error BluetoothLeConnectionFactory::Init() {
+TransportAdapter::Error AndroidConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
-TransportAdapter::Error BluetoothLeConnectionFactory::CreateConnection(
+TransportAdapter::Error AndroidConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   SDL_LOG_AUTO_TRACE();
-  std::shared_ptr<BluetoothLeSocketConnection> connection =
-      std::make_shared<BluetoothLeSocketConnection>(
+  std::shared_ptr<AndroidSocketConnection> connection =
+      std::make_shared<AndroidSocketConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    SDL_LOG_ERROR("Bluetooth LE connection::Start() failed with error: " << error);
+    SDL_LOG_ERROR("Android Ipc connection::Start() failed with error: " << error);
   }
   return error;
 }
 
-void BluetoothLeConnectionFactory::Terminate() {}
+void AndroidConnectionFactory::Terminate() {}
 
-bool BluetoothLeConnectionFactory::IsInitialised() const {
+bool AndroidConnectionFactory::IsInitialised() const {
   return true;
 }
 
