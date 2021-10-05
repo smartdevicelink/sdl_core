@@ -36,6 +36,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -46,7 +47,7 @@ namespace commands {
 /**
  * @brief DeleteSubMenuRequest command class
  **/
-class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
+class DeleteSubMenuRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DeleteSubMenuRequest class constructor
@@ -82,34 +83,45 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
   bool Init() FINAL;
 
  private:
-  /*
-   * @brief Deletes submenus that have a parentID that matches the parentID
-   * parameter
+  /**
+   * @brief Creates and queues up delete requests for a submenus that have a
+   * parent ID which matches the parentID parameter
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteNestedSubMenus(app_mngr::ApplicationSharedPtr const app,
-                            uint32_t parentID,
+                            const uint32_t parentID,
                             const app_mngr::SubMenuMap& subMenus);
 
-  /*
-   * @brief Deletes VR commands from SDL for corresponding submenu ID
+  /**
+   * @brief Creates and queues up delete requests for each VR command tied to
+   * the given submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteSubMenuVRCommands(app_mngr::ApplicationConstSharedPtr app,
-                               uint32_t parentID);
+                               const uint32_t parentID);
 
-  /*
-   * @brief Deletes UI commands from SDL for corresponding submenu ID
+  /**
+   * @brief Creates and queues up delete requests for each UI command tied to
+   * the given submenu ID
    *
    * @param app_id Application ID
    * @param parentID Parent ID of a nested submenu
    */
   void DeleteSubMenuUICommands(app_mngr::ApplicationSharedPtr const app,
-                               uint32_t parentID);
+                               const uint32_t parentID);
+
+  /**
+   * @brief Takes the next request in the queue and sends it to HMI
+   */
+  void SendNextRequest();
+
+  typedef std::list<smart_objects::SmartObject> RequestsList;
+  RequestsList requests_list_;
+  uint32_t pending_request_corr_id_;
 
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };

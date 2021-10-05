@@ -208,7 +208,7 @@ TEST_F(UIIsReadyRequestTest,
 TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
   HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace ui_is_ready_request

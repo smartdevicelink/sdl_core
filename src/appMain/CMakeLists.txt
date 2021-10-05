@@ -144,7 +144,7 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif()
 
-if(ENABLE_LOG AND NOT ANDROID)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
@@ -182,7 +182,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/build_config.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if (${LOGGER_NAME} STREQUAL "LOG4CXX")
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/boostlogconfig.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${INI_FILE_NAME} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -239,8 +244,8 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt
-    ${CMAKE_CURRENT_BINARY_DIR}/${INI_FILE_NAME}
+  FILES build_config.txt log4cxx.properties boostlogconfig.ini audio.8bit.wav test.txt
+  ${CMAKE_CURRENT_BINARY_DIR}/${INI_FILE_NAME}
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin

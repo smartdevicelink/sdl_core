@@ -78,7 +78,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    */
   hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
 
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Trigger waiting for response
@@ -95,9 +95,6 @@ class HMILanguageHandler : public event_engine::EventObserver {
   void set_default_capabilities_languages(hmi_apis::Common_Language::eType ui,
                                           hmi_apis::Common_Language::eType vr,
                                           hmi_apis::Common_Language::eType tts);
-
-  DEPRECATED
-  void Init(resumption::LastState*);
 
   void Init(resumption::LastStateWrapperPtr value);
 

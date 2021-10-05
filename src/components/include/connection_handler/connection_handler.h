@@ -58,6 +58,18 @@ enum CloseSessionReason {
 
 class ConnectionHandlerObserver;
 
+/**
+ * @brief Helper structure to collect all required vehicle data
+ */
+struct ProtocolVehicleData {
+  std::string vehicle_make;
+  std::string vehicle_model;
+  std::string vehicle_year;
+  std::string vehicle_trim;
+  std::string vehicle_system_software_version;
+  std::string vehicle_system_hardware_version;
+};
+
 // The SessionConnectionMap keeps track of the primary and secondary transports
 // associated with a session ID
 typedef struct {
@@ -171,6 +183,15 @@ class ConnectionHandler {
    * @param service_type the service that should be closed.
    */
   virtual void SendEndService(uint32_t key, uint8_t service_type) = 0;
+
+  /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  virtual bool IsSessionHeartbeatTracked(
+      const uint32_t connection_key) const = 0;
 
   /**
    * \brief Start heartbeat for specified session
@@ -334,6 +355,14 @@ class ConnectionHandler {
    */
   virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
       const = 0;
+
+  /**
+   * @brief Collects all vehicle data required by a protocol layer
+   * @param data output structure to store received vehicle data
+   * @return true if data has been received successfully, otherwise returns
+   * false
+   */
+  virtual bool GetProtocolVehicleData(ProtocolVehicleData& data) = 0;
 
   /**
    * @brief Called when HMI cooperation is started,

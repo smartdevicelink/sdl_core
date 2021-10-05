@@ -430,6 +430,7 @@ struct ModuleMeta : CompositeType {
   Optional<Integer<uint16_t, 0, 65535> > pt_exchanged_x_days_after_epoch;
   Optional<Integer<uint16_t, 0, 65535> > ignition_cycles_since_last_exchange;
   Optional<String<0, 500> > ccpu_version;
+  Optional<String<0, 500> > hardware_version;
 
  public:
   ModuleMeta();

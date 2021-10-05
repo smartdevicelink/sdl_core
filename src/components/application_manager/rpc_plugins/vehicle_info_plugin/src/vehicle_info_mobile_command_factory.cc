@@ -208,7 +208,8 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::DiagnosticMessageRequest>()
                  : factory.GetCreator<commands::DiagnosticMessageResponse>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<VehicleInfoInvalidCommand>();
 }
@@ -226,7 +227,8 @@ VehicleInfoMobileCommandFactory::get_notification_creator(
     case mobile_apis::FunctionID::OnVehicleDataID: {
       return factory.GetCreator<commands::OnVehicleDataNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<VehicleInfoInvalidCommand>();
 }
@@ -254,7 +256,8 @@ app_mngr::CommandCreator& VehicleInfoMobileCommandFactory::get_creator_factory(
       }
       break;
     }
-    default: {}
+    default: {
+    }
   }
   VehicleInfoCommandParams params = {application_manager_,
                                      rpc_service_,

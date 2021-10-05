@@ -171,6 +171,9 @@ extern const char* minutes;
 extern const char* seconds;
 extern const char* update_mode;
 extern const char* audioStreamingIndicator;
+extern const char* seek_time;
+extern const char* forward_seek_indicator;
+extern const char* back_seek_indicator;
 extern const char* trigger_source;
 extern const char* hmi_level;
 extern const char* activate_app_hmi_level;
@@ -227,6 +230,8 @@ extern const char* policy_type;
 extern const char* property;
 extern const char* displays;
 extern const char* seat_location;
+extern const char* app_capability;
+extern const char* app_capability_type;
 
 // PutFile
 extern const char* sync_file_name;
@@ -296,12 +301,20 @@ extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
 extern const char* cloud_app_vehicle_id;
+extern const char* climate_data;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;
 extern const char* gearStatus;
 extern const char* prndl;
 extern const char* tire_pressure;
+extern const char* pressure_telltale;
+extern const char* left_front;
+extern const char* right_front;
+extern const char* left_rear;
+extern const char* right_rear;
+extern const char* inner_left_rear;
+extern const char* inner_right_rear;
 extern const char* odometer;
 extern const char* belt_status;
 extern const char* electronic_park_brake_status;
@@ -336,11 +349,13 @@ extern const char* video_streaming;
 extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
+extern const char* system_hardware_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 extern const char* oem_custom_data_type;
 extern const char* window_status;
 extern const char* hands_off_steering;
+extern const char* seat_occupancy;
 
 // app services
 extern const char* app_service_manifest;
@@ -480,10 +495,16 @@ extern const char* const haptic_spatial_data_supported;
 extern const char* const diagonal_screen_size;
 extern const char* const pixel_per_inch;
 extern const char* const scale;
+extern const char* const additional_video_streaming_capabilities;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
+extern const char* const preferred_fps;
+
+// OnResetTimeout
+extern const char* const request_id;
+extern const char* const reset_period;
 }  // namespace strings
 
 namespace hmi_interface {
@@ -584,6 +605,8 @@ extern const char* method_name;
 extern const char* keyboard_layout;
 extern const char* limited_character_list;
 extern const char* auto_complete_list;
+extern const char* mask_input_characters;
+extern const char* custom_keys;
 extern const char* file;
 extern const char* file_name;
 extern const char* retry;
@@ -621,6 +644,9 @@ extern const char* image_capabilities;
 extern const char* display_type;
 extern const char* display_name;
 extern const char* text_fields;
+extern const char* keyboard_capabilities;
+extern const char* supported_keyboards;
+extern const char* num_configurable_keys;
 extern const char* media_clock_formats;
 extern const char* graphic_supported;
 extern const char* image_fields;

@@ -41,6 +41,7 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -53,6 +54,7 @@ namespace components {
 namespace commands_test {
 
 namespace am = ::application_manager;
+namespace strings = am::strings;
 
 using ::testing::_;
 using ::testing::Mock;
@@ -68,6 +70,7 @@ using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
+using ::test::components::event_engine_test::MockEventDispatcher;
 
 // Depending on the value type will be selected
 template <const bool kIf, class ThenT, class ElseT>
@@ -145,7 +148,24 @@ class CommandsTest : public ::testing::Test {
                                      mock_policy_handler_);
   }
 
-  enum { kDefaultTimeout_ = 100 };
+  void InitEventDispatcher() {
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
+  }
+
+  void InitNegativeResponse() {
+    MessageSharedPtr timeout_response =
+        CommandsTest<kIsNice>::CreateMessage(smart_objects::SmartType_Map);
+    (*timeout_response)[am::strings::msg_params][am::strings::result_code] =
+        am::mobile_api::Result::GENERIC_ERROR;
+    (*timeout_response)[am::strings::msg_params][am::strings::success] = false;
+
+    ON_CALL(mock_message_helper_,
+            CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
+        .WillByDefault(Return(timeout_response));
+  }
+
+  enum { kDefaultTimeout_ = 100, kDefaultTimeoutCompensation_ = 10 };
 
   MockAppManager app_mngr_;
   MockRPCService mock_rpc_service_;
@@ -154,21 +174,31 @@ class CommandsTest : public ::testing::Test {
   testing::NiceMock<policy_test::MockPolicyHandlerInterface>
       mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
+  MockEventDispatcher event_dispatcher_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
 
  protected:
   virtual void InitCommand(const uint32_t& timeout) {
+    this->InitCommand(timeout, kDefaultTimeoutCompensation_);
+  }
+
+  virtual void InitCommand(const uint32_t timeout,
+                           const uint32_t compensation) {
     timeout_ = timeout;
+    timeout_compensation_ = compensation;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, default_timeout())
         .WillByDefault(ReturnRef(timeout_));
+    ON_CALL(app_mngr_settings_, default_timeout_compensation())
+        .WillByDefault(ReturnRef(timeout_compensation_));
   }
 
   CommandsTest()
       : mock_message_helper_(*am::MockMessageHelper::message_helper_mock())
-      , timeout_(0) {
+      , timeout_(0)
+      , timeout_compensation_(0) {
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceFromFunction(_))
@@ -177,6 +207,30 @@ class CommandsTest : public ::testing::Test {
         .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
     InitHMIToMobileResultConverter();
+  }
+
+  void FillVideoStreamingCapability(
+      smart_objects::SmartObject& video_streaming_capability) {
+    video_streaming_capability[strings::preferred_resolution] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_width] = 800;
+    video_streaming_capability[strings::preferred_resolution]
+                              [strings::resolution_height] = 354;
+    video_streaming_capability[strings::max_bitrate] = 10000;
+    video_streaming_capability[strings::supported_formats] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    video_streaming_capability[strings::supported_formats][0] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    video_streaming_capability[strings::supported_formats][0]
+                              [strings::protocol] =
+                                  hmi_apis::Common_VideoStreamingProtocol::RAW;
+    video_streaming_capability[strings::supported_formats][0][strings::codec] =
+        hmi_apis::Common_VideoStreamingCodec::H264;
+    video_streaming_capability[strings::haptic_spatial_data_supported] = true;
+    video_streaming_capability[strings::diagonal_screen_size] = 7.47;
+    video_streaming_capability[strings::pixel_per_inch] = 117.f;
+    video_streaming_capability[strings::scale] = 1.f;
   }
 
   void InitHMIToMobileResultConverter() {
@@ -229,6 +283,7 @@ class CommandsTest : public ::testing::Test {
 
  private:
   uint32_t timeout_;
+  uint32_t timeout_compensation_;
 };
 
 MATCHER_P(MobileResultCodeIs, result_code, "") {

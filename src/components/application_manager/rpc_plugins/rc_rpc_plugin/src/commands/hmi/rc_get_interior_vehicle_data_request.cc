@@ -57,7 +57,7 @@ void RCGetInteriorVehicleDataRequest::Run() {
   SendRequest();
 }
 
-void RCGetInteriorVehicleDataRequest::onTimeOut() {
+void RCGetInteriorVehicleDataRequest::OnTimeOut() {
   SDL_LOG_TRACE("function_id: " << function_id()
                                 << " correlation_id: " << correlation_id());
   using namespace application_manager;

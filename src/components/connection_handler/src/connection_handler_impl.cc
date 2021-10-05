@@ -547,11 +547,16 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
         session_key,
         service_type,
         params);
-  } else {
+  }
+#ifdef BUILD_TESTS
+  else {
+    // FIXME (VSemenyuk): This code is only used in unit tests, so should be
+    // removed. ConnectionHandler unit tests should be fixed.
     if (protocol_handler_) {
       protocol_handler_->NotifySessionStarted(context, rejected_params);
     }
   }
+#endif
 }
 
 void ConnectionHandlerImpl::NotifyServiceStartedResult(
@@ -589,17 +594,20 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
 
   if (!result) {
     SDL_LOG_WARN("Service starting forbidden by connection_handler_observer");
+    context.is_start_session_failed_ = true;
+  }
+
+  if (protocol_handler_) {
+    protocol_handler_->NotifySessionStarted(context, rejected_params, reason);
+  }
+
+  if (context.is_start_session_failed_) {
     if (protocol_handler::kRpc == context.service_type_) {
       connection->RemoveSession(context.new_session_id_);
     } else {
       connection->RemoveService(context.initial_session_id_,
                                 context.service_type_);
     }
-    context.new_session_id_ = 0;
-  }
-
-  if (protocol_handler_ != NULL) {
-    protocol_handler_->NotifySessionStarted(context, rejected_params, reason);
   }
 }
 
@@ -919,6 +927,15 @@ void ConnectionHandlerImpl::CreateWebEngineDevice() {
   transport_manager_.CreateWebEngineDevice();
 }
 
+bool ConnectionHandlerImpl::GetProtocolVehicleData(ProtocolVehicleData& data) {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    return connection_handler_observer_->GetProtocolVehicleData(data);
+  }
+
+  return false;
+}
+
 const std::string
 ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {
@@ -987,7 +1004,7 @@ uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) const {
   const uint32_t key = connection_handle | (session_id << 16);
-  SDL_LOG_DEBUG("Key for ConnectionHandle:"
+  SDL_LOG_TRACE("Key for ConnectionHandle:"
                 << static_cast<uint32_t>(connection_handle)
                 << " Session:" << static_cast<uint32_t>(session_id) << " is: 0x"
                 << std::hex << static_cast<uint32_t>(key));
@@ -1005,7 +1022,7 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  SDL_LOG_DEBUG("ConnectionHandle: "
+  SDL_LOG_TRACE("ConnectionHandle: "
                 << static_cast<int32_t>(*connection_handle)
                 << " Session: " << static_cast<int32_t>(*session_id)
                 << " for key: " << static_cast<int32_t>(key));
@@ -1459,6 +1476,10 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
       SDL_LOG_DEBUG("No need to connect to web engine device");
       continue;
     }
+    if ("CLOUD_WEBSOCKET" == i->second.connection_type()) {
+      SDL_LOG_DEBUG("No need to connect to cloud device");
+      continue;
+    }
     ConnectToDevice(i->first);
   }
 }
@@ -1667,6 +1688,21 @@ void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
           st.primary_transport, connection_handle, session_id, service_type);
     }
   }
+}
+
+bool ConnectionHandlerImpl::IsSessionHeartbeatTracked(
+    const uint32_t connection_key) const {
+  SDL_LOG_AUTO_TRACE();
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  ConnectionList::const_iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    return it->second->IsSessionHeartbeatTracked(session_id);
+  }
+  return false;
 }
 
 void ConnectionHandlerImpl::StartSessionHeartBeat(uint32_t connection_key) {

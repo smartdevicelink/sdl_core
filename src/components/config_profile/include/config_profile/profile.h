@@ -44,6 +44,7 @@
 #include "media_manager/media_manager_settings.h"
 #include "policy/policy_settings.h"
 #include "protocol_handler/protocol_handler_settings.h"
+#include "smart_objects/smart_object.h"
 #include "transport_manager/transport_manager_settings.h"
 #include "utils/macro.h"
 
@@ -247,6 +248,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Default timeout for waiting for response to mobile app
    */
   const uint32_t& default_timeout() const;
+
+  /**
+   * @brief Default timeout compensation for waiting some extra time for
+   * response to mobile app
+   */
+  const uint32_t& default_timeout_compensation() const;
 
   /**
    * @brief Default timeout for waiting for resuming
@@ -552,6 +559,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   size_t update_before_hours() const;
 
+  /**
+   * @brief Return security level that will be configured in the OpenSSL
+   */
+  uint32_t security_level() const;
+
 #endif  // ENABLE_SECURITY
 
   /**
@@ -825,6 +837,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t app_transport_change_timer_addition() const OVERRIDE;
 
   /**
+   * @brief Parses values in config_file_name_ to config_obj_ smart object
+   */
+  void ParseConfiguration();
+
+  /**
    * @brief Updates all related values from ini file
    */
   void UpdateValues();
@@ -989,6 +1006,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   size_t maximum_audio_payload_size_;
   size_t maximum_video_payload_size_;
   std::string config_file_name_;
+  smart_objects::SmartObject config_obj_;
   std::string server_address_;
   uint16_t server_port_;
   uint16_t video_streaming_port_;
@@ -1005,6 +1023,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   bool is_redecoding_enabled_;
   uint32_t max_cmd_id_;
   uint32_t default_timeout_;
+  uint32_t default_timeout_compensation_;
   uint32_t app_resuming_timeout_;
   uint32_t app_resumption_save_persistent_data_timeout_;
   std::string vr_help_title_;
@@ -1078,6 +1097,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string security_manager_protocol_name_;
   std::vector<int> force_protected_service_;
   std::vector<int> force_unprotected_service_;
+  uint32_t security_level_;
 #endif
 
   /*
@@ -1113,6 +1133,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int iap2_hub_connect_attempts_;
   int iap_hub_connection_wait_timeout_;
   uint16_t tts_global_properties_timeout_;
+  size_t maximum_payload_size_;
+  size_t message_frequency_count_;
+  size_t message_frequency_time_;
+  bool malformed_message_filtering_;
+  size_t malformed_frequency_count_;
+  size_t malformed_frequency_time_;
+  uint32_t multiframe_waiting_timeout_;
   uint16_t attempts_to_open_policy_db_;
   uint16_t open_attempt_timeout_ms_;
   uint32_t resumption_delay_before_ign_;

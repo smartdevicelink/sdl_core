@@ -1128,7 +1128,8 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
-  const bool app_id_exists = policies.end() != policy_iter;
+  const bool app_id_exists =
+      policies.end() != policy_iter && !IsApplicationRevoked(policy_app_id);
   if (app_id_exists) {
     priority = EnumToJsonString((*policy_iter).second.priority);
   }
@@ -1336,6 +1337,8 @@ void CacheManager::PersistData() {
       }
 
       backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
+      backup_->SetHardwareVersion(
+          *(*copy_pt.policy_table.module_meta).hardware_version);
 
       // In case of extended policy the meta info should be backuped as well.
       backup_->WriteDb();
@@ -1489,11 +1492,33 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
   return true;
 }
 
+void CacheManager::SetHardwareVersion(const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  *pt_->policy_table.module_meta->hardware_version = hardware_version;
+  Backup();
+}
+
 std::string CacheManager::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
       pt_->policy_table.module_meta;
   return *(module_meta->ccpu_version);
+}
+
+std::string CacheManager::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->hardware_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {

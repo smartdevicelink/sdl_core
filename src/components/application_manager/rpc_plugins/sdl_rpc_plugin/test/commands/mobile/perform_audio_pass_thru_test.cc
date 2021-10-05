@@ -184,7 +184,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
-  command->onTimeOut();
+  command->OnTimeOut();
   EXPECT_EQ((*vr_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -626,7 +626,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id));
   EXPECT_CALL(app_mngr_, StartAudioPassThruThread(_, _, _, _, _, _));
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
 
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
@@ -654,7 +654,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   // First call on_event for setting result_tts_speak_ to UNSUPPORTED_RESOURCE
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   CallOnEvent caller_speak(*command_sptr_, event_speak);
   caller_speak();
 
@@ -691,31 +691,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       app_mngr_,
       StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
-  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  CallOnEvent caller(*command_sptr_, event);
-  caller();
-
-  EXPECT_EQ(kConnectionKey, msg_params_[am::strings::connection_key].asUInt());
-  EXPECT_EQ(kFunctionId, msg_params_[am::strings::function_id].asString());
-}
-
-TEST_F(PerformAudioPassThruRequestTest,
-       DISABLED_OnEvent_TTSOnResetTimeout_UpdateTimeout) {
-  am::event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-
-  msg_params_[am::strings::connection_key] = kConnectionKey;
-  msg_params_[am::strings::function_id] = kFunctionId;
-
-  uint32_t app_id = kConnectionKey;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
-  EXPECT_CALL(app_mngr_, BeginAudioPassThru(app_id)).WillOnce(Return(true));
-
-  EXPECT_CALL(
-      app_mngr_,
-      StartAudioPassThruThread(kConnectionKey, kCorrelationId, _, _, _, _));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
   CallOnEvent caller(*command_sptr_, event);
@@ -729,7 +705,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnEvent_DefaultCase) {
   am::event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
   uint32_t app_id = kConnectionKey;
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);
@@ -756,10 +732,20 @@ TEST_F(PerformAudioPassThruRequestTest,
   // For setting current_state_ -> kCompleted
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
-  command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  command_sptr_->onTimeOut();
+  MessageSharedPtr timeout_response =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*timeout_response)[am::strings::msg_params][am::strings::result_code] =
+      am::mobile_api::Result::GENERIC_ERROR;
+  (*timeout_response)[am::strings::msg_params][am::strings::success] = false;
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
+      .WillOnce(Return(timeout_response));
+
+  command_sptr_->OnTimeOut();
 }
 
 TEST_F(PerformAudioPassThruRequestTest,
@@ -830,7 +816,7 @@ TEST_F(PerformAudioPassThruRequestTest,
                   HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(false));
 
-  command_sptr_->onTimeOut();
+  command_sptr_->OnTimeOut();
 }
 
 }  // namespace perform_audio_pass_thru_request

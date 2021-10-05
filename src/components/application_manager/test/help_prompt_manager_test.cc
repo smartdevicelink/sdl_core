@@ -57,6 +57,7 @@ const uint32_t kAppId = 10u;
 const uint32_t kCmdId = 1u;
 const std::string kPolicyAppId = "fake_app_id";
 const uint32_t kTimeout = 10000u;
+const uint32_t kTimeoutCompensation = 1000u;
 const std::string kText = "one";
 const uint32_t kPosition = 1u;
 const std::string kFirstVrCommand = "first";
@@ -168,6 +169,8 @@ void HelpPromptManagerTest::SetUp() {
       .WillByDefault(ReturnRef(mock_event_dispatcher_));
   ON_CALL(app_mngr_settings_, default_timeout())
       .WillByDefault(ReturnRef(kTimeout));
+  ON_CALL(app_mngr_settings_, default_timeout_compensation())
+      .WillByDefault(ReturnRef(kTimeoutCompensation));
   ON_CALL(app_mngr_settings_, app_icons_folder())
       .WillByDefault(ReturnRef(kDirectoryName));
   ON_CALL(app_mngr_settings_, app_storage_folder())

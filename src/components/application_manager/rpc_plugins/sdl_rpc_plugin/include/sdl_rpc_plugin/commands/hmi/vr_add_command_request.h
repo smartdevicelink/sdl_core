@@ -66,7 +66,7 @@ class VRAddCommandRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual void Run();
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRAddCommandRequest);

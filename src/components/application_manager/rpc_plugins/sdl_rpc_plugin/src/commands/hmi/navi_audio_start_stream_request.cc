@@ -53,14 +53,15 @@ AudioStartStreamRequest::AudioStartStreamRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handle)
-    , EventObserver(application_manager.event_dispatcher())
     , retry_number_(0) {
   SDL_LOG_AUTO_TRACE();
   std::pair<uint32_t, int32_t> stream_retry =
       application_manager_.get_settings().start_stream_retry_amount();
-  default_timeout_ = stream_retry.second;
+  default_timeout_ =
+      stream_retry.second +
+      application_manager_.get_settings().default_timeout_compensation();
   retry_number_ = stream_retry.first;
-  SDL_LOG_DEBUG("default_timeout_ = " << default_timeout_
+  SDL_LOG_DEBUG("default_timeout_ = " << stream_retry.second
                                       << "; retry_number_ = " << retry_number_);
 }
 
@@ -136,12 +137,13 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void AudioStartStreamRequest::onTimeOut() {
+void AudioStartStreamRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   RetryStartSession();
 }
 
 void AudioStartStreamRequest::RetryStartSession() {
+  using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
   auto retry_start_session = [this](const uint32_t hmi_app_id) {
@@ -176,7 +178,7 @@ void AudioStartStreamRequest::RetryStartSession() {
       SDL_LOG_DEBUG("Audio start stream retry sequence stopped. "
                     << "Attempts expired.");
 
-      application_manager_.EndNaviServices(app->app_id());
+      application_manager_.EndService(app->app_id(), ServiceType::kAudio);
     }
   };
 

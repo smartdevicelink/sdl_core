@@ -433,10 +433,23 @@ class PolicyManager : public usage_statistics::StatisticsManager,
                              const std::string& language) = 0;
 
   /**
+   * @brief Set hardware version from GetSystemInfo response to policy table, if
+   * present
+   * @param hardware_version Hardware version
+   */
+  virtual void SetHardwareVersion(const std::string& hardware_version) = 0;
+
+  /**
    * @brief Get information about last ccpu_version from PT
    * @return ccpu_version from PT
    */
   virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
+   * @brief Get information about last hardware version from PT
+   * @return hardware version from PT
+   */
+  virtual std::string GetHardwareVersionFromPT() const = 0;
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
@@ -740,15 +753,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual const PolicySettings& get_settings() const = 0;
 
   /**
-   * @deprecated Unused in EXTERNAL_PROPRIETARY policies
-   * @brief Finds the next URL that must be sent on OnSystemRequest retry
-   * @param urls vector of vectors that contain urls for each application
-   * @return Pair of policy application id and application url id from the
-   * urls vector
-   */
-  DEPRECATED virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
-
-  /**
    * @brief Assigns new HMI types for specified application
    * @param device_handle device identifier
    * @param application_id Unique application id
@@ -857,6 +861,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @brief Restart PTU timeout if PTU in UPDATING state
    */
   virtual void ResetTimeout() = 0;
+
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
 
  protected:
   /**

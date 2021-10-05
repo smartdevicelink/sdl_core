@@ -53,8 +53,7 @@ RCIsReadyRequest::RCIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 RCIsReadyRequest::~RCIsReadyRequest() {}
 
@@ -79,6 +78,8 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
       if (!is_available) {
         hmi_capabilities.set_rc_supported(false);
       }
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::RC_IsReady);
 
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_RC)) {
@@ -97,8 +98,10 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void RCIsReadyRequest::onTimeOut() {
+void RCIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::RC_IsReady);
   RequestInterfaceCapabilities(hmi_interface::rc);
 }
 

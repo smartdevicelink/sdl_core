@@ -140,7 +140,8 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
           msg_params[strings::result_code].asInt());
   hmi_apis::Common_Result::eType result =
       MessageHelper::MobileToHMIResult(mobile_result);
-  bool success = IsMobileResultSuccess(mobile_result);
+  bool success =
+      application_manager::commands::IsMobileResultSuccess(mobile_result);
   SendResponse(success,
                correlation_id(),
                hmi_apis::FunctionID::AppService_PerformAppServiceInteraction,
@@ -149,7 +150,7 @@ void ASPerformAppServiceInteractionRequestFromHMI::on_event(
                application_manager::commands::Command::SOURCE_SDL_TO_HMI);
 }
 
-void ASPerformAppServiceInteractionRequestFromHMI::onTimeOut() {
+void ASPerformAppServiceInteractionRequestFromHMI::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject response_params;
   response_params[strings::info] =

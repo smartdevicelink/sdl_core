@@ -113,7 +113,8 @@ bool WSSampleClient<WS>::Connect(tcp::resolver::results_type& results) {
 template <>
 bool WSSampleClient<WSS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
-  boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
+  boost::asio::connect(
+      boost::beast::get_lowest_layer(*ws_), results.begin(), results.end(), ec);
   if (ec) {
     return false;
   }
@@ -134,7 +135,7 @@ bool WSSampleClient<WS>::Handshake(const std::string& host,
 template <>
 void WSSampleClient<WS>::Stop() {
   ioc_.stop();
-  ws_->lowest_layer().close();
+  boost::beast::get_lowest_layer(*ws_).close();
 
   io_pool_.stop();
   io_pool_.join();
@@ -165,7 +166,7 @@ void WSSampleClient<WSS>::Stop() {
   ioc_.stop();
   ws_->next_layer().next_layer().shutdown(
       boost::asio::ip::tcp::socket::shutdown_both);
-  ws_->lowest_layer().close();
+  boost::beast::get_lowest_layer(*ws_).close();
 
   io_pool_.stop();
   io_pool_.join();

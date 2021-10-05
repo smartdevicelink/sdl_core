@@ -48,21 +48,18 @@ SubtleAlertRequest::SubtleAlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , awaiting_ui_subtle_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
     , is_ui_subtle_alert_sent_(false)
     , is_tts_stop_speaking_sent_(false)
     , subtle_alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 SubtleAlertRequest::~SubtleAlertRequest() {}
 
@@ -118,18 +115,6 @@ void SubtleAlertRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::TTS_OnResetTimeout:
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO(
-          "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event"
-          << awaiting_tts_speak_response_ << " "
-          << awaiting_tts_stop_speaking_response_ << " "
-          << awaiting_ui_subtle_alert_response_);
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_SubtleAlert: {
       SDL_LOG_INFO("Received UI_SubtleAlert event");
       // Unsubscribe from event to avoid unwanted messages
@@ -206,20 +191,10 @@ bool SubtleAlertRequest::PrepareResponseParameters(
   bool result =
       PrepareResultForMobileResponse(ui_subtle_alert_info, tts_alert_info);
 
-  /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive response for
-   * TTS.IsReady.
-   */
-  if (result && ui_subtle_alert_info.is_ok &&
-      tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
-    result = false;
-  }
   result_code = mobile_apis::Result::WARNINGS;
   if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
-    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
     info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
                                           ui_response_info_,
                                           tts_alert_info,
@@ -244,7 +219,11 @@ bool SubtleAlertRequest::PrepareResponseParameters(
                                         tts_alert_info,
                                         tts_response_info_);
   // Mobile Alert request is successful when UI_SubtleAlert is successful
-  if (is_ui_subtle_alert_sent_ && !ui_subtle_alert_info.is_ok) {
+  bool has_unsupported_data = ui_subtle_alert_info.is_unsupported_resource &&
+                              HmiInterfaces::STATE_NOT_AVAILABLE !=
+                                  ui_subtle_alert_info.interface_state;
+  if (is_ui_subtle_alert_sent_ && !ui_subtle_alert_info.is_ok &&
+      !has_unsupported_data) {
     return false;
   }
   return result;
@@ -342,7 +321,7 @@ void SubtleAlertRequest::SendSubtleAlertRequest(int32_t app_id) {
         hmi_apis::Common_TextFieldName::subtleAlertText1;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text1];
-    index++;
+    ++index;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =

@@ -217,7 +217,7 @@ TEST_F(RCIsReadyRequestTest, Run_ErrorMessage_StateNotAvailable) {
 TEST_F(RCIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace rc_is_ready_request

@@ -63,8 +63,8 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     out_result = RESULT_FAIL;
     return ProtocolFramePtrList();
   }
-  SDL_LOG_INFO("Processing incoming data of size "
-               << tm_message_size << " for connection " << connection_id);
+  SDL_LOG_TRACE("Processing incoming data of size "
+                << tm_message_size << " for connection " << connection_id);
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
     SDL_LOG_WARN("ProcessData requested for unknown connection");
@@ -73,16 +73,16 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   }
   std::vector<uint8_t>& connection_data = it->second;
   connection_data.insert(connection_data.end(), data, data + tm_message_size);
-  SDL_LOG_DEBUG("Total data size for connection " << connection_id << " is "
+  SDL_LOG_TRACE("Total data size for connection " << connection_id << " is "
                                                   << connection_data.size());
   ProtocolFramePtrList out_frames;
   *malformed_occurrence = 0;
   out_result = CreateFrame(
       connection_data, out_frames, *malformed_occurrence, connection_id);
-  SDL_LOG_DEBUG("New data size for connection " << connection_id << " is "
+  SDL_LOG_TRACE("New data size for connection " << connection_id << " is "
                                                 << connection_data.size());
   if (!out_frames.empty()) {
-    SDL_LOG_INFO("Created and passed " << out_frames.size() << " packets");
+    SDL_LOG_TRACE("Created and passed " << out_frames.size() << " packets");
   } else {
     if (RESULT_DEFERRED == out_result) {
       SDL_LOG_DEBUG(
@@ -156,7 +156,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
                     << std::hex << static_cast<const void*>(&*data_it));
       continue;
     }
-    SDL_LOG_DEBUG("Payload size " << header_.dataSize);
+    SDL_LOG_TRACE("Payload size " << header_.dataSize);
     const uint32_t packet_size = GetPacketSize(header_);
     if (packet_size == 0) {
       SDL_LOG_WARN("Null packet size");
@@ -167,14 +167,14 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       continue;
     }
     if (data_size < packet_size) {
-      SDL_LOG_DEBUG("Packet data is not available yet");
+      SDL_LOG_TRACE("Packet data is not available yet");
       incoming_data.erase(incoming_data.begin(), data_it);
       return RESULT_DEFERRED;
     }
     ProtocolFramePtr frame(new protocol_handler::ProtocolPacket(connection_id));
     const RESULT_CODE deserialize_result =
         frame->deserializePacket(&*data_it, packet_size);
-    SDL_LOG_DEBUG("Deserialized frame " << frame);
+    SDL_LOG_TRACE("Deserialized frame " << frame);
     if (deserialize_result != RESULT_OK) {
       SDL_LOG_WARN("Packet deserialization failed");
       incoming_data.erase(incoming_data.begin(), data_it);
@@ -183,7 +183,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
 
     out_frames.push_back(frame);
     last_portion_of_data_was_malformed_ = false;
-    SDL_LOG_DEBUG("Frame added. "
+    SDL_LOG_TRACE("Frame added. "
                   << "Connection ID " << connection_id);
 
     data_it += packet_size;

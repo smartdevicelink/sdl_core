@@ -54,6 +54,7 @@ SecurityManagerImpl::SecurityManagerImpl(
     , crypto_manager_(NULL)
     , protocol_handler_(NULL)
     , system_time_handler_(std::move(system_time_handler))
+    , current_seq_number_(0)
     , waiting_for_certificate_(false)
     , waiting_for_time_(false) {
   DCHECK(system_time_handler_);
@@ -425,7 +426,7 @@ void SecurityManagerImpl::ProcessFailedPTU() {
   }
 }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
 void SecurityManagerImpl::ProcessFailedCertDecrypt() {
   SDL_LOG_AUTO_TRACE();
   {
@@ -556,6 +557,7 @@ bool SecurityManagerImpl::ProcessHandshakeData(
     // no handshake data to send
     return false;
   }
+
   if (sslContext->IsInitCompleted()) {
     // On handshake success
     SDL_LOG_DEBUG("SSL initialization finished success.");
@@ -564,6 +566,29 @@ bool SecurityManagerImpl::ProcessHandshakeData(
   } else if (handshake_result != SSLContext::Handshake_Result_Success) {
     // On handshake fail
     SDL_LOG_WARN("SSL initialization finished with fail.");
+    int32_t error_code = ERROR_HANDSHAKE_FAILED;
+    std::string error_text = "Handshake failed";
+    switch (handshake_result) {
+      case SSLContext::Handshake_Result_CertExpired:
+        error_code = ERROR_EXPIRED_CERT;
+        error_text = "Certificate is expired";
+        break;
+      case SSLContext::Handshake_Result_NotYetValid:
+        error_code = ERROR_INVALID_CERT;
+        error_text = "Certificate is not yet valid";
+        break;
+      case SSLContext::Handshake_Result_CertNotSigned:
+        error_code = ERROR_INVALID_CERT;
+        error_text = "Certificate is not signed";
+        break;
+      case SSLContext::Handshake_Result_AppIDMismatch:
+        error_code = ERROR_INVALID_CERT;
+        error_text = "App ID does not match certificate";
+        break;
+      default:
+        break;
+    }
+    SendInternalError(connection_key, error_code, error_text);
     NotifyListenersOnHandshakeDone(connection_key, handshake_result);
   }
 
@@ -596,13 +621,24 @@ bool SecurityManagerImpl::ProcessInternalError(
   return true;
 }
 
-void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
-                                               const uint8_t* const data,
-                                               const size_t data_size,
-                                               const uint32_t seq_number) {
-  const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
-                                          SecurityQuery::SEND_HANDSHAKE_DATA,
-                                          seq_number);
+uint32_t SecurityManagerImpl::NextSequentialNumber() {
+  if (current_seq_number_ >= std::numeric_limits<uint32_t>::max()) {
+    current_seq_number_ = 0;
+  }
+  current_seq_number_++;
+  return current_seq_number_;
+}
+
+void SecurityManagerImpl::SendHandshakeBinData(
+    const uint32_t connection_key,
+    const uint8_t* const data,
+    const size_t data_size,
+    const uint32_t custom_seq_number) {
+  uint32_t seq_number =
+      (0 == custom_seq_number) ? NextSequentialNumber() : custom_seq_number;
+
+  const SecurityQuery::QueryHeader header(
+      SecurityQuery::REQUEST, SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
   DCHECK(data_size < 1024 * 1024 * 1024);
   const SecurityQuery query =
       SecurityQuery(header, connection_key, data, data_size);

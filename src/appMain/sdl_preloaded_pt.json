@@ -189,6 +189,13 @@
                             "NONE"
                         ]
                     },
+                    "OnAppCapabilityUpdated": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
                     "OnAppInterfaceUnregistered": {
                         "hmi_levels": [
                             "BACKGROUND",
@@ -545,6 +552,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -564,6 +572,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -583,6 +592,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -602,6 +612,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     }
@@ -621,6 +632,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -648,6 +660,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -675,6 +688,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -701,6 +715,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -854,8 +869,7 @@
                         "hmi_levels": [
                             "FULL",
                             "LIMITED",
-                            "BACKGROUND",
-                            "NONE"
+                            "BACKGROUND"
                         ]
                     },
                     "UnpublishAppService": {
@@ -1647,6 +1661,7 @@
                 "rpcs": {
                     "CreateWindow": {
                         "hmi_levels": [
+                          "NONE",
                           "BACKGROUND",
                           "FULL",
                           "LIMITED"
@@ -1654,6 +1669,7 @@
                     },
                     "DeleteWindow": {
                         "hmi_levels": [
+                          "NONE",
                           "BACKGROUND",
                           "FULL",
                           "LIMITED"
@@ -1719,12 +1735,6 @@
                             "line1": "Grant Requested",
                             "line2": "Permission(s)?",
                             "textBody": "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. \n\nIf you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%’s use of your data. You can change these permissions and hear detailed descriptions in the mobile apps settings menu."
-                        },
-                        "es-en": {
-                            "tts": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar.",
-                            "line1": "¿Otorgar permiso(s)",
-                            "line2": "solicitado(s)?",
-                            "textBody": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar. \n\n Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles."
                         },
                         "es-es": {
                             "tts": "%appName% está solicitando el uso de los siguientes permisos e información del vehículo: %functionalGroupLabels%. Si pulsa sí, acepta que %vehicleMake% no será responsable de los daños o la pérdida de privacidad relacionados con el uso de sus datos por parte de %appName%. Pulse sí para permitir o no para denegar.",
@@ -1817,9 +1827,6 @@
                         "en-us": {
                             "tts": "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press yes to grant permissions or no to deny."
                         },
-                        "es-en": {
-                            "tts": "%appName% solicita la siguiente información y permisos del vehículo: %functionalGroupLabels%. Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles. Presione Sí para otorgar permisos y No para denegar."
-                        },
                         "es-es": {
                             "tts": "%appName% está solicitando los siguientes permisos e información del vehículo: %functionalGroupLabels%. Puede cambiar estos permisos y escuchar descripciones detalladas en el menú de configuración de la aplicación móvil. Pulse sí para conceder el permiso o no para denegarlo."
                         },
@@ -1880,9 +1887,6 @@
                         },
                         "en-us": {
                             "tts": "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
-                        },
-                        "es-en": {
-                            "tts": "Las autorizaciones de la aplicación han cambiado. %appName% ya no puede acceder a %functionalGroupLabels%. Asegúrese de haber instalado la versión más reciente de la aplicación en su dispositivo móvil."
                         },
                         "es-es": {
                             "tts": "Las autorizaciones de la aplicación han cambiado. %appName% ya no puede acceder a %functionalGroupLabels%. Asegúrese de que tiene la versión más reciente de la aplicación instalada en su dispositivo móvil."
@@ -1951,11 +1955,6 @@
                             "tts": "This version of %appName% is not authorized and will not work with SYNC.",
                             "line1": "Not Authorized",
                             "textBody": "This version of %appName% is no longer authorized to work with AppLink. Please update to the latest version of %appName%."
-                        },
-                        "es-en": {
-                            "tts": "Esta versión de %appName% no tiene autorización y no funcionará con SYNC.",
-                            "line1": "no autorizada",
-                            "textBody": "Esta versión de %appName% no tiene autorización y no funcionará con SYNC."
                         },
                         "es-es": {
                             "tts": "Esta versión de %appName% no está autorizada y no funcionará con SYNC.",
@@ -2040,11 +2039,6 @@
                             "tts": "This version of %appName% is not supported by SYNC.",
                             "line1": "Not Supported",
                             "textBody": "Your version of %appName% is not supported by SYNC."
-                        },
-                        "es-en": {
-                            "tts": "Esta versión de %appName% no es compatible con SYNC.",
-                            "line1": "no compatible",
-                            "textBody": "Esta versión de %appName% no es compatible con SYNC."
                         },
                         "es-es": {
                             "tts": "Esta versión de %appName% no es compatible con SYNC.",
@@ -2166,12 +2160,6 @@
                             "line2": "and Mobile Apps?",
                             "textBody": "If you disable, you will not be able to use any mobile apps with SYNC and your vehicle will stop receiving mobile app permission updates via your device`s data plan. Please press yes to disable mobile apps or no to cancel."
                         },
-                        "es-en": {
-                            "tts": "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar.",
-                            "line1": "¿Deshab. actualiz.",
-                            "line2": "autom. y aplic. móv.?",
-                            "textBody": "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar."
-                        },
                         "es-es": {
                             "tts": "Si desactiva las actualizaciones automáticas, también se desactivará la sincronización de las aplicaciones móviles. No podrá utilizar ninguna aplicación móvil con SYNC. Pulse sí para confirmar o no para cancelar.",
                             "line1": "¿Desact. actual. auto",
@@ -2270,11 +2258,6 @@
                             "label": "Driving Characteristics",
                             "textBody": "An app can access the following driving characteristics: Fuel Consumption, MyKey, Seat Belt Status."
                         },
-                        "es-en": {
-                            "tts": "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad.",
-                            "label": "Características del manejo",
-                            "textBody": "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad."
-                        },
                         "es-es": {
                             "tts": "Una aplicación puede acceder a las siguientes características de conducción: Consumo de combustible, MyKey, Estado cinturones de seguridad.",
                             "label": "Características de conducción"
@@ -2358,11 +2341,6 @@
                             "tts": "An app can access vehicle GPS and speed.",
                             "label": "GPS and speed",
                             "textBody": "An app can access vehicle GPS and speed."
-                        },
-                        "es-en": {
-                            "tts": "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo.",
-                            "label": "GPS y velocidad",
-                            "textBody": "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo."
                         },
                         "es-es": {
                             "tts": "Una aplicación puede acceder al GPS y la velocidad del vehículo.",
@@ -2455,11 +2433,6 @@
                             "label": "Push notifications",
                             "textBody": "An app can send notifications when running in the background."
                         },
-                        "es-en": {
-                            "tts": "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano.",
-                            "label": "Notificaciones tipo Push",
-                            "textBody": "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano."
-                        },
                         "es-es": {
                             "tts": "Una aplicación puede enviar notificaciones cuando se está ejecutando en segundo plano.",
                             "label": "Notificaciones push"
@@ -2538,10 +2511,6 @@
                             "line1": "Disable Updates",
                             "textBody": "Disable Updates"
                         },
-                        "es-en": {
-                            "line1": "Deshab. actual.",
-                            "textBody": "Deshab. actual."
-                        },
                         "es-es": {
                             "line1": "Desact. actual."
                         },
@@ -2605,9 +2574,6 @@
                         "en-us": {
                             "line1": "Enable Apps"
                         },
-                        "es-en": {
-                            "line1": "Hab. aplic."
-                        },
                         "es-es": {
                             "line1": "Activar apl."
                         },
@@ -2670,10 +2636,6 @@
                         "en-us": {
                             "line1": "Request Update",
                             "textBody": "Select `Update now` to receive app permissions for your SYNC-enabled mobile apps. This may enable additional functionality depending on the app and your settings. If your phone has a working data connection, an update should complete in less than 1 minute."
-                        },
-                        "es-en": {
-                            "line1": "Solicit. actualiz.",
-                            "textBody": "Solicit. actualiz."
                         },
                         "es-es": {
                             "line1": "Solicitar actual."
@@ -2740,10 +2702,6 @@
                             "line1": "Update Needed",
                             "textBody": "Update Needed"
                         },
-                        "es-en": {
-                            "line1": "Actualiz. neces.",
-                            "textBody": "Actualiz. neces."
-                        },
                         "es-es": {
                             "line1": "Actu. necesaria"
                         },
@@ -2809,10 +2767,6 @@
                             "line1": "Updating...",
                             "textBody": "Updating..."
                         },
-                        "es-en": {
-                            "line1": "Actualizando...",
-                            "textBody": "Actualizando..."
-                        },
                         "es-es": {
                             "line1": "Actualizando..."
                         },
@@ -2877,10 +2831,6 @@
                         "en-us": {
                             "line1": "Up-To-Date",
                             "textBody": "Up-To-Date"
-                        },
-                        "es-en": {
-                            "line1": "Actualizado",
-                            "textBody": "Actualizado"
                         },
                         "es-es": {
                             "line1": "Actualizada"
@@ -2951,11 +2901,6 @@
                             "tts": "An app can access the following vehicle information: Fuel Level, Fuel Economy, Engine RPMs, Odometer, VIN, External Temperature, Gear Position, Tire Pressure.",
                             "label": "Vehicle information",
                             "textBody": "An app can access the following vehicle information: Fuel Level, Fuel Economy, Engine RPMs, Odometer, VIN, External Temperature, Gear Position, Tire Pressure."
-                        },
-                        "es-en": {
-                            "tts": "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos.",
-                            "label": "Información del vehículo",
-                            "textBody": "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos."
                         },
                         "es-es": {
                             "tts": "Una aplicación puede acceder a la siguiente información del vehículo: Nivel de combustible, Ahorro de combustible, RPM del motor, Cuentakilómetros, VIN, Temperatura aire exterior, Marcha engranada, Presión de neumáticos.",
@@ -3477,12 +3422,71 @@
                     "since": "5.0"
                 },
                 {
+                    "name": "climateData",
+                    "params": [
+                        {
+                            "name": "externalTemperature",
+                            "key": "OEM_REF_EXT_TEMP",
+                            "params": [
+                                {
+                                    "name": "unit",
+                                    "key": "OEM_REF_EXT_TEMP_UNIT",
+                                    "type": "TemperatureUnit",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "value",
+                                    "key": "OEM_REF_EXT_TEMP_VALUE",
+                                    "type": "Float",
+                                    "mandatory": true
+                                }
+                            ],
+                            "type": "Struct",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "cabinTemperature",
+                            "key": "OEM_REF_CABIN_TEMP",
+                            "params": [
+                                {
+                                    "name": "unit",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
+                                    "type": "TemperatureUnit",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "value",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
+                                    "type": "Float",
+                                    "mandatory": true
+                                }
+                            ],
+                            "type": "Struct",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "atmosphericPressure",
+                            "key": "OEM_REF_ATMOSPHERIC_PRESSURE",
+                            "type": "Float",
+                            "minvalue": 0,
+                            "maxvalue": 2000,
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_CLIMATE_DATA",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.1"
+                },
+                {
                     "name": "externalTemperature",
                     "key": "OEM_REF_EXT_TEMP",
                     "type": "Float",
                     "mandatory": false,
                     "minvalue": -40,
-                    "maxvalue": 100
+                    "maxvalue": 100,
+                    "deprecated": true,
+                    "since": "7.1"
                 },
                 {
                     "name": "turnSignal",
@@ -3541,7 +3545,16 @@
                             "name": "pressureTelltale",
                             "key": "OEM_REF_PRES_TEL",
                             "type": "WarningLightStatus",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "pressureTelltale",
+                            "key": "OEM_REF_PRES_TEL",
+                            "type": "WarningLightStatus",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "leftFront",
@@ -3571,7 +3584,40 @@
                             ],
                             "key": "OEM_REF_LEFT_FR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "leftFront",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_LEFT_FR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_LEFT_FR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_LEFT_FR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_LEFT_FR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "rightFront",
@@ -3601,7 +3647,40 @@
                             ],
                             "key": "OEM_REF_RIGHT_FR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "rightFront",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_RIGHT_FR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_RIGHT_FR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_RIGHT_FR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_RIGHT_FR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "leftRear",
@@ -3631,7 +3710,40 @@
                             ],
                             "key": "OEM_REF_LEFT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "leftRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_LEFT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_LEFT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_LEFT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_LEFT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "rightRear",
@@ -3661,7 +3773,40 @@
                             ],
                             "key": "OEM_REF_RIGHT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "rightRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_RIGHT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_RIGHT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_RIGHT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_RIGHT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "innerLeftRear",
@@ -3691,7 +3836,40 @@
                             ],
                             "key": "OEM_REF_IN_LEFT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "innerLeftRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_IN_LEFT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_IN_LEFT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_IN_LEFT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_IN_LEFT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         },
                         {
                             "name": "innerRightRear",
@@ -3721,7 +3899,40 @@
                             ],
                             "key": "OEM_REF_IN_RIGHT_REAR",
                             "type": "Struct",
-                            "mandatory": true
+                            "mandatory": true,
+                            "since": "2.0",
+                            "until": "8.0"
+                        },
+                        {
+                            "name": "innerRightRear",
+                            "params": [
+                                {
+                                    "name": "status",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_ST",
+                                    "type": "ComponentVolumeStatus",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "tpms",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_TMPS",
+                                    "type": "TPMS",
+                                    "mandatory": false,
+                                    "since": "5.0"
+                                },
+                                {
+                                    "name": "pressure",
+                                    "key": "OEM_REF_IN_RIGHT_REAR_PRES",
+                                    "type": "Float",
+                                    "mandatory": false,
+                                    "minvalue": 0,
+                                    "maxvalue": 2000,
+                                    "since": "5.0"
+                                }
+                            ],
+                            "key": "OEM_REF_IN_RIGHT_REAR",
+                            "type": "Struct",
+                            "mandatory": false,
+                            "since": "8.0"
                         }
                     ],
                     "key": "OEM_REF_TIRE_PRES",
@@ -3859,25 +4070,63 @@
                             "name": "driverDoorAjar",
                             "key": "OEM_REF_DR_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "passengerDoorAjar",
                             "key": "OEM_REF_PAS_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "rearLeftDoorAjar",
                             "key": "OEM_REF_REAR_LEFT_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "rearRightDoorAjar",
                             "key": "OEM_REF_REAR_RIGHT_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "doorStatuses",
+                            "key": "OEM_REF_DOOR_STATUSES",
+                            "array": true,
+                            "type": "DoorStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "gateStatuses",
+                            "key": "OEM_REF_GATE_STATUSES",
+                            "array": true,
+                            "type": "GateStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "roofStatuses",
+                            "key": "OEM_REF_ROOF_STATUSES",
+                            "array": true,
+                            "type": "RoofStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
                         }
                     ],
                     "key": "OEM_REF_BODY_INF",
@@ -4335,6 +4584,33 @@
                     "type": "Boolean",
                     "mandatory": false,
                     "since": "7.0"
+                },
+                {
+                    "name": "seatOccupancy",
+                    "key": "OEM_REF_SEAT_OCCUP",
+                    "params": [
+                        {
+                            "name": "seatsOccupied",
+                            "key": "OEM_REF_SEATS_OCCUP",
+                            "type": "SeatStatus",
+                            "array": true,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "mandatory": false
+                        },
+                        {
+                            "name": "seatsBelted",
+                            "key": "OEM_REF_SEATS_BELT",
+                            "type": "SeatStatus",
+                            "array": true,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "mandatory": false
+                        }
+                    ],
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.1"
                 }
             ]
         }

@@ -65,9 +65,6 @@ class AppServiceManager {
   AppServiceManager(ApplicationManager& app_manager,
                     resumption::LastStateWrapperPtr last_state);
 
-  DEPRECATED AppServiceManager(ApplicationManager& app_manager,
-                               resumption::LastState& last_state);
-
   /**
    * @brief Class destructor
    */
@@ -213,6 +210,13 @@ class AppServiceManager {
    */
   virtual bool UpdateNavigationCapabilities(
       smart_objects::SmartObject& out_params);
+
+  /**
+   * @brief Retrieve the active service for handling waypoints if available
+   * @return The active NAVIGATION service if it handles waypoints, nullptr
+   * otherwise
+   */
+  virtual AppService* FindWayPointsHandler();
 
   /**
    * @brief Get the RPCPassingHandler tied to this object

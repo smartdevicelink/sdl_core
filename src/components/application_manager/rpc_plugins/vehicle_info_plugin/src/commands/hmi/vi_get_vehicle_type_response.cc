@@ -55,17 +55,19 @@ void VIGetVehicleTypeResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
-
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
     SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
     return;
   }
 
   std::vector<std::string> sections_to_update{hmi_response::vehicle_type};
   hmi_capabilities_.set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::vehicle_info,

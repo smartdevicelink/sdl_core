@@ -88,8 +88,9 @@ class MockApplication : public ::application_manager::Application {
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
                void(protocol_handler::ServiceType service_type));
-  MOCK_METHOD1(WakeUpStreaming,
-               void(protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(WakeUpStreaming,
+               void(protocol_handler::ServiceType service_type,
+                    uint32_t timer_len));
   MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
   MOCK_METHOD1(set_voice_communication_supported,
                void(bool is_voice_communication_supported));
@@ -206,9 +207,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD2(RemoveHMIState,
                void(const application_manager::WindowID window_id,
                     ::application_manager::HmiState::StateID state_id));
-  MOCK_METHOD2(SubscribeToSoftButtons,
-               void(int32_t cmd_id,
-                    const ::application_manager::SoftButtonID& softbuttons_id));
+  MOCK_METHOD2(
+      SubscribeToSoftButtons,
+      void(int32_t cmd_id,
+           const application_manager::WindowSoftButtons& window_softbuttons));
   MOCK_METHOD1(IsSubscribedToSoftButton, bool(const uint32_t softbutton_id));
   MOCK_METHOD1(UnsubscribeFromSoftButtons, void(int32_t cmd_id));
   MOCK_CONST_METHOD0(IsAudioApplication, bool());
@@ -251,6 +253,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(menu_layout, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(day_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(night_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(display_layout, std::string());
@@ -303,6 +306,8 @@ class MockApplication : public ::application_manager::Application {
                void(const smart_objects::SmartObject& menu_title));
   MOCK_METHOD1(set_menu_icon,
                void(const smart_objects::SmartObject& menu_icon));
+  MOCK_METHOD1(set_menu_layout,
+               void(const smart_objects::SmartObject& menu_layout));
   MOCK_METHOD1(set_day_color_scheme,
                void(const smart_objects::SmartObject& color_scheme));
   MOCK_METHOD1(set_night_color_scheme,

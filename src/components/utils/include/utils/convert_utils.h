@@ -70,18 +70,14 @@ unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
 uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
 
 /**
- * @brief Convert one number value to another type value
- * @param value to be converted
+ * @brief Convert binary data to a string value
+ * @param data raw binary data
+ * @param data_size string length. Required to check whether the data is a
+ * printable string.
  * @return conversion result
  */
-template <typename InputType, typename OutputType>
-OutputType SafeStaticCast(const InputType value) {
-  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
-                   std::numeric_limits<OutputType>::min());
-  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
-                   std::numeric_limits<OutputType>::max());
-  return static_cast<OutputType>(value);
-}
+std::string ConvertBinaryDataToString(const uint8_t* data,
+                                      const size_t data_size);
 
 /**
  * @brief Convert binary data to a string value

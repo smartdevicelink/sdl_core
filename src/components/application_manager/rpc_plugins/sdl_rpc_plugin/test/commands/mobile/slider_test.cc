@@ -55,6 +55,7 @@ namespace am = application_manager;
 using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
+using app_mngr::commands::RequestFromMobileImpl;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::SliderRequest;
 using ::testing::_;
@@ -182,13 +183,13 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+  CallOnTimeOut(RequestFromMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
-  CommandRequestImpl& command_;
+  RequestFromMobileImpl& command_;
 };
 
 TEST_F(SliderRequestTest, Init_SUCCESS) {
@@ -272,22 +273,6 @@ TEST_F(SliderRequestTest, Run_SUCCESS) {
 
   CommandPtr command(CreateCommand<SliderRequest>(msg_));
   command->Run();
-}
-
-TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
-  PreConditions();
-  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
-  (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
-
-  CommandPtr command(CreateCommand<SliderRequest>(msg_));
-  EXPECT_TRUE(command->Init());
-
-  EXPECT_CALL(app_mngr_,
-              updateRequestTimeout(kConnectionKey, kCorrelationId, _));
-
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
-  command->on_event(event);
 }
 
 TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {

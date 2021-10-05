@@ -69,6 +69,6 @@ endif()
 
 create_test("media_manager_test" "${SOURCES}" "${LIBRARIES}")
 
-if(ENABLE_LOG AND NOT ANDROIDs)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
     target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()

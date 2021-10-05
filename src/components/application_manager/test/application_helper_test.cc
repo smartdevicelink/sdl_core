@@ -149,7 +149,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;
   const uint32_t choice_set_id = 3;
-  const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
 
   smart_objects::SmartObject cmd(smart_objects::SmartType_Map);
   cmd[strings::msg_params][strings::cmd_id] = cmd_id;
@@ -163,8 +162,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
 
-  EXPECT_TRUE(app_impl_->SubscribeToButton(button));
-
   const std::string some_string = "some_string";
   smart_objects::SmartObject dummy_data =
       smart_objects::SmartObject(smart_objects::SmartType_String);
@@ -176,6 +173,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->set_keyboard_props(dummy_data);
   app_impl_->set_menu_title(dummy_data);
   app_impl_->set_menu_icon(dummy_data);
+  app_impl_->set_menu_layout(dummy_data);
 
   const bool persistent = false;
   const bool downloaded = true;
@@ -190,7 +188,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(smart_objects::SmartType_Null != sub_menu1.getType());
   const auto choice_set1 = app_impl_->FindChoiceSet(choice_set_id);
   EXPECT_TRUE(smart_objects::SmartType_Null != choice_set1.getType());
-  EXPECT_TRUE(app_impl_->IsSubscribedToButton(button));
   auto help_prompt = app_impl_->help_prompt();
   EXPECT_TRUE(help_prompt->asString() == some_string);
   auto timeout_prompt = app_impl_->timeout_prompt();
@@ -205,12 +202,11 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(menu_title->asString() == some_string);
   auto menu_icon = app_impl_->menu_icon();
   EXPECT_TRUE(menu_icon->asString() == some_string);
+  auto menu_layout = app_impl_->menu_layout();
+  EXPECT_TRUE(menu_layout->asString() == some_string);
   auto file_ptr = app_impl_->GetFile(filename);
   EXPECT_TRUE(NULL != file_ptr);
   EXPECT_TRUE(file_ptr->file_name == filename);
-
-  EXPECT_CALL(*mock_message_helper_, CreateUnsubscribeWayPointsRequest(_))
-      .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
 
   EXPECT_CALL(*mock_message_helper_, CreateDeleteUICommandRequest(_, _, _))
       .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
@@ -227,7 +223,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(smart_objects::SmartType_Null == sub_menu2.getType());
   const auto choice_set2 = app_impl_->FindChoiceSet(choice_set_id);
   EXPECT_TRUE(smart_objects::SmartType_Null == choice_set2.getType());
-  EXPECT_FALSE(app_impl_->IsSubscribedToButton(button));
   help_prompt = app_impl_->help_prompt();
   EXPECT_FALSE(help_prompt->asString() == some_string);
   timeout_prompt = app_impl_->timeout_prompt();
@@ -242,6 +237,8 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_FALSE(menu_title->asString() == some_string);
   menu_icon = app_impl_->menu_icon();
   EXPECT_FALSE(menu_icon->asString() == some_string);
+  menu_layout = app_impl_->menu_layout();
+  EXPECT_FALSE(menu_layout->asString() == some_string);
   file_ptr = app_impl_->GetFile(filename);
   EXPECT_TRUE(NULL == file_ptr);
 }
@@ -259,10 +256,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
-
-  EXPECT_CALL(*mock_message_helper_, CreateUnsubscribeWayPointsRequest(_))
-      .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
 
   EXPECT_CALL(*mock_message_helper_, CreateDeleteUICommandRequest(_, _, _))
       .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
@@ -275,9 +268,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   EXPECT_CALL(*mock_message_helper_, SendDeleteChoiceSetRequest(_, _, _));
 
   EXPECT_CALL(*mock_message_helper_, SendResetPropertiesRequest(_, _));
-
-  EXPECT_CALL(*mock_message_helper_,
-              SendUnsubscribeButtonNotification(_, _, _));
 
   // Act
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);

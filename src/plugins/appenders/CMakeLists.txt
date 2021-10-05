@@ -30,15 +30,19 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
+if (${LOGGER_NAME} STREQUAL "LOG4CXX")
 include_directories(
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+endif()
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 
+if (${LOGGER_NAME} STREQUAL "LOG4CXX")
 set(LIBRARIES
   log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
 )
+endif()
 
 add_library(appenders SHARED ${SOURCES})
 target_link_libraries(appenders ${LIBRARIES})

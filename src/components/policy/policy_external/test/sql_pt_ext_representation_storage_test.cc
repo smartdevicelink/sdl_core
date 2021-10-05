@@ -38,8 +38,6 @@
 #include "policy/mock_policy_settings.h"
 #include "sqlite_wrapper/sql_query.h"
 #include "utils/file_system.h"
-#include "utils/make_shared.h"
-#include "utils/shared_ptr.h"
 
 using namespace ::policy;
 

@@ -165,7 +165,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             print('\033[31;1mMissing fileName parameter: %s\033[0m' % str(json_data))
             return
 
-        self.write_message(self.handle_func(json_data, self.encryption, self.add_http_header, self.is_android))
+        msg = {
+            "requestType": json_data['requestType'],
+            "data": self.handle_func(json_data, self.encryption, self.add_http_header, self.is_android) 
+        }
+        self.write_message(msg)
 
     def on_close(self):
         print ("Connection Closed\n")

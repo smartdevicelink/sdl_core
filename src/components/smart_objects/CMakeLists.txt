@@ -48,7 +48,7 @@ add_library("SmartObjects" ${SOURCES})
 target_link_libraries("SmartObjects" Utils)
 add_dependencies("SmartObjects" MOBILE_API)
 
-if(ENABLE_LOG AND NOT ANDROID)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

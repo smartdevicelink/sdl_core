@@ -26,8 +26,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_request.h"
+
 #include <cstring>
 #include <string>
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
@@ -45,15 +47,13 @@ AlertManeuverRequest::AlertManeuverRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 AlertManeuverRequest::~AlertManeuverRequest() {}
 
@@ -144,6 +144,7 @@ void AlertManeuverRequest::Run() {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+    msg_params[strings::app_id] = app->app_id();
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
     msg_params[hmi_request::speak_type] =
@@ -172,19 +173,14 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_Speak: {
       SDL_LOG_INFO("Received TTS_Speak event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+
       pending_requests_.Remove(event_id);
       tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, info_tts_);
       break;
     }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      SDL_LOG_INFO("Received TTS_OnResetTimeout event");
 
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     default: {
       SDL_LOG_ERROR("Received unknown event " << event.id());
       SendResponse(
@@ -193,12 +189,11 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (!pending_requests_.IsFinal(event_id)) {
-    SDL_LOG_DEBUG(
-        "There are some pending responses from HMI. "
-        "AlertManeuverRequest still waiting.");
+  if (IsPendingResponseExist()) {
+    SDL_LOG_DEBUG("Command still wating for HMI response");
     return;
   }
+
   std::string return_info;
   mobile_apis::Result::eType result_code;
   const bool result = PrepareResponseParameters(result_code, return_info);
@@ -236,7 +231,8 @@ bool AlertManeuverRequest::PrepareResponseParameters(
                   application_manager_.hmi_interfaces().GetInterfaceState(
                       HmiInterfaces::HMI_INTERFACE_TTS)))) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    return_info = app_mngr::commands::MergeInfos(
+        navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
     return result;
   }
   result_code =
