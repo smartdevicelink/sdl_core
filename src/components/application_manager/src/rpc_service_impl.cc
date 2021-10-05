@@ -149,7 +149,9 @@ bool RPCServiceImpl::ManageMobileCommand(
       (app_manager_.IsAppInReconnectMode(app_ptr->device(),
                                          app_ptr->policy_app_id()) ||
        (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id &&
-        mobile_apis::HMILevel::INVALID_ENUM == app_ptr->hmi_level(window_id) &&
+        (!app_ptr->WindowIdExists(window_id) ||
+         mobile_apis::HMILevel::INVALID_ENUM ==
+             app_ptr->hmi_level(window_id)) &&
         mobile_apis::messageType::notification == message_type))) {
     commands_holder_.Suspend(
         app_ptr, CommandHolder::CommandType::kMobileCommand, source, message);
