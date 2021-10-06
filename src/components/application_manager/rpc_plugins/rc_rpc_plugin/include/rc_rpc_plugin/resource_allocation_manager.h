@@ -209,8 +209,16 @@ class ResourceAllocationManager {
       NotificationTrigger::eType event,
       application_manager::ApplicationSharedPtr application) = 0;
 
+  /**
+   * @brief Returns current state of RC functionality
+   * @return current state of RC functionality
+   */
   virtual bool is_rc_enabled() const = 0;
 
+  /**
+   * @brief Sets current state of RC functionality to a new one
+   * @param value new RC functionality state
+   */
   virtual void set_rc_enabled(const bool value) = 0;
 
   /**
