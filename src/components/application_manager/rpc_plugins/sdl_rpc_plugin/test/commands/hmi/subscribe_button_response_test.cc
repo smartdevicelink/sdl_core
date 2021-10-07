@@ -32,9 +32,11 @@
 
 #include <string>
 
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "gtest/gtest.h"
 #include "hmi/subscribe_button_response.h"
+
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
