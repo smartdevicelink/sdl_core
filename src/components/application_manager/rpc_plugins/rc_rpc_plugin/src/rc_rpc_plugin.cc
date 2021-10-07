@@ -120,7 +120,7 @@ void RCRPCPlugin::OnApplicationEvent(
   switch (event) {
     case plugins::kApplicationRegistered: {
       auto extension = std::shared_ptr<RCAppExtension>(
-          new RCAppExtension(kRCPluginID, *this, *application));
+          new RCAppExtension(*this, *application));
       DCHECK_OR_RETURN_VOID(application->AddExtension(extension));
       const auto driver_location =
           rc_capabilities_manager_
@@ -136,6 +136,7 @@ void RCRPCPlugin::OnApplicationEvent(
     case plugins::kApplicationUnregistered: {
       resource_allocation_manager_->OnApplicationEvent(event, application);
       interior_data_manager_->OnApplicationEvent(event, application);
+      application->RemoveExtension(RCAppExtension::RCAppExtensionID);
       break;
     }
     case plugins::kGlobalPropertiesUpdated: {

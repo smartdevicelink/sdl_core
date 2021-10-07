@@ -59,7 +59,7 @@ class WayPointsAppExtension : public app_mngr::AppExtension {
    * @brief WayPointsAppExtensionUID unique identifier of waypoints
    * aplication extension
    */
-  static unsigned WayPointsAppExtensionUID;
+  static const app_mngr::AppExtensionUID WayPointsAppExtensionUID;
 
  private:
   SDLRPCPlugin& plugin_;

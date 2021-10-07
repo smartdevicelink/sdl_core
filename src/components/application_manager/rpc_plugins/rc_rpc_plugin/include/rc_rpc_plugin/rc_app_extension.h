@@ -143,8 +143,7 @@ class RCRPCPlugin;
 
 class RCAppExtension : public application_manager::AppExtension {
  public:
-  explicit RCAppExtension(application_manager::AppExtensionUID uid,
-                          RCRPCPlugin& plugin,
+  explicit RCAppExtension(RCRPCPlugin& plugin,
                           application_manager::Application& application);
   ~RCAppExtension();
 
@@ -231,6 +230,8 @@ class RCAppExtension : public application_manager::AppExtension {
    * @param grid grid of user_location
    */
   void SetUserLocation(const Grid& grid);
+
+  static const application_manager::AppExtensionUID RCAppExtensionID = 153;
 
  private:
   /**

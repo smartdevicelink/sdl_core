@@ -38,7 +38,8 @@ SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
-const AppExtensionUID AppServiceAppExtensionUID = 455;
+const app_mngr::AppExtensionUID
+    AppServiceAppExtension::AppServiceAppExtensionUID = 455;
 
 AppServiceAppExtension::AppServiceAppExtension(
     AppServiceRpcPlugin& plugin, application_manager::Application& app)

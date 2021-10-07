@@ -94,6 +94,11 @@ void SDLRPCPlugin::OnApplicationEvent(
     SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
     sys_cap_ext_ptr->SubscribeTo(capability_type);
 
+  } else if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
+    application->RemoveExtension(
+        WayPointsAppExtension::WayPointsAppExtensionUID);
+    application->RemoveExtension(
+        SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
     ClearSubscriptions(application);
   }

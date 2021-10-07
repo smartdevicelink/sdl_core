@@ -125,8 +125,6 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   bool IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
                              const uint32_t app_id);
 
-  static const uint32_t kRCPluginID = 153;
-
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);

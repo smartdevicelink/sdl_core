@@ -204,6 +204,7 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   set_voice_communication_supported(false);
   set_mobile_projection_enabled(false);
   set_webengine_projection_enabled(false);
+  set_remote_control_supported(false);
   const smart_objects::SmartObject& array_app_types = *app_types_;
   uint32_t lenght_app_types = array_app_types.length();
 
@@ -1305,6 +1306,7 @@ AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
 }
 
 bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  SDL_LOG_AUTO_TRACE();
   if (!QueryInterface(extension->uid())) {
     SDL_LOG_TRACE("Add extenstion to add id" << app_id() << " with uid "
                                              << extension->uid());
@@ -1315,11 +1317,11 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  SDL_LOG_AUTO_TRACE();
   auto it = std::find_if(
       extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
         return extension->uid() == uid;
       });
-
   return it != extensions_.end();
 }
 

@@ -38,7 +38,8 @@ SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 namespace vehicle_info_plugin {
 namespace strings = application_manager::strings;
 
-unsigned VehicleInfoAppExtension::VehicleInfoAppExtensionUID = 146;
+const app_mngr::AppExtensionUID
+    VehicleInfoAppExtension::VehicleInfoAppExtensionUID = 146;
 
 VehicleInfoAppExtension::VehicleInfoAppExtension(
     VehicleInfoPlugin& plugin, application_manager::Application& app)

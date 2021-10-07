@@ -32,7 +32,8 @@ SDL_CREATE_LOG_VARIABLE("WayPointsAppExtension")
 
 namespace sdl_rpc_plugin {
 namespace strings = application_manager::strings;
-unsigned WayPointsAppExtension::WayPointsAppExtensionUID = 138;
+const app_mngr::AppExtensionUID
+    WayPointsAppExtension::WayPointsAppExtensionUID = 138;
 
 WayPointsAppExtension::WayPointsAppExtension(
     SDLRPCPlugin& plugin, application_manager::Application& app)

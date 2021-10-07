@@ -152,7 +152,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @brief VehicleInfoAppExtensionUID unique identifier of VehicleInfo
    * aplication extension
    */
-  static unsigned VehicleInfoAppExtensionUID;
+  static const app_mngr::AppExtensionUID VehicleInfoAppExtensionUID;
 
   /**
    * @brief ExtractVIExtension utility function to extract application extension

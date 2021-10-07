@@ -40,10 +40,6 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 
-namespace {
-const uint32_t kRCAppExtensionId = 1ull;
-}  // namespace
-
 namespace test {
 namespace components {
 namespace rc_rpc_plugin_test {
@@ -57,7 +53,7 @@ class RcAppExtensionTest : public testing::Test {
   RcAppExtensionTest()
       : mock_app_(new NiceMock<MockApplication>())
       , rc_app_extension_(std::make_shared<rc_rpc_plugin::RCAppExtension>(
-            kRCAppExtensionId, rc_plugin_, *mock_app_)) {}
+            rc_plugin_, *mock_app_)) {}
 
  protected:
   std::unique_ptr<MockApplication> mock_app_;
