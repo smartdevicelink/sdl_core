@@ -80,6 +80,7 @@ void AppServiceRpcPlugin::OnApplicationEvent(
     application->AddExtension(
         std::make_shared<AppServiceAppExtension>(*this, *application));
   } else if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
+    DeleteSubscriptions(application);
     application->RemoveExtension(
         AppServiceAppExtension::AppServiceAppExtensionUID);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {

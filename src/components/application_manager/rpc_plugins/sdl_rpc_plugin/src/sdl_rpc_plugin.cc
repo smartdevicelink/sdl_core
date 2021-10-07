@@ -95,6 +95,7 @@ void SDLRPCPlugin::OnApplicationEvent(
     sys_cap_ext_ptr->SubscribeTo(capability_type);
 
   } else if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
+    ClearSubscriptions(application);
     application->RemoveExtension(
         WayPointsAppExtension::WayPointsAppExtensionUID);
     application->RemoveExtension(

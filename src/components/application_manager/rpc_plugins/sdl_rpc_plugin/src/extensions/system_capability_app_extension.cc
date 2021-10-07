@@ -7,9 +7,6 @@ SDL_CREATE_LOG_VARIABLE("GetSystemCapabilitiesAppExtension")
 namespace app_mngr_ = application_manager;
 namespace strings = app_mngr::strings;
 
-const app_mngr_::AppExtensionUID
-    SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID = 200;
-
 SystemCapabilityAppExtension::SystemCapabilityAppExtension(
     sdl_rpc_plugin::SDLRPCPlugin& plugin, app_mngr_::Application& app)
     : app_mngr_::AppExtension(
