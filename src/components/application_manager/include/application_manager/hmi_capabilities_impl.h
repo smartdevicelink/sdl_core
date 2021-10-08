@@ -135,6 +135,11 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_hmi_zone_capabilities(
       const smart_objects::SmartObject& hmi_zone_capabilities) OVERRIDE;
 
+  const smart_objects::SmartObjectSPtr ui_hmi_capabilities() const OVERRIDE;
+
+  void set_ui_hmi_capabilities(
+      const smart_objects::SmartObject& ui_hmi_capabilities) OVERRIDE;
+
   const smart_objects::SmartObjectSPtr soft_button_capabilities()
       const OVERRIDE;
 
@@ -463,6 +468,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObjectSPtr display_capabilities_;
   smart_objects::SmartObjectSPtr system_display_capabilities_;
   smart_objects::SmartObjectSPtr hmi_zone_capabilities_;
+  smart_objects::SmartObjectSPtr ui_hmi_capabilities_;
   smart_objects::SmartObjectSPtr soft_buttons_capabilities_;
   smart_objects::SmartObjectSPtr button_capabilities_;
   smart_objects::SmartObjectSPtr preset_bank_capabilities_;

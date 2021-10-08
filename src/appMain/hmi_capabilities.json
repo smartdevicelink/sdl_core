@@ -322,6 +322,11 @@
             "audioType": "PCM"
         },
         "hmiZoneCapabilities": "FRONT",
+		"hmiCapabilities":{
+			"navigation":true,
+			"phoneCall":true,
+			"videoStreaming":true
+		},
         "softButtonCapabilities": [{
             "shortPressAvailable": true,
             "longPressAvailable": true,
