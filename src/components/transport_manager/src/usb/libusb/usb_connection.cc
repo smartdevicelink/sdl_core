@@ -96,6 +96,12 @@ void OutTransferCallback(libusb_transfer* transfer) {
 
 bool UsbConnection::PostInTransfer() {
   SDL_LOG_TRACE("enter");
+
+  if (nullptr == in_transfer_) {
+    SDL_LOG_TRACE("exit with FALSE. Condition: nullptr == in_transfer_");
+    return false;
+  }
+
   libusb_fill_bulk_transfer(in_transfer_,
                             device_handle_,
                             in_endpoint_,
@@ -153,8 +159,9 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
     }
   }
 
-  if (disconnecting_) {
+  if (waiting_in_transfer_cancel_) {
     libusb_free_transfer(in_transfer_);
+    in_transfer_ = nullptr;
     waiting_in_transfer_cancel_ = false;
     return;
   }
