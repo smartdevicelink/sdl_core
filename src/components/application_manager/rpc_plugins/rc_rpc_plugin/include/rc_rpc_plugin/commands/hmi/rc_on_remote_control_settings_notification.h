@@ -76,6 +76,18 @@ class RCOnRemoteControlSettingsNotification
    * notifications
    */
   void DisallowRCFunctionality();
+
+  /**
+   * @brief Performs the set of actions depending on access mode param received
+   * in the message
+   */
+  void ProcessAccessModeParam();
+
+  /**
+   * @brief Performs the set of actions depending on allowed param received in
+   * the message
+   */
+  void ProcessAllowedParam();
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin
