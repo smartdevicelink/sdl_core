@@ -136,7 +136,32 @@ void SDLActivateAppRequest::Run() {
                       static_cast<eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
                       "HMIDeactivate is active");
-  } else if (app && !app->IsRegistered() && app->is_cloud_app()) {
+    return;
+  }
+
+  if ((app->is_cloud_app() && app->IsRegistered()) || (!app->is_cloud_app())) {
+    auto main_state =
+        app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+      SDL_LOG_DEBUG(
+          "Application registration is not completed, HMI level hasn't set "
+          "yet, postpone activation");
+      auto& postponed_activation_ctrl = application_manager_.state_controller()
+                                            .GetPostponedActivationController();
+      postponed_activation_ctrl.AddAppToActivate(app->app_id(),
+                                                 correlation_id());
+      return;
+    }
+  }
+
+  const uint32_t application_id = app_id();
+  if (app->IsRegistered()) {
+    SDL_LOG_DEBUG("Application is registered. Activating.");
+    policy_handler_.OnActivateApp(application_id, correlation_id());
+    return;
+  }
+
+  if (app->is_cloud_app()) {
     SDL_LOG_DEBUG("Starting cloud application.");
     const ApplicationManagerSettings& settings =
         application_manager_.get_settings();
@@ -146,21 +171,7 @@ void SDLActivateAppRequest::Run() {
         0, correlation_id(), default_timeout_ + total_retry_timeout);
     subscribe_on_event(BasicCommunication_OnAppRegistered);
     application_manager_.connection_handler().ConnectToDevice(app->device());
-  } else {
-    const uint32_t application_id = app_id();
-    auto main_state =
-        app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
-    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
-      SDL_LOG_DEBUG(
-          "Application registration is not completed, HMI level hasn't set "
-          "yet, postpone activation");
-      auto& postponed_activation_ctrl = application_manager_.state_controller()
-                                            .GetPostponedActivationController();
-      postponed_activation_ctrl.AddAppToActivate(application_id,
-                                                 correlation_id());
-      return;
-    }
-    policy_handler_.OnActivateApp(application_id, correlation_id());
+    return;
   }
 }
 
@@ -205,8 +216,8 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if (app_to_activate->IsRegistered()) {
-    SDL_LOG_DEBUG("Application is registered. Activating.");
+  if ((app_to_activate->is_cloud_app() && app_to_activate->IsRegistered()) ||
+      (!app_to_activate->is_cloud_app())) {
     auto main_state = app_to_activate->CurrentHmiState(
         mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
@@ -215,13 +226,19 @@ void SDLActivateAppRequest::Run() {
           "yet, postpone activation");
       auto& postponed_activation_ctrl = application_manager_.state_controller()
                                             .GetPostponedActivationController();
-      postponed_activation_ctrl.AddAppToActivate(application_id,
+      postponed_activation_ctrl.AddAppToActivate(app_to_activate->app_id(),
                                                  correlation_id());
       return;
     }
+  }
+
+  if (app_to_activate->IsRegistered()) {
+    SDL_LOG_DEBUG("Application is registered. Activating.");
     policy_handler_.OnActivateApp(application_id, correlation_id());
     return;
-  } else if (app_to_activate->is_cloud_app()) {
+  }
+
+  if (app_to_activate->is_cloud_app()) {
     SDL_LOG_DEBUG("Starting cloud application.");
     const ApplicationManagerSettings& settings =
         application_manager_.get_settings();

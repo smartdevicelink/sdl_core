@@ -1848,7 +1848,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }
-  if (app->IsRegistered()) {
+  if (!app->is_cloud_app() || app->IsRegistered()) {
     message[strings::hmi_display_language_desired] = app->ui_language();
     message[strings::is_media_application] = app->is_media_application();
   } else {
