@@ -720,7 +720,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else if (!app_to_device_link_.empty()) {
+  } else {
     const ApplicationSet& accessor =
         application_manager_.applications().GetData();
     for (const auto& app : accessor) {
@@ -759,10 +759,6 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else {
-    SDL_LOG_WARN(
-        "There are no applications previously stored for "
-        "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
   if (!policy_manager->SetExternalConsentStatus(external_consent_status)) {
