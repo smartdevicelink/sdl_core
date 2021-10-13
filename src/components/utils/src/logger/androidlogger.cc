@@ -34,24 +34,22 @@
 
 #include <android/log.h>
 
-namespace{
-    std::chrono::high_resolution_clock::time_point init_time_point;
+namespace {
+std::chrono::high_resolution_clock::time_point init_time_point;
 }
 
 namespace logger {
 
-AndroidLogger::AndroidLogger(){
-}
+AndroidLogger::AndroidLogger() {}
 
 void AndroidLogger::Init() {
-    init_time_point = std::chrono::high_resolution_clock::now();
+  init_time_point = std::chrono::high_resolution_clock::now();
 }
 
-void AndroidLogger::DeInit() {
-}
+void AndroidLogger::DeInit() {}
 
 android_LogPriority getLogLevel(LogLevel log_level) {
-    switch (log_level) {
+  switch (log_level) {
     case LogLevel::TRACE_LEVEL:
       return android_LogPriority::ANDROID_LOG_VERBOSE;
     case LogLevel::DEBUG_LEVEL:
@@ -75,27 +73,24 @@ bool AndroidLogger::IsEnabledFor(const std::string& component,
 }
 
 void AndroidLogger::PushLog(const LogMessage& log_message) {
-
-  auto timeInMicroSec =
-    std::chrono::duration_cast<std::chrono::microseconds>
-    (log_message.timestamp_ - init_time_point).count();
+  auto timeInMicroSec = std::chrono::duration_cast<std::chrono::microseconds>(
+                            log_message.timestamp_ - init_time_point)
+                            .count();
 
   std::string time_stamp;
-  time_stamp += std::to_string((timeInMicroSec % 1000000000) / 1000000 ); // sec
+  time_stamp += std::to_string((timeInMicroSec % 1000000000) / 1000000);  // sec
   time_stamp += "::";
-  time_stamp += std::to_string((timeInMicroSec % 1000000) / 1000 );       // mls
+  time_stamp += std::to_string((timeInMicroSec % 1000000) / 1000);  // mls
   time_stamp += "::";
-  time_stamp += std::to_string(timeInMicroSec % 1000);                    // mcs
+  time_stamp += std::to_string(timeInMicroSec % 1000);  // mcs
 
-  __android_log_print(
-    getLogLevel(log_message.log_level_),
-    time_stamp.c_str(),
-    "%s: %s:%d %s",
-    log_message.log_event_.c_str(),
-    log_message.location_.file_name.c_str(),
-    log_message.location_.line_number,
-    log_message.location_.function_name.c_str()
-    );
+  __android_log_print(getLogLevel(log_message.log_level_),
+                      time_stamp.c_str(),
+                      "%s: %s:%d %s",
+                      log_message.log_event_.c_str(),
+                      log_message.location_.file_name.c_str(),
+                      log_message.location_.line_number,
+                      log_message.location_.function_name.c_str());
 }
 
 }  // namespace logger

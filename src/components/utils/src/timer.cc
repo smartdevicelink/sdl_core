@@ -155,7 +155,7 @@ void timer::Timer::StopThread() {
       thread_->Stop(threads::Thread::kThreadSoftStop);
 #else
       thread_->Stop(threads::Thread::kThreadStopDelegate);
-#endif // __ANDROID__
+#endif  // __ANDROID__
     }
     delegate_->set_finalized_flag(false);
   }

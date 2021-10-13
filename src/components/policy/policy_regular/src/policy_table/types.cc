@@ -1792,7 +1792,12 @@ Json::Value VehicleDataItem::ToJsonValue() const {
   return ret;
 }
 
-bool VehicleDataItem::operator==(const VehicleDataItem& vd) const {
+#ifdef __ANDROID__
+bool VehicleDataItem::operator==(const VehicleDataItem& vd) const
+#else
+bool VehicleDataItem::operator==(const VehicleDataItem& vd)
+#endif
+{
   return (name == vd.name && type == vd.type && key == vd.key &&
           mandatory == vd.mandatory && params == vd.params &&
           array == vd.array && since == vd.since && until == vd.until &&

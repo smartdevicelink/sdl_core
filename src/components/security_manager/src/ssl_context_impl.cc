@@ -240,8 +240,10 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   TIME_TYPE start = convert_asn1_time_to_time_t(notBefore);
   TIME_TYPE end = convert_asn1_time_to_time_t(notAfter);
 
-  const double start_seconds = get_duration_diff<std::chrono::seconds>(hsh_context_.system_time, start);
-  const double end_seconds = get_duration_diff<std::chrono::seconds>(end, hsh_context_.system_time);
+  const double start_seconds =
+      get_duration_diff<std::chrono::seconds>(hsh_context_.system_time, start);
+  const double end_seconds =
+      get_duration_diff<std::chrono::seconds>(end, hsh_context_.system_time);
 
   if (start_seconds < 0) {
     SDL_LOG_ERROR("Certificate is not yet valid. Time before validity "

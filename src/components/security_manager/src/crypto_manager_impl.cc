@@ -39,10 +39,10 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <chrono>
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <chrono>
 
 #include "security_manager/security_manager.h"
 
@@ -334,7 +334,8 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired(
     const TIME_TYPE system_time, const TIME_TYPE certificates_time) const {
   SDL_LOG_AUTO_TRACE();
 
-  const double seconds = get_duration_diff<std::chrono::seconds>(certificates_time, system_time);
+  const double seconds =
+      get_duration_diff<std::chrono::seconds>(certificates_time, system_time);
   const size_t maxsize = 40;
   char certificate_utc_time[maxsize];
   std::strftime(

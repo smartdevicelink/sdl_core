@@ -49,15 +49,13 @@ namespace transport_adapter {
  */
 class AndroidIpcDevice : public Device {
  public:
-
   /**
    * @brief Constructor.
    *
    * @param device_address Bluetooth address.
    * @param device_name Human-readable device name.
    **/
-  AndroidIpcDevice(const std::string& device_address,
-                  const char* device_name);
+  AndroidIpcDevice(const std::string& device_address, const char* device_name);
 
   bool IsSameAs(const Device* other) const override;
 
@@ -73,7 +71,6 @@ class AndroidIpcDevice : public Device {
    * @brief List of available apps to interact with (only single app for now)
    */
   ApplicationList applications_list_;
-
 };
 
 }  // namespace transport_adapter

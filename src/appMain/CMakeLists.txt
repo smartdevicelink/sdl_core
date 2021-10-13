@@ -30,7 +30,9 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
-#find_package(SDLOpenSSL REQUIRED)
+if( NOT ANDROID)
+  find_package(SDLOpenSSL REQUIRED)
+endif()
 
 if (EXTENDED_MEDIA_MODE) 
   set(default_media_inc 

@@ -37,8 +37,8 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_DEVICE_SCANNER_H_
 
 #include "transport_manager/android/android_ipc_device.h"
-#include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/android/local_socket_receiver.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
@@ -66,7 +66,6 @@ class AndroidDeviceScanner : public DeviceScanner {
   ~AndroidDeviceScanner();
 
  protected:
-
   void Terminate() override;
 
   TransportAdapter::Error Init() override;

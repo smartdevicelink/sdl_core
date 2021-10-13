@@ -61,10 +61,14 @@ void LastStateImpl::SaveToFileSystem() {
     styled_string = dictionary_.toStyledString();
   }
 
+#ifdef __ANDROID__
+  const std::string full_path = app_info_storage_;
+#else
   const std::string full_path =
       !app_storage_folder_.empty()
           ? app_storage_folder_ + "/" + app_info_storage_
           : app_info_storage_;
+#endif
 
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());

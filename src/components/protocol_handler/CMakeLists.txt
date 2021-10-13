@@ -57,11 +57,14 @@ collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
   ProtocolLibrary
-  HMI_API
   Utils
   bson -L${BSON_LIBS_DIRECTORY}
   emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
+
+if(ANDROID)
+  list(APPEND LIBRARIES HMI_API)
+endif()
 
 get_property(dirs DIRECTORY "" PROPERTY LIBRARIES)
 foreach(dir ${dirs})

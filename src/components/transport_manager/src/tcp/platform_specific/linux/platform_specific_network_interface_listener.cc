@@ -9,7 +9,7 @@
 #include "transport_manager/tcp/ifaddrs_android/ifaddrs-android.h"
 #else
 #include <ifaddrs.h>
-#endif // __ANDROID__
+#endif  // __ANDROID__
 
 #include <net/if.h>
 #include <sys/select.h>

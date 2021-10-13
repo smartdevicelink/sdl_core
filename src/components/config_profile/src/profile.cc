@@ -1405,7 +1405,8 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kHmiCapabilitiesCacheFileKey);
 
-  if (!hmi_capabilities_cache_file_name_.empty() && IsRelativePath(hmi_capabilities_cache_file_name_)) {
+  if (!hmi_capabilities_cache_file_name_.empty() &&
+      IsRelativePath(hmi_capabilities_cache_file_name_)) {
     hmi_capabilities_cache_file_name_ =
         app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
   }

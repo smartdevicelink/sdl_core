@@ -728,7 +728,7 @@ void StateControllerImpl::HandleOnEvent(
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Received event for function" << event.id());
   switch (event.id()) {
-      case mobile_apis::FunctionID::RegisterAppInterfaceID: {
+    case mobile_apis::FunctionID::RegisterAppInterfaceID: {
       auto message = event.smart_object();
       uint32_t connection_key =
           message[strings::params][strings::connection_key].asUInt();
@@ -759,7 +759,8 @@ void StateControllerImpl::HandleOnEvent(
 
         apps_with_pending_hmistatus_notification_.erase(app->app_id());
         if (apps_with_pending_hmistatus_notification_.empty()) {
-          unsubscribe_from_event(mobile_apis::FunctionID::RegisterAppInterfaceID);
+          unsubscribe_from_event(
+              mobile_apis::FunctionID::RegisterAppInterfaceID);
         }
       }
     } break;

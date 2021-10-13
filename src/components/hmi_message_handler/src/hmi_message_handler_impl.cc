@@ -35,100 +35,103 @@
 
 namespace hmi_message_handler {
 
-    SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
+SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
 
-    HMIMessageHandlerImpl::HMIMessageHandlerImpl(
-            const HMIMessageHandlerSettings &settings)
-            : settings_(settings), observer_(NULL), messages_to_hmi_(
-            "HMH ToHMI",
-            this,
-            threads::ThreadOptions(get_settings().thread_min_stack_size())), messages_from_hmi_(
-            "HMH FromHMI",
-            this,
-            threads::ThreadOptions(get_settings().thread_min_stack_size())) {}
+HMIMessageHandlerImpl::HMIMessageHandlerImpl(
+    const HMIMessageHandlerSettings& settings)
+    : settings_(settings)
+    , observer_(NULL)
+    , messages_to_hmi_(
+          "HMH ToHMI",
+          this,
+          threads::ThreadOptions(get_settings().thread_min_stack_size()))
+    , messages_from_hmi_(
+          "HMH FromHMI",
+          this,
+          threads::ThreadOptions(get_settings().thread_min_stack_size())) {}
 
-    HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
-        SDL_LOG_AUTO_TRACE();
-        messages_to_hmi_.Shutdown();
-        messages_from_hmi_.Shutdown();
-        set_message_observer(NULL);
-    }
+HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
+  SDL_LOG_AUTO_TRACE();
+  messages_to_hmi_.Shutdown();
+  messages_from_hmi_.Shutdown();
+  set_message_observer(NULL);
+}
 
-    void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
-        SDL_LOG_AUTO_TRACE();
-        sync_primitives::AutoLock lock(observer_locker_);
-        if (!observer_) {
-            SDL_LOG_WARN("No HMI message observer set!");
-            return;
-        }
-        messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
-    }
+void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(observer_locker_);
+  if (!observer_) {
+    SDL_LOG_WARN("No HMI message observer set!");
+    return;
+  }
+  messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
+}
 
-    void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
-        SDL_LOG_INFO("SendMessageToHMI");
-        messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
-    }
+void HMIMessageHandlerImpl::SendMessageToHMI(MessageSharedPointer message) {
+  SDL_LOG_INFO("SendMessageToHMI");
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
+}
 
-    void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver *observer) {
-        SDL_LOG_AUTO_TRACE();
-        sync_primitives::AutoLock lock(observer_locker_);
-        observer_ = observer;
-    }
+void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver* observer) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(observer_locker_);
+  observer_ = observer;
+}
 
-    void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
-        SDL_LOG_AUTO_TRACE();
-        sync_primitives::AutoLock lock(observer_locker_);
-        if (!observer_) {
-            SDL_LOG_WARN("No HMI message observer set!");
-            return;
-        }
-        observer_->OnErrorSending(message);
-    }
+void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(observer_locker_);
+  if (!observer_) {
+    SDL_LOG_WARN("No HMI message observer set!");
+    return;
+  }
+  observer_->OnErrorSending(message);
+}
 
-    void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter *adapter) {
-        SDL_LOG_AUTO_TRACE();
-        if (!adapter) {
-            SDL_LOG_WARN("HMIMessageAdapter is not valid!");
-            return;
-        }
-        sync_primitives::AutoLock lock(message_adapters_locker_);
-        message_adapters_.insert(adapter);
-    }
+void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
+  SDL_LOG_AUTO_TRACE();
+  if (!adapter) {
+    SDL_LOG_WARN("HMIMessageAdapter is not valid!");
+    return;
+  }
+  sync_primitives::AutoLock lock(message_adapters_locker_);
+  message_adapters_.insert(adapter);
+}
 
-    void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
-            HMIMessageAdapter *adapter) {
-        SDL_LOG_AUTO_TRACE();
-        if (!adapter) {
-            SDL_LOG_WARN("HMIMessageAdapter is not valid!");
-            return;
-        }
-        sync_primitives::AutoLock lock(message_adapters_locker_);
-        message_adapters_.erase(adapter);
-    }
+void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
+    HMIMessageAdapter* adapter) {
+  SDL_LOG_AUTO_TRACE();
+  if (!adapter) {
+    SDL_LOG_WARN("HMIMessageAdapter is not valid!");
+    return;
+  }
+  sync_primitives::AutoLock lock(message_adapters_locker_);
+  message_adapters_.erase(adapter);
+}
 
-    const HMIMessageHandlerSettings &HMIMessageHandlerImpl::get_settings() const {
-        return settings_;
-    }
+const HMIMessageHandlerSettings& HMIMessageHandlerImpl::get_settings() const {
+  return settings_;
+}
 
-    void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
-        SDL_LOG_INFO("Received message from hmi");
-        sync_primitives::AutoLock lock(observer_locker_);
-        if (!observer_) {
-            SDL_LOG_ERROR("Observer is not set for HMIMessageHandler");
-            return;
-        }
+void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
+  SDL_LOG_INFO("Received message from hmi");
+  sync_primitives::AutoLock lock(observer_locker_);
+  if (!observer_) {
+    SDL_LOG_ERROR("Observer is not set for HMIMessageHandler");
+    return;
+  }
 
-        observer_->OnMessageReceived(message);
-        SDL_LOG_INFO("Message from hmi given away.");
-    }
+  observer_->OnMessageReceived(message);
+  SDL_LOG_INFO("Message from hmi given away.");
+}
 
-    void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
-        sync_primitives::AutoLock lock(message_adapters_locker_);
-        for (std::set<HMIMessageAdapter *>::iterator it = message_adapters_.begin();
-             it != message_adapters_.end();
-             ++it) {
-            (*it)->SendMessageToHMI(message);
-        }
-    }
+void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
+  sync_primitives::AutoLock lock(message_adapters_locker_);
+  for (std::set<HMIMessageAdapter*>::iterator it = message_adapters_.begin();
+       it != message_adapters_.end();
+       ++it) {
+    (*it)->SendMessageToHMI(message);
+  }
+}
 
 }  //  namespace hmi_message_handler

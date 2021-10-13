@@ -41,20 +41,16 @@
 namespace transport_manager {
 namespace transport_adapter {
 
- enum class AndroidTransportType {
-   BLE,
-   BT
- }; 
+enum class AndroidTransportType { BLE, BT };
 
 /**
  * @brief Transport adapter that use bluetooth low energy transport.
  */
 class AndroidTransportAdapter : public TransportAdapterImpl {
  public:
-
   AndroidTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                            const TransportManagerSettings& settings,
-                            AndroidTransportType transport_type);
+                          const TransportManagerSettings& settings,
+                          AndroidTransportType transport_type);
 
   ~AndroidTransportAdapter() override;
 
@@ -65,7 +61,6 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
   std::string GetControlReceiverSocketName() const;
 
  protected:
-
   DeviceType GetDeviceType() const override;
 
   void Store() const override;
@@ -77,11 +72,10 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
   void DisconnectDone(const DeviceUID& device_handle,
                       const ApplicationHandle& app_handle) override;
 
-  private:
-    DeviceUID active_device_uid_;
-    ApplicationHandle app_handle_;
-    AndroidTransportType transport_type_;
-
+ private:
+  DeviceUID active_device_uid_;
+  ApplicationHandle app_handle_;
+  AndroidTransportType transport_type_;
 };
 
 }  // namespace transport_adapter

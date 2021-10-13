@@ -84,6 +84,7 @@ if (ENABLE_LOG)
   elseif(${LOGGER_NAME} STREQUAL "LOG4CXX")
     list(APPEND EXCLUDE_PATHS
       logger/boostlogger.cc
+      logger/androidlogger.cc
     )
     list(APPEND LIBRARIES
     log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
@@ -94,6 +95,7 @@ if (ENABLE_LOG)
   else()
     list(APPEND EXCLUDE_PATHS
       logger/log4cxxlogger.cc
+      logger/androidlogger.cc
     )
   endif()
 else()
@@ -101,6 +103,7 @@ else()
     auto_trace.cc
     logger/log4cxxlogger.cc
     logger/boostlogger.cc
+    logger/androidlogger.cc
   )
 endif() #(ENABLE_LOG)
 

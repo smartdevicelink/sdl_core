@@ -57,8 +57,13 @@ set(LIBRARIES
   ProtocolLibrary
 )
 
-list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
-list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
+if(ANDROID)
+  list(APPEND LIBRARIES crypto -L${OPENSSL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES ssl -L${OPENSSL_LIBS_DIRECTORY})
+else()
+  list(APPEND LIBRARIES crypto)
+  list(APPEND LIBRARIES ssl)
+endif()
 
 add_library(SecurityManager ${SOURCES})
 target_link_libraries(SecurityManager ${LIBRARIES})

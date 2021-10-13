@@ -42,34 +42,34 @@ SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 const ApplicationHandle kDefaultAppHandle = 1u;
 
-  /**
-   * @brief Constructor.
-   *
-   * @param device_address Bluetooth address.
-   * @param device_name Human-readable device name.
-   **/
-  AndroidIpcDevice::AndroidIpcDevice(const std::string& device_address,
-                  const char* device_name)
+/**
+ * @brief Constructor.
+ *
+ * @param device_address Bluetooth address.
+ * @param device_name Human-readable device name.
+ **/
+AndroidIpcDevice::AndroidIpcDevice(const std::string& device_address,
+                                   const char* device_name)
     : Device(device_name, device_address)
     , address_(device_address)
-    , applications_list_({kDefaultAppHandle}) { }
+    , applications_list_({kDefaultAppHandle}) {}
 
-  bool AndroidIpcDevice::IsSameAs(const Device* other) const {
-      SDL_LOG_AUTO_TRACE();
-      const AndroidIpcDevice* other_bluetooth_device =
+bool AndroidIpcDevice::IsSameAs(const Device* other) const {
+  SDL_LOG_AUTO_TRACE();
+  const AndroidIpcDevice* other_bluetooth_device =
       dynamic_cast<const AndroidIpcDevice*>(other);
-      if(other_bluetooth_device) {
-        return other_bluetooth_device->address_ == address_;
-      }
-
-      SDL_LOG_TRACE("Compare with no Android Ipc device !");
-
-      return false;
+  if (other_bluetooth_device) {
+    return other_bluetooth_device->address_ == address_;
   }
 
-  ApplicationList AndroidIpcDevice::GetApplicationList() const {
-      return applications_list_;
-  }
+  SDL_LOG_TRACE("Compare with no Android Ipc device !");
 
+  return false;
 }
+
+ApplicationList AndroidIpcDevice::GetApplicationList() const {
+  return applications_list_;
 }
+
+}  // namespace transport_adapter
+}  // namespace transport_manager

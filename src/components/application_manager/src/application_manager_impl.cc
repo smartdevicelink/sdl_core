@@ -5042,7 +5042,7 @@ bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
 
   const uint32_t connection_key =
       (*response)[strings::params][strings::connection_key].asUInt();
-  const auto function_id = static_cast<FunctionID::eType>(
+  const auto function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*response)[strings::params][strings::function_id].asInt());
 
   ApplicationSharedPtr app = application(connection_key);

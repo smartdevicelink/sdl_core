@@ -43,9 +43,9 @@
 #include <sstream>
 #include <vector>
 
+#include "transport_manager/android/android_ipc_control_protocol.h"
 #include "transport_manager/android/android_ipc_device.h"
 #include "transport_manager/android/android_transport_adapter.h"
-#include "transport_manager/android/android_ipc_control_protocol.h"
 
 #include "utils/logger.h"
 
@@ -58,12 +58,15 @@ AndroidDeviceScanner::AndroidDeviceScanner(
     TransportAdapterController* controller)
     : controller_(controller)
     , ipc_control_receiver_(new LocalSocketReceiver(
-     std::bind(&AndroidDeviceScanner::ProcessMessage, this, std::placeholders::_1))) {
-
+          std::bind(&AndroidDeviceScanner::ProcessMessage,
+                    this,
+                    std::placeholders::_1))) {
   ipc_control_receiver_thread_ = std::thread([&]() {
-    ipc_control_receiver_->Init(static_cast<AndroidTransportAdapter*>(controller_)->GetControlReceiverSocketName());
+    ipc_control_receiver_->Init(
+        static_cast<AndroidTransportAdapter*>(controller_)
+            ->GetControlReceiverSocketName());
     ipc_control_receiver_->Run();
-    });
+  });
 }
 
 AndroidDeviceScanner::~AndroidDeviceScanner() {
@@ -82,7 +85,7 @@ void AndroidDeviceScanner::UpdateTotalDeviceList() {
 void AndroidDeviceScanner::Terminate() {
   SDL_LOG_AUTO_TRACE();
   ipc_control_receiver_->Stop();
-  if(ipc_control_receiver_thread_.joinable()) {
+  if (ipc_control_receiver_thread_.joinable()) {
     ipc_control_receiver_thread_.join();
   }
 }
@@ -92,7 +95,8 @@ TransportAdapter::Error AndroidDeviceScanner::Init() {
 }
 
 TransportAdapter::Error AndroidDeviceScanner::Scan() {
-  return ipc_control_receiver_thread_.joinable() ? TransportAdapter::OK : TransportAdapter::FAIL;
+  return ipc_control_receiver_thread_.joinable() ? TransportAdapter::OK
+                                                 : TransportAdapter::FAIL;
 }
 
 bool AndroidDeviceScanner::IsInitialised() const {
@@ -105,39 +109,37 @@ void AndroidDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) {
 
     const auto action = AndroidIpcControlProtocol::GetMessageActionType(data);
 
-    switch(action){
-      case AndroidIpcProtocolActions::ON_DEVICE_CONNECTED:
-      {
+    switch (action) {
+      case AndroidIpcProtocolActions::ON_DEVICE_CONNECTED: {
         DeviceSptr device_ptr(new AndroidIpcDevice(
-                AndroidIpcControlProtocol::GetAddress(data),
-                AndroidIpcControlProtocol::GetName(data).c_str() ));
+            AndroidIpcControlProtocol::GetAddress(data),
+            AndroidIpcControlProtocol::GetName(data).c_str()));
 
         found_devices_with_sdl_.push_back(device_ptr);
 
         UpdateTotalDeviceList();
-      }
-      break;
+      } break;
 
-      case AndroidIpcProtocolActions::ON_DEVICE_DISCONNECTED:
-      {
+      case AndroidIpcProtocolActions::ON_DEVICE_DISCONNECTED: {
         const auto addr = AndroidIpcControlProtocol::GetAddress(data);
-        auto it_device = std::find_if(found_devices_with_sdl_.begin(),
-                                      found_devices_with_sdl_.end(), [&addr](DeviceSptr d){
-          AndroidIpcDevice tDevice(addr, "");
-          return d->IsSameAs(static_cast<Device*>(&tDevice));
-        });
+        auto it_device =
+            std::find_if(found_devices_with_sdl_.begin(),
+                         found_devices_with_sdl_.end(),
+                         [&addr](DeviceSptr d) {
+                           AndroidIpcDevice tDevice(addr, "");
+                           return d->IsSameAs(static_cast<Device*>(&tDevice));
+                         });
 
         if (it_device != found_devices_with_sdl_.end()) {
           DeviceSptr device = *it_device;
           found_devices_with_sdl_.erase(it_device);
           controller_->DisconnectDone(device->unique_device_id(), 0);
         }
-      }
-      break;
+      } break;
 
       default:
         SDL_LOG_ERROR("Undefined BLE action " << static_cast<uint32_t>(action));
-      break;
+        break;
     }
 
   } else {

@@ -1221,24 +1221,6 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsInvalidConnectionId) {
   connection_handler_->CloseConnectionSessions(invalid_id, kCommon);
 }
 
-TEST_F(ConnectionHandlerTest, CloseConnectionSessionsInvalidConnectionId) {
-  connection_handler_test::MockConnectionHandlerObserver
-      mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(
-      &mock_connection_handler_observer);
-
-  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(_, _)).Times(0);
-  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
-      .Times(0);
-  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
-      .Times(0);
-
-  uint8_t invalid_id = 0u;
-  connection_handler_->CloseConnectionSessions(invalid_id, kCommon);
-}
-
 TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   AddTestDeviceConnection();
   AddTestSession();

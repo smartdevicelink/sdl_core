@@ -335,7 +335,8 @@ bool PolicyHandler::LoadPolicyLibrary() {
     sync_primitives::AutoWriteLock lock(policy_manager_lock_);
 
 #ifdef __ANDROID__
-    const std::string policy_lib_path = application_manager_.get_settings().plugins_folder() + "/" + kLibrary;
+    const std::string policy_lib_path =
+        application_manager_.get_settings().plugins_folder() + "/" + kLibrary;
 #else
     const std::string policy_lib_path = kLibrary;
 #endif

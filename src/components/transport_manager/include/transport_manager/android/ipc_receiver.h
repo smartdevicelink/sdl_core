@@ -6,26 +6,25 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class IpcReceiver
-{
-public:
-    virtual ~IpcReceiver() {}
+class IpcReceiver {
+ public:
+  virtual ~IpcReceiver() {}
 
-   /**
+  /**
    * @brief Initialize receiver
    * @param ipc_name local socket name
    */
-    virtual void Init(const std::string& ipc_name) = 0;
+  virtual void Init(const std::string& ipc_name) = 0;
 
-   /**
+  /**
    * @brief Run receiving cycle
    */
-    virtual void Run() = 0;
+  virtual void Run() = 0;
 
-   /**
+  /**
    * @brief Stop receiving
    */
-    virtual void Stop() = 0;
+  virtual void Stop() = 0;
 };
 
 }  // namespace transport_adapter

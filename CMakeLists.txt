@@ -461,7 +461,10 @@ include_directories(
 # --- 3rd party libs
 add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
-find_package(OpenSSL REQUIRED)
+if (NOT ANDROID)
+  find_package(OpenSSL REQUIRED)
+endif()
+
 if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   message(STATUS "Including log4cxx")
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )

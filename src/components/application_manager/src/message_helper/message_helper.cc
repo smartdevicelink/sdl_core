@@ -2384,7 +2384,8 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   params[strings::message_type] = MessageType::kResponse;
   params[strings::correlation_id] = correlation_id;
   params[hmi_response::code] = static_cast<int32_t>(
-      success_flag ? Common_Result::SUCCESS : Common_Result::GENERIC_ERROR);
+      success_flag ? hmi_apis::Common_Result::SUCCESS
+                   : hmi_apis::Common_Result::GENERIC_ERROR);
 
   SmartObject& msg_params = (*message)[strings::msg_params];
 
@@ -2755,7 +2756,8 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
   using namespace smart_objects;
 
   SmartObject content(SmartType_Map);
-  content[strings::msg_params][strings::request_type] = mobile_apis::RequestType::LAUNCH_APP;
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
     content[strings::msg_params][strings::url] = urlSchema;
@@ -2772,7 +2774,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   const uint32_t timeout = policy_handler.TimeoutExchangeSec();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
-  content[strings::msg_params][strings::request_type] = mobile_apis::RequestType::QUERY_APPS;
+  content[strings::msg_params][strings::request_type] =
+      mobile_apis::RequestType::QUERY_APPS;
   content[strings::msg_params][strings::url] = policy_handler.RemoteAppsUrl();
   content[strings::msg_params][strings::timeout] = timeout;
 
@@ -2794,7 +2797,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(binary_data);
-  content[strings::msg_params][strings::file_type] = mobile_apis::FileType::BINARY;
+  content[strings::msg_params][strings::file_type] =
+      mobile_apis::FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }
