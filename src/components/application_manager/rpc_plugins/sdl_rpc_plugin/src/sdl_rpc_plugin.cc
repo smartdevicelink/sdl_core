@@ -81,27 +81,40 @@ void SDLRPCPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
-  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<WayPointsAppExtension>(*this, *application));
+  switch (event) {
+    case plugins::ApplicationEvent::kApplicationRegistered: {
+      application->AddExtension(
+          std::make_shared<WayPointsAppExtension>(*this, *application));
 
-    auto sys_cap_ext_ptr =
-        std::make_shared<SystemCapabilityAppExtension>(*this, *application);
-    application->AddExtension(sys_cap_ext_ptr);
-    // Processing automatic subscription to SystemCapabilities for DISPLAY type
-    const auto capability_type =
-        mobile_apis::SystemCapabilityType::eType::DISPLAYS;
-    SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
-    sys_cap_ext_ptr->SubscribeTo(capability_type);
+      auto sys_cap_ext_ptr =
+          std::make_shared<SystemCapabilityAppExtension>(*this, *application);
+      application->AddExtension(sys_cap_ext_ptr);
+      // Processing automatic subscription to SystemCapabilities for DISPLAY
+      // type
+      const auto capability_type =
+          mobile_apis::SystemCapabilityType::eType::DISPLAYS;
+      SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
+      sys_cap_ext_ptr->SubscribeTo(capability_type);
+      break;
+    }
 
-  } else if (plugins::ApplicationEvent::kApplicationUnregistered == event) {
-    ClearSubscriptions(application);
-    application->RemoveExtension(
-        WayPointsAppExtension::WayPointsAppExtensionUID);
-    application->RemoveExtension(
-        SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
-  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
-    ClearSubscriptions(application);
+    case plugins::ApplicationEvent::kApplicationUnregistered: {
+      ClearSubscriptions(application);
+      application->RemoveExtension(
+          WayPointsAppExtension::WayPointsAppExtensionUID);
+      application->RemoveExtension(
+          SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
+      break;
+    }
+
+    case plugins::ApplicationEvent::kDeleteApplicationData: {
+      ClearSubscriptions(application);
+      break;
+    }
+
+    default: {
+      break;
+    }
   }
 }
 

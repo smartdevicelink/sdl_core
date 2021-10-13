@@ -111,48 +111,80 @@ void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
-  if (!application->is_remote_control_supported()) {
-    SDL_LOG_DEBUG(
-        "Remote control is not supported for application with app_id: "
-        << application->app_id());
-    return;
-  }
+
   switch (event) {
     case plugins::kApplicationRegistered: {
-      auto extension = std::shared_ptr<RCAppExtension>(
-          new RCAppExtension(*this, *application));
-      DCHECK_OR_RETURN_VOID(application->AddExtension(extension));
-      const auto driver_location =
-          rc_capabilities_manager_
-              ->GetDriverLocationFromSeatLocationCapability();
-      extension->SetUserLocation(driver_location);
-      break;
-    }
-    case plugins::kApplicationExit: {
-      resource_allocation_manager_->OnApplicationEvent(event, application);
-      interior_data_manager_->OnApplicationEvent(event, application);
+      if (application->is_remote_control_supported()) {
+        CreateRcExtension(application);
+      }
+
       break;
     }
     case plugins::kApplicationUnregistered: {
-      resource_allocation_manager_->OnApplicationEvent(event, application);
-      interior_data_manager_->OnApplicationEvent(event, application);
-      application->RemoveExtension(RCAppExtension::RCAppExtensionID);
+      if (application->is_remote_control_supported()) {
+        RemoveRcExtension(application);
+      }
+
+      break;
+    }
+    case plugins::kApplicationExit: {
+      if (application->is_remote_control_supported()) {
+        resource_allocation_manager_->OnApplicationEvent(event, application);
+        interior_data_manager_->OnApplicationEvent(event, application);
+      }
+
       break;
     }
     case plugins::kGlobalPropertiesUpdated: {
-      const auto user_location = application->get_user_location();
-      auto extension = RCHelpers::GetRCExtension(*application);
-      extension->SetUserLocation(user_location);
+      if (application->is_remote_control_supported()) {
+        const auto user_location = application->get_user_location();
+        auto extension = RCHelpers::GetRCExtension(*application);
+        extension->SetUserLocation(user_location);
+      }
+
       break;
     }
     case plugins::kRCStatusChanged: {
-      resource_allocation_manager_->SendOnRCStatusNotifications(
-          NotificationTrigger::APP_REGISTRATION, application);
+      if (application->is_remote_control_supported()) {
+        resource_allocation_manager_->SendOnRCStatusNotifications(
+            NotificationTrigger::APP_REGISTRATION, application);
+      }
+
+      break;
+    }
+    case plugins::kAppHmiTypesChanged: {
+      auto extension =
+          application->QueryInterface(RCAppExtension::RCAppExtensionID);
+      if (!application->is_remote_control_supported() && extension) {
+        RemoveRcExtension(application);
+      } else if (application->is_remote_control_supported() && !extension) {
+        CreateRcExtension(application);
+      }
+
       break;
     }
     default:
       break;
   }
+}
+
+void RCRPCPlugin::CreateRcExtension(
+    application_manager::ApplicationSharedPtr application) {
+  auto extension =
+      std::shared_ptr<RCAppExtension>(new RCAppExtension(*this, *application));
+  DCHECK_OR_RETURN_VOID(application->AddExtension(extension));
+  const auto driver_location =
+      rc_capabilities_manager_->GetDriverLocationFromSeatLocationCapability();
+  extension->SetUserLocation(driver_location);
+}
+
+void RCRPCPlugin::RemoveRcExtension(
+    application_manager::ApplicationSharedPtr application) {
+  resource_allocation_manager_->OnApplicationEvent(
+      plugins::kApplicationUnregistered, application);
+  interior_data_manager_->OnApplicationEvent(plugins::kApplicationUnregistered,
+                                             application);
+  application->RemoveExtension(RCAppExtension::RCAppExtensionID);
 }
 
 void RCRPCPlugin::ProcessResumptionSubscription(

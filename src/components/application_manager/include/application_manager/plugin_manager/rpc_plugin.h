@@ -62,6 +62,7 @@ enum ApplicationEvent {
   kApplicationUnregistered,
   kDeleteApplicationData,
   kGlobalPropertiesUpdated,
+  kAppHmiTypesChanged,
   kRCStatusChanged
 };
 

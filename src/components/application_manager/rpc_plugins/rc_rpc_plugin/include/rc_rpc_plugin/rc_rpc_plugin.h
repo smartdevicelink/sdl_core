@@ -125,6 +125,18 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   bool IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
                              const uint32_t app_id);
 
+  /**
+   * @brief Creates the RC extension for specified application
+   * @param application pointer to app to work with
+   */
+  void CreateRcExtension(application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief Removes the RC extensions for specified application
+   * @param application pointer to app to work with
+   */
+  void RemoveRcExtension(application_manager::ApplicationSharedPtr application);
+
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);

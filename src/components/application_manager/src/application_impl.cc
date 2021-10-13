@@ -1322,7 +1322,13 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
       extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
         return extension->uid() == uid;
       });
-  return it != extensions_.end();
+
+  if (extensions_.end() != it) {
+    extensions_.erase(it);
+    return true;
+  }
+
+  return false;
 }
 
 const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
