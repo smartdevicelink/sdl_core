@@ -4495,20 +4495,14 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       if (flag_diffirence_app_hmi_type) {
         ApplicationSharedPtr app = *it;
 
-        auto on_app_unregistered = [app](plugin_manager::RPCPlugin& plugin) {
-          plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,
-                                    app);
-        };
-        ApplyFunctorForEachPlugin(on_app_unregistered);
-
         app->set_app_types(transform_app_hmi_types);
         app->ChangeSupportingAppHMIType();
 
-        auto on_app_registered = [app](plugin_manager::RPCPlugin& plugin) {
-          plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
-                                    app);
+        auto on_app_hmi_types_changed = [app](
+                                            plugin_manager::RPCPlugin& plugin) {
+          plugin.OnApplicationEvent(plugin_manager::kAppHmiTypesChanged, app);
         };
-        ApplyFunctorForEachPlugin(on_app_registered);
+        ApplyFunctorForEachPlugin(on_app_hmi_types_changed);
 
         const mobile_apis::HMILevel::eType app_hmi_level =
             (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
