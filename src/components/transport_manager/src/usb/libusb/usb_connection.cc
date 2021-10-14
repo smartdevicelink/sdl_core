@@ -133,7 +133,6 @@ std::string hex_data(const unsigned char* const buffer,
 }
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
-  SDL_LOG_AUTO_TRACE();
   SDL_LOG_TRACE("enter with Libusb_transfer*: " << transfer);
   switch (transfer->status) {
     case LIBUSB_TRANSFER_COMPLETED: {
@@ -163,14 +162,12 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
     libusb_free_transfer(in_transfer_);
     in_transfer_ = nullptr;
     waiting_in_transfer_cancel_ = false;
-    return;
-  }
-
-  if (!PostInTransfer()) {
+  } else if (!PostInTransfer()) {
     SDL_LOG_ERROR("USB incoming transfer failed with "
                   << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
     AbortConnection();
   }
+
   SDL_LOG_TRACE("exit");
 }
 
