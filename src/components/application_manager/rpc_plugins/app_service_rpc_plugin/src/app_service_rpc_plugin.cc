@@ -83,13 +83,7 @@ void AppServiceRpcPlugin::OnApplicationEvent(
       break;
     }
 
-    case plugins::ApplicationEvent::kApplicationUnregistered: {
-      DeleteSubscriptions(application);
-      application->RemoveExtension(
-          AppServiceAppExtension::AppServiceAppExtensionUID);
-      break;
-    }
-
+    case plugins::ApplicationEvent::kApplicationUnregistered:
     case plugins::ApplicationEvent::kDeleteApplicationData: {
       DeleteSubscriptions(application);
       break;

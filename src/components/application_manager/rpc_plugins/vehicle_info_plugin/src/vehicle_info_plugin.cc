@@ -117,13 +117,7 @@ void VehicleInfoPlugin::OnApplicationEvent(
       break;
     }
 
-    case plugins::ApplicationEvent::kApplicationUnregistered: {
-      DeleteSubscriptions(application);
-      application->RemoveExtension(
-          VehicleInfoAppExtension::VehicleInfoAppExtensionUID);
-      break;
-    }
-
+    case plugins::ApplicationEvent::kApplicationUnregistered:
     case plugins::ApplicationEvent::kDeleteApplicationData: {
       DeleteSubscriptions(application);
       break;

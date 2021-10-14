@@ -98,15 +98,7 @@ void SDLRPCPlugin::OnApplicationEvent(
       break;
     }
 
-    case plugins::ApplicationEvent::kApplicationUnregistered: {
-      ClearSubscriptions(application);
-      application->RemoveExtension(
-          WayPointsAppExtension::WayPointsAppExtensionUID);
-      application->RemoveExtension(
-          SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
-      break;
-    }
-
+    case plugins::ApplicationEvent::kApplicationUnregistered:
     case plugins::ApplicationEvent::kDeleteApplicationData: {
       ClearSubscriptions(application);
       break;
