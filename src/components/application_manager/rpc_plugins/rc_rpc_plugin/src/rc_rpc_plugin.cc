@@ -120,13 +120,7 @@ void RCRPCPlugin::OnApplicationEvent(
 
       break;
     }
-    case plugins::kApplicationUnregistered: {
-      if (application->is_remote_control_supported()) {
-        RemoveRcExtension(application);
-      }
-
-      break;
-    }
+    case plugins::kApplicationUnregistered:
     case plugins::kApplicationExit: {
       if (application->is_remote_control_supported()) {
         resource_allocation_manager_->OnApplicationEvent(event, application);
