@@ -139,7 +139,7 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if ((app->is_cloud_app() && app->IsRegistered()) || (!app->is_cloud_app())) {
+  if (!app->is_cloud_app() || app->IsRegistered()) {
     auto main_state =
         app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
@@ -216,8 +216,7 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if ((app_to_activate->is_cloud_app() && app_to_activate->IsRegistered()) ||
-      (!app_to_activate->is_cloud_app())) {
+  if (!app_to_activate->is_cloud_app() || app_to_activate->IsRegistered()) {
     auto main_state = app_to_activate->CurrentHmiState(
         mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
