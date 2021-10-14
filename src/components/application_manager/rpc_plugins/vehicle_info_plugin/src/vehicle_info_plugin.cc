@@ -110,12 +110,22 @@ void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
-  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<VehicleInfoAppExtension>(*this, *application));
-  } else if ((plugins::ApplicationEvent::kDeleteApplicationData == event) ||
-             (plugins::ApplicationEvent::kApplicationUnregistered == event)) {
-    DeleteSubscriptions(application);
+  switch (event) {
+    case plugins::ApplicationEvent::kApplicationRegistered: {
+      application->AddExtension(
+          std::make_shared<VehicleInfoAppExtension>(*this, *application));
+      break;
+    }
+
+    case plugins::ApplicationEvent::kApplicationUnregistered:
+    case plugins::ApplicationEvent::kDeleteApplicationData: {
+      DeleteSubscriptions(application);
+      break;
+    }
+
+    default: {
+      break;
+    }
   }
 }
 

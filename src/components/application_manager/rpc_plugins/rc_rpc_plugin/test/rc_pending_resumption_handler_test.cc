@@ -78,7 +78,6 @@ const std::string kModuleType_1 = "CLIMATE";
 const std::string kModuleId_1 = "9cb963f3-c5e8-41cb-b001-19421cc16552";
 const std::string kModuleType_2 = "RADIO";
 const std::string kModuleId_2 = "357a3918-9f35-4d86-a8b6-60cd4308d76f";
-const uint32_t kRCPluginID = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
 const auto kSourceHMI = application_manager::commands::Command::SOURCE_HMI;
 }  // namespace
 
@@ -171,9 +170,11 @@ class RCPendingResumptionHandlerTest : public ::testing::Test {
   }
 
   rc_rpc_plugin::RCAppExtensionPtr CreateExtension(MockApplication& app) {
-    auto rc_app_ext = std::make_shared<rc_rpc_plugin::RCAppExtension>(
-        kRCPluginID, rc_plugin_, app);
-    ON_CALL(app, QueryInterface(kRCPluginID)).WillByDefault(Return(rc_app_ext));
+    auto rc_app_ext =
+        std::make_shared<rc_rpc_plugin::RCAppExtension>(rc_plugin_, app);
+    ON_CALL(app,
+            QueryInterface(rc_rpc_plugin::RCAppExtension::RCAppExtensionID))
+        .WillByDefault(Return(rc_app_ext));
     return rc_app_ext;
   }
 

@@ -65,7 +65,6 @@ using ::testing::ReturnRef;
 using ::testing::SaveArg;
 
 namespace {
-const int kModuleId = 153u;
 const uint32_t kConnectionKey = 1u;
 const uint32_t kAppId = 0u;
 const std::string kPolicyAppId = "Test";
@@ -83,13 +82,13 @@ class ButtonPressRequestTest
             smart_objects::SmartType_Map))
       , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extension_(std::make_shared<rc_rpc_plugin::RCAppExtension>(
-            kModuleId, rc_plugin_, *mock_app_)) {}
+            rc_plugin_, *mock_app_)) {}
 
   void SetUp() OVERRIDE {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
     (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
+    ON_CALL(*mock_app_, QueryInterface(RCAppExtension::RCAppExtensionID))
         .WillByDefault(Return(rc_app_extension_));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
