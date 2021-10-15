@@ -392,7 +392,9 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
   if (kRequest == message_type) {
     SDL_LOG_DEBUG("ManageHMICommand");
     command->set_warning_info(warning_info);
-    request_ctrl_.AddHMIRequest(command);
+    if (!app_manager_.IsStopping()) {
+      request_ctrl_.AddHMIRequest(command);
+    }
   }
 
   if (command->Init()) {

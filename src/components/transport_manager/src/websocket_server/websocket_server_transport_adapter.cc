@@ -102,7 +102,8 @@ void WebSocketServerTransportAdapter::Store() const {
   if (webengine_device_) {
     resumption::LastStateAccessor accessor =
         last_state_wrapper_->get_accessor();
-    Json::Value dictionary = accessor.GetData().dictionary();
+    resumption::LastState& data = accessor.GetMutableData();
+    Json::Value dictionary = data.dictionary();
     if (dictionary["TransportManager"].isMember("WebsocketServerAdapter")) {
       SDL_LOG_DEBUG(
           "WebsocketServerAdapter already exists. Storing is skipped");
@@ -116,6 +117,8 @@ void WebSocketServerTransportAdapter::Store() const {
     ws_adapter_dictionary["device"] = device_dictionary;
     dictionary["TransportManager"]["WebsocketServerAdapter"] =
         ws_adapter_dictionary;
+
+    data.set_dictionary(dictionary);
   }
 }
 

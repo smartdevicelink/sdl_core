@@ -237,12 +237,14 @@ void sig_handler(int sig) {
       SDL_LOG_DEBUG("SIGTERM signal has been caught");
       break;
     case SIGSEGV:
+      std::cerr << "SIGSEGV caught" << std::endl;
       SDL_LOG_DEBUG("SIGSEGV signal has been caught");
       SDL_FLUSH_LOGGER();
       // exit need to prevent endless sending SIGSEGV
       // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
       abort();
     default:
+      std::cerr << "Unexpected signal " << sig << " caught" << std::endl;
       SDL_LOG_DEBUG("Unexpected signal has been caught");
       exit(EXIT_FAILURE);
   }

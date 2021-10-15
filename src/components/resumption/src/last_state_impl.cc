@@ -49,7 +49,6 @@ LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
 
 LastStateImpl::~LastStateImpl() {
   SDL_LOG_AUTO_TRACE();
-  SaveToFileSystem();
 }
 
 void LastStateImpl::SaveToFileSystem() {

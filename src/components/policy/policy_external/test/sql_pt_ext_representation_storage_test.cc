@@ -98,9 +98,9 @@ TEST_F(
   // Act
   const std::string value_12345 = "12345";
   const std::string query_insert_12345 =
-      "INSERT INTO `application` (`id`, `memory_kb`,"
+      "INSERT INTO `application` (`id`, "
       " `heart_beat_timeout_ms`, `keep_context`) VALUES ('" +
-      value_12345 + "', 5, 10, 1)";
+      value_12345 + "', 10, 1)";
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_12345));
@@ -110,9 +110,9 @@ TEST_F(
   // Act
   const std::string value_123 = "123";
   const std::string query_insert_123 =
-      "INSERT INTO `application` (`id`, `memory_kb`,"
+      "INSERT INTO `application` (`id`, "
       " `heart_beat_timeout_ms`, `keep_context`) VALUES ('" +
-      value_123 + "', 10, 7, 0)";
+      value_123 + "', 7, 0)";
 
   // Assert
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_123));

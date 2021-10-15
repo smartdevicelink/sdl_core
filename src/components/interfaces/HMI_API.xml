@@ -1949,7 +1949,7 @@
     <struct name="SeatControlCapabilities">
       <param name="moduleName" type="String" maxlength="100"  mandatory="true">
         <description>
-        The short friendly name of the light control module.
+        The short friendly name of the seat control module.
         It should not be used to identify a module by mobile application.
         </description>
       </param>
@@ -2464,7 +2464,7 @@
  <struct name="AudioControlCapabilities">
      <param name="moduleName" type="String" maxlength="100" mandatory="true">
          <description>
-           The short friendly name of the light control module.
+           The short friendly name of the audio control module.
            It should not be used to identify a module by mobile application.
          </description>
      </param>

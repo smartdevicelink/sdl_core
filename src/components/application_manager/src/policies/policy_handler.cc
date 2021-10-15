@@ -720,7 +720,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else if (!app_to_device_link_.empty()) {
+  } else {
     const ApplicationSet& accessor =
         application_manager_.applications().GetData();
     for (const auto& app : accessor) {
@@ -759,10 +759,6 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else {
-    SDL_LOG_WARN(
-        "There are no applications previously stored for "
-        "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
   if (!policy_manager->SetExternalConsentStatus(external_consent_status)) {
@@ -2873,6 +2869,10 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 
 bool PolicyHandler::CheckModule(const PTString& app_id,
                                 const PTString& module) {
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   return policy_manager->CheckModule(app_id, module);
@@ -2943,6 +2943,10 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
                                  mobile_apis::AppHMIType::eType hmi,
                                  const smart_objects::SmartObject* app_types) {
   SDL_LOG_AUTO_TRACE();
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   std::vector<int> policy_hmi_types;

@@ -766,33 +766,32 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
 
-    *params.memory_kb = query.GetInteger(2);
-    *params.heart_beat_timeout_ms = query.GetUInteger(3);
+    *params.heart_beat_timeout_ms = query.GetUInteger(2);
 
-    if (!query.IsNull(4)) {
-      *params.certificate = query.GetString(4);
+    if (!query.IsNull(3)) {
+      *params.certificate = query.GetString(3);
     }
 
     // Read cloud app properties
     policy_table::HybridAppPreference hap;
-    bool valid = policy_table::EnumFromJsonString(query.GetString(5), &hap);
+    bool valid = policy_table::EnumFromJsonString(query.GetString(4), &hap);
     if (valid) {
       *params.hybrid_app_preference = hap;
     }
-    *params.endpoint = query.GetString(6);
-    if (!query.IsNull(7)) {
-      *params.enabled = query.GetBoolean(7);
+    *params.endpoint = query.GetString(5);
+    if (!query.IsNull(6)) {
+      *params.enabled = query.GetBoolean(6);
     }
-    *params.auth_token = query.GetString(8);
-    *params.cloud_transport_type = query.GetString(9);
-    *params.icon_url = query.GetString(10);
-    *params.allow_unknown_rpc_passthrough = query.GetBoolean(11);
+    *params.auth_token = query.GetString(7);
+    *params.cloud_transport_type = query.GetString(8);
+    *params.icon_url = query.GetString(9);
+    *params.allow_unknown_rpc_passthrough = query.GetBoolean(10);
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
 
-    if (!query.IsNull(12)) {
-      *params.encryption_required = query.GetBoolean(12);
+    if (!query.IsNull(11)) {
+      *params.encryption_required = query.GetBoolean(11);
     }
     // Data should be gathered from db by  "default" key if application has
     // default policies
@@ -1122,36 +1121,35 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(
       1, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(2, app.second.is_null());
-  app_query.Bind(3, *app.second.memory_kb);
-  app_query.Bind(4, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+  app_query.Bind(3, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
   app.second.certificate.is_initialized()
-      ? app_query.Bind(5, *app.second.certificate)
-      : app_query.Bind(5);
+      ? app_query.Bind(4, *app.second.certificate)
+      : app_query.Bind(4);
   app.second.hybrid_app_preference.is_initialized()
-      ? app_query.Bind(6,
+      ? app_query.Bind(5,
                        std::string(policy_table::EnumToJsonString(
                            *app.second.hybrid_app_preference)))
-      : app_query.Bind(6);
-  app.second.endpoint.is_initialized() ? app_query.Bind(7, *app.second.endpoint)
-                                       : app_query.Bind(7);
-  app.second.enabled.is_initialized() ? app_query.Bind(8, *app.second.enabled)
-                                      : app_query.Bind(8);
+      : app_query.Bind(5);
+  app.second.endpoint.is_initialized() ? app_query.Bind(6, *app.second.endpoint)
+                                       : app_query.Bind(6);
+  app.second.enabled.is_initialized() ? app_query.Bind(7, *app.second.enabled)
+                                      : app_query.Bind(7);
   app.second.auth_token.is_initialized()
-      ? app_query.Bind(9, *app.second.auth_token)
-      : app_query.Bind(9);
+      ? app_query.Bind(8, *app.second.auth_token)
+      : app_query.Bind(8);
   app.second.cloud_transport_type.is_initialized()
-      ? app_query.Bind(10, *app.second.cloud_transport_type)
-      : app_query.Bind(10);
+      ? app_query.Bind(9, *app.second.cloud_transport_type)
+      : app_query.Bind(9);
   app.second.icon_url.is_initialized()
-      ? app_query.Bind(11, *app.second.icon_url)
-      : app_query.Bind(11);
+      ? app_query.Bind(10, *app.second.icon_url)
+      : app_query.Bind(10);
   app.second.allow_unknown_rpc_passthrough.is_initialized()
-      ? app_query.Bind(12, *app.second.allow_unknown_rpc_passthrough)
-      : app_query.Bind(12);
+      ? app_query.Bind(11, *app.second.allow_unknown_rpc_passthrough)
+      : app_query.Bind(11);
 
   app.second.encryption_required.is_initialized()
-      ? app_query.Bind(13, *app.second.encryption_required)
-      : app_query.Bind(13);
+      ? app_query.Bind(12, *app.second.encryption_required)
+      : app_query.Bind(12);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     SDL_LOG_WARN("Incorrect insert into application.");

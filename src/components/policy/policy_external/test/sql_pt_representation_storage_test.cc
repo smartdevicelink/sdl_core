@@ -90,10 +90,10 @@ TEST_F(
   const std::string gps = "gps";
   const std::string speed = "speed";
   const std::string query =
-      "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
+      "INSERT OR REPLACE INTO `application` (`id`,"
       " `heart_beat_timeout_ms`) VALUES ('" +
       value_12345 +
-      "', 5, 10); "
+      "', 10); "
       "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
       "  VALUES (1, 'Base-4'); "
       "INSERT OR REPLACE INTO `app_group` (`application_id`,"

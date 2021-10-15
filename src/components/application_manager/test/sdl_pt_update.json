@@ -16,7 +16,6 @@
                "Emergency-1"
             ],
             "keep_context" : true,
-            "memory_kb" : 1000,
             "nicknames" : [ "SyncProxyTester" ],
             "priority" : "EMERGENCY",
             "steal_focus" : true,
@@ -32,7 +31,6 @@
             "default_hmi" : "NONE",
             "groups" : [ "Base-4" ],
             "keep_context" : false,
-            "memory_kb" : 1000,
             "priority" : "NONE",
             "steal_focus" : false,
             "watchdog_timer_ms" : 20000
@@ -40,7 +38,6 @@
          "device" : {
             "default_hmi" : "NONE",
             "groups" : [ "Base-4" ],
-            "memory_kb" : 1000,
             "watchdog_timer_ms" : 20000,
             "keep_context" : false,
             "priority" : "NONE",
@@ -50,7 +47,6 @@
             "default_hmi" : "NONE",
             "groups" : [ "pre_Base-1" ],
             "keep_context" : false,
-            "memory_kb" : 1000,
             "priority" : "NONE",
             "steal_focus" : false,
             "watchdog_timer_ms" : 20000
@@ -1607,9 +1603,6 @@
          }
       },
       "module_config" : {
-         "device_certificates" : {
-            "HUU40DAS7F970UEI17A73JH32L41K32JH4L1K234H3K4" : "aldhfkahfgkafrblgjr"
-         },
          "endpoints" : {
             "0x07" : {
                "default" : [ "http://x.x.x.x:3000/api/1/policies" ]
