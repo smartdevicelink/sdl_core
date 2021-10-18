@@ -120,6 +120,10 @@ if (ENABLE_SECURITY)
   list(APPEND LIBRARIES SecurityManager)
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES sqlite3)
+endif ()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
