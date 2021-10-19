@@ -123,6 +123,8 @@ TEST_F(UnsubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
       .WillOnce(Return(subscribed_apps));
 
+  EXPECT_CALL(app_mngr_, IsSubscribedToHMIWayPoints()).WillOnce(Return(true));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(
                   HMIResultCodeIs(
@@ -156,9 +158,10 @@ TEST_F(UnsubscribeWayPointsRequestTest,
   Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(app_mngr_,
-              UnsubscribeAppFromWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)));
+  EXPECT_CALL(
+      app_mngr_,
+      UnsubscribeAppFromWayPoints(
+          ::testing::Matcher<am::ApplicationSharedPtr>(mock_app), true));
 
   EXPECT_CALL(
       mock_rpc_service_,

@@ -28,7 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-include_directories(include)
+include_directories(
+  include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/sdl_rpc_plugin
+)
 
 set (COMMANDS_SOURCE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/src/commands
@@ -63,7 +66,7 @@ set(LIBRARIES
   crypto
 )
 
-if(ENABLE_LOG AND NOT ANDROID)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

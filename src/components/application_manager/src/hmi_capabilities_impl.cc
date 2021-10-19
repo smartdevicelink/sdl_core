@@ -126,6 +126,13 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     is_ivi_cooperating_ = true;
     is_rc_cooperating_ = true;
   }
+  requests_required_for_capabilities_ = {
+      hmi_apis::FunctionID::VehicleInfo_IsReady,
+      hmi_apis::FunctionID::VR_IsReady,
+      hmi_apis::FunctionID::TTS_IsReady,
+      hmi_apis::FunctionID::UI_IsReady,
+      hmi_apis::FunctionID::RC_IsReady,
+      hmi_apis::FunctionID::Navigation_IsReady};
 }
 
 HMICapabilitiesImpl::~HMICapabilitiesImpl() {}
@@ -423,8 +430,6 @@ void HMICapabilitiesImpl::Init(
   hmi_language_handler_.set_default_capabilities_languages(
       ui_language_, vr_language_, tts_language_);
 }
-
-void HMICapabilitiesImpl::Init(resumption::LastState*) {}
 
 bool HMICapabilitiesImpl::is_ui_cooperating() const {
   return is_ui_cooperating_;
@@ -1858,6 +1863,15 @@ void HMICapabilitiesImpl::set_ccpu_version(const std::string& ccpu_version) {
 
 const std::string& HMICapabilitiesImpl::ccpu_version() const {
   return ccpu_version_;
+}
+
+void HMICapabilitiesImpl::set_hardware_version(
+    const std::string& hardware_version) {
+  hardware_version_ = hardware_version;
+}
+
+const std::string& HMICapabilitiesImpl::hardware_version() const {
+  return hardware_version_;
 }
 
 void HMICapabilitiesImpl::convert_json_languages_to_obj(

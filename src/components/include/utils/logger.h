@@ -51,7 +51,7 @@
         logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__}, \
         std::this_thread::get_id()};                                   \
     logger::Logger::instance().PushLog(message);                       \
-  }                                                                    
+  }
 
 #include "utils/auto_trace.h"
 #define SDL_CREATE_LOG_VARIABLE(component_name) \
@@ -75,8 +75,8 @@
   LOG_WITH_LEVEL(logger::LogLevel::TRACE_LEVEL, logEvent)
 
 #define SDL_LOG_AUTO_TRACE()    \
-    logger::AutoTrace auto_trace( \
-    logger_, logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__})
+  logger::AutoTrace auto_trace( \
+      logger_, logger::LocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__})
 
 #define SDL_LOG_DEBUG(logEvent) \
   LOG_WITH_LEVEL(logger::LogLevel::DEBUG_LEVEL, logEvent)

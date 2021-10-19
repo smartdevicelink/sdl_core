@@ -67,8 +67,10 @@ void OnReceivedPolicyUpdate::Run() {
   std::string file_name = file_path;
 
 #ifdef __ANDROID__
-  const std::string t_name = file_path.substr(file_path.find_last_of("/\\") + 1);
-  const std::string system_folder = application_manager_.get_settings().system_files_path();
+  const std::string t_name =
+      file_path.substr(file_path.find_last_of("/\\") + 1);
+  const std::string system_folder =
+      application_manager_.get_settings().system_files_path();
   file_name = system_folder + "/" + t_name;
 #endif
 

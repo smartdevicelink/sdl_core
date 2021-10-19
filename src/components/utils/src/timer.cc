@@ -87,7 +87,9 @@ void timer::Timer::Start(const Milliseconds timeout,
       single_shot_ = false;
       break;
     }
-    default: { ASSERT("timer_type should be kSingleShot or kPeriodic"); }
+    default: {
+      ASSERT("timer_type should be kSingleShot or kPeriodic");
+    }
   };
   StartDelegate(timeout);
   StartThread();
@@ -153,7 +155,7 @@ void timer::Timer::StopThread() {
       thread_->Stop(threads::Thread::kThreadSoftStop);
 #else
       thread_->Stop(threads::Thread::kThreadStopDelegate);
-#endif // __ANDROID__
+#endif  // __ANDROID__
     }
     delegate_->set_finalized_flag(false);
   }

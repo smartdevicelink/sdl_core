@@ -99,10 +99,10 @@ WebSocketConnection<Session>::~WebSocketConnection() {
 
 #ifdef ENABLE_SECURITY
 template <>
-WebSocketConnection<WebSocketSecureSession<>>::~WebSocketConnection() {
-    if (!IsShuttingDown()) {
-        Shutdown();
-    }
+WebSocketConnection<WebSocketSecureSession<> >::~WebSocketConnection() {
+  if (!IsShuttingDown()) {
+    Shutdown();
+  }
 }
 #endif  // ENABLE_SECURITY
 
@@ -176,7 +176,7 @@ void WebSocketConnection<WebSocketSecureSession<> >::Run() {
   SDL_LOG_AUTO_TRACE();
   session_->AsyncAccept();
 }
-#endif // ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
 template <typename Session>
 void WebSocketConnection<Session>::Shutdown() {

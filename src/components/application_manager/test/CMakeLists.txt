@@ -72,6 +72,7 @@ set(testSources
   ${AM_TEST_DIR}/application_helper_test.cc
   ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
+  ${AM_TEST_DIR}/request_timeout_handler_test.cc
 )
 
 set(testSourcesMockHmi
@@ -119,19 +120,23 @@ if (ENABLE_SECURITY)
   list(APPEND LIBRARIES SecurityManager)
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES sqlite3)
+endif ()
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
 
-if (ENABLE_LOG)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(

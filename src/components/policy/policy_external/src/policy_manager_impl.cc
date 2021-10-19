@@ -762,6 +762,13 @@ void PolicyManagerImpl::StartPTExchange() {
   }
 }
 
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
+  SDL_LOG_AUTO_TRACE();
+  if (ignition_check) {
+    StartPTExchange();
+  }
+}
+
 void PolicyManagerImpl::OnAppsSearchStarted() {
   SDL_LOG_AUTO_TRACE();
   update_status_manager_.OnAppsSearchStarted();
@@ -1589,7 +1596,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
     FillFunctionalGroupPermissions(
         all_disallowed, group_names, kGroupDisallowed, permissions);
   }
-  return;
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
@@ -1617,9 +1623,20 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
+void PolicyManagerImpl::SetHardwareVersion(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  cache_->SetHardwareVersion(hardware_version);
+}
+
 std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
   return cache_->GetCCPUVersionFromPT();
+}
+
+std::string PolicyManagerImpl::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  return cache_->GetHardwareVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(const std::string& priority,
@@ -2124,18 +2141,6 @@ void PolicyManagerImpl::SetDecryptedCertificate(
     const std::string& certificate) {
   SDL_LOG_AUTO_TRACE();
   cache_->SetDecryptedCertificate(certificate);
-}
-
-AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
-  SDL_LOG_AUTO_TRACE();
-
-  const AppIdURL next_app_url = RetrySequenceUrl(retry_sequence_url_, urls);
-
-  retry_sequence_url_.url_idx_ = next_app_url.second + 1;
-  retry_sequence_url_.app_idx_ = next_app_url.first;
-  retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_id;
-
-  return next_app_url;
 }
 
 AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,

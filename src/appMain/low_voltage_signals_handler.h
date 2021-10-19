@@ -116,7 +116,8 @@ class NotificationThreadDelegate : public threads::ThreadDelegate {
  public:
   NotificationThreadDelegate(
       LowVoltageSignalsHandler& low_voltage_signals_handler)
-      : is_stopped_(false), low_voltage_signals_handler_(low_voltage_signals_handler) {}
+      : is_stopped_(false)
+      , low_voltage_signals_handler_(low_voltage_signals_handler) {}
 
   ~NotificationThreadDelegate() {}
 

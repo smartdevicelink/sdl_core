@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
+#include <utils/time64.h>
 #include "application_manager/policies/policy_handler_observer.h"
 #include "security_manager/security_manager_settings.h"
-#include <utils/time64.h>
 
 /**
  * \class security_manager::CryptoManager

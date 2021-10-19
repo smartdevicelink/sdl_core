@@ -14,7 +14,7 @@ RCPendingResumptionHandler::RCPendingResumptionHandler(
     , rpc_service_(application_manager.GetRPCService())
     , interior_data_cache_(interior_data_cache) {}
 
-void RCPendingResumptionHandler::on_event(
+void RCPendingResumptionHandler::HandleOnEvent(
     const application_manager::event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   namespace am_strings = application_manager::strings;

@@ -71,10 +71,11 @@ std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
 }  // namespace
 
 namespace rc_rpc_plugin {
-RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid,
-                               RCRPCPlugin& plugin,
+RCAppExtension::RCAppExtension(RCRPCPlugin& plugin,
                                application_manager::Application& application)
-    : AppExtension(uid), plugin_(plugin), application_(application) {}
+    : AppExtension(RCAppExtensionID)
+    , plugin_(plugin)
+    , application_(application) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(const ModuleUid& module) {
   subscribed_interior_vehicle_data_.insert(module);
@@ -199,15 +200,13 @@ void RCAppExtension::RevertResumption(
   const auto module_subscriptions =
       ConvertSmartObjectToModuleCollection(resumption_data);
 
-  for (auto& module : module_subscriptions) {
-    SDL_LOG_TRACE("Requested to unsubscribe module_type  "
-                  << module.first << "module_id: " << module.second);
-  }
   std::set<rc_rpc_plugin::ModuleUid> to_be_unsubscribed;
 
   const auto app_id = application_.app_id();
   auto no_apps_subscribed = [app_id,
                              this](const rc_rpc_plugin::ModuleUid& module) {
+    SDL_LOG_TRACE("Requested to unsubscribe module_type  "
+                  << module.first << "module_id: " << module.second);
     if (plugin_.IsOtherAppsSubscribed(module, app_id)) {
       SDL_LOG_DEBUG("Some other app except " << app_id
                                              << " is already subscribed to "

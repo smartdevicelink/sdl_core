@@ -127,7 +127,7 @@ HmiStatePtr ApplicationState::GetState(const WindowID window_id,
       SDL_LOG_DEBUG("Getting postponed state for window " << window_id);
       return PostponedHmiState(window_id);
     default:
-      SDL_LOG_DEBUG("Getting current state for window " << window_id);
+      SDL_LOG_TRACE("Getting current state for window " << window_id);
       return CurrentHmiState(window_id);
   }
 }
@@ -205,7 +205,12 @@ void ApplicationState::RemoveHMIState(const WindowID window_id,
 void ApplicationState::EraseHMIState(HmiStates& hmi_states,
                                      HmiStates::iterator it) {
   if (hmi_states.begin() == it) {
-    (*it)->set_parent(nullptr);
+    HmiStates::iterator next = it;
+    ++next;
+    if (hmi_states.end() != next) {
+      HmiStatePtr next_state = *next;
+      next_state->set_parent(nullptr);
+    }
   } else {
     HmiStates::iterator next = it;
     HmiStates::iterator prev = it;

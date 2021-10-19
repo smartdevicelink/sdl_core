@@ -48,11 +48,11 @@ SendHapticDataRequest::SendHapticDataRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 SendHapticDataRequest::~SendHapticDataRequest() {}
 
@@ -70,6 +70,7 @@ void SendHapticDataRequest::Run() {
   }
 
   if (app->is_navi() || app->mobile_projection_enabled()) {
+    msg_params[strings::app_id] = connection_key();
     SendHMIRequest(hmi_apis::FunctionID::UI_SendHapticData, &msg_params, true);
   } else {
     SendResponse(false,

@@ -147,7 +147,8 @@ class CryptoManagerImpl : public CryptoManager {
   void ReleaseSSLContext(SSLContext* context) OVERRIDE;
   std::string LastError() const OVERRIDE;
   bool IsCertificateUpdateRequired(
-      const TIME_TYPE system_time, const TIME_TYPE certificates_time) const OVERRIDE;
+      const TIME_TYPE system_time,
+      const TIME_TYPE certificates_time) const OVERRIDE;
   virtual const CryptoManagerSettings& get_settings() const OVERRIDE;
 
  private:

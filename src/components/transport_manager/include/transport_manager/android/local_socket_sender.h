@@ -4,38 +4,40 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "protocol/raw_message.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include <utils/threads/message_loop_thread.h>
+#include "protocol/raw_message.h"
 #include "transport_manager/android/ipc_sender.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-typedef threads::MessageQueue<protocol_handler::RawMessagePtr> RawMessageLoopQueue;
+typedef threads::MessageQueue<protocol_handler::RawMessagePtr>
+    RawMessageLoopQueue;
 
-class LocalSocketSender: public IpcSender
-{
-public:
-    using OnDataSentCallback = std::function<void(protocol_handler::RawMessagePtr)>;
-    using OnConnectedCallback = std::function<void(const bool)>;
+class LocalSocketSender : public IpcSender {
+ public:
+  using OnDataSentCallback =
+      std::function<void(protocol_handler::RawMessagePtr)>;
+  using OnConnectedCallback = std::function<void(const bool)>;
 
-    LocalSocketSender(OnDataSentCallback&& sent_callback, OnConnectedCallback&& connected_callback);
-    ~LocalSocketSender();
+  LocalSocketSender(OnDataSentCallback&& sent_callback,
+                    OnConnectedCallback&& connected_callback);
+  ~LocalSocketSender();
 
-    void Init(const std::string& socket_name) override;
-    void Run() override;
-    void Stop() override;
-    void Send(::protocol_handler::RawMessagePtr message) override;
+  void Init(const std::string& socket_name) override;
+  void Run() override;
+  void Stop() override;
+  void Send(::protocol_handler::RawMessagePtr message) override;
 
-private:
-    int socket_id_;
-    bool connected_;
-    RawMessageLoopQueue message_queue_;
-    OnConnectedCallback connected_callback_;
-    OnDataSentCallback sent_callback_;
+ private:
+  int socket_id_;
+  bool connected_;
+  RawMessageLoopQueue message_queue_;
+  OnConnectedCallback connected_callback_;
+  OnDataSentCallback sent_callback_;
 
-    bool TryToConnect(sockaddr_un &addr, socklen_t len);
+  bool TryToConnect(sockaddr_un& addr, socklen_t len);
 };
 
 }  // namespace transport_adapter

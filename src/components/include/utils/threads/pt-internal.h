@@ -49,14 +49,14 @@ struct pthread_internal_t {
   void* alternate_signal_stack;
 
   /*
-   * The dynamic linker implements dlerror(3), which makes it hard for us to implement this
-   * per-thread buffer by simply using malloc(3) and free(3).
+   * The dynamic linker implements dlerror(3), which makes it hard for us to
+   * implement this per-thread buffer by simply using malloc(3) and free(3).
    */
 #define __BIONIC_DLERROR_BUFFER_SIZE 508
   char dlerror_buffer[__BIONIC_DLERROR_BUFFER_SIZE];
-	
-	//  ugly hack: use last 4 bytes of dlerror_buffer as cancel_lock
-	pthread_mutex_t cancel_lock; 
+
+  //  ugly hack: use last 4 bytes of dlerror_buffer as cancel_lock
+  pthread_mutex_t cancel_lock;
 };
 
 /* Has the thread a cancellation request? */
@@ -71,9 +71,9 @@ struct pthread_internal_t {
 /* Has the thread a cancellation handler? */
 #define PTHREAD_ATTR_FLAG_CANCEL_HANDLER 0x00000040
 
-struct pthread_internal_t *__pthread_getid ( pthread_t );
+struct pthread_internal_t* __pthread_getid(pthread_t);
 
-int __pthread_do_cancel (struct pthread_internal_t *);
+int __pthread_do_cancel(struct pthread_internal_t*);
 
 void pthread_init(void);
 

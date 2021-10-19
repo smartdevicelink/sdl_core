@@ -240,7 +240,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     SDL_LOG_ERROR(str_err);
-    ws_.lowest_layer().close();
+    boost::beast::get_lowest_layer(ws_).close();
     ioc_.stop();
     Shutdown();
     return;

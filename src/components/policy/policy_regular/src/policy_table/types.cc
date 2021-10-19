@@ -19,7 +19,9 @@ std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
     case PT_SNAPSHOT: {
       return "PT_SNAPSHOT";
     }
-    default: { return "INVALID_PT_TYPE"; }
+    default: {
+      return "INVALID_PT_TYPE";
+    }
   }
 }
 
@@ -1297,7 +1299,8 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
           impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
     , ignition_cycles_since_last_exchange(
           impl::ValueMember(value__, "ignition_cycles_since_last_exchange"))
-    , ccpu_version(impl::ValueMember(value__, "ccpu_version")) {}
+    , ccpu_version(impl::ValueMember(value__, "ccpu_version"))
+    , hardware_version(impl::ValueMember(value__, "hardware_version")) {}
 
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1317,6 +1320,9 @@ bool ModuleMeta::is_valid() const {
     return initialization_state__ == kInitialized && Validate();
   }
   if (!ccpu_version.is_valid()) {
+    return false;
+  }
+  if (!hardware_version.is_valid()) {
     return false;
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
@@ -1339,6 +1345,9 @@ bool ModuleMeta::struct_empty() const {
   if (ccpu_version.is_initialized()) {
     return false;
   }
+  if (hardware_version.is_initialized()) {
+    return false;
+  }
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
   }
@@ -1358,6 +1367,10 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!ccpu_version.is_valid()) {
     ccpu_version.ReportErrors(&report__->ReportSubobject("ccpu_version"));
+  }
+  if (!hardware_version.is_valid()) {
+    hardware_version.ReportErrors(
+        &report__->ReportSubobject("hardware_version"));
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     pt_exchanged_at_odometer_x.ReportErrors(
@@ -1446,13 +1459,47 @@ AppLevel::AppLevel(const Json::Value* value__)
           impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"))
     , count_of_removals_for_bad_behavior(
           impl::ValueMember(value__, "count_of_removals_for_bad_behavior"))
-    , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
+    , count_of_tls_errors(impl::ValueMember(value__, "count_of_TLS_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
 
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
+  impl::WriteJsonField("app_registration_language_gui",
+                       app_registration_language_gui,
+                       &result__);
+  impl::WriteJsonField("app_registration_language_vui",
+                       app_registration_language_vui,
+                       &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_background", minutes_in_hmi_background, &result__);
+  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
+  impl::WriteJsonField(
+      "count_of_user_selections", count_of_user_selections, &result__);
+  impl::WriteJsonField("count_of_rejections_sync_out_of_memory",
+                       count_of_rejections_sync_out_of_memory,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_nickname_mismatch",
+                       count_of_rejections_nickname_mismatch,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_duplicate_name",
+                       count_of_rejections_duplicate_name,
+                       &result__);
+  impl::WriteJsonField(
+      "count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
+  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none",
+                       count_of_rpcs_sent_in_hmi_none,
+                       &result__);
+  impl::WriteJsonField("count_of_removals_for_bad_behavior",
+                       count_of_removals_for_bad_behavior,
+                       &result__);
   impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_run_attempts_while_revoked",
+                       count_of_run_attempts_while_revoked,
+                       &result__);
   return result__;
 }
 
@@ -1745,7 +1792,12 @@ Json::Value VehicleDataItem::ToJsonValue() const {
   return ret;
 }
 
-bool VehicleDataItem::operator==(const VehicleDataItem& vd) const {
+#ifdef __ANDROID__
+bool VehicleDataItem::operator==(const VehicleDataItem& vd) const
+#else
+bool VehicleDataItem::operator==(const VehicleDataItem& vd)
+#endif
+{
   return (name == vd.name && type == vd.type && key == vd.key &&
           mandatory == vd.mandatory && params == vd.params &&
           array == vd.array && since == vd.since && until == vd.until &&

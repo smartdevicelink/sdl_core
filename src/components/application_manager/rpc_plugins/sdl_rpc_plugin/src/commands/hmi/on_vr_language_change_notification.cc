@@ -79,10 +79,17 @@ void OnVRLanguageChangeNotification::Run() {
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
   const auto applications = application_manager_.applications().GetData();
-
   for (auto app : applications) {
+    if (!app->IsRegistered()) {
+      SDL_LOG_DEBUG("Skipping app "
+                    << app->app_id()
+                    << " which has not finished the registration process");
+      continue;
+    }
+
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
+
     if (static_cast<int32_t>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
       application_manager_.state_controller().SetRegularState(

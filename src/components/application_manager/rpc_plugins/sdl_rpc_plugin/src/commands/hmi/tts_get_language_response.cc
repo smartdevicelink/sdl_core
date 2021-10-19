@@ -61,11 +61,10 @@ void TTSGetLanguageResponse::Run() {
   const Common_Result::eType result_code = static_cast<Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::TTS_GetLanguage);
-
   if (Common_Result::SUCCESS != result_code) {
     SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::TTS_GetLanguage);
     return;
   }
 
@@ -78,6 +77,9 @@ void TTSGetLanguageResponse::Run() {
   }
 
   hmi_capabilities_.set_active_tts_language(language);
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetLanguage);
 
   std::vector<std::string> sections_to_update{hmi_response::language};
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(

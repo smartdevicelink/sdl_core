@@ -451,9 +451,13 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
+
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Get number of notification by priority
@@ -869,7 +873,6 @@ class PolicyManagerImpl : public PolicyManager {
   void ResetTimeout() OVERRIDE;
 
  protected:
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
   /**
    * @brief Parse policy table content and convert to PT object
    * @param pt_content binary content of PT
@@ -877,15 +880,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   virtual std::shared_ptr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
-#else
-  /**
-   * @brief Parse policy table content and convert to PT object
-   * @param pt_content binary content of PT
-   * @return pointer to converted PT
-   */
-  virtual std::shared_ptr<policy_table::Table> ParseArray(
-      const BinaryMessage& pt_content);
-#endif
 
   /**
    * @brief Getter for policy settings

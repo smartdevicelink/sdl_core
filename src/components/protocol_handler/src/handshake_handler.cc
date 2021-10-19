@@ -149,8 +149,6 @@ bool HandshakeHandler::OnHandshakeDone(
             return "Certificate is not signed";
           case security_manager::SSLContext::Handshake_Result_AppIDMismatch:
             return "Trying to run handshake with wrong app id";
-          case security_manager::SSLContext::Handshake_Result_AppNameMismatch:
-            return "Trying to run handshake with wrong app name";
           case security_manager::SSLContext::Handshake_Result_AbnormalFail:
             return "Error occurred during handshake";
           case security_manager::SSLContext::Handshake_Result_Fail:
@@ -232,7 +230,8 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
                                            context_.service_type_,
                                            (is_service_already_protected)
                                                ? "Service is already protected"
-                                               : "Service cannot be protected");
+                                               : "Service cannot be protected",
+                                           full_version_);
   }
 }
 
@@ -284,7 +283,8 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
         context_.new_session_id_,
         protocol_version_,
         context_.service_type_,
-        reason_msg + (err_reason.empty() ? "" : ": " + err_reason));
+        reason_msg + (err_reason.empty() ? "" : ": " + err_reason),
+        full_version_);
   }
 }
 

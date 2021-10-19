@@ -36,6 +36,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
@@ -50,7 +51,7 @@ namespace commands {
  * @brief UnsubscribeVehicleDataRequest command class
  **/
 class UnsubscribeVehicleDataRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief UnsubscribeVehicleDataRequest class constructor

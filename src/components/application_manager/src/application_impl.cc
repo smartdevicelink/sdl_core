@@ -159,8 +159,7 @@ ApplicationImpl::ApplicationImpl(
   set_name(app_name);
 
   MarkUnregistered();
-  // subscribe application to custom button by default
-  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
+
   // load persistent files
   LoadPersistentFiles();
 
@@ -205,6 +204,7 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   set_voice_communication_supported(false);
   set_mobile_projection_enabled(false);
   set_webengine_projection_enabled(false);
+  set_remote_control_supported(false);
   const smart_objects::SmartObject& array_app_types = *app_types_;
   uint32_t lenght_app_types = array_app_types.length();
 
@@ -224,6 +224,9 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
         break;
       case mobile_apis::AppHMIType::WEB_VIEW:
         set_webengine_projection_enabled(true);
+        break;
+      case mobile_apis::AppHMIType::REMOTE_CONTROL:
+        set_remote_control_supported(true);
         break;
       default:
         break;
@@ -613,9 +616,6 @@ void ApplicationImpl::StopStreaming(
 void ApplicationImpl::StopNaviStreaming() {
   SDL_LOG_AUTO_TRACE();
   video_stream_suspend_timer_.Stop();
-  application_manager_.OnAppStreaming(app_id(),
-                                      protocol_handler::ServiceType::kMobileNav,
-                                      StreamingState::kStopped);
   MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
   set_video_stream_retry_number(0);
@@ -624,9 +624,6 @@ void ApplicationImpl::StopNaviStreaming() {
 void ApplicationImpl::StopAudioStreaming() {
   SDL_LOG_AUTO_TRACE();
   audio_stream_suspend_timer_.Stop();
-  application_manager_.OnAppStreaming(app_id(),
-                                      protocol_handler::ServiceType::kAudio,
-                                      StreamingState::kStopped);
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
@@ -637,17 +634,14 @@ void ApplicationImpl::SuspendStreaming(
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
-  if (ServiceType::kMobileNav == service_type && !video_streaming_suspended_) {
+  if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(
-        app_id(), service_type, StreamingState::kSuspended);
+    application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
-  } else if (ServiceType::kAudio == service_type &&
-             !audio_streaming_suspended_) {
+  } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(
-        app_id(), service_type, StreamingState::kSuspended);
+    application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
@@ -656,7 +650,7 @@ void ApplicationImpl::SuspendStreaming(
 }
 
 void ApplicationImpl::WakeUpStreaming(
-    protocol_handler::ServiceType service_type) {
+    protocol_handler::ServiceType service_type, uint32_t timer_len) {
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
@@ -668,29 +662,28 @@ void ApplicationImpl::WakeUpStreaming(
     {  // reduce the range of video_streaming_suspended_lock_
       sync_primitives::AutoLock auto_lock(video_streaming_suspended_lock_);
       if (video_streaming_suspended_) {
-        application_manager_.OnAppStreaming(
-            app_id(), service_type, StreamingState::kStarted);
+        application_manager_.OnAppStreaming(app_id(), service_type, true);
         application_manager_.ProcessOnDataStreamingNotification(
             service_type, app_id(), true);
         video_streaming_suspended_ = false;
       }
     }
-
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    video_stream_suspend_timer_.Start(
+        timer_len == 0 ? video_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     {  // reduce the range of audio_streaming_suspended_lock_
       sync_primitives::AutoLock auto_lock(audio_streaming_suspended_lock_);
       if (audio_streaming_suspended_) {
-        application_manager_.OnAppStreaming(
-            app_id(), service_type, StreamingState::kStarted);
+        application_manager_.OnAppStreaming(app_id(), service_type, true);
         application_manager_.ProcessOnDataStreamingNotification(
             service_type, app_id(), true);
         audio_streaming_suspended_ = false;
       }
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    audio_stream_suspend_timer_.Start(
+        timer_len == 0 ? audio_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   }
 }
 
@@ -1147,20 +1140,36 @@ uint32_t ApplicationImpl::GetAvailableDiskSpace() {
 }
 
 void ApplicationImpl::SubscribeToSoftButtons(
-    int32_t cmd_id, const SoftButtonID& softbuttons_id) {
+    int32_t cmd_id, const WindowSoftButtons& window_softbuttons) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) ==
-      cmd_id) {
-    CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
-    if (cmd_softbuttonid_.end() == it) {
-      cmd_softbuttonid_[cmd_id] = softbuttons_id;
-    }
-  } else {
-    auto& soft_button_ids = cmd_softbuttonid_[cmd_id];
-    for (auto& softbutton_item : softbuttons_id) {
-      soft_button_ids.insert(softbutton_item);
-    }
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+
+  if (cmd_softbuttonid_.end() == it) {
+    SoftButtonIDs soft_buttons{window_softbuttons};
+    cmd_softbuttonid_.insert({cmd_id, soft_buttons});
+    return;
   }
+
+  auto& command_soft_buttons = cmd_softbuttonid_[cmd_id];
+
+  const auto window_id = window_softbuttons.first;
+  auto find_window_id = [window_id](const WindowSoftButtons& window_buttons) {
+    return window_id == window_buttons.first;
+  };
+
+  auto subscribed_window_buttons = std::find_if(
+      command_soft_buttons.begin(), command_soft_buttons.end(), find_window_id);
+
+  if (subscribed_window_buttons == command_soft_buttons.end()) {
+    command_soft_buttons.insert(window_softbuttons);
+    return;
+  }
+
+  WindowSoftButtons new_window_soft_buttons = *subscribed_window_buttons;
+  new_window_soft_buttons.second.insert(window_softbuttons.second.begin(),
+                                        window_softbuttons.second.end());
+  command_soft_buttons.erase(subscribed_window_buttons);
+  command_soft_buttons.insert(new_window_soft_buttons);
 }
 
 struct FindSoftButtonId {
@@ -1169,24 +1178,46 @@ struct FindSoftButtonId {
   explicit FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
-  bool operator()(const std::pair<uint32_t, WindowID>& element) const {
-    return soft_button_id_ == element.first;
+  bool operator()(const uint32_t softbutton_id) {
+    return soft_button_id_ == softbutton_id;
   }
+};
+
+struct FindWindowSoftButtonId {
+ public:
+  FindWindowSoftButtonId(const uint32_t soft_button_id)
+      : find_softbutton_id_(soft_button_id) {}
+
+  bool operator()(const WindowSoftButtons& window_buttons) {
+    const auto softbuttons = window_buttons.second;
+    auto found_softbutton = std::find_if(
+        softbuttons.begin(), softbuttons.end(), find_softbutton_id_);
+
+    return found_softbutton != softbuttons.end();
+  }
+
+ private:
+  FindSoftButtonId find_softbutton_id_;
 };
 
 bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
-  for (; it != cmd_softbuttonid_.end(); ++it) {
-    const auto& soft_button_ids = (*it).second;
-    FindSoftButtonId finder(softbutton_id);
-    const auto find_res =
-        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
-    if ((soft_button_ids.end() != find_res)) {
+
+  for (const auto& command_soft_buttons : cmd_softbuttonid_) {
+    FindWindowSoftButtonId find_window_softbutton_id(softbutton_id);
+    const auto& window_softbuttons = command_soft_buttons.second;
+
+    const auto found_window_softbutton_id =
+        std::find_if(window_softbuttons.begin(),
+                     window_softbuttons.end(),
+                     find_window_softbutton_id);
+
+    if (found_window_softbutton_id != window_softbuttons.end()) {
       return true;
     }
   }
+
   return false;
 }
 
@@ -1194,14 +1225,18 @@ WindowID ApplicationImpl::GetSoftButtonWindowID(const uint32_t softbutton_id) {
   SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
-  for (; it != cmd_softbuttonid_.end(); ++it) {
-    const auto& soft_button_ids = (*it).second;
-    FindSoftButtonId finder(softbutton_id);
-    const auto find_res =
-        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
-    if ((soft_button_ids.end() != find_res)) {
-      return find_res->second;
+
+  for (const auto& command_soft_buttons : cmd_softbuttonid_) {
+    FindWindowSoftButtonId find_window_softbutton_id(softbutton_id);
+    const auto& window_softbuttons = command_soft_buttons.second;
+
+    const auto found_window_softbutton_id =
+        std::find_if(window_softbuttons.begin(),
+                     window_softbuttons.end(),
+                     find_window_softbutton_id);
+
+    if (found_window_softbutton_id != window_softbuttons.end()) {
+      return found_window_softbutton_id->first;
     }
   }
 
@@ -1271,6 +1306,7 @@ AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
 }
 
 bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  SDL_LOG_AUTO_TRACE();
   if (!QueryInterface(extension->uid())) {
     SDL_LOG_TRACE("Add extenstion to add id" << app_id() << " with uid "
                                              << extension->uid());
@@ -1281,12 +1317,18 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 }
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  SDL_LOG_AUTO_TRACE();
   auto it = std::find_if(
       extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
         return extension->uid() == uid;
       });
 
-  return it != extensions_.end();
+  if (extensions_.end() != it) {
+    extensions_.erase(it);
+    return true;
+  }
+
+  return false;
 }
 
 const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {

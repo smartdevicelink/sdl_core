@@ -130,6 +130,19 @@ class ResourceAllocationManager {
                               const std::string& module_id) const = 0;
 
   /**
+   * @brief IsResourceAllocated check if module is allocated by certain
+   * application
+   * @param module_type module to be checked
+   * @param module_id uuid of a resource to be checked
+   * @param app_id app to be checked
+   * @return true if module_type is allocated by application with provided
+   * app_id
+   */
+  virtual bool IsResourceAllocated(const std::string& module_type,
+                                   const std::string& module_id,
+                                   const uint32_t app_id) = 0;
+
+  /**
    * @brief AcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
    * @param module_id uuid of a resource
@@ -196,8 +209,16 @@ class ResourceAllocationManager {
       NotificationTrigger::eType event,
       application_manager::ApplicationSharedPtr application) = 0;
 
+  /**
+   * @brief Returns current state of RC functionality
+   * @return current state of RC functionality
+   */
   virtual bool is_rc_enabled() const = 0;
 
+  /**
+   * @brief Sets current state of RC functionality to a new one
+   * @param value new RC functionality state
+   */
   virtual void set_rc_enabled(const bool value) = 0;
 
   /**

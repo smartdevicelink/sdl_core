@@ -284,10 +284,8 @@ void GetInteriorVehicleDataRequest::on_event(
                       [message_params::kModuleData][data_mapping(module_type)];
       interior_data_cache_.Add(module, module_data);
     }
-  } else {
-    hmi_response[app_mngr::strings::msg_params].erase(
-        message_params::kIsSubscribed);
   }
+
   std::string response_info;
   GetInfo(hmi_response, response_info);
   SetResourceState(ModuleType(), ResourceState::FREE);
@@ -295,7 +293,7 @@ void GetInteriorVehicleDataRequest::on_event(
   SendResponse(result,
                result_code,
                response_info.c_str(),
-               &hmi_response[app_mngr::strings::msg_params]);
+               result ? &hmi_response[app_mngr::strings::msg_params] : nullptr);
 }
 
 GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {}
@@ -317,7 +315,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
       const_cast<smart_objects::SmartObject&>(hmi_response);
 
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(RequestFromMobileImpl::connection_key());
   const auto extension = RCHelpers::GetRCExtension(*app);
   const char* module_type;
   ns_smart_device_link::ns_smart_objects::
@@ -405,8 +403,8 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
           message_params::kSubscribe);
 
   if (is_subscribe_present_in_request) {
-    app_mngr::ApplicationSharedPtr app =
-        application_manager_.application(CommandRequestImpl::connection_key());
+    app_mngr::ApplicationSharedPtr app = application_manager_.application(
+        RequestFromMobileImpl::connection_key());
     const auto extension = RCHelpers::GetRCExtension(*app);
 
     const std::string module_type = ModuleType();

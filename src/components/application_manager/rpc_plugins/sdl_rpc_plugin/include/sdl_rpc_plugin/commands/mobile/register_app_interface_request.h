@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
@@ -56,7 +56,7 @@ namespace custom_str = utils::custom_string;
  * @brief Register app interface request  command class
  **/
 class RegisterAppInterfaceRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * \brief RegisterAppInterfaceRequest class constructor
@@ -210,10 +210,9 @@ class RegisterAppInterfaceRequest
                                      const std::string& param,
                                      const std::string& backup_value);
   /**
-   * @brief Sends ButtonSubscription notification at start up
-   * to notify HMI that app subscribed on the custom button by default.
+   * @brief Sends ButtonSubscription request if approved by hmi_capabilities
    */
-  void SendSubscribeCustomButtonNotification();
+  void SendSubscribeCustomButtonRequest();
 
   /**
    * @brief IsApplicationSwitched checks whether application is switched
@@ -259,12 +258,6 @@ class RegisterAppInterfaceRequest
    */
   mobile_apis::Result::eType ProcessingAppHMITypesInMessage(
       const smart_objects::SmartObject& message);
-
-  /**
-   * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
-   * requests processing
-   */
-  void WaitForHMIIsReady();
 
   /**
    * @brief FillApplicationParams set app application attributes from the RAI

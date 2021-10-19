@@ -38,8 +38,6 @@ SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
-const AppExtensionUID AppServiceAppExtensionUID = 455;
-
 AppServiceAppExtension::AppServiceAppExtension(
     AppServiceRpcPlugin& plugin, application_manager::Application& app)
     : app_mngr::AppExtension(AppServiceAppExtensionUID)
@@ -91,7 +89,7 @@ void AppServiceAppExtension::SaveResumptionData(
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
     resumption_data[app_mngr::hmi_interface::app_service][i] = subscription;
-    i++;
+    ++i;
   }
 }
 

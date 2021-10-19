@@ -296,7 +296,7 @@ template <typename EnumType>
 const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
     const std::vector<ElementSignature>& signatures,
     const utils::SemanticVersion& MessageVersion) {
-  for (uint i = 0; i < signatures.size(); i++) {
+  for (uint i = 0; i < signatures.size(); ++i) {
     ElementSignature signature = signatures[i];
     // Check if signature matches message version
     if (signature.mSince != boost::none &&

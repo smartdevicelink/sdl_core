@@ -45,6 +45,7 @@ struct SystemInfo {
   std::string ccpu_version;
   std::string wers_country_code;
   std::string language;
+  std::string hardware_version;
 };
 
 /**

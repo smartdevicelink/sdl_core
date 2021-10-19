@@ -38,6 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/smart_objects/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -176,7 +177,7 @@ endif()
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})
 
-if(ENABLE_LOG AND NOT ANDROID)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   target_link_libraries("TransportManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

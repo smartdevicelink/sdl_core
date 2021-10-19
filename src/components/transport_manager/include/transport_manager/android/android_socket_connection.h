@@ -36,10 +36,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ANDROID_ANDROID_SOCKET_CONNECTION_H_
 
-#include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/android/local_socket_sender.h"
-#include "transport_manager/android/local_socket_receiver.h"
 #include "transport_manager/android/android_transport_adapter.h"
+#include "transport_manager/android/local_socket_receiver.h"
+#include "transport_manager/android/local_socket_sender.h"
+#include "transport_manager/transport_adapter/connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -59,13 +59,13 @@ class AndroidSocketConnection : public Connection {
    * @param controller Pointer to the device adapter controller.
    */
   AndroidSocketConnection(const DeviceUID& device_uid,
-                            const ApplicationHandle& app_handle,
-                            AndroidTransportAdapter* controller);
+                          const ApplicationHandle& app_handle,
+                          AndroidTransportAdapter* controller);
 
   ~AndroidSocketConnection() override;
 
   TransportAdapter::Error SendData(
-            ::protocol_handler::RawMessagePtr message) override;
+      ::protocol_handler::RawMessagePtr message) override;
 
   TransportAdapter::Error Disconnect() override;
 
@@ -76,20 +76,19 @@ class AndroidSocketConnection : public Connection {
   TransportAdapter::Error Start();
 
  private:
-    void ProcessMessage(const std::vector<uint8_t>& data);
-    void OnMessageSent(protocol_handler::RawMessagePtr message);
-    void OnClientConnectionDone(const bool is_connected);
+  void ProcessMessage(const std::vector<uint8_t>& data);
+  void OnMessageSent(protocol_handler::RawMessagePtr message);
+  void OnClientConnectionDone(const bool is_connected);
 
-    DeviceUID device_uid_;
-    ApplicationHandle app_handle_;
-    AndroidTransportAdapter* controller_;
+  DeviceUID device_uid_;
+  ApplicationHandle app_handle_;
+  AndroidTransportAdapter* controller_;
 
-    std::unique_ptr<IpcSender> sender_;
-    std::unique_ptr<IpcReceiver> receiver_;
+  std::unique_ptr<IpcSender> sender_;
+  std::unique_ptr<IpcReceiver> receiver_;
 
-    std::thread receiver_thread_;
-    std::thread sender_thread_;
-
+  std::thread receiver_thread_;
+  std::thread sender_thread_;
 };
 
 }  // namespace transport_adapter

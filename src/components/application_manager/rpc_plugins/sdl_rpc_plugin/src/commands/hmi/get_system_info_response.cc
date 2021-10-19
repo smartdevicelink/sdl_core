@@ -59,6 +59,8 @@ void GetSystemInfoResponse::Run() {
       (*message_)[strings::params][hmi_response::code].asInt());
 
   hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
+  hmi_capabilities_.set_hardware_version(
+      policy_handler_.GetHardwareVersionFromPT());
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
     SDL_LOG_WARN("GetSystemError returns an error code " << code);
@@ -71,6 +73,11 @@ void GetSystemInfoResponse::Run() {
 
   policy_handler_.OnGetSystemInfo(
       info.ccpu_version, info.wers_country_code, info.language);
+
+  if (!info.hardware_version.empty()) {
+    policy_handler_.OnHardwareVersionReceived(info.hardware_version);
+    hmi_capabilities_.set_hardware_version(info.hardware_version);
+  }
 
   hmi_capabilities_.OnSoftwareVersionReceived(info.ccpu_version);
 }
@@ -89,6 +96,12 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo() const {
   info.language = application_manager::EnumToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::system_hardware_version)) {
+    info.hardware_version =
+        (*message_)[strings::msg_params][strings::system_hardware_version]
+            .asString();
+  }
   return info;
 }
 

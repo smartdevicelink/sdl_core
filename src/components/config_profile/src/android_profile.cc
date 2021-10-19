@@ -35,30 +35,30 @@
 
 namespace profile {
 
-AndroidProfile::AndroidProfile(const std::string &internal_storage_dir,
-                               const std::string &external_storage_dir)
-                               : internal_storage_dir_(internal_storage_dir)
-                               , external_storage_dir_(external_storage_dir) {}
+AndroidProfile::AndroidProfile(const std::string& internal_storage_dir,
+                               const std::string& external_storage_dir)
+    : internal_storage_dir_(internal_storage_dir)
+    , external_storage_dir_(external_storage_dir) {}
 
-void AndroidProfile::SubstituteMacroInString(std::string &in_string) const {
-    std::string out_string = in_string;
-    const std::map<std::string, std::string> replace_macro = {
-            {"%ANDROID_INTERNAL_DIR%", internal_storage_dir_},
-            {"%ANDROID_EXTERNAL_DIR%", external_storage_dir_}
-    };
+void AndroidProfile::SubstituteMacroInString(std::string& in_string) const {
+  std::string out_string = in_string;
+  const std::map<std::string, std::string> replace_macro = {
+      {"%ANDROID_INTERNAL_DIR%", internal_storage_dir_},
+      {"%ANDROID_EXTERNAL_DIR%", external_storage_dir_}};
 
-    for (const auto& macro : replace_macro) {
-        size_t index = 0;
-        while (true) {
-            index = out_string.find(macro.first, index);
-            if (index == std::string::npos) break;
+  for (const auto& macro : replace_macro) {
+    size_t index = 0;
+    while (true) {
+      index = out_string.find(macro.first, index);
+      if (index == std::string::npos)
+        break;
 
-            out_string.replace(index, macro.first.size(), macro.second);
-            index += macro.first.size();
-        }
+      out_string.replace(index, macro.first.size(), macro.second);
+      index += macro.first.size();
     }
+  }
 
-    in_string = out_string;
+  in_string = out_string;
 }
 
-}
+}  // namespace profile

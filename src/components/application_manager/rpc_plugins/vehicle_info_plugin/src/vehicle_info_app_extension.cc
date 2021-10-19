@@ -38,8 +38,6 @@ SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 namespace vehicle_info_plugin {
 namespace strings = application_manager::strings;
 
-unsigned VehicleInfoAppExtension::VehicleInfoAppExtensionUID = 146;
-
 VehicleInfoAppExtension::VehicleInfoAppExtension(
     VehicleInfoPlugin& plugin, application_manager::Application& app)
     : app_mngr::AppExtension(
@@ -138,7 +136,8 @@ void VehicleInfoAppExtension::SaveResumptionData(
   int i = 0;
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[strings::application_vehicle_info][i++] = subscription;
+    resumption_data[strings::application_vehicle_info][i] = subscription;
+    ++i;
   }
 }
 

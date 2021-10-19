@@ -173,6 +173,7 @@ class MockPolicyManager : public PolicyManager {
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
   MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD2(SendNotificationOnPermissionsUpdated,
                void(const std::string& device_id,
@@ -269,6 +270,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
+  MOCK_METHOD0(TriggerPTUOnStartupIfRequired, void());
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,
@@ -308,6 +310,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(RetrySequenceFailed, void());
   MOCK_METHOD0(ResetTimeout, void());
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
 };
 }  // namespace policy_manager_test
 }  // namespace components

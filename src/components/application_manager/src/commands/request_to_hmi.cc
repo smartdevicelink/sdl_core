@@ -80,26 +80,6 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
   return HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
-bool IsResponseCodeSuccess(
-    const smart_objects::SmartObject& response_from_hmi) {
-  auto response_code = static_cast<hmi_apis::Common_Result::eType>(
-      response_from_hmi[strings::params][hmi_response::code].asInt());
-
-  using helpers::Compare;
-  using helpers::EQ;
-  using helpers::ONE;
-
-  const bool is_result_success =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          response_code,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED);
-  return is_result_success;
-}
-
 bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface) {
@@ -113,12 +93,14 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
       return false;
     }
 
-    // Process response with result
-    if (response_from_hmi[strings::params].keyExists(hmi_response::code) &&
-        !IsResponseCodeSuccess(response_from_hmi)) {
-      application_manager.hmi_interfaces().SetInterfaceState(
-          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
-      return false;
+    if (response_from_hmi[strings::params].keyExists(hmi_response::code)) {
+      auto response_code = static_cast<hmi_apis::Common_Result::eType>(
+          response_from_hmi[strings::params][hmi_response::code].asInt());
+      if (!IsHMIResultSuccess(response_code)) {
+        application_manager.hmi_interfaces().SetInterfaceState(
+            interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+        return false;
+      }
     }
 
     application_manager.hmi_interfaces().SetInterfaceState(
@@ -141,11 +123,11 @@ RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
                            rpc_service::RPCService& rpc_service,
                            HMICapabilities& hmi_capabilities,
                            policy::PolicyHandlerInterface& policy_handler)
-    : CommandImpl(message,
-                  application_manager,
-                  rpc_service,
-                  hmi_capabilities,
-                  policy_handler) {}
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {}
 
 RequestToHMI::~RequestToHMI() {}
 
@@ -155,6 +137,7 @@ bool RequestToHMI::Init() {
 }
 
 bool RequestToHMI::CleanUp() {
+  unsubscribe_from_all_hmi_events();
   return true;
 }
 

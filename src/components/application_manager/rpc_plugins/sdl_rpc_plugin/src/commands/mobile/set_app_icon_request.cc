@@ -54,11 +54,11 @@ SetAppIconRequest::SetAppIconRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , is_icons_saving_enabled_(false) {
   const std::string path =
       application_manager_.get_settings().app_icons_folder();
@@ -116,8 +116,8 @@ void SetAppIconRequest::Run() {
   msg_params[strings::sync_file_name] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // For further use in on_event function
-  full_file_path_for_hmi_ = file_system::ConvertPathForURL(full_file_path);
+  // for further use in on_event function
+  full_file_path_for_hmi_ = full_file_path;
 
   msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi_;
 

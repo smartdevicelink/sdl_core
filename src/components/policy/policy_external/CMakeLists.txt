@@ -133,7 +133,7 @@ target_link_libraries(PolicyStatic ${LIBRARIES})
 add_library(Policy SHARED "src/policy_manager_impl.cc")
 target_link_libraries(Policy PolicyStatic)
 
-if(ENABLE_LOG AND NOT ANDROID)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
   target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

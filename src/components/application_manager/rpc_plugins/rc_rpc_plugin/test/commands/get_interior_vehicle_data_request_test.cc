@@ -95,9 +95,9 @@ class GetInteriorVehicleDataRequestTest
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , mock_app2_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extension_(
-            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
-      , rc_app_extension2_(std::make_shared<RCAppExtension>(
-            kModuleId, rc_plugin_, *mock_app2_))
+            std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_))
+      , rc_app_extension2_(
+            std::make_shared<RCAppExtension>(rc_plugin_, *mock_app2_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_)
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
@@ -734,6 +734,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   available_hd_chanels[1] = chanel2_index;
   available_hd_chanels[2] = chanel3_index;
 
+  msg_params[message_params::kModuleData][message_params::kModuleId] =
+      kModuleId;
   msg_params[message_params::kModuleData][message_params::kRadioControlData]
             [message_params::kAvailableHdChannels] = available_hd_chanels;
 
@@ -792,6 +794,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       smart_objects::SmartObject(smart_objects::SmartType_Boolean);
   climate_control_data = true;
 
+  msg_params[message_params::kModuleData][message_params::kModuleId] =
+      kModuleId;
   msg_params[message_params::kModuleData][message_params::kClimateControlData]
             [message_params::kClimateEnableAvailable] = climate_control_data;
 

@@ -69,6 +69,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
     ERROR_DECRYPTION_FAILED = 0x06,
     ERROR_ENCRYPTION_FAILED = 0x07,
     ERROR_SSL_INVALID_DATA = 0x08,
+    ERROR_HANDSHAKE_FAILED = 0x09,  // Handshake failed
+    ERROR_INVALID_CERT = 0x0A,      // Handshake failed because cert is invalid
+    ERROR_EXPIRED_CERT = 0x0B,      // Handshake failed because cert is expired
     ERROR_INTERNAL = 0xFF,
     ERROR_UNKNOWN_INTERNAL_ERROR = 0xFE  // error value for testing
   };
@@ -99,24 +102,24 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
    * \param connection_key Unique key used by other components as session
    * identifier
    * \param error_id  unique error identifier
-   * \param erorr_text SSL impelmentation error text
+   * \param error_text SSL impelmentation error text
    * \param seq_number received from Mobile Application
    */
   virtual void SendInternalError(const uint32_t connection_key,
                                  const uint8_t& error_id,
-                                 const std::string& erorr_text,
+                                 const std::string& error_text,
                                  const uint32_t seq_number) = 0;
   /**
    * \brief Sends InternalError override methode for sending without seq_number
    * \param connection_key Unique key used by other components as session
    * identifier
    * \param error_id  unique error identifier
-   * \param erorr_text SSL impelmentation error text
+   * \param error_text SSL impelmentation error text
    */
   void SendInternalError(const uint32_t connection_key,
                          const uint8_t& error_id,
-                         const std::string& erorr_text) {
-    SendInternalError(connection_key, error_id, erorr_text, 0);
+                         const std::string& error_text) {
+    SendInternalError(connection_key, error_id, error_text, 0);
   }
 
   /**
@@ -170,7 +173,7 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
 
   virtual void ProcessFailedPTU() = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify listeners that
    * certificate decryption failed in the external flow

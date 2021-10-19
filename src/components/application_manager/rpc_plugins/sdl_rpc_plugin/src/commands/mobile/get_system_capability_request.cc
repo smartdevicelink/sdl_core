@@ -50,11 +50,11 @@ GetSystemCapabilityRequest::GetSystemCapabilityRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 GetSystemCapabilityRequest::~GetSystemCapabilityRequest() {}
 
@@ -204,10 +204,12 @@ void GetSystemCapabilityRequest::Run() {
       auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
       if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
               .asBool() == true) {
-        SDL_LOG_DEBUG("Subscribe to system capability: " << response_type);
+        SDL_LOG_DEBUG("Subscribe to system capability: "
+                      << response_type << " for app_id: " << app->app_id());
         ext.SubscribeTo(response_type);
       } else {
-        SDL_LOG_DEBUG("Unsubscribe from system capability: " << response_type);
+        SDL_LOG_DEBUG("Unsubscribe from system capability: "
+                      << response_type << " for app_id: " << app->app_id());
         ext.UnsubscribeFrom(response_type);
       }
     }

@@ -35,7 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_
 
 #include "application_manager/application_impl.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -46,7 +46,8 @@ namespace commands {
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
+class SubscribeButtonRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor
@@ -74,6 +75,12 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
  private:
   /**
    * @brief Checks if button subscription allowed. In case non-media
@@ -87,12 +94,6 @@ class SubscribeButtonRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   bool IsSubscriptionAllowed(app_mngr::ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
-
-  /**
-   * @brief Sends ButtonSubscription notification
-   * to notify HMI that app subscribed on the button.
-   */
-  void SendSubscribeButtonNotification();
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };

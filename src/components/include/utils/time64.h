@@ -51,10 +51,10 @@ typedef time_t TIME_TYPE;
 
 template <typename DURATION_TYPE>
 double get_duration_diff(TIME_TYPE from, TIME_TYPE to) {
-    const DURATION_TYPE time_from(from);
-    const DURATION_TYPE time_to(to);
+  const DURATION_TYPE time_from(from);
+  const DURATION_TYPE time_to(to);
 
-    return std::chrono::duration_cast<DURATION_TYPE>(time_from - time_to).count();
+  return std::chrono::duration_cast<DURATION_TYPE>(time_from - time_to).count();
 }
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_TIME64_H

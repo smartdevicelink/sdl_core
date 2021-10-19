@@ -39,7 +39,7 @@
 
 #ifdef __ANDROID__
 #include "utils/threads/pthread_android.h"
-#endif // __ANDROID__
+#endif  // __ANDROID__
 
 namespace threads {
 

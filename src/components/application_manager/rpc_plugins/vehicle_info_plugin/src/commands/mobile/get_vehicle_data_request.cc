@@ -54,11 +54,11 @@ namespace str = strings;
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
-                         params.application_manager_,
-                         params.rpc_service_,
-                         params.hmi_capabilities_,
-                         params.policy_handler_)
+    : RequestFromMobileImpl(message,
+                            params.application_manager_,
+                            params.rpc_service_,
+                            params.hmi_capabilities_,
+                            params.policy_handler_)
     , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
@@ -91,7 +91,7 @@ void GetVehicleDataRequest::Run() {
       continue;
     }
     hmi_msg_params[name] = msg_params[name];
-    params_count++;
+    ++params_count;
   }
 
   const int minimal_params_count = 1;
@@ -125,6 +125,12 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
+
+      if (message[strings::msg_params].keyExists(strings::tire_pressure)) {
+        ApplicationSharedPtr app =
+            application_manager_.application(connection_key());
+        MessageHelper::AddDefaultParamsToTireStatus(app, message);
+      }
 
       auto data_not_available_with_params = [this, &result_code, &message]() {
         if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
@@ -162,6 +168,13 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           if (pending_vehicle_data_.end() == found_item) {
             message[strings::msg_params].erase(item);
           }
+        }
+
+        if (MessageHelper::RemoveEmptyMessageParams(
+                message[strings::msg_params]) > 0) {
+          mobile_result_code = mobile_apis::Result::WARNINGS;
+          response_info = app_mngr::commands::MergeInfos(
+              response_info, "Some vehicle data items could not be retrieved");
         }
 
         if (message[strings::msg_params].empty() &&

@@ -121,7 +121,7 @@ void SystemTimeHandlerImpl::SendTimeRequest() {
   awaiting_get_system_time_ = true;
 }
 
-void SystemTimeHandlerImpl::on_event(
+void SystemTimeHandlerImpl::HandleOnEvent(
     const application_manager::event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   using namespace application_manager;

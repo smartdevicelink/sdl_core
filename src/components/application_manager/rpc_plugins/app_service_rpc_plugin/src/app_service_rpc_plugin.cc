@@ -58,18 +58,6 @@ bool AppServiceRpcPlugin::Init(
   return true;
 }
 
-bool AppServiceRpcPlugin::Init(app_mngr::ApplicationManager& app_manager,
-                               app_mngr::rpc_service::RPCService& rpc_service,
-                               app_mngr::HMICapabilities& hmi_capabilities,
-                               policy::PolicyHandlerInterface& policy_handler,
-                               resumption::LastState& last_state) {
-  UNUSED(last_state);
-  application_manager_ = &app_manager;
-  command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
-      app_manager, rpc_service, hmi_capabilities, policy_handler));
-  return true;
-}
-
 bool AppServiceRpcPlugin::IsAbleToProcess(
     const int32_t function_id, const commands::Command::CommandSource source) {
   return command_factory_->IsAbleToProcess(function_id, source);
@@ -88,11 +76,22 @@ void AppServiceRpcPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void AppServiceRpcPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
-  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<AppServiceAppExtension>(*this, *application));
-  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
-    DeleteSubscriptions(application);
+  switch (event) {
+    case plugins::ApplicationEvent::kApplicationRegistered: {
+      application->AddExtension(
+          std::make_shared<AppServiceAppExtension>(*this, *application));
+      break;
+    }
+
+    case plugins::ApplicationEvent::kApplicationUnregistered:
+    case plugins::ApplicationEvent::kDeleteApplicationData: {
+      DeleteSubscriptions(application);
+      break;
+    }
+
+    default: {
+      break;
+    }
   }
 }
 

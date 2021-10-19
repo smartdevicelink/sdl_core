@@ -38,18 +38,18 @@
 #include "utils/macro.h"
 
 namespace profile {
-    class AndroidProfile : public Profile {
-    public:
-        AndroidProfile(
-                const std::string& internal_storage_dir,
-                const std::string& external_storage_dir);
+class AndroidProfile : public Profile {
+ public:
+  AndroidProfile(const std::string& internal_storage_dir,
+                 const std::string& external_storage_dir);
 
-        void SubstituteMacroInString(std::string& in_string) const OVERRIDE;
+  void SubstituteMacroInString(std::string& in_string) const OVERRIDE;
 
-    private:
-        std::string internal_storage_dir_;
-        std::string external_storage_dir_;
-    };
-}
+ private:
+  std::string internal_storage_dir_;
+  std::string external_storage_dir_;
+};
+}  // namespace profile
 
-#endif //#ifndef SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_ANDROID_PROFILE_H_
+#endif  //#ifndef
+        // SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_ANDROID_PROFILE_H_

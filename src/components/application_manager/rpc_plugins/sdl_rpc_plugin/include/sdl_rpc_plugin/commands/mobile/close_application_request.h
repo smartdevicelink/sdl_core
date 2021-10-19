@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CLOSE_APPLICATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CLOSE_APPLICATION_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
 namespace sdl_rpc_plugin {
@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief CloseApplicationRequest command class
  **/
-class CloseApplicationRequest : public app_mngr::commands::CommandRequestImpl {
+class CloseApplicationRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief CloseApplicationRequest class constructor

@@ -51,8 +51,7 @@ VIIsReadyRequest::VIIsReadyRequest(
                    params.application_manager_,
                    params.rpc_service_,
                    params.hmi_capabilities_,
-                   params.policy_handler_)
-    , EventObserver(application_manager_.event_dispatcher()) {}
+                   params.policy_handler_) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
@@ -78,6 +77,8 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
       HMICapabilities& hmi_capabilities = hmi_capabilities_;
       hmi_capabilities.set_is_ivi_cooperating(is_available);
       policy_handler_.OnVIIsReady();
+      hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VehicleInfo_IsReady);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VehicleInfo)) {
         SDL_LOG_INFO(
@@ -97,8 +98,10 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void VIIsReadyRequest::onTimeOut() {
+void VIIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_IsReady);
   RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
 }
 

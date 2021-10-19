@@ -58,11 +58,10 @@ void UIGetCapabilitiesResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::UI_GetCapabilities);
-
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
     SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::UI_GetCapabilities);
     return;
   }
 
@@ -152,11 +151,6 @@ void UIGetCapabilitiesResponse::Run() {
         hmi_capabilities_.set_driver_distraction_supported(true);
       }
     }
-    if (system_capabilities_so.keyExists(strings::display_capabilities)) {
-      sections_to_update.push_back(strings::display_capabilities);
-      hmi_capabilities_.set_system_display_capabilities(
-          system_capabilities_so[strings::display_capabilities]);
-    }
   }
 
   if (msg_params.keyExists(strings::pcm_stream_capabilities)) {
@@ -164,6 +158,9 @@ void UIGetCapabilitiesResponse::Run() {
     hmi_capabilities_.set_pcm_stream_capabilities(
         msg_params[strings::pcm_stream_capabilities]);
   }
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetCapabilities);
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::ui, sections_to_update, message_->getSchema())) {

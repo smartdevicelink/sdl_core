@@ -56,11 +56,11 @@ class AndroidConnectionFactory : public ServerConnectionFactory {
   AndroidConnectionFactory(AndroidTransportAdapter* controller);
 
  protected:
-
   TransportAdapter::Error Init() override;
 
   TransportAdapter::Error CreateConnection(
-      const DeviceUID& device_uid, const ApplicationHandle& app_handle) override;
+      const DeviceUID& device_uid,
+      const ApplicationHandle& app_handle) override;
 
   void Terminate() override;
 

@@ -430,6 +430,7 @@ struct ModuleMeta : CompositeType {
   Optional<Integer<uint16_t, 0, 65535> > pt_exchanged_x_days_after_epoch;
   Optional<Integer<uint16_t, 0, 65535> > ignition_cycles_since_last_exchange;
   Optional<String<0, 500> > ccpu_version;
+  Optional<String<0, 500> > hardware_version;
 
  public:
   ModuleMeta();
@@ -563,7 +564,11 @@ struct VehicleDataItem : CompositeType {
   VehicleDataItem(const VehicleDataItem& policy_table);
   explicit VehicleDataItem(const Json::Value* value__);
 
+#ifdef __ANDROID__
   bool operator==(const VehicleDataItem& vd) const;
+#else
+  bool operator==(const VehicleDataItem& vd);
+#endif
 
   ~VehicleDataItem();
 

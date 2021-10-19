@@ -716,16 +716,16 @@ using ::std::tuple_size;
 # define GTEST_ATTRIBUTE_UNUSED_
 #endif
 
-// A macro to disallow operator=
+// A macro to disallow copy operator=
 // This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_ASSIGN_(type)\
-  void operator=(type const &)
+#define GTEST_DISALLOW_ASSIGN_(type) \
+  type& operator=(type const &) = delete
 
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_COPY_AND_ASSIGN_(type)\
-  type(type const &);\
-  GTEST_DISALLOW_ASSIGN_(type)
+#define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
+  type(type const&) = delete;                 \
+  type& operator=(type const&) = delete
 
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations

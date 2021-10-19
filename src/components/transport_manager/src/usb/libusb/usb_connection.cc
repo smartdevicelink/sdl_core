@@ -81,7 +81,6 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
 UsbConnection::~UsbConnection() {
   SDL_LOG_TRACE("enter with this" << this);
   Finalise();
-  libusb_free_transfer(in_transfer_);
   delete[] in_buffer_;
   SDL_LOG_TRACE("exit");
 }
@@ -97,6 +96,12 @@ void OutTransferCallback(libusb_transfer* transfer) {
 
 bool UsbConnection::PostInTransfer() {
   SDL_LOG_TRACE("enter");
+
+  if (nullptr == in_transfer_) {
+    SDL_LOG_TRACE("exit with FALSE. Condition: nullptr == in_transfer_");
+    return false;
+  }
+
   libusb_fill_bulk_transfer(in_transfer_,
                             device_handle_,
                             in_endpoint_,
@@ -129,28 +134,40 @@ std::string hex_data(const unsigned char* const buffer,
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   SDL_LOG_TRACE("enter with Libusb_transfer*: " << transfer);
-  if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    SDL_LOG_DEBUG("USB incoming transfer, size:"
-                  << transfer->actual_length << ", data:"
-                  << hex_data(transfer->buffer, transfer->actual_length));
-    ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
-        0, 0, in_buffer_, transfer->actual_length, false));
-    controller_->DataReceiveDone(device_uid_, app_handle_, data);
-  } else {
-    SDL_LOG_ERROR("USB incoming transfer failed: "
-                  << libusb_error_name(transfer->status));
-    controller_->DataReceiveFailed(
-        device_uid_, app_handle_, DataReceiveError());
-  }
-  if (disconnecting_) {
-    waiting_in_transfer_cancel_ = false;
-  } else {
-    if (!PostInTransfer()) {
-      SDL_LOG_ERROR("USB incoming transfer failed with "
-                    << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
-      AbortConnection();
+  switch (transfer->status) {
+    case LIBUSB_TRANSFER_COMPLETED: {
+      SDL_LOG_DEBUG("USB incoming transfer, size:"
+                    << transfer->actual_length << ", data:"
+                    << hex_data(transfer->buffer, transfer->actual_length));
+      ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
+          0, 0, in_buffer_, transfer->actual_length, false));
+      controller_->DataReceiveDone(device_uid_, app_handle_, data);
+      break;
+    }
+
+    case LIBUSB_TRANSFER_CANCELLED: {
+      SDL_LOG_DEBUG("Free already canceled transfer.");
+      break;
+    }
+
+    default: {
+      SDL_LOG_ERROR("USB incoming transfer failed: "
+                    << libusb_error_name(transfer->status));
+      controller_->DataReceiveFailed(
+          device_uid_, app_handle_, DataReceiveError());
     }
   }
+
+  if (waiting_in_transfer_cancel_) {
+    libusb_free_transfer(in_transfer_);
+    in_transfer_ = nullptr;
+    waiting_in_transfer_cancel_ = false;
+  } else if (!PostInTransfer()) {
+    SDL_LOG_ERROR("USB incoming transfer failed with "
+                  << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
+    AbortConnection();
+  }
+
   SDL_LOG_TRACE("exit");
 }
 
@@ -200,38 +217,49 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
+  SDL_LOG_AUTO_TRACE();
   SDL_LOG_TRACE("enter with  Libusb_transfer*: " << transfer);
   auto error_code = TransportAdapter::OK;
   {
     sync_primitives::AutoLock locker(out_messages_mutex_);
-    if (LIBUSB_TRANSFER_COMPLETED == transfer->status) {
-      bytes_sent_ += transfer->actual_length;
-      if (current_out_message_->data_size() == bytes_sent_) {
-        SDL_LOG_DEBUG(
-            "USB out transfer, data sent: " << current_out_message_.get());
-        controller_->DataSendDone(
-            device_uid_, app_handle_, current_out_message_);
+    switch (transfer->status) {
+      case LIBUSB_TRANSFER_COMPLETED: {
+        bytes_sent_ += transfer->actual_length;
+        if (current_out_message_->data_size() == bytes_sent_) {
+          SDL_LOG_DEBUG(
+              "USB out transfer, data sent: " << current_out_message_.get());
+          controller_->DataSendDone(
+              device_uid_, app_handle_, current_out_message_);
+          error_code = PopOutMessage();
+        }
+        break;
+      }
+
+      case LIBUSB_TRANSFER_CANCELLED: {
+        SDL_LOG_DEBUG("Free already canceled transfer.");
+        break;
+      }
+
+      default: {
+        SDL_LOG_ERROR(
+            "USB out transfer failed: " << libusb_error_name(transfer->status));
+        controller_->DataSendFailed(
+            device_uid_, app_handle_, current_out_message_, DataSendError());
         error_code = PopOutMessage();
       }
-    } else {
-      SDL_LOG_ERROR(
-          "USB out transfer failed: " << libusb_error_name(transfer->status));
-      controller_->DataSendFailed(
-          device_uid_, app_handle_, current_out_message_, DataSendError());
-      error_code = PopOutMessage();
     }
-    if (current_out_message_.use_count() == 0) {
+
+    if (waiting_out_transfer_cancel_ || current_out_message_.use_count() == 0) {
       libusb_free_transfer(transfer);
       out_transfer_ = nullptr;
       waiting_out_transfer_cancel_ = false;
+      return;
     }
   }
 
   if (TransportAdapter::FAIL == error_code) {
     AbortConnection();
   }
-
-  SDL_LOG_TRACE("exit");
 }
 
 TransportAdapter::Error UsbConnection::SendData(

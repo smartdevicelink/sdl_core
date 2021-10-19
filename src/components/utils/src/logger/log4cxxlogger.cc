@@ -90,6 +90,7 @@ log4cxx::LevelPtr getLogLevel(LogLevel log_level) {
       return log4cxx::Level::getFatal();
     default:
       assert(false);
+      return log4cxx::Level::getTrace();
   }
 }
 

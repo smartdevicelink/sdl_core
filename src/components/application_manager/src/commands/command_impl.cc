@@ -39,17 +39,55 @@
 namespace application_manager {
 
 namespace {
-struct AppExtensionPredicate {
-  AppExtensionUID uid;
-  bool operator()(const ApplicationSharedPtr app) {
-    return app ? (app->QueryInterface(uid).use_count() != 0) : false;
+
+/**
+ * @brief Functor for build info string
+ */
+struct InfoAppender {
+  explicit InfoAppender(std::string& info) : info_(info) {}
+
+  void operator()(const RPCParams::value_type& parameter) {
+    if (info_.empty()) {
+      info_ = "\'" + parameter + "\'";
+      return;
+    }
+
+    info_ = info_ + ", \'" + parameter + "\'";
   }
+
+ private:
+  std::string& info_;
 };
+
 }  // namespace
 
 namespace commands {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
+
+bool IsMobileResultSuccess(const mobile_apis::Result::eType result_code) {
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED,
+      mobile_apis::Result::TRUNCATED_DATA);
+}
+
+bool IsHMIResultSuccess(const hmi_apis::Common_Result::eType result_code) {
+  using namespace helpers;
+  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED,
+      hmi_apis::Common_Result::TRUNCATED_DATA);
+}
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;
@@ -61,7 +99,9 @@ CommandImpl::CommandImpl(const MessageSharedPtr& message,
                          HMICapabilities& hmi_capabilities,
                          policy::PolicyHandlerInterface& policy_handler)
     : message_(message)
-    , default_timeout_(application_manager.get_settings().default_timeout())
+    , default_timeout_(
+          application_manager.get_settings().default_timeout() +
+          application_manager.get_settings().default_timeout_compensation())
     , allowed_to_terminate_(true)
     , application_manager_(application_manager)
     , rpc_service_(rpc_service)
@@ -85,6 +125,8 @@ bool CommandImpl::CleanUp() {
 }
 
 void CommandImpl::Run() {}
+
+void CommandImpl::OnUpdateTimeOut() {}
 
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
@@ -111,6 +153,8 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
+void CommandImpl::HandleTimeOut() {}
+
 void CommandImpl::set_warning_info(const std::string info) {
   warning_info_ = info;
 }
@@ -118,8 +162,6 @@ void CommandImpl::set_warning_info(const std::string info) {
 std::string CommandImpl::warning_info() const {
   return warning_info_;
 }
-
-void CommandImpl::onTimeOut() {}
 
 bool CommandImpl::AllowedToTerminate() {
   return allowed_to_terminate_;
@@ -139,6 +181,12 @@ bool CommandImpl::CheckAllowedParameters(const Command::CommandSource source) {
         "There is no registered application with "
         "connection key '"
         << connection_key() << "'");
+
+    rpc_service_.SendMessageToMobile(MessageHelper::CreateNegativeResponse(
+        connection_key(),
+        function_id(),
+        correlation_id(),
+        mobile_apis::Result::APPLICATION_NOT_REGISTERED));
     return false;
   }
 
@@ -179,6 +227,25 @@ bool CommandImpl::CheckAllowedParameters(const Command::CommandSource source) {
               check_result,
               correlation_id(),
               app->app_id());
+
+      if (!params.empty()) {
+        if (parameters_permissions_.AreDisallowedParamsIncluded(params)) {
+          const std::string info = "RPC is disallowed by the user";
+          SDL_LOG_DEBUG(info);
+          (*response)[strings::msg_params][strings::info] = info;
+          AddDisallowedParameters(*response);
+        } else if (parameters_permissions_.AreUndefinedParamsIncluded(params)) {
+          const std::string info =
+              "Requested parameters are disallowed by Policies";
+
+          SDL_LOG_DEBUG(info);
+          (*response)[strings::msg_params][strings::info] = info;
+          AddDisallowedParameters(*response);
+        } else {
+          FormatResponse(*response);
+        }
+      }
+
       rpc_service_.SendMessageToMobile(response);
     }
 
@@ -196,6 +263,143 @@ bool CommandImpl::CheckAllowedParameters(const Command::CommandSource source) {
   RemoveDisallowedParameters();
 
   return true;
+}
+
+struct DisallowedParamsInserter {
+  DisallowedParamsInserter(smart_objects::SmartObject& response,
+                           mobile_apis::VehicleDataResultCode::eType code)
+      : response_(response), code_(code) {}
+
+  bool operator()(const std::string& param) {
+    smart_objects::SmartObjectSPtr disallowed_param =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+
+    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+    auto vehicle_data = rpc_spec_vehicle_data.find(param);
+    auto vehicle_data_type =
+        vehicle_data == rpc_spec_vehicle_data.end()
+            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
+            : vehicle_data->second;
+
+    (*disallowed_param)[strings::data_type] = vehicle_data_type;
+    (*disallowed_param)[strings::result_code] = code_;
+    response_[strings::msg_params][param.c_str()] = *disallowed_param;
+    return true;
+  }
+
+ private:
+  smart_objects::SmartObject& response_;
+  mobile_apis::VehicleDataResultCode::eType code_;
+};
+
+void CommandImpl::AddDisallowedParameters(
+    smart_objects::SmartObject& response) {
+  const mobile_apis::FunctionID::eType id =
+      static_cast<mobile_apis::FunctionID::eType>(function_id());
+
+  if (!helpers::
+          Compare<mobile_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+              id,
+              mobile_apis::FunctionID::SubscribeVehicleDataID,
+              mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+    SDL_LOG_INFO("The function id: " << id << " is not supported.");
+    return;
+  }
+
+  DisallowedParamsInserter disallowed_inserter(
+      response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
+  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
+                removed_parameters_permissions_.disallowed_params.end(),
+                disallowed_inserter);
+
+  DisallowedParamsInserter undefined_inserter(
+      response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
+  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
+                removed_parameters_permissions_.undefined_params.end(),
+                undefined_inserter);
+}
+
+void CommandImpl::AddDisallowedParameterToInfoString(
+    std::string& info, const std::string& param) const {
+  // prepare disallowed params enumeration for response info string
+  if (info.empty()) {
+    info = "\'" + param + "\'";
+  } else {
+    info = info + "," + " " + "\'" + param + "\'";
+  }
+}
+
+void CommandImpl::AddDisallowedParametersToInfo(
+    smart_objects::SmartObject& response) const {
+  SDL_LOG_AUTO_TRACE();
+  const mobile_apis::FunctionID::eType id =
+      static_cast<mobile_apis::FunctionID::eType>(function_id());
+
+  if (!helpers::
+          Compare<mobile_apis::FunctionID::eType, helpers::EQ, helpers::ONE>(
+              id,
+              mobile_apis::FunctionID::SubscribeVehicleDataID,
+              mobile_apis::FunctionID::UnsubscribeVehicleDataID,
+              mobile_apis::FunctionID::GetVehicleDataID,
+              mobile_apis::FunctionID::SendLocationID)) {
+    SDL_LOG_INFO("The function id: " << id << " is not supported.");
+    return;
+  }
+
+  std::string disallowed_by_user_info;
+  InfoAppender user_info_appender(disallowed_by_user_info);
+
+  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
+                removed_parameters_permissions_.disallowed_params.end(),
+                user_info_appender);
+
+  const size_t min_number_of_disallowed_params = 1;
+  if (!disallowed_by_user_info.empty()) {
+    disallowed_by_user_info +=
+        min_number_of_disallowed_params <
+                removed_parameters_permissions_.disallowed_params.size()
+            ? " are"
+            : " is";
+    disallowed_by_user_info += " disallowed by user";
+  }
+
+  std::string disallowed_by_policy_info;
+  InfoAppender policy_info_appender(disallowed_by_policy_info);
+
+  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
+                removed_parameters_permissions_.undefined_params.end(),
+                policy_info_appender);
+
+  const size_t min_number_of_undefined_params = 1;
+  if (!disallowed_by_policy_info.empty()) {
+    disallowed_by_policy_info +=
+        min_number_of_undefined_params <
+                removed_parameters_permissions_.undefined_params.size()
+            ? " are"
+            : " is";
+    disallowed_by_policy_info += " disallowed by policies";
+  }
+
+  if (disallowed_by_user_info.empty() && disallowed_by_policy_info.empty()) {
+    SDL_LOG_INFO("There are not disallowed by user or by policy parameters.");
+    return;
+  }
+
+  smart_objects::SmartObject& info =
+      response[strings::msg_params][strings::info];
+
+  std::string summary;
+  if (!disallowed_by_policy_info.empty()) {
+    summary += disallowed_by_policy_info;
+  }
+
+  if (!disallowed_by_user_info.empty()) {
+    summary = summary.empty() ? disallowed_by_user_info
+                              : summary + ", " + disallowed_by_user_info;
+  }
+
+  info = info.asString().empty() ? summary : info.asString() + " " + summary;
 }
 
 void CommandImpl::RemoveDisallowedParameters() {
@@ -268,11 +472,18 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
         }
         break;
       }
-      default: { break; }
+      default: {
+        break;
+      }
     }
   }
 
   return true;
+}
+
+void CommandImpl::FormatResponse(smart_objects::SmartObject& response) {
+  AddDisallowedParametersToInfo(response);
+  AddDisallowedParameters(response);
 }
 
 bool CommandImpl::ReplaceHMIWithMobileAppId(
@@ -312,7 +523,9 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
         }
         break;
       }
-      default: { break; }
+      default: {
+        break;
+      }
     }
   }
 
@@ -350,6 +563,20 @@ bool CommandImpl::CheckSyntax(const std::string& str,
     }
   }
   return true;
+}
+
+bool CommandImpl::IsHMIResultSuccess(
+    hmi_apis::Common_Result::eType result_code,
+    HmiInterfaces::InterfaceID interface) const {
+  SDL_LOG_AUTO_TRACE();
+  if (application_manager::commands::IsHMIResultSuccess(result_code)) {
+    return true;
+  }
+
+  const HmiInterfaces::InterfaceState state =
+      application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  return hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code &&
+         HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
 }  // namespace commands

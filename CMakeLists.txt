@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 cmake_minimum_required(VERSION 2.8.11)
+cmake_policy(SET CMP0054 NEW)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
@@ -54,12 +55,17 @@ option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 option(ENABLE_IAP2EMULATION "IAP2 emulation via tcp" OFF)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" OFF)
+
+set(LOGGER_NAME "LOG4CXX" CACHE STRING "Logging library to use (BOOST, LOG4CXX)")
+set_property(CACHE LOGGER_NAME PROPERTY STRINGS BOOST LOG4CXX)
+if(LOGGER_NAME STREQUAL "")
+  set(LOGGER_NAME "LOG4CXX")
+endif()
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")
 set_property(CACHE EXTENDED_POLICY PROPERTY STRINGS PROPRIETARY HTTP EXTERNAL_PROPRIETARY)
@@ -200,6 +206,12 @@ get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
 
+get_property(cHelpString CACHE LOGGER_NAME PROPERTY HELPSTRING)
+get_property(cType CACHE LOGGER_NAME PROPERTY TYPE)
+get_property(cValue CACHE LOGGER_NAME PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "LOGGER_NAME:${cType}=${cValue}\n\n")
+
 get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
 get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
 get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
@@ -217,12 +229,6 @@ get_property(cType CACHE HMI PROPERTY TYPE)
 get_property(cValue CACHE HMI PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
-
-get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
-get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
-get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
-file(APPEND "${build_config_path}" "//${cHelpString}\n")
-file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
 get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
 get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
@@ -405,6 +411,14 @@ else()
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
+if(${LOGGER_NAME} STREQUAL "LOG4CXX")
+  add_definitions(-DLOG4CXX_LOGGER)
+  message(STATUS "Selected the apache log4cxx logging library")
+else()
+  add_definitions(-DBOOST_LOGGER)
+  message(STATUS "Selected the boost logging library")
+endif()
+
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 
@@ -448,10 +462,18 @@ include_directories(
 add_subdirectory(./src/3rd_party EXCLUDE_FROM_ALL)
 
 if (NOT ANDROID)
-if(ENABLE_LOG)
+  find_package(OpenSSL REQUIRED)
+endif()
+
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX" AND NOT ANDROID)
+  message(STATUS "Including log4cxx")
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
 endif()
-endif ()
+
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  message(STATUS "Including boost")
+  include_directories ( ${BOOST_INCLUDE_DIR} )
+endif()
 
 if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
@@ -459,11 +481,6 @@ if(ENABLE_SECURITY)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
   message(STATUS "Security enabled")
-endif()
-
-if(ENABLE_HMI_PTU_DECRYPTION)
-  add_definitions(-DUSE_HMI_PTU_DECRYPTION)
-  message(STATUS "HMI PTU decription enabled")
 endif()
 
 if(ENABLE_IAP2EMULATION)

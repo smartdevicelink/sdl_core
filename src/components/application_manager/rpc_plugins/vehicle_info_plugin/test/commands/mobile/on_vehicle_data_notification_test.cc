@@ -56,8 +56,10 @@ namespace on_vehicle_data_notification {
 namespace am = ::application_manager;
 
 using ::testing::_;
+using ::testing::ContainerEq;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgPointee;
 
 using am::commands::MessageSharedPtr;
 using vehicle_info_plugin::commands::OnVehicleDataNotification;
@@ -118,6 +120,15 @@ TEST_F(OnVehicleDataNotificationTest, OnVehicleDataNotification_SUCCESS) {
           QueryInterface(vehicle_info_plugin::VehicleInfoAppExtension::
                              VehicleInfoAppExtensionUID))
       .WillByDefault(Return(vi_app_extention_ptr));
+
+  am::CommandParametersPermissions params_permissions;
+  params_permissions.allowed_params.insert(am::strings::gps);
+  params_permissions.allowed_params.insert(am::strings::speed);
+  EXPECT_CALL(app_mngr_,
+              CheckPolicyPermissions(
+                  _, _, _, ContainerEq(params_permissions.allowed_params), _))
+      .WillOnce(DoAll(SetArgPointee<4>(params_permissions),
+                      Return(mobile_apis::Result::SUCCESS)));
 
   MessageSharedPtr message(CreateMessage(smart_objects::SmartType_Map));
   smart_objects::SmartObject gps_data;

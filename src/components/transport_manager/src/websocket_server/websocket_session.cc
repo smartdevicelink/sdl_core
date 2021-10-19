@@ -48,7 +48,6 @@ WebSocketSession<tcp::socket&>::WebSocketSession(
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_)
-    , strand_(ws_.get_executor())
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)
     , data_send_failed_(data_send_failed)
@@ -67,7 +66,6 @@ WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_, ctx)
-    , strand_(ws_.get_executor())
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)
     , data_send_failed_(data_send_failed)
@@ -83,11 +81,9 @@ WebSocketSession<ExecutorType>::~WebSocketSession() {}
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::AsyncAccept() {
   SDL_LOG_AUTO_TRACE();
-  ws_.async_accept(
-      boost::asio::bind_executor(strand_,
-                                 std::bind(&WebSocketSession::AsyncRead,
-                                           this->shared_from_this(),
-                                           std::placeholders::_1)));
+  ws_.async_accept(std::bind(&WebSocketSession::AsyncRead,
+                             this->shared_from_this(),
+                             std::placeholders::_1));
 }
 
 template <typename ExecutorType>
@@ -96,15 +92,16 @@ void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
     SDL_LOG_ERROR(str_err);
+    buffer_.consume(buffer_.size());
+    on_io_error_();
     return;
   }
 
   ws_.async_read(buffer_,
-                 boost::asio::bind_executor(strand_,
-                                            std::bind(&WebSocketSession::Read,
-                                                      this->shared_from_this(),
-                                                      std::placeholders::_1,
-                                                      std::placeholders::_2)));
+                 std::bind(&WebSocketSession::Read,
+                           this->shared_from_this(),
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
 template <typename ExecutorType>

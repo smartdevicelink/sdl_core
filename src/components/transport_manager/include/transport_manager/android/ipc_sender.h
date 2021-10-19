@@ -6,34 +6,31 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class IpcSender
-{
-public:
+class IpcSender {
+ public:
+  virtual ~IpcSender() {}
 
-    virtual ~IpcSender() {}
+  /**
+   * @brief Initialize sender
+   * @param ipc_name local socket name
+   */
+  virtual void Init(const std::string& ipc_name) = 0;
 
-    /**
-    * @brief Initialize sender
-    * @param ipc_name local socket name
-    */
-    virtual void Init(const std::string& ipc_name) = 0;
+  /**
+   * @brief Run sending cycle
+   */
+  virtual void Run() = 0;
 
-    /**
-    * @brief Run sending cycle
-    */
-    virtual void Run() = 0;
-    
-    /**
-    * @brief Run sending
-    */
-    virtual void Stop() = 0;
-    
-    /**
-    * @brief Send message
-    * @param message message to send
-    */
-    virtual void Send(::protocol_handler::RawMessagePtr message) = 0;
+  /**
+   * @brief Run sending
+   */
+  virtual void Stop() = 0;
 
+  /**
+   * @brief Send message
+   * @param message message to send
+   */
+  virtual void Send(::protocol_handler::RawMessagePtr message) = 0;
 };
 
 }  // namespace transport_adapter

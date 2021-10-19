@@ -86,8 +86,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool InitPolicyTable() OVERRIDE;
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
-  DEPRECATED bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                   const std::string& url) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
@@ -386,9 +384,13 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  void OnHardwareVersionReceived(const std::string& hardware_version) OVERRIDE;
+
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -812,6 +814,9 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void LinkAppsToDevice();
 
+  void SetHeartBeatTimeout(const std::string& policy_app_id,
+                           const uint32_t app_id);
+
   typedef std::vector<application_manager::ApplicationSharedPtr> Applications;
 
   /**
@@ -873,19 +878,21 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Collects permissions for all currently registered applications on
    * all devices
-   * @return consolidated permissions list or empty list if no
-   * applications/devices currently present
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectRegisteredAppsPermissions();
+  bool CollectRegisteredAppsPermissions(
+      std::vector<FunctionalGroupPermission>& out_permissions);
 
   /**
    * @brief Collects permissions for application with certain connection key
    * @param connection_key Connection key of application to look for
-   * @return list of application permissions or empty list if no such
-   * application found
+   * @param out_permissions output ref on list of application permissions
+   * @return true if app connection information is valid, otherwise - false
    */
-  std::vector<FunctionalGroupPermission> CollectAppPermissions(
-      const uint32_t connection_key);
+  bool CollectAppPermissions(
+      const uint32_t connection_key,
+      std::vector<policy::FunctionalGroupPermission>& out_permissions);
 
  private:
   static const std::string kLibrary;
