@@ -76,11 +76,22 @@ void AppServiceRpcPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void AppServiceRpcPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
-  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<AppServiceAppExtension>(*this, *application));
-  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
-    DeleteSubscriptions(application);
+  switch (event) {
+    case plugins::ApplicationEvent::kApplicationRegistered: {
+      application->AddExtension(
+          std::make_shared<AppServiceAppExtension>(*this, *application));
+      break;
+    }
+
+    case plugins::ApplicationEvent::kApplicationUnregistered:
+    case plugins::ApplicationEvent::kDeleteApplicationData: {
+      DeleteSubscriptions(application);
+      break;
+    }
+
+    default: {
+      break;
+    }
   }
 }
 

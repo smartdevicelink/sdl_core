@@ -44,7 +44,6 @@ class AppServiceRpcPlugin;
 
 namespace app_mngr = application_manager;
 
-typedef int AppExtensionUID;
 typedef mobile_apis::VehicleDataType::eType VehicleDataType;
 /**
  * @brief Defines set of app service types
@@ -113,6 +112,8 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    */
   static AppServiceAppExtension& ExtractASExtension(
       application_manager::Application& app);
+
+  static const app_mngr::AppExtensionUID AppServiceAppExtensionUID = 455;
 
  private:
   AppServiceSubscriptions subscribed_data_;

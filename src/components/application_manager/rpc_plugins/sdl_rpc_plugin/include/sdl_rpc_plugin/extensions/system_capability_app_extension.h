@@ -69,7 +69,7 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
   void RevertResumption(
       const smart_objects::SmartObject& subscriptions) OVERRIDE;
 
-  static const app_mngr_::AppExtensionUID SystemCapabilityAppExtensionUID;
+  static const app_mngr_::AppExtensionUID SystemCapabilityAppExtensionUID = 200;
 
   static SystemCapabilityAppExtension& ExtractExtension(
       app_mngr_::Application& app);

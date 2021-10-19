@@ -71,10 +71,11 @@ std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
 }  // namespace
 
 namespace rc_rpc_plugin {
-RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid,
-                               RCRPCPlugin& plugin,
+RCAppExtension::RCAppExtension(RCRPCPlugin& plugin,
                                application_manager::Application& application)
-    : AppExtension(uid), plugin_(plugin), application_(application) {}
+    : AppExtension(RCAppExtensionID)
+    , plugin_(plugin)
+    , application_(application) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(const ModuleUid& module) {
   subscribed_interior_vehicle_data_.insert(module);

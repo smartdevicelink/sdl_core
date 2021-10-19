@@ -62,7 +62,6 @@ const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "Test";
 const std::string module_type = "CLIMATE";
 const std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
-const int kModuleId = 153u;
 }  // namespace
 
 namespace rc_rpc_plugin_test {
@@ -75,7 +74,7 @@ class OnInteriorVehicleDataNotificationTest
   OnInteriorVehicleDataNotificationTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extension_(
-            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
+            std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));

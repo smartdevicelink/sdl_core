@@ -440,6 +440,8 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
                                       &(msg_params[strings::app_hmi_type]));
   }
 
+  application->MarkRegistered();
+
   // Default HMI level should be set before any permissions validation, since
   // it relies on HMI level.
   app_manager.OnApplicationRegistered(application);
@@ -732,7 +734,6 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   CheckLanguage();
-
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, status_notifier, add_info);
 }

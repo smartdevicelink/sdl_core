@@ -4499,8 +4499,17 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       }
 
       if (flag_diffirence_app_hmi_type) {
-        (*it)->set_app_types(transform_app_hmi_types);
-        (*it)->ChangeSupportingAppHMIType();
+        ApplicationSharedPtr app = *it;
+
+        app->set_app_types(transform_app_hmi_types);
+        app->ChangeSupportingAppHMIType();
+
+        auto on_app_hmi_types_changed = [app](
+                                            plugin_manager::RPCPlugin& plugin) {
+          plugin.OnApplicationEvent(plugin_manager::kAppHmiTypesChanged, app);
+        };
+        ApplyFunctorForEachPlugin(on_app_hmi_types_changed);
+
         const mobile_apis::HMILevel::eType app_hmi_level =
             (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
         if (app_hmi_level == mobile_api::HMILevel::HMI_BACKGROUND) {
@@ -4741,9 +4750,6 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
-
-  // Add application to registered app list and set appropriate mark.
-  application->MarkRegistered();
   applications_.insert(application);
   SDL_LOG_DEBUG("App with app_id: "
                 << application->app_id()

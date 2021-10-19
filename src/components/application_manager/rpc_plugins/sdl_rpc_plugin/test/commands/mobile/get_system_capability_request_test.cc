@@ -34,6 +34,7 @@
 
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state_impl.h"

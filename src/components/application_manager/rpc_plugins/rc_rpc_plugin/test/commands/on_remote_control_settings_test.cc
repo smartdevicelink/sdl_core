@@ -117,18 +117,61 @@ class RCOnRemoteControlSettingsNotificationTest
 };
 
 TEST_F(RCOnRemoteControlSettingsNotificationTest,
-       Run_Allowed_SetAccessMode) {  // Arrange
+       Run_Allowed_MissedAccessMode) {  // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kAllowed] = true;
 
   // Expectations
+  EXPECT_CALL(mock_allocation_manager_, SetAccessMode(_)).Times(0);
+  EXPECT_CALL(mock_allocation_manager_, set_rc_enabled(true));
 
-  ON_CALL(mock_allocation_manager_, GetAccessMode())
-      .WillByDefault(Return(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
+  // Act
+  std::shared_ptr<
+      rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>
+      command = CreateRCCommand<
+          rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>(
+          mobile_message);
 
+  command->Run();
+}
+
+TEST_F(RCOnRemoteControlSettingsNotificationTest,
+       Run_AccessMode_MissedAllowed) {  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kAccessMode] =
+                       hmi_apis::Common_RCAccessMode::ASK_DRIVER;
+
+  // Expectations
+  EXPECT_CALL(mock_allocation_manager_, set_rc_enabled(_)).Times(0);
   EXPECT_CALL(mock_allocation_manager_,
               SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
+
+  // Act
+  std::shared_ptr<
+      rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>
+      command = CreateRCCommand<
+          rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>(
+          mobile_message);
+
+  command->Run();
+}
+
+TEST_F(RCOnRemoteControlSettingsNotificationTest,
+       Run_AccessModeAndAllowed_BothPresent) {  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kAllowed] = true;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kAccessMode] =
+                       hmi_apis::Common_RCAccessMode::ASK_DRIVER;
+
+  // Expectations
+  EXPECT_CALL(mock_allocation_manager_, set_rc_enabled(true));
+  EXPECT_CALL(mock_allocation_manager_,
+              SetAccessMode(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
+
   // Act
   std::shared_ptr<
       rc_rpc_plugin::commands::RCOnRemoteControlSettingsNotification>

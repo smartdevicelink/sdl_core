@@ -112,9 +112,8 @@ class RAManagerTest : public ::testing::Test {
       , mock_rc_helpers_(MockRCHelpers::rc_helpers_mock()) {
     ON_CALL(mock_app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
-    auto plugin_id = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
     app_ext_ptr_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(
-        plugin_id, rc_plugin_, *mock_app_1_);
+        rc_plugin_, *mock_app_1_);
     ON_CALL(*mock_app_1_, app_id()).WillByDefault(Return(kAppId1));
 
     PrepareResources();
@@ -130,13 +129,12 @@ class RAManagerTest : public ::testing::Test {
     ON_CALL(mock_app_mngr_, application(kAppId1))
         .WillByDefault(Return(mock_app_1_));
     ON_CALL(*mock_app_1_,
-            QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+            QueryInterface(rc_rpc_plugin::RCAppExtension::RCAppExtensionID))
         .WillByDefault(Return(app_ext_ptr_));
 
     ON_CALL(mock_app_mngr_, application(kAppId2))
         .WillByDefault(Return(mock_app_2_));
-    ON_CALL(*mock_app_2_,
-            QueryInterface(rc_rpc_plugin::RCRPCPlugin::kRCPluginID))
+    ON_CALL(*mock_app_2_, QueryInterface(RCAppExtension::RCAppExtensionID))
         .WillByDefault(Return(app_ext_ptr_));
 
     OnRCStatusNotificationExpectations();
@@ -144,10 +142,7 @@ class RAManagerTest : public ::testing::Test {
 
   void SetUp() OVERRIDE {
     rc_app_extension_ = std::make_shared<rc_rpc_plugin::RCAppExtension>(
-        static_cast<application_manager::AppExtensionUID>(
-            rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
-        rc_plugin_,
-        *mock_app_1_);
+        rc_plugin_, *mock_app_1_);
     ON_CALL(mock_rc_capabilities_manager_,
             GetDriverLocationFromSeatLocationCapability())
         .WillByDefault(Return(kDriverLocation));
@@ -407,11 +402,8 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
       mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
-  RCAppExtensionPtr rc_extension_ptr = std::make_shared<RCAppExtension>(
-      application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
-      rc_plugin_,
-      *mock_app_1_);
+  RCAppExtensionPtr rc_extension_ptr =
+      std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_1_);
 
   EXPECT_EQ(rc_rpc_plugin::AcquireResult::ALLOWED,
             ra_manager.AcquireResource(kModuleType1, kModuleId, kAppId1));
@@ -483,13 +475,10 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
 
-  RCAppExtensionPtr rc_extension_ptr = std::make_shared<RCAppExtension>(
-      application_manager::AppExtensionUID(
-          rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
-      rc_plugin_,
-      *mock_app_1_);
+  RCAppExtensionPtr rc_extension_ptr =
+      std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_1_);
 
-  EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
+  EXPECT_CALL(*mock_app_1_, QueryInterface(RCAppExtension::RCAppExtensionID))
       .WillRepeatedly(Return(rc_extension_ptr));
 
   // Act
@@ -517,13 +506,9 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
       .WillRepeatedly(Return(mock_app_1_));
 
   RCAppExtensionPtr rc_extension_ptr =
-      std::make_shared<rc_rpc_plugin::RCAppExtension>(
-          application_manager::AppExtensionUID(
-              rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
-          rc_plugin_,
-          *mock_app_1_);
+      std::make_shared<rc_rpc_plugin::RCAppExtension>(rc_plugin_, *mock_app_1_);
 
-  EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
+  EXPECT_CALL(*mock_app_1_, QueryInterface(RCAppExtension::RCAppExtensionID))
       .WillRepeatedly(Return(rc_extension_ptr));
 
   ON_CALL(*mock_app_1_, is_remote_control_supported())
