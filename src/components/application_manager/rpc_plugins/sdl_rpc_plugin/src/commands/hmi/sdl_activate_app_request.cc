@@ -139,7 +139,7 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if (!app->is_cloud_app() || app->IsRegistered()) {
+  if (app->app_id() > 0 || app->IsRegistered()) {
     auto main_state =
         app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
@@ -173,6 +173,15 @@ void SDLActivateAppRequest::Run() {
     application_manager_.connection_handler().ConnectToDevice(app->device());
     return;
   }
+
+  connection_handler::DeviceHandle device_handle = app->device();
+  SDL_LOG_ERROR(
+      "Can't find regular foreground app with the same connection id: "
+      << device_handle);
+  SendErrorResponse(correlation_id(),
+                    SDL_ActivateApp,
+                    hmi_apis::Common_Result::NO_APPS_REGISTERED,
+                    "");
 }
 
 #else  // EXTERNAL_PROPRIETARY_MODE
@@ -216,7 +225,7 @@ void SDLActivateAppRequest::Run() {
     return;
   }
 
-  if (!app_to_activate->is_cloud_app() || app_to_activate->IsRegistered()) {
+  if (app_to_activate->app_id() > 0 || app_to_activate->IsRegistered()) {
     auto main_state = app_to_activate->CurrentHmiState(
         mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {

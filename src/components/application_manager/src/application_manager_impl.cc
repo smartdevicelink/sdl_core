@@ -1200,6 +1200,19 @@ void ApplicationManagerImpl::CreatePendingApplication(
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
   application->set_cloud_app_certificate(app_properties.certificate);
 
+  HmiStatePtr initial_state =
+      CreateRegularState(application,
+                         mobile_apis::WindowType::MAIN,
+                         mobile_apis::HMILevel::INVALID_ENUM,
+                         mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
+                         mobile_api::SystemContext::SYSCTXT_MAIN);
+
+  application->SetInitialState(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      std::string(),  // should not be tracked for main window
+      initial_state);
+
   {
     sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
     SDL_LOG_DEBUG(
@@ -1283,6 +1296,19 @@ void ApplicationManagerImpl::CreatePendingLocalApplication(
   application->set_cloud_app_transport_type(app_properties.transport_type);
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
   application->set_cloud_app_certificate(app_properties.certificate);
+
+  HmiStatePtr initial_state =
+      CreateRegularState(application,
+                         mobile_apis::WindowType::MAIN,
+                         mobile_apis::HMILevel::INVALID_ENUM,
+                         mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
+                         mobile_api::SystemContext::SYSCTXT_MAIN);
+
+  application->SetInitialState(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      std::string(),  // should not be tracked for main window
+      initial_state);
 
   sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   apps_to_register_.insert(application);

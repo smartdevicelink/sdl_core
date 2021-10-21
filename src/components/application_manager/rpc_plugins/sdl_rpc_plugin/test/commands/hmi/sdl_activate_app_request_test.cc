@@ -157,6 +157,7 @@ TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
               CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
       .WillOnce(Return(state));
 
+  EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppID));
   EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
@@ -203,12 +204,6 @@ TEST_F(SDLActivateAppRequestTest, FindAppToRegister_SUCCESS) {
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
-
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
 
   ON_CALL(*mock_app, IsRegistered()).WillByDefault(Return(false));
   ON_CALL(*mock_app, is_cloud_app()).WillByDefault(Return(false));
@@ -272,12 +267,6 @@ TEST_F(SDLActivateAppRequestTest, DevicesAppsEmpty_SUCCESS) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
 
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
-
   ON_CALL(*mock_app, IsRegistered()).WillByDefault(Return(false));
   ON_CALL(*mock_app, is_cloud_app()).WillByDefault(Return(false));
   ON_CALL(*mock_app, device()).WillByDefault(Return(kHandle));
@@ -304,12 +293,6 @@ TEST_F(SDLActivateAppRequestTest, FirstAppActive_SUCCESS) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
-
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
 
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
@@ -348,13 +331,13 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActiveNONE_SUCCESS) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
 
+  ON_CALL(*mock_app, IsRegistered()).WillByDefault(Return(true));
+
   am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
   state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
   EXPECT_CALL(*mock_app,
               CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
       .WillOnce(Return(state));
-
-  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
 
@@ -376,12 +359,6 @@ TEST_F(SDLActivateAppRequestTest, FirstAppIsForeground_SUCCESS) {
   mock_app->SetPackageName(package_name);
 
   ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app));
-
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
 
   EXPECT_CALL(*mock_app, device()).WillOnce(Return(kHandle));
   ON_CALL(*mock_app, IsRegistered()).WillByDefault(Return(false));
@@ -425,12 +402,6 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegisteredAndEmpty_SUCCESS) {
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
 
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
-
   MockAppPtr mock_app_first(CreateMockApp());
   ON_CALL(*mock_app_first, device()).WillByDefault(Return(kHandle));
   ON_CALL(*mock_app_first, is_foreground()).WillByDefault(Return(false));
@@ -463,12 +434,6 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotRegistered_SUCCESS) {
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
-
-  am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
-  state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  EXPECT_CALL(*mock_app,
-              CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
-      .WillOnce(Return(state));
 
   DataAccessor<ApplicationSet> accessor(app_list_, lock_);
   EXPECT_CALL(app_mngr_, applications()).WillRepeatedly(Return(accessor));
