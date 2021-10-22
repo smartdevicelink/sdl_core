@@ -55,12 +55,9 @@ jint JNI_OnLoad(JavaVM* vm, void*) {
 
 void StartSDLNative(JNIEnv* env, jobject) {
 #ifdef ENABLE_LOG
-  static bool __inited_log = false;
   auto logger_impl =
       std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
-  if (!__inited_log) {
-    logger::Logger::instance(logger_impl.get());
-  }
+  logger::Logger::instance(logger_impl.get());
 #endif  // ENABLE_LOG
   const std::string internal_storage =
       JNI_GetMainActivityStringProperty("sdl_cache_folder_path");
@@ -79,15 +76,12 @@ void StartSDLNative(JNIEnv* env, jobject) {
   profile_instance.set_config_file_name(ini_name);
 
 #ifdef ENABLE_LOG
-  if (!__inited_log) {
-    if (profile_instance.logs_enabled()) {
-      // Logger initialization
-      // Redefine for each paticular logger implementation
-      auto logger =
-              std::unique_ptr<logger::AndroidLogger>(new logger::AndroidLogger());
-      logger_impl->Init(std::move(logger));
-    }
-    __inited_log = true;
+  if (profile_instance.logs_enabled()) {
+    // Logger initialization
+    // Redefine for each paticular logger implementation
+    auto logger =
+        std::unique_ptr<logger::AndroidLogger>(new logger::AndroidLogger());
+    logger_impl->Init(std::move(logger));
   }
 #endif
 
