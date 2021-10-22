@@ -52,26 +52,6 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-namespace {
-std::string getTransportName(AndroidTransportType transport_type) {
-  switch (transport_type) {
-    case AndroidTransportType::BLE:
-      return "Bluetooth Low Energy";
-      break;
-
-    case AndroidTransportType::BT:
-      return "Bluetooth";
-      break;
-
-    default:
-      SDL_LOG_ERROR("Unknown android transport type");
-      break;
-  }
-
-  return "Unknown";
-}
-}  // namespace
-
 AndroidTransportAdapter::AndroidTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings,
@@ -85,7 +65,7 @@ AndroidTransportAdapter::AndroidTransportAdapter(
     , app_handle_(0)
     , transport_type_(transport_type) {
   SDL_LOG_DEBUG("AndroidTransportAdapter created for transport type : "
-                << getTransportName(transport_type));
+                << GetTransportName());
 }
 
 DeviceType AndroidTransportAdapter::GetDeviceType() const {
@@ -117,14 +97,14 @@ void AndroidTransportAdapter::SearchDeviceDone(const DeviceVector& devices) {
   for (const DeviceSptr& device : devices) {
     if (dynamic_cast<AndroidIpcDevice*>(device.get()) != nullptr) {
       active_device_uid_ = device->unique_device_id();
-      SDL_LOG_DEBUG(
-          "New active Android Ipc device found: " << active_device_uid_);
+      SDL_LOG_DEBUG("New active Android Ipc device found: "
+                    << active_device_uid_ << " " << GetTransportName());
 
       const auto apps_list = device->GetApplicationList();
       if (!apps_list.empty()) {
         app_handle_ = apps_list.front();
-        SDL_LOG_DEBUG(
-            "New active Android ipc device app handle: " << app_handle_);
+        SDL_LOG_DEBUG("New active Android ipc device app handle: "
+                      << app_handle_ << " " << GetTransportName());
       }
 
       break;
@@ -199,6 +179,24 @@ std::string AndroidTransportAdapter::GetControlReceiverSocketName() const {
       break;
   }
   return "";
+}
+
+std::string AndroidTransportAdapter::GetTransportName() const {
+  switch (transport_type_) {
+    case AndroidTransportType::BLE:
+      return "[IPC][CPP][BLE]";
+      break;
+
+    case AndroidTransportType::BT:
+      return "[IPC][CPP][BT]";
+      break;
+
+    default:
+      SDL_LOG_ERROR("[IPC][CPP][Unknown]");
+      break;
+  }
+
+  return "[IPC][CPP][Unknown]";
 }
 
 }  // namespace transport_adapter

@@ -57,17 +57,22 @@ AndroidSocketConnection::AndroidSocketConnection(
                     std::placeholders::_1),
           std::bind(&AndroidSocketConnection::OnClientConnectionDone,
                     this,
-                    std::placeholders::_1)))
+                    std::placeholders::_1),
+          LocalSocketSender::ChannelNameGetter(
+              [this]() { return controller_->GetTransportName(); })))
     , receiver_(new LocalSocketReceiver(
           std::bind(&AndroidSocketConnection::ProcessMessage,
                     this,
-                    std::placeholders::_1))) {}
+                    std::placeholders::_1),
+          LocalSocketSender::ChannelNameGetter(
+              [this]() { return controller_->GetTransportName(); }))) {}
 
 AndroidSocketConnection::~AndroidSocketConnection() {}
 
 void AndroidSocketConnection::ProcessMessage(const std::vector<uint8_t>& data) {
   if (data.size() > 0) {
-    SDL_LOG_DEBUG("Received " << data.size() << " bytes from Java adapter");
+    SDL_LOG_DEBUG("Received " << data.size() << " bytes from Java adapter "
+                              << controller_->GetTransportName());
     ::protocol_handler::RawMessagePtr frame(new protocol_handler::RawMessage(
         0, 0, data.data(), data.size(), false));
     controller_->DataReceiveDone(device_uid_, app_handle_, frame);
@@ -81,21 +86,25 @@ void AndroidSocketConnection::OnMessageSent(
     protocol_handler::RawMessagePtr msg) {
   if (msg) {
     SDL_LOG_DEBUG("Successfully sent " << msg->data_size()
-                                       << " bytes to Java adapter");
+                                       << " bytes to Java adapter "
+                                       << controller_->GetTransportName());
     controller_->DataSendDone(device_uid_, app_handle_, msg);
   } else {
     SDL_LOG_ERROR("Failed to send " << msg->data_size()
-                                    << " bytes to Java adapter");
+                                    << " bytes to Java adapter "
+                                    << controller_->GetTransportName());
     controller_->DataSendFailed(device_uid_, app_handle_, msg, DataSendError());
   }
 }
 
 void AndroidSocketConnection::OnClientConnectionDone(const bool is_connected) {
   if (is_connected) {
-    SDL_LOG_DEBUG("Successfully connected to Java adapter");
+    SDL_LOG_DEBUG("Successfully connected to Java adapter "
+                  << controller_->GetTransportName());
     controller_->ConnectDone(device_uid_, app_handle_);
   } else {
-    SDL_LOG_ERROR("Failed to connect to Java adapter");
+    SDL_LOG_ERROR("Failed to connect to Java adapter "
+                  << controller_->GetTransportName());
     controller_->ConnectFailed(device_uid_, app_handle_, ConnectError());
   }
 }
@@ -108,7 +117,8 @@ TransportAdapter::Error AndroidSocketConnection::SendData(
 }
 
 TransportAdapter::Error AndroidSocketConnection::Disconnect() {
-  SDL_LOG_DEBUG("Disconnecting from Java adapter");
+  SDL_LOG_DEBUG("Disconnecting from Java adapter "
+                << controller_->GetTransportName());
   sender_->Stop();
   if (sender_thread_.joinable()) {
     sender_thread_.join();
@@ -123,7 +133,8 @@ TransportAdapter::Error AndroidSocketConnection::Disconnect() {
 }
 
 TransportAdapter::Error AndroidSocketConnection::Start() {
-  SDL_LOG_DEBUG("Initializing Android IPC connection threads");
+  SDL_LOG_DEBUG("Initializing Android IPC connection threads "
+                << controller_->GetTransportName());
 
   receiver_thread_ = std::thread([&]() {
     receiver_->Init(controller_->GetReceiverSocketName());

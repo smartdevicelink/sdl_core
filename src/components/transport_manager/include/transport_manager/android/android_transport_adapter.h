@@ -59,6 +59,12 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
   std::string GetSenderSocketName() const;
   std::string GetReceiverSocketName() const;
   std::string GetControlReceiverSocketName() const;
+  std::string GetTransportName() const;
+
+  void SearchDeviceDone(const DeviceVector& devices) override;
+
+  void DisconnectDone(const DeviceUID& device_handle,
+                      const ApplicationHandle& app_handle) override;
 
  protected:
   DeviceType GetDeviceType() const override;
@@ -66,11 +72,6 @@ class AndroidTransportAdapter : public TransportAdapterImpl {
   void Store() const override;
 
   bool Restore() override;
-
-  void SearchDeviceDone(const DeviceVector& devices) override;
-
-  void DisconnectDone(const DeviceUID& device_handle,
-                      const ApplicationHandle& app_handle) override;
 
  private:
   DeviceUID active_device_uid_;

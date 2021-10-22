@@ -22,8 +22,9 @@ std::vector<uint8_t> buffer(buffer_size);
 namespace transport_manager {
 namespace transport_adapter {
 
-LocalSocketReceiver::LocalSocketReceiver(MessageDelegate&& callback)
-    : callback_(callback) {}
+LocalSocketReceiver::LocalSocketReceiver(MessageDelegate&& callback,
+                                         ChannelNameGetter&& channelNameGetter)
+    : callback_(callback), channelNameGetter_(channelNameGetter) {}
 
 void LocalSocketReceiver::Init(const std::string& socket_name) {
   SDL_LOG_AUTO_TRACE();
@@ -43,8 +44,8 @@ void LocalSocketReceiver::Init(const std::string& socket_name) {
   server_sock_ = socket(PF_LOCAL, SOCK_STREAM, 0);
   if (server_sock_ < 0) {
     err = errno;
-    SDL_LOG_ERROR("Cannot open socket: " << strerror(err) << " "
-                                         << socket_name);
+    SDL_LOG_ERROR("Cannot open socket: " << strerror(err) << " " << socket_name
+                                         << " " << channelNameGetter_());
     return;
   }
 
@@ -52,7 +53,8 @@ void LocalSocketReceiver::Init(const std::string& socket_name) {
   int rc = bind(server_sock_, (struct sockaddr*)&server_sockaddr, len);
   if (rc < 0) {
     err = errno;
-    SDL_LOG_ERROR("BIND ERROR: " << strerror(err) << " " << socket_name);
+    SDL_LOG_ERROR("BIND ERROR: " << strerror(err) << " " << socket_name << " "
+                                 << channelNameGetter_());
     close(server_sock_);
     return;
   }
@@ -61,17 +63,20 @@ void LocalSocketReceiver::Init(const std::string& socket_name) {
   rc = listen(server_sock_, backlog);
   if (rc < 0) {
     err = errno;
-    SDL_LOG_ERROR("LISTEN ERROR: " << strerror(err) << " " << socket_name);
+    SDL_LOG_ERROR("LISTEN ERROR: " << strerror(err) << " " << socket_name << " "
+                                   << channelNameGetter_());
     close(server_sock_);
     return;
   }
 
-  SDL_LOG_INFO("Socket listening... " << socket_name);
+  SDL_LOG_INFO("Socket listening... " << socket_name << " "
+                                      << channelNameGetter_());
 
   client_sock_ = accept(server_sock_, (struct sockaddr*)&client_sockaddr, &len);
   if (client_sock_ < 0) {
     err = errno;
-    SDL_LOG_ERROR("ACCEPT ERROR: " << strerror(err) << " " << socket_name);
+    SDL_LOG_ERROR("ACCEPT ERROR: " << strerror(err) << " " << socket_name << " "
+                                   << channelNameGetter_());
     close(server_sock_);
     close(client_sock_);
     return;
@@ -81,8 +86,7 @@ void LocalSocketReceiver::Init(const std::string& socket_name) {
 }
 
 void LocalSocketReceiver::Run() {
-  SDL_LOG_AUTO_TRACE();
-
+  SDL_LOG_DEBUG("LocalSocketReceiver Run " << channelNameGetter_());
   while (connected_ && !stop_requested_) {
     buffer.resize(buffer_size);
     const int n = read(client_sock_, buffer.data(), buffer_size - 1);
@@ -94,7 +98,7 @@ void LocalSocketReceiver::Run() {
 }
 
 void LocalSocketReceiver::Stop() {
-  SDL_LOG_DEBUG("Requesting server to stop");
+  SDL_LOG_DEBUG("Requesting server to stop" << channelNameGetter_());
   stop_requested_ = true;
   close(client_sock_);
   close(server_sock_);

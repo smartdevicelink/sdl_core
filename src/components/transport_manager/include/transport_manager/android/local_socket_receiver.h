@@ -11,8 +11,10 @@ namespace transport_adapter {
 class LocalSocketReceiver : public IpcReceiver {
  public:
   using MessageDelegate = std::function<void(const std::vector<uint8_t>&)>;
+  using ChannelNameGetter = std::function<std::string()>;
 
-  LocalSocketReceiver(MessageDelegate&& callback);
+  LocalSocketReceiver(MessageDelegate&& callback,
+                      ChannelNameGetter&& channelNameGetter);
   ~LocalSocketReceiver();
   void Init(const std::string& socket_name) override;
   void Run() override;
@@ -24,6 +26,7 @@ class LocalSocketReceiver : public IpcReceiver {
   bool connected_;
   std::atomic_bool stop_requested_;
   MessageDelegate callback_;
+  ChannelNameGetter channelNameGetter_;
 };
 
 }  // namespace transport_adapter

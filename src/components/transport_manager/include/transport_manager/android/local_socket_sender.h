@@ -20,9 +20,11 @@ class LocalSocketSender : public IpcSender {
   using OnDataSentCallback =
       std::function<void(protocol_handler::RawMessagePtr)>;
   using OnConnectedCallback = std::function<void(const bool)>;
+  using ChannelNameGetter = std::function<std::string()>;
 
   LocalSocketSender(OnDataSentCallback&& sent_callback,
-                    OnConnectedCallback&& connected_callback);
+                    OnConnectedCallback&& connected_callback,
+                    ChannelNameGetter&& channelNameGetter);
   ~LocalSocketSender();
 
   void Init(const std::string& socket_name) override;
@@ -36,6 +38,7 @@ class LocalSocketSender : public IpcSender {
   RawMessageLoopQueue message_queue_;
   OnConnectedCallback connected_callback_;
   OnDataSentCallback sent_callback_;
+  ChannelNameGetter channelNameGetter_;
 
   bool TryToConnect(sockaddr_un& addr, socklen_t len);
 };

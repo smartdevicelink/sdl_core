@@ -54,13 +54,14 @@ namespace transport_adapter {
 
 SDL_CREATE_LOG_VARIABLE("TransportManager")
 
-AndroidDeviceScanner::AndroidDeviceScanner(
-    TransportAdapterController* controller)
+AndroidDeviceScanner::AndroidDeviceScanner(AndroidTransportAdapter* controller)
     : controller_(controller)
     , ipc_control_receiver_(new LocalSocketReceiver(
           std::bind(&AndroidDeviceScanner::ProcessMessage,
                     this,
-                    std::placeholders::_1))) {
+                    std::placeholders::_1),
+          LocalSocketReceiver::ChannelNameGetter(
+              [this]() { return controller_->GetTransportName(); }))) {
   ipc_control_receiver_thread_ = std::thread([&]() {
     ipc_control_receiver_->Init(
         static_cast<AndroidTransportAdapter*>(controller_)
@@ -105,7 +106,8 @@ bool AndroidDeviceScanner::IsInitialised() const {
 
 void AndroidDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) {
   if (data.size() > 0) {
-    SDL_LOG_DEBUG("Control message:  " << data.data());
+    SDL_LOG_DEBUG("Control message:  " << data.data() << " "
+                                       << controller_->GetTransportName());
 
     const auto action = AndroidIpcControlProtocol::GetMessageActionType(data);
 
@@ -143,7 +145,7 @@ void AndroidDeviceScanner::ProcessMessage(const std::vector<uint8_t>& data) {
     }
 
   } else {
-    SDL_LOG_DEBUG("Control message fail");
+    SDL_LOG_DEBUG("Control message fail " << controller_->GetTransportName());
   }
 }
 

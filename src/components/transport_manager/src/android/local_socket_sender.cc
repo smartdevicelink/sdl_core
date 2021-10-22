@@ -19,12 +19,14 @@ namespace transport_manager {
 namespace transport_adapter {
 
 LocalSocketSender::LocalSocketSender(OnDataSentCallback&& sent_callback,
-                                     OnConnectedCallback&& connected_callback)
+                                     OnConnectedCallback&& connected_callback,
+                                     ChannelNameGetter&& channelNameGetter)
     : socket_id_(-1)
     , connected_(false)
     , message_queue_()
     , connected_callback_(connected_callback)
-    , sent_callback_(sent_callback) {}
+    , sent_callback_(sent_callback)
+    , channelNameGetter_(channelNameGetter) {}
 
 void LocalSocketSender::Init(const std::string& socket_name) {
   SDL_LOG_AUTO_TRACE();
@@ -37,16 +39,17 @@ void LocalSocketSender::Init(const std::string& socket_name) {
       offsetof(struct sockaddr_un, sun_path) + 1 + strlen(&addr.sun_path[1]);
   int err;
 
-  SDL_LOG_DEBUG("Creating local socket...");
+  SDL_LOG_DEBUG("Creating local socket... " << channelNameGetter_());
   socket_id_ = socket(PF_LOCAL, SOCK_STREAM, 0);
   if (socket_id_ < 0) {
     err = errno;
-    SDL_LOG_ERROR("Cannot open socket: " << strerror(err));
+    SDL_LOG_ERROR("Cannot open socket: " << strerror(err) << " "
+                                         << channelNameGetter_());
     return;
   }
 
   if (!TryToConnect(addr, len)) {
-    SDL_LOG_ERROR("Failed to connect");
+    SDL_LOG_ERROR("Failed to connect " << channelNameGetter_());
     close(socket_id_);
   } else {
     connected_ = true;
@@ -85,25 +88,27 @@ bool LocalSocketSender::TryToConnect(sockaddr_un& addr, socklen_t len) {
   const int attempt_interval_ms = 500;
 
   for (int i = 0; i < connect_attempts; ++i) {
-    SDL_LOG_DEBUG("Attempt #" << i + 1 << " to connect to socket...");
+    SDL_LOG_DEBUG("Attempt #" << i + 1 << " to connect to socket... "
+                              << channelNameGetter_());
 
     if (connect(socket_id_, (struct sockaddr*)&addr, len) < 0) {
       SDL_LOG_ERROR("Connect() failed: " << strerror(errno) << ". Retry in "
-                                         << attempt_interval_ms << "ms");
+                                         << attempt_interval_ms << "ms "
+                                         << channelNameGetter_());
       usleep(attempt_interval_ms);
       continue;
     }
 
-    SDL_LOG_DEBUG("Successfully connected to socket");
+    SDL_LOG_DEBUG("Successfully connected to socket " << channelNameGetter_());
     return true;
   }
 
-  SDL_LOG_ERROR("Connection attempts exceeded. Can't connect to socket");
+  SDL_LOG_DEBUG("Successfully connected to socket " << channelNameGetter_());
   return false;
 }
 
 void LocalSocketSender::Stop() {
-  SDL_LOG_DEBUG("Requesting client to stop");
+  SDL_LOG_DEBUG("Requesting client to stop " << channelNameGetter_());
   message_queue_.Shutdown();
 }
 

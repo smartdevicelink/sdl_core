@@ -48,7 +48,7 @@ class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
-class TransportAdapterController;
+class AndroidTransportAdapter;
 
 /**
  * @brief Scan for devices using android platform approaches
@@ -59,7 +59,7 @@ class AndroidDeviceScanner : public DeviceScanner {
    * @brief Constructor.
    * @param controller Transport adapter controller
    */
-  AndroidDeviceScanner(TransportAdapterController* controller);
+  AndroidDeviceScanner(AndroidTransportAdapter* controller);
   /**
    * @brief Destructor.
    */
@@ -87,7 +87,7 @@ class AndroidDeviceScanner : public DeviceScanner {
    */
   void ProcessMessage(const std::vector<uint8_t>& data);
 
-  TransportAdapterController* controller_;
+  AndroidTransportAdapter* controller_;
 
   DeviceVector found_devices_with_sdl_;
 
