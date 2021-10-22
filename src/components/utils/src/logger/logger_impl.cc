@@ -36,8 +36,6 @@
 
 namespace logger {
 
-Logger* Logger::instance_ = nullptr;
-
 LoggerImpl::LoggerImpl(bool use_message_loop_thread)
     : impl_(nullptr), use_message_loop_thread_(use_message_loop_thread) {}
 
@@ -70,8 +68,6 @@ void LoggerImpl::DeInit() {
   if (impl_) {
     impl_->DeInit();
   }
-
-  instance_ = nullptr;
 }
 
 void LoggerImpl::Flush() {
@@ -100,6 +96,7 @@ void LoggerImpl::PushLog(const LogMessage& log_message) {
 }
 
 Logger& Logger::instance(Logger* pre_init) {
+  static Logger* instance_;
   if (pre_init) {
     assert(instance_ == nullptr);
     instance_ = pre_init;
