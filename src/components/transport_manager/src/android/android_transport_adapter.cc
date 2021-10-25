@@ -71,12 +71,10 @@ AndroidTransportAdapter::AndroidTransportAdapter(
 DeviceType AndroidTransportAdapter::GetDeviceType() const {
   switch (transport_type_) {
     case AndroidTransportType::BLE:
-      return DeviceType::BLUETOOTH_LE;
-      break;
+      return DeviceType::ANDROID_BLE;
 
     case AndroidTransportType::BT:
-      return DeviceType::BLUETOOTH;
-      break;
+      return DeviceType::ANDROID_BT;
   }
 
   SDL_LOG_ERROR("Unknown android transport type");

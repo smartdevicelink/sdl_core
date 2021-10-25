@@ -56,7 +56,8 @@ namespace {
 DeviceTypes devicesType = {
     std::make_pair(DeviceType::AOA, std::string("USB_AOA")),
     std::make_pair(DeviceType::BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(DeviceType::BLUETOOTH_LE, std::string("BLUETOOTH_LE")),
+    std::make_pair(DeviceType::ANDROID_BLE, std::string("ANDROID_BLE")),
+    std::make_pair(DeviceType::ANDROID_BT, std::string("ANDROID_BT")),
     std::make_pair(DeviceType::IOS_BT, std::string("BLUETOOTH_IOS")),
     std::make_pair(DeviceType::IOS_USB, std::string("USB_IOS")),
     std::make_pair(DeviceType::TCP, std::string("WIFI")),

@@ -148,8 +148,7 @@ typedef enum {
   TT_USB = 0,
   TT_BLUETOOTH = 1,
   TT_WIFI = 2,
-  TT_WEBSOCKET = 3,
-  TT_BLUETOOTH_LE = 4,
+  TT_WEBSOCKET = 3
 } TransportType;
 
 struct TransportDescription {

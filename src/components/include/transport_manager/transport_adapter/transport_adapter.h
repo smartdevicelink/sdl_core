@@ -61,7 +61,8 @@ class TransportAdapterListener;
 enum DeviceType {
   AOA,
   BLUETOOTH,
-  BLUETOOTH_LE,
+  ANDROID_BLE,
+  ANDROID_BT,
   IOS_BT,
   IOS_USB,
   TCP,

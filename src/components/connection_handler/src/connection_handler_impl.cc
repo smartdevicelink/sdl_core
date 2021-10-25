@@ -972,8 +972,10 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("AOA_USB");
   } else if (connection_type == "BLUETOOTH") {
     return std::string("SPP_BLUETOOTH");
-  } else if (connection_type == "BLUETOOTH_LE") {
-    return std::string("BLUETOOTH_LE");
+  } else if (connection_type == "ANDROID_BLE") {
+    return std::string("ANDROID_BLE");
+  } else if (connection_type == "ANDROID_BT") {
+    return std::string("ANDROID_BT");
   } else if (connection_type == "USB_IOS") {
     return std::string("IAP_USB");
   } else if (connection_type == "BLUETOOTH_IOS") {

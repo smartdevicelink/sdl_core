@@ -97,7 +97,6 @@
 <enum name="TransportType">
   <description>Lists of the transport types used for device connection to HU.</description>
   <element name="BLUETOOTH"/>
-  <element name="BLUETOOTH_LE"/>
   <element name="USB_IOS"/>
   <element name="USB_AOA"/>
   <element name="WIFI"/>
