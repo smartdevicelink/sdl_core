@@ -1256,7 +1256,10 @@ void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
     DeviceSptr device = i->second;
     const bool is_cloud_device =
         (GetDeviceType() == DeviceType::CLOUD_WEBSOCKET);
-    if (!device->keep_on_disconnect() || is_cloud_device) {
+    const bool is_android_device =
+        helpers::Compare<DeviceType, helpers::EQ, helpers::ONE>(
+            GetDeviceType(), DeviceType::ANDROID_BT, DeviceType::ANDROID_BLE);
+    if (!device->keep_on_disconnect() || is_cloud_device || is_android_device) {
       devices_.erase(i);
       for (TransportAdapterListenerList::iterator it = listeners_.begin();
            it != listeners_.end();
