@@ -77,9 +77,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
   virtual bool ClearUserConsent() = 0;
-  // Deprecated in favor of private variant
-  DEPRECATED virtual bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                           const std::string& url) = 0;
+
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;

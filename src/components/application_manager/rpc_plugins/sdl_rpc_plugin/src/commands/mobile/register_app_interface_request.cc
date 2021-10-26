@@ -134,11 +134,11 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , are_tts_chunks_invalid_(false)
     , are_hmi_types_invalid_(false)
     , is_resumption_failed_(false)
@@ -224,7 +224,8 @@ void RegisterAppInterfaceRequest::FillApplicationParams(
           application->set_webengine_projection_enabled(true);
           break;
         }
-        default: {}
+        default: {
+        }
       }
     }
   }
@@ -702,8 +703,11 @@ void RegisterAppInterfaceRequest::Run() {
   SendOnAppRegisteredNotificationToHMI(
       application, is_resumption_required && !is_resumption_failed_);
 
-  // By default app subscribed to CUSTOM_BUTTON
-  SendSubscribeCustomButtonNotification();
+  if (CheckHMICapabilities(mobile_apis::ButtonName::CUSTOM_BUTTON)) {
+    SDL_LOG_DEBUG("CUSTOM_BUTTON available");
+    SendSubscribeCustomButtonRequest();
+  }
+
   SendChangeRegistrationOnHMI(application);
 
   if (is_resumption_required) {
@@ -983,12 +987,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   smart_objects::SmartObject msg_params_copy = msg_params;
+  ApplicationManager& app_manager = application_manager_;
   const auto result_code = CalculateFinalResultCode();
 
   SendResponse(true, result_code, response_info_.c_str(), &response_params);
 
   FinishSendingResponseToMobile(
-      msg_params_copy, application_manager_, key, status_notifier);
+      msg_params_copy, app_manager, key, status_notifier);
 }
 
 void RegisterAppInterfaceRequest::SendChangeRegistration(
@@ -1459,14 +1464,14 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
   }
 }
 
-void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
+void RegisterAppInterfaceRequest::SendSubscribeCustomButtonRequest() {
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
-  msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
-                        msg_params);
+  msg_params[strings::button_name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
+  SendHMIRequest(
+      hmi_apis::FunctionID::Buttons_SubscribeButton, &msg_params, false);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {

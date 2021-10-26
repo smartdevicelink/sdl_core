@@ -71,6 +71,8 @@ TEST_F(GetSystemInfoRequestTest, RUN_SendRequest_SUCCESS) {
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
 
+  InitEventDispatcher();
+
   RequestToHMIPtr command(CreateCommand<GetSystemInfoRequest>(command_msg));
 
   const uint32_t kAppId = command->application_id();

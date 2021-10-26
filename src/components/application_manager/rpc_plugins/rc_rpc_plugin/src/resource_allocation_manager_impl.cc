@@ -140,7 +140,9 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
                     << module_type << " " << module_id);
       return AcquireResult::ALLOWED;
     }
-    default: { DCHECK_OR_RETURN(false, AcquireResult::IN_USE); }
+    default: {
+      DCHECK_OR_RETURN(false, AcquireResult::IN_USE);
+    }
   }
 }
 
@@ -484,6 +486,28 @@ bool ResourceAllocationManagerImpl::IsResourceFree(
   SDL_LOG_DEBUG("Resource " << module_type << " state is " << resource->second);
 
   return ResourceState::FREE == resource->second;
+}
+
+bool ResourceAllocationManagerImpl::IsResourceAllocated(
+    const std::string& module_type,
+    const std::string& module_id,
+    const uint32_t app_id) {
+  ModuleUid module(module_type, module_id);
+  sync_primitives::AutoLock lock(allocated_resources_lock_);
+  const auto allocation = allocated_resources_.find(module);
+  if (allocated_resources_.end() == allocation) {
+    SDL_LOG_DEBUG("Resource " << module_type << " is not allocated.");
+    return false;
+  }
+
+  if (app_id != allocation->second) {
+    SDL_LOG_DEBUG("Resource " << module_type
+                              << " is allocated by different application "
+                              << allocation->second);
+    return true;
+  }
+
+  return false;
 }
 
 void ResourceAllocationManagerImpl::SetAccessMode(

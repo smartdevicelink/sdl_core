@@ -193,7 +193,6 @@ struct ApplicationParams : PolicyBase {
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
   Optional<RequestSubTypes> RequestSubType;
-  Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 65535> > certificate;
   mutable Optional<ModuleTypes> moduleType;
@@ -312,7 +311,6 @@ struct EndpointProperty : CompositeType {
 
 struct ModuleConfig : CompositeType {
  public:
-  Optional<Map<String<0, 100>, 0, 255> > device_certificates;
   Optional<Boolean> preloaded_pt;
   Optional<Boolean> full_app_id_supported;
   Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;

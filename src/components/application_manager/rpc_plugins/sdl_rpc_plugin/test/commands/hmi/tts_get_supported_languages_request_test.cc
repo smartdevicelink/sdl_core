@@ -77,6 +77,7 @@ class TTSGetSupportedLanguagesRequestTest
 
 TEST_F(TTSGetSupportedLanguagesRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(
       CreateCommand<TTSGetSupportedLanguagesRequest>(command_msg));
 
@@ -94,6 +95,7 @@ TEST_F(TTSGetSupportedLanguagesRequestTest, RUN_SendRequest_SUCCESS) {
 TEST_F(TTSGetSupportedLanguagesRequestTest,
        onTimeOut_TTSGetSupportedLanguagesUpdated) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(
       CreateCommand<TTSGetSupportedLanguagesRequest>(command_msg));
 
@@ -103,7 +105,7 @@ TEST_F(TTSGetSupportedLanguagesRequestTest,
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*command_msg)[strings::params][strings::protocol_type].asInt());

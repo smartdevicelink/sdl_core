@@ -213,13 +213,13 @@ const std::string kUpdateGroupPermissions =
 
 const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, `steal_focus`, "
-    " `default_hmi`, `priority_value`, `is_revoked`, `memory_kb`, "
+    " `default_hmi`, `priority_value`, `is_revoked`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, "
     " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, "
     "`encryption_required`) "
     "VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
@@ -246,7 +246,7 @@ const std::string kSelectPreconsentedGroupsId =
 
 const std::string kSelectAppPolicies =
     "SELECT `id`, `priority_value`, `default_hmi`, `keep_context`, "
-    " `steal_focus`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
+    " `steal_focus`, `heart_beat_timeout_ms`, `certificate`, "
     " `hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
     " `cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, "
     "`encryption_required`"

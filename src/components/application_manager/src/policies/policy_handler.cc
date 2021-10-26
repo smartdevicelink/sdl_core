@@ -720,7 +720,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else if (!app_to_device_link_.empty()) {
+  } else {
     const ApplicationSet& accessor =
         application_manager_.applications().GetData();
     for (const auto& app : accessor) {
@@ -759,10 +759,6 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else {
-    SDL_LOG_WARN(
-        "There are no applications previously stored for "
-        "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
   if (!policy_manager->SetExternalConsentStatus(external_consent_status)) {
@@ -1234,12 +1230,6 @@ void PolicyHandler::OnPendingPermissionChange(
   }
 
   policy_manager->RemovePendingPermissionChanges(policy_app_id);
-}
-
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
-  const uint32_t app_id = GetAppIdForSending();
-  return SendMessageToSDK(pt_string, url, app_id);
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
@@ -2014,7 +2004,9 @@ void PolicyHandler::AddStatisticsInfo(int type) {
       ++count_of_iap_buffer_full;
       break;
     }
-    default: { SDL_LOG_WARN("Type of statistics is unknown"); }
+    default: {
+      SDL_LOG_WARN("Type of statistics is unknown");
+    }
   }
 }
 
@@ -2033,7 +2025,9 @@ void PolicyHandler::OnSystemError(int code) {
       ++count_sync_out_of_memory;
       break;
     }
-    default: { SDL_LOG_WARN("System error is unknown"); }
+    default: {
+      SDL_LOG_WARN("System error is unknown");
+    }
   }
 }
 
@@ -2875,6 +2869,10 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 
 bool PolicyHandler::CheckModule(const PTString& app_id,
                                 const PTString& module) {
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   return policy_manager->CheckModule(app_id, module);
@@ -2945,6 +2943,10 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
                                  mobile_apis::AppHMIType::eType hmi,
                                  const smart_objects::SmartObject* app_types) {
   SDL_LOG_AUTO_TRACE();
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   std::vector<int> policy_hmi_types;

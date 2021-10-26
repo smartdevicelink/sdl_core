@@ -19,7 +19,9 @@ std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
     case PT_SNAPSHOT: {
       return "PT_SNAPSHOT";
     }
-    default: { return "INVALID_PT_TYPE"; }
+    default: {
+      return "INVALID_PT_TYPE";
+    }
   }
 }
 
@@ -345,7 +347,6 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
     , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
-    , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
     , certificate(impl::ValueMember(value__, "certificate"))
@@ -366,7 +367,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
   impl::WriteJsonField("RequestSubType", RequestSubType, &result__);
-  impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
@@ -396,9 +396,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!AppHMIType.is_valid()) {
-    return false;
-  }
-  if (!memory_kb.is_valid()) {
     return false;
   }
   if (!heart_beat_timeout_ms.is_valid()) {
@@ -458,9 +455,6 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (RequestSubType.is_initialized()) {
-    return false;
-  }
-  if (memory_kb.is_initialized()) {
     return false;
   }
   if (heart_beat_timeout_ms.is_initialized()) {
@@ -537,9 +531,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!steal_focus.is_valid()) {
     steal_focus.ReportErrors(&report__->ReportSubobject("steal_focus"));
   }
-  if (!memory_kb.is_valid()) {
-    memory_kb.ReportErrors(&report__->ReportSubobject("memory_kb"));
-  }
   if (!heart_beat_timeout_ms.is_valid()) {
     heart_beat_timeout_ms.ReportErrors(
         &report__->ReportSubobject("heart_beat_timeout_ms"));
@@ -588,7 +579,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
   RequestSubType.SetPolicyTableType(pt_type);
-  memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
@@ -1641,7 +1631,7 @@ AppLevel::AppLevel(const Json::Value* value__)
           impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"))
     , count_of_removals_for_bad_behavior(
           impl::ValueMember(value__, "count_of_removals_for_bad_behavior"))
-    , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
+    , count_of_tls_errors(impl::ValueMember(value__, "count_of_TLS_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
 

@@ -37,7 +37,6 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
@@ -55,20 +54,17 @@ AlertRequest::AlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
     , is_ui_alert_sent_(false)
     , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
-}
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 AlertRequest::~AlertRequest() {}
 
@@ -124,23 +120,22 @@ void AlertRequest::Run() {
   }
 }
 
+void AlertRequest::OnTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  if (!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    RequestFromMobileImpl::OnTimeOut();
+    return;
+  }
+  SDL_LOG_INFO(
+      "Default timeout ignored. "
+      "AlertRequest with soft buttons wait timeout on HMI side");
+}
+
 void AlertRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::TTS_OnResetTimeout:
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO(
-          "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event "
-          << awaiting_tts_speak_response_ << " "
-          << awaiting_tts_stop_speaking_response_ << " "
-          << awaiting_ui_alert_response_);
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::UI_Alert: {
       SDL_LOG_INFO("Received UI_Alert event");
       // Unsubscribe from event to avoid unwanted messages
@@ -190,9 +185,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (HasHmiResponsesToWait()) {
+  if (IsPendingResponseExist()) {
+    SDL_LOG_DEBUG("Command is still waiting for HMI response");
     return;
   }
+
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   std::string info;
   const bool result = PrepareResponseParameters(result_code, info);
@@ -458,7 +455,7 @@ bool AlertRequest::CheckStrings() {
   return true;
 }
 
-bool AlertRequest::HasHmiResponsesToWait() {
+bool AlertRequest::IsPendingResponseExist() {
   SDL_LOG_AUTO_TRACE();
   return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;

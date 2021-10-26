@@ -57,6 +57,10 @@ class MockEventDispatcher
       remove_observer,
       void(const ::application_manager::event_engine::Event::EventID& event_id,
            ::application_manager::event_engine::EventObserver& observer));
+  MOCK_METHOD2(
+      remove_observer,
+      void(const ::application_manager::event_engine::Event::EventID& event_id,
+           int32_t hmi_correlation_id));
   MOCK_METHOD1(
       remove_observer,
       void(::application_manager::event_engine::EventObserver& observer));

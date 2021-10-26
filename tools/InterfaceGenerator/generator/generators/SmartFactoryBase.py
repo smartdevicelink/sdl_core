@@ -785,6 +785,7 @@ class CodeGenerator(object):
                 result_array.append(self._impl_code_item_decl_template.substitute(
                     comment="",
                     var_name=self._gen_schema_item_var_name(item),
+                    var_type="std::shared_ptr<ISchemaItem>",
                     item_decl=self._impl_function_schema))
                 result_array.append(self._gen_function_history_vector_item_fill(item, member.name))
                 count += 1
@@ -811,6 +812,7 @@ class CodeGenerator(object):
         return self._impl_code_item_decl_template.substitute(
             comment=self._gen_comment(member, False),
             var_name=self._gen_schema_item_var_name(member),
+            var_type="ISchemaItem*" if type(member.param_type) is Struct else "std::shared_ptr<ISchemaItem>",
             item_decl=self._gen_schema_item_decl_code(
                 member.param_type,
                 member.name,
@@ -838,22 +840,37 @@ class CodeGenerator(object):
                     [[u"bool", None if param.default_value is None
                       else u"true" if param.default_value is True else u"false"]]))
         elif type(param) is Integer:
-            if not param.max_value or param.max_value and param.max_value < 2 ** 31:
+            if param.min_value is not None and param.min_value >= 0:
+                if param.max_value is None or param.max_value >= 2 ** 32:
+                    code = self._impl_code_integer_item_template.substitute(
+                        type=u"uint64_t",
+                        params=self._gen_schema_item_param_values(
+                            [[u"uint64_t", param.min_value],
+                             [u"uint64_t", param.max_value],
+                             [u"uint64_t", param.default_value]]))
+                else:
+                    code = self._impl_code_integer_item_template.substitute(
+                        type=u"uint32_t",
+                        params=self._gen_schema_item_param_values(
+                            [[u"uint32_t", param.min_value],
+                             [u"uint32_t", param.max_value],
+                             [u"uint32_t", param.default_value]]))
+            elif (param.min_value is not None and param.min_value >= -(2 ** 31)) and (param.max_value is not None and param.max_value < 2 ** 31):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int32_t",
                     params=self._gen_schema_item_param_values(
                         [[u"int32_t", param.min_value],
                          [u"int32_t", param.max_value],
                          [u"int32_t", param.default_value]]))
-            elif param.max_value < 2 ** 63:
+            elif (param.min_value is None or param.min_value >= -(2 ** 63)) and (param.max_value is None or param.max_value < 2 ** 63):
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int64_t",
                     params=self._gen_schema_item_param_values(
                         [[u"int64_t", param.min_value],
-                         [u"int64_t", str(param.max_value) + u"LL"],
+                         [u"int64_t", param.max_value],
                          [u"int64_t", param.default_value]]))
             else:
-                raise GenerateError("Parameter value too large: " + str(param.max_value))
+                raise GenerateError("Parameter value too large/small: " + str(param.min_value) + "/" + str(param.max_value))
         elif type(param) is Float:
             code = self._impl_code_integer_item_template.substitute(
                 type=u"double",
@@ -1724,11 +1741,11 @@ class CodeGenerator(object):
         u'''\n'''
         u'''using namespace ns_smart_device_link::ns_smart_objects;\n'''
         u'''\n'''
+        u'''$namespace::$class_name::TStructsSchemaItems $namespace::$class_name::struct_schema_items = {};\n\n'''
         u'''$namespace::$class_name::$class_name()\n'''
         u''' : ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, '''
         u'''messageType::eType, StructIdentifiers::eType>() {\n'''
-        u'''  TStructsSchemaItems struct_schema_items;\n'''
-        u'''  InitStructSchemes(struct_schema_items);\n'''
+        u'''  InitStructSchemes();\n'''
         u'''\n'''
         u'''  std::set<FunctionID::eType> function_id_items;\n'''
         u'''${function_id_items}'''
@@ -1736,7 +1753,7 @@ class CodeGenerator(object):
         u'''  std::set<messageType::eType> message_type_items;\n'''
         u'''${message_type_items}'''
         u'''\n'''
-        u'''  InitFunctionSchemes(struct_schema_items, function_id_items, '''
+        u'''  InitFunctionSchemes(function_id_items, '''
         u'''message_type_items);\n'''
         u'''}\n'''
         u'''\n'''
@@ -1780,13 +1797,11 @@ class CodeGenerator(object):
         u'''  InitFunctionSchema(function_id, message_type);\n'''
         u'''}\n'''
         u'''\n'''
-        u'''void $namespace::$class_name::InitStructSchemes(\n'''
-        u'''    TStructsSchemaItems &struct_schema_items) {'''
+        u'''void $namespace::$class_name::InitStructSchemes() {'''
         u'''$struct_schema_items'''
         u'''}\n'''
         u'''\n'''
         u'''void $namespace::$class_name::InitFunctionSchemes(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
         u'''    const std::set<messageType::eType> &message_type_items) {\n'''
         u'''$pre_function_schemas'''
@@ -1797,8 +1812,6 @@ class CodeGenerator(object):
         u'''    const FunctionID::eType &function_id,\n'''
         u'''    const messageType::eType &message_type) {\n'''
         u'''\n'''
-        u'''  TStructsSchemaItems struct_schema_items;\n'''
-        u'''  InitStructSchemes(struct_schema_items);\n'''
         u'''\n'''
         u'''  std::set<FunctionID::eType> function_id_items { function_id };\n'''
         u'''  std::set<messageType::eType> message_type_items { message_type };\n'''
@@ -1873,13 +1886,13 @@ class CodeGenerator(object):
         u'''  ns_smart_device_link::ns_json_handler::SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
         u'''  functions_schemes_[shema_key] = '''
         u'''InitFunction_${function_id}_${message_type}('''
-        u'''struct_schema_items, function_id_items, message_type_items);\n'''
+        u'''function_id_items, message_type_items);\n'''
         u'''  break;\n'''
         u'''}\n''')
 
     _struct_schema_item_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
-        u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
+        u'''InitStructSchemaItem_${name}();\n'''
         u'''structs_schemes_.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, CSmartSchema('''
         u'''struct_schema_item_${name})));\n''')
@@ -1890,12 +1903,11 @@ class CodeGenerator(object):
         u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         u'''(FunctionID::$function_id, messageType::$message_type), '''
         u'''InitFunction_${function_id}_${message_type}('''
-        u'''struct_schema_items, function_id_items, message_type_items)));''')
+        u'''function_id_items, message_type_items)));''')
 
     _struct_impl_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
-        u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    TStructsSchemaItems &struct_schema_items) {\n'''
+        u'''InitStructSchemaItem_${struct_name}() {\n'''
         u'''$code'''
         u'''}\n''')
 
@@ -1932,7 +1944,7 @@ class CodeGenerator(object):
 
     _impl_code_item_decl_template = string.Template(
         u'''${comment}'''
-        u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''${var_type} ${var_name} = ${item_decl};''')
 
     _impl_code_shared_ptr_vector_template = string.Template(
         u'''std::vector<SMember> ${var_name}_history_vector;''')
@@ -1954,7 +1966,7 @@ class CodeGenerator(object):
 
     _impl_code_struct_item_template = string.Template(
         u'''ProvideObjectSchemaItemForStruct(struct_schema_items, '''
-        u'''StructIdentifiers::${name})''')
+        u'''StructIdentifiers::${name}).get()''')
 
     _impl_code_enum_item_template = string.Template(
         u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
@@ -1988,7 +2000,6 @@ class CodeGenerator(object):
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
         u'''InitFunction_${function_id}_${message_type}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
         u'''    const std::set<messageType::eType> &message_type_items) {\n'''
         u'''$code'''
@@ -2066,20 +2077,17 @@ class CodeGenerator(object):
         u'''  /**\n'''
         u'''   * @brief Initializes all struct schemes.\n'''
         u'''   */\n'''
-        u'''  void InitStructSchemes('''
-        u'''TStructsSchemaItems &struct_schema_items);\n'''
+        u'''  void InitStructSchemes();\n'''
         u'''\n'''
         u'''  /**\n'''
         u'''   * @brief Initializes all function schemes.\n'''
         u'''   *\n'''
-        u'''   * @param struct_schema_items Struct schema items.\n'''
         u'''   * @param function_id_items Set of all elements '''
         u'''of FunctionID enum.\n'''
         u'''   * @param message_type_items Set of all elements '''
         u'''of messageType enum.\n'''
         u'''   */\n'''
         u'''  void InitFunctionSchemes(\n'''
-        u'''      const TStructsSchemaItems &struct_schema_items,\n'''
         u'''      const std::set<FunctionID::eType> &function_id_items,\n'''
         u'''      const std::set<messageType::eType> '''
         u'''&message_type_items);\n'''
@@ -2097,6 +2105,7 @@ class CodeGenerator(object):
         u'''$init_function_decls'''
         u'''\n'''
         u''' public:\n'''
+        u'''  static TStructsSchemaItems struct_schema_items;\n'''
         u'''$init_struct_decls'''
         u'''};''')
 
@@ -2107,7 +2116,6 @@ class CodeGenerator(object):
         u'''$comment\n'''
         u'''static ns_smart_device_link::ns_smart_objects::CSmartSchema '''
         u'''InitFunction_${function_id}_${message_type}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
         u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
         u'''    const std::set<messageType::eType> &message_type_items);''')
 
@@ -2115,8 +2123,7 @@ class CodeGenerator(object):
         u'''$comment\n'''
         u'''static '''
         u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
-        u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    TStructsSchemaItems &struct_schema_items);''')
+        u'''InitStructSchemaItem_${struct_name}();\n''')
 
     _class_comment_template = string.Template(
         u'''/**\n'''

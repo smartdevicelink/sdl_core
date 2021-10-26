@@ -70,6 +70,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(tts_global_properties_timeout, uint16_t());
   MOCK_CONST_METHOD0(max_supported_protocol_version, uint16_t());
   MOCK_CONST_METHOD0(default_timeout, const uint32_t&());
+  MOCK_CONST_METHOD0(default_timeout_compensation, const uint32_t&());
   MOCK_CONST_METHOD0(max_cmd_id, const uint32_t&());
   MOCK_CONST_METHOD0(launch_hmi, bool());
   MOCK_CONST_METHOD0(delete_file_in_none, const uint32_t&());

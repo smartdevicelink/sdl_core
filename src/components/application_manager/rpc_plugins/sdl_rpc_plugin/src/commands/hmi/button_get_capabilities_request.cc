@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
+
 #include "utils/logger.h"
 
 namespace sdl_rpc_plugin {
@@ -60,7 +61,7 @@ void ButtonGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
-void ButtonGetCapabilitiesRequest::onTimeOut() {
+void ButtonGetCapabilitiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::Buttons_GetCapabilities);

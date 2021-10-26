@@ -142,7 +142,7 @@ void SDLActivateAppRequest::Run() {
         application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
                                     settings.cloud_app_max_retry_attempts());
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         0, correlation_id(), default_timeout_ + total_retry_timeout);
     subscribe_on_event(BasicCommunication_OnAppRegistered);
     application_manager_.connection_handler().ConnectToDevice(app->device());
@@ -227,7 +227,7 @@ void SDLActivateAppRequest::Run() {
         application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
                                     settings.cloud_app_max_retry_attempts());
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         0, correlation_id(), default_timeout_ + total_retry_timeout);
     subscribe_on_event(BasicCommunication_OnAppRegistered);
     application_manager_.connection_handler().ConnectToDevice(
@@ -272,7 +272,7 @@ void SDLActivateAppRequest::Run() {
 }
 
 #endif  // EXTERNAL_PROPRIETARY_MODE
-void SDLActivateAppRequest::onTimeOut() {
+void SDLActivateAppRequest::OnTimeOut() {
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;

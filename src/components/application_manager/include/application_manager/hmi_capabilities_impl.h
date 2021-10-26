@@ -257,9 +257,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
-  DEPRECATED
-  void Init(resumption::LastState* last_state) OVERRIDE;
-
   HMILanguageHandler& get_hmi_language_handler() OVERRIDE;
 
   void set_handle_response_for(

@@ -46,6 +46,7 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/message.h"
 #include "connection_handler/device.h"
+#include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "smart_objects/smart_object.h"
@@ -106,6 +107,8 @@ struct AppFile {
   mobile_apis::FileType::eType file_type;
 };
 typedef std::map<std::string, AppFile> AppFilesMap;
+typedef std::map<int32_t, hmi_apis::Common_ButtonName::eType>
+    ButtonSubscriptionsMap;
 class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
@@ -203,6 +206,7 @@ class DynamicApplicationData {
   virtual const smart_objects::SmartObject* keyboard_props() const = 0;
   virtual const smart_objects::SmartObject* menu_title() const = 0;
   virtual const smart_objects::SmartObject* menu_icon() const = 0;
+  virtual const smart_objects::SmartObject* menu_layout() const = 0;
   virtual smart_objects::SmartObject day_color_scheme() const = 0;
   virtual smart_objects::SmartObject night_color_scheme() const = 0;
   virtual std::string display_layout() const = 0;
@@ -242,6 +246,8 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& keyboard_props) = 0;
   virtual void set_menu_title(const smart_objects::SmartObject& menu_title) = 0;
   virtual void set_menu_icon(const smart_objects::SmartObject& menu_icon) = 0;
+  virtual void set_menu_layout(
+      const smart_objects::SmartObject& menu_layout) = 0;
 
   virtual uint32_t audio_stream_retry_number() const = 0;
 
@@ -370,12 +376,6 @@ class DynamicApplicationData {
    * @brief Finds menu with the specified id
    */
   virtual smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const = 0;
-
-  /*
-   * @brief Returns true if sub menu with such name already exist
-   */
-  DEPRECATED virtual bool IsSubMenuNameAlreadyExist(
-      const std::string& name, const uint32_t parent_id) = 0;
 
   /*
    * @brief Adds a interaction choice set to the application

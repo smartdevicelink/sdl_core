@@ -49,11 +49,11 @@ SDL_CREATE_LOG_VARIABLE("Commands")
 DiagnosticMessageRequest::DiagnosticMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
-                         params.application_manager_,
-                         params.rpc_service_,
-                         params.hmi_capabilities_,
-                         params.policy_handler_) {}
+    : RequestFromMobileImpl(message,
+                            params.application_manager_,
+                            params.rpc_service_,
+                            params.hmi_capabilities_,
+                            params.policy_handler_) {}
 
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 

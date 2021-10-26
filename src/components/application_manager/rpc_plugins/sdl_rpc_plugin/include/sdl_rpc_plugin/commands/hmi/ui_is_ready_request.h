@@ -45,8 +45,7 @@ namespace commands {
 /**
  * @brief UIIsReadyRequest command class
  **/
-class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
-                         public app_mngr::event_engine::EventObserver {
+class UIIsReadyRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UIIsReadyRequest class constructor
@@ -77,7 +76,7 @@ class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut from requrst Controller
    */
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIIsReadyRequest);

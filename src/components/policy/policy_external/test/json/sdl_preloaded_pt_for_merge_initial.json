@@ -56,25 +56,12 @@
               "textBody" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%`s use of your data. You can change these permissions and hear detailed descriptions in the mobile apps settings menu.",
               "tts" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press Yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%`s use of your data. Please press Yes to allow or No to deny."
             },
-            "en-ie" :
-            {
-              "line1" : "Grant requested",
-              "line2" : "permission(s)?",
-              "tts" : "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press Yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%'s use of your data. Please press Yes to allow or No to deny."
-            },
             "en-us" :
             {
               "line1" : "Grant Requested",
               "line2" : "Permission(s)?",
               "textBody" : "The %appName% App is requesting permission to use the following: %functionalGroupLabels%.\r\n\r\nTo disable or change these settings at any time visit the SYNC mobile apps settings menu. See App terms of service and privacy policies. Ford is not responsible for App functionality. Avoid distractions and use voice controls where available. I agree and consent.",
               "tts" : "%appName% is requesting permission to use the following: %functionalGroupLabels%.\r\nTo disable or change these settings at any time visit the SYNC mobile apps settings menu. See App terms of service and privacy policies. Ford is not responsible for App functionality. Avoid distractions and use voice controls where available. Please press yes to allow or no to deny."
-            },
-            "es-en" :
-            {
-              "line1" : "¿Otorgar permiso(s)",
-              "line2" : "solicitado(s)?",
-              "textBody" : "La App %appName% solicita permiso para usar: %functionalGroupLabels%. \r\n\r\nPara desactivar o cambiar la configuración, acceda al menú de SYNC® de configuración de apps. Consulte términos de servicio y políticas de privacidad de la App. Ford no es responsable de la funcionalidad de la App. Evite distracciones y use los controles de voz cuando estén disponibles. Estoy de acuerdo y acepto lo anterior.",
-              "tts" : "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar."
             },
             "es-es" :
             {
@@ -180,17 +167,9 @@
             {
               "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press Yes to grant permissions or No to deny."
             },
-            "en-ie" :
-            {
-              "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press Yes to grant permissions or No to deny."
-            },
             "en-us" :
             {
               "tts" : "%appName% is requesting the following vehicle information and permissions: %functionalGroupLabels%. You can change these permissions and hear detailed descriptions in the mobile apps settings menu. Please press yes to grant permissions or no to deny."
-            },
-            "es-en" :
-            {
-              "tts" : "%appName% solicita la siguiente información y permisos del vehículo: %functionalGroupLabels%. Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles. Presione Sí para otorgar permisos y No para denegar."
             },
             "es-es" :
             {
@@ -266,17 +245,9 @@
             {
               "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
             },
-            "en-ie" :
-            {
-              "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
-            },
             "en-us" :
             {
               "tts" : "App authorizations have changed. %appName% can no longer access %functionalGroupLabels%. Please ensure you have the most recent app version installed on your mobile device."
-            },
-            "es-en" :
-            {
-              "tts" : "Las autorizaciones de la aplicación han cambiado. %appName% ya no puede acceder a %functionalGroupLabels%. Asegúrese de haber instalado la versión más reciente de la aplicación en su dispositivo móvil."
             },
             "es-es" :
             {
@@ -356,22 +327,11 @@
               "textBody" : "This version of %appName% is not authorized and will not work with SYNC.",
               "tts" : "This version of %appName% is not authorized and will not work with SYNC."
             },
-            "en-ie" :
-            {
-              "line1" : "not authorized",
-              "tts" : "This version of %appName% is not authorized and will not work with SYNC."
-            },
             "en-us" :
             {
               "line1" : "Not Authorized",
               "textBody" : "This version of %appName% is no longer authorized to work with Mobile Apps. Please update to the latest version of %appName%.",
               "tts" : "This version of %appName% is not authorized and will not work with SYNC."
-            },
-            "es-en" :
-            {
-              "line1" : "no autorizada",
-              "textBody" : "Esta versión de %appName% no tiene autorización y no funcionará con SYNC.",
-              "tts" : "Esta versión de %appName% no tiene autorización y no funcionará con SYNC."
             },
             "es-es" :
             {
@@ -467,22 +427,11 @@
               "textBody" : "This version of %appName% is not supported by SYNC.",
               "tts" : "This version of %appName% is not supported by SYNC."
             },
-            "en-ie" :
-            {
-              "line1" : "not supported",
-              "tts" : "This version of %appName% is not supported by SYNC."
-            },
             "en-us" :
             {
               "line1" : "Not Supported",
               "textBody" : "Your version of %appName% is not supported by SYNC.",
               "tts" : "This version of %appName% is not supported by SYNC."
-            },
-            "es-en" :
-            {
-              "line1" : "no compatible",
-              "textBody" : "Esta versión de %appName% no es compatible con SYNC.",
-              "tts" : "Esta versión de %appName% no es compatible con SYNC."
             },
             "es-es" :
             {
@@ -623,25 +572,12 @@
               "textBody" : "Disabling automatic updates will also disable SYNC mobile apps. You will not be able to use any mobile apps with SYNC. Please press Yes to confirm or No to cancel.",
               "tts" : "Disabling automatic updates will also disable SYNC mobile apps. You will not be able to use any mobile apps with SYNC. Please press Yes to confirm or No to cancel."
             },
-            "en-ie" :
-            {
-              "line1" : "Disable auto-updates",
-              "line2" : "and Mobile Apps?",
-              "tts" : "Disabling automatic updates will also disable SYNC mobile apps. You will not be able to use any mobile apps with SYNC. Please press Yes to confirm or No to cancel."
-            },
             "en-us" :
             {
               "line1" : "Disable Auto-Updates",
               "line2" : "and Mobile Apps?",
               "textBody" : "If you disable, you will not be able to use any mobile apps with SYNC and your vehicle will stop receiving mobile app permission updates via your device`s data plan. Please press yes to disable mobile apps or no to cancel.",
               "tts" : "Disabling automatic updates will also disable sync mobile apps. You will not be able to use any mobile apps with SYNC. Please press yes to confirm or no to cancel."
-            },
-            "es-en" :
-            {
-              "line1" : "¿Deshab. actualiz.",
-              "line2" : "autom. y aplic. móv.?",
-              "textBody" : "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar.",
-              "tts" : "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar."
             },
             "es-es" :
             {
@@ -751,22 +687,11 @@
               "textBody" : "An app can access the following driving characteristics: Fuel consumption, MyKey, Seat belt status.",
               "tts" : "An app can access the following driving characteristics: Fuel consumption, MyKey, Seat belt status."
             },
-            "en-ie" :
-            {
-              "label" : "Driving characteristics",
-              "tts" : "An app can access the following driving characteristics: Fuel consumption, MyKey, Seat belt status."
-            },
             "en-us" :
             {
               "label" : "Driving Characteristics",
               "textBody" : "An app can access the following driving characteristics: Fuel Consumption, MyKey, Seat Belt Status, Gear Position, RPM.",
               "tts" : "An app can access the following driving characteristics: Fuel Consumption, MyKey, Seat Belt Status, Gear Position, RPM."
-            },
-            "es-en" :
-            {
-              "label" : "Características del manejo",
-              "textBody" : "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad.",
-              "tts" : "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad."
             },
             "es-es" :
             {
@@ -863,22 +788,11 @@
               "textBody" : "An app can access vehicle GPS and speed.",
               "tts" : "An app can access vehicle GPS and speed."
             },
-            "en-ie" :
-            {
-              "label" : "GPS and speed",
-              "tts" : "An app can access vehicle GPS and speed."
-            },
             "en-us" :
             {
               "label" : "GPS and Speed",
               "textBody" : "An app can access vehicle GPS and speed.",
               "tts" : "An app can access vehicle GPS and speed."
-            },
-            "es-en" :
-            {
-              "label" : "GPS y velocidad",
-              "textBody" : "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo.",
-              "tts" : "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo."
             },
             "es-es" :
             {
@@ -974,22 +888,11 @@
               "textBody" : "An app can send notifications when running in the background.",
               "tts" : "An app can send notifications when running in the background."
             },
-            "en-ie" :
-            {
-              "label" : "Push notifications",
-              "tts" : "An app can send notifications when running in the background."
-            },
             "en-us" :
             {
               "label" : "Push Notifications",
               "textBody" : "An app can send notifications when running in the background.",
               "tts" : "An app can send notifications when running in the background."
-            },
-            "es-en" :
-            {
-              "label" : "Notificaciones tipo Push",
-              "textBody" : "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano.",
-              "tts" : "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano."
             },
             "es-es" :
             {
@@ -1100,19 +1003,10 @@
             {
               "line1" : "Disable updates"
             },
-            "en-ie" :
-            {
-              "line1" : "Disable updates"
-            },
             "en-us" :
             {
               "line1" : "Disable Updates",
               "textBody" : "Disable Updates"
-            },
-            "es-en" :
-            {
-              "line1" : "Deshab. actual.",
-              "textBody" : "Deshab. actual."
             },
             "es-es" :
             {
@@ -1190,17 +1084,9 @@
             {
               "line1" : "Enable Apps"
             },
-            "en-ie" :
-            {
-              "line1" : "Enable Apps"
-            },
             "en-us" :
             {
               "line1" : "Enable Apps"
-            },
-            "es-en" :
-            {
-              "line1" : "Hab. aplic."
             },
             "es-es" :
             {
@@ -1277,19 +1163,10 @@
             {
               "line1" : "Request update"
             },
-            "en-ie" :
-            {
-              "line1" : "Request update"
-            },
             "en-us" :
             {
               "line1" : "Request Update",
               "textBody" : "Select `Update now` to receive app permissions for your SYNC-enabled mobile apps. This may enable additional functionality depending on the app and your settings. If your phone has a working data connection, an update should complete in less than 1 minute."
-            },
-            "es-en" :
-            {
-              "line1" : "Solicit. actualiz.",
-              "textBody" : "Solicit. actualiz."
             },
             "es-es" :
             {
@@ -1368,19 +1245,10 @@
               "line1" : "Update needed",
               "textBody" : "Update needed"
             },
-            "en-ie" :
-            {
-              "line1" : "Update needed"
-            },
             "en-us" :
             {
               "line1" : "Update Needed",
               "textBody" : "Update Needed"
-            },
-            "es-en" :
-            {
-              "line1" : "Actualiz. neces.",
-              "textBody" : "Actualiz. neces."
             },
             "es-es" :
             {
@@ -1459,19 +1327,10 @@
               "line1" : "Updating...",
               "textBody" : "Updating..."
             },
-            "en-ie" :
-            {
-              "line1" : "Updating..."
-            },
             "en-us" :
             {
               "line1" : "Updating...",
               "textBody" : "Updating..."
-            },
-            "es-en" :
-            {
-              "line1" : "Actualizando...",
-              "textBody" : "Actualizando..."
             },
             "es-es" :
             {
@@ -1550,19 +1409,10 @@
               "line1" : "Up-to-date",
               "textBody" : "Up-to-date"
             },
-            "en-ie" :
-            {
-              "line1" : "Up-to-date"
-            },
             "en-us" :
             {
               "line1" : "Up-To-Date",
               "textBody" : "Up-To-Date"
-            },
-            "es-en" :
-            {
-              "line1" : "Actualizado",
-              "textBody" : "Actualizado"
             },
             "es-es" :
             {
@@ -1644,22 +1494,11 @@
               "textBody" : "An app can access the following vehicle information: Fuel level, Fuel economy, Engine RPMs, Odometer, VIN, Outside air temperature, Gear position, Tire pressure.",
               "tts" : "An app can access the following vehicle information: Fuel level, Fuel economy, Engine RPMs, Odometer, VIN, Outside air temperature, Gear position, Tire pressure."
             },
-            "en-ie" :
-            {
-              "label" : "Vehicle information",
-              "tts" : "An app can access the following vehicle information: Fuel level, Fuel economy, Engine RPMs, Odometer, VIN, Outside air temperature, Gear position, Tyre pressure."
-            },
             "en-us" :
             {
               "label" : "Vehicle Information",
               "textBody" : "An app can access the following vehicle information: Fuel Level, Fuel Economy, Odometer, VIN, External Temperature, Tire Pressure.",
               "tts" : "An app can access the following vehicle information: Fuel Level, Fuel Economy, Odometer, VIN, External Temperature, Tire Pressure."
-            },
-            "es-en" :
-            {
-              "label" : "Información del vehículo",
-              "textBody" : "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos.",
-              "tts" : "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos."
             },
             "es-es" :
             {

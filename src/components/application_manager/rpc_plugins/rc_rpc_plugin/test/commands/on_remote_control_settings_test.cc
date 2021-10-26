@@ -145,9 +145,10 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kAllowed] = false;
-
-  EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
+  ON_CALL(mock_allocation_manager_, GetAccessMode())
+      .WillByDefault(Return(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
   EXPECT_CALL(mock_interior_data_manager_, OnDisablingRC());
+  EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
   EXPECT_CALL(mock_rc_consent_manger_, RemoveAllConsents());
 
   // Act

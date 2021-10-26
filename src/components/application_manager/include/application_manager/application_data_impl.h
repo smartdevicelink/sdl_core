@@ -102,6 +102,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   const smart_objects::SmartObject* keyboard_props() const;
   const smart_objects::SmartObject* menu_title() const;
   const smart_objects::SmartObject* menu_icon() const;
+  const smart_objects::SmartObject* menu_layout() const;
 
   smart_objects::SmartObject day_color_scheme() const OVERRIDE;
   smart_objects::SmartObject night_color_scheme() const OVERRIDE;
@@ -141,6 +142,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_keyboard_props(const smart_objects::SmartObject& keyboard_props);
   void set_menu_title(const smart_objects::SmartObject& menu_title);
   void set_menu_icon(const smart_objects::SmartObject& menu_icon);
+  void set_menu_layout(const smart_objects::SmartObject& menu_layout);
   void set_day_color_scheme(const smart_objects::SmartObject& color_scheme);
   void set_night_color_scheme(const smart_objects::SmartObject& color_scheme);
   void set_display_layout(const std::string& layout);
@@ -323,6 +325,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject* keyboard_props_;
   smart_objects::SmartObject* menu_title_;
   smart_objects::SmartObject* menu_icon_;
+  smart_objects::SmartObject* menu_layout_;
   smart_objects::SmartObject* tbt_show_command_;
   smart_objects::SmartObjectSPtr display_capabilities_;
   AppWindowsTemplates window_templates_;

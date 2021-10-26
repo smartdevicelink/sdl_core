@@ -237,12 +237,14 @@ void sig_handler(int sig) {
       SDL_LOG_DEBUG("SIGTERM signal has been caught");
       break;
     case SIGSEGV:
+      std::cerr << "SIGSEGV caught" << std::endl;
       SDL_LOG_DEBUG("SIGSEGV signal has been caught");
       SDL_FLUSH_LOGGER();
       // exit need to prevent endless sending SIGSEGV
       // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
       abort();
     default:
+      std::cerr << "Unexpected signal " << sig << " caught" << std::endl;
       SDL_LOG_DEBUG("Unexpected signal has been caught");
       exit(EXIT_FAILURE);
   }
@@ -264,14 +266,14 @@ void LifeCycleImpl::StopComponents() {
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
 
-  DCHECK_OR_RETURN_VOID(connection_handler_);
-  connection_handler_->set_connection_handler_observer(NULL);
-
   DCHECK_OR_RETURN_VOID(protocol_handler_);
   protocol_handler_->RemoveProtocolObserver(&(app_manager_->GetRPCHandler()));
 
   DCHECK_OR_RETURN_VOID(app_manager_);
   app_manager_->Stop();
+
+  DCHECK_OR_RETURN_VOID(connection_handler_);
+  connection_handler_->set_connection_handler_observer(NULL);
 
   SDL_LOG_INFO("Stopping Protocol Handler");
   DCHECK_OR_RETURN_VOID(protocol_handler_);

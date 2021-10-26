@@ -19,7 +19,9 @@ std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
     case PT_SNAPSHOT: {
       return "PT_SNAPSHOT";
     }
-    default: { return "INVALID_PT_TYPE"; }
+    default: {
+      return "INVALID_PT_TYPE";
+    }
   }
 }
 
@@ -270,7 +272,6 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
     , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
-    , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , certificate(impl::ValueMember(value__, "certificate"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
@@ -292,7 +293,6 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
   impl::WriteJsonField("RequestSubType", RequestSubType, &result__);
-  impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
@@ -327,9 +327,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!AppHMIType.is_valid()) {
-    return false;
-  }
-  if (!memory_kb.is_valid()) {
     return false;
   }
   if (!heart_beat_timeout_ms.is_valid()) {
@@ -394,9 +391,6 @@ bool ApplicationParams::struct_empty() const {
   if (RequestSubType.is_initialized()) {
     return false;
   }
-  if (memory_kb.is_initialized()) {
-    return false;
-  }
   if (heart_beat_timeout_ms.is_initialized()) {
     return false;
   }
@@ -458,9 +452,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
   }
-  if (!memory_kb.is_valid()) {
-    memory_kb.ReportErrors(&report__->ReportSubobject("memory_kb"));
-  }
   if (!heart_beat_timeout_ms.is_valid()) {
     heart_beat_timeout_ms.ReportErrors(
         &report__->ReportSubobject("heart_beat_timeout_ms"));
@@ -510,7 +501,6 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
   RequestSubType.SetPolicyTableType(pt_type);
-  memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
   moduleType.SetPolicyTableType(pt_type);
@@ -739,7 +729,6 @@ ModuleConfig::~ModuleConfig() {}
 
 ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
-    , device_certificates(impl::ValueMember(value__, "device_certificates"))
     , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
     , full_app_id_supported(impl::ValueMember(value__, "full_app_id_supported"))
     , exchange_after_x_ignition_cycles(
@@ -766,8 +755,6 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
           impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
-  //  device_certificates = from.device_certificates;  // According to the
-  //  requirements this is optional.
   exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
   exchange_after_x_kilometers = from.exchange_after_x_kilometers;
   exchange_after_x_days = from.exchange_after_x_days;
@@ -941,10 +928,6 @@ bool ModuleConfig::struct_empty() const {
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
-  }
-  if (!device_certificates.is_valid()) {
-    device_certificates.ReportErrors(
-        &report__->ReportSubobject("device_certificates"));
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
@@ -1457,13 +1440,47 @@ AppLevel::AppLevel(const Json::Value* value__)
           impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"))
     , count_of_removals_for_bad_behavior(
           impl::ValueMember(value__, "count_of_removals_for_bad_behavior"))
-    , count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors"))
+    , count_of_tls_errors(impl::ValueMember(value__, "count_of_TLS_errors"))
     , count_of_run_attempts_while_revoked(
           impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {}
 
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
+  impl::WriteJsonField("app_registration_language_gui",
+                       app_registration_language_gui,
+                       &result__);
+  impl::WriteJsonField("app_registration_language_vui",
+                       app_registration_language_vui,
+                       &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
+  impl::WriteJsonField(
+      "minutes_in_hmi_background", minutes_in_hmi_background, &result__);
+  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
+  impl::WriteJsonField(
+      "count_of_user_selections", count_of_user_selections, &result__);
+  impl::WriteJsonField("count_of_rejections_sync_out_of_memory",
+                       count_of_rejections_sync_out_of_memory,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_nickname_mismatch",
+                       count_of_rejections_nickname_mismatch,
+                       &result__);
+  impl::WriteJsonField("count_of_rejections_duplicate_name",
+                       count_of_rejections_duplicate_name,
+                       &result__);
+  impl::WriteJsonField(
+      "count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
+  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none",
+                       count_of_rpcs_sent_in_hmi_none,
+                       &result__);
+  impl::WriteJsonField("count_of_removals_for_bad_behavior",
+                       count_of_removals_for_bad_behavior,
+                       &result__);
   impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_run_attempts_while_revoked",
+                       count_of_run_attempts_while_revoked,
+                       &result__);
   return result__;
 }
 

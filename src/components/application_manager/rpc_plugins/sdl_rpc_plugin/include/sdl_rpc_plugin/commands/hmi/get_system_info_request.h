@@ -67,9 +67,9 @@ class GetSystemInfoRequest : public app_mngr::commands::RequestToHMI {
   void Run() OVERRIDE;
 
   /**
-   * @brief onTimeOut from request controller
+   * @brief OnTimeOut from request controller
    */
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(GetSystemInfoRequest);

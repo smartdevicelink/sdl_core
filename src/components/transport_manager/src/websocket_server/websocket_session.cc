@@ -92,6 +92,8 @@ void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
     SDL_LOG_ERROR(str_err);
+    buffer_.consume(buffer_.size());
+    on_io_error_();
     return;
   }
 

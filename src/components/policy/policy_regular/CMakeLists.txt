@@ -85,7 +85,6 @@ generate_policy_types("${GENERATED_HMI_POLICY_TYPES}"
 set(POLICY_TABLE_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/policy_table
   ${CMAKE_CURRENT_SOURCE_DIR}/src/policy_table
-  ${CMAKE_CURRENT_BINARY_DIR}/
 )
 
 set(POLICY_TABLE_SOURCES
@@ -124,6 +123,7 @@ set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
+
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
 
 set(LIBRARIES
@@ -141,7 +141,6 @@ else ()
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
   list(APPEND LIBRARIES sqlite3)
 endif ()
-
 
 add_library(PolicyStatic ${SOURCES})
 target_link_libraries(PolicyStatic ${LIBRARIES})

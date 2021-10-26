@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #include "application_manager/mock_request.h"
-#include "application_manager/request_controller.h"
+#include "application_manager/request_controller_impl.h"
 #include "application_manager/request_info.h"
 #include "gtest/gtest.h"
 
@@ -44,10 +44,14 @@
 
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application_manager.h"
+
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/mock_request_timeout_handler.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
 #include "resumption/last_state.h"
 #include "utils/test_async_waiter.h"
 
@@ -56,8 +60,11 @@ namespace components {
 namespace request_controller_test {
 
 using ::application_manager::request_controller::RequestController;
+using ::application_manager::request_controller::RequestControllerImpl;
 using ::application_manager::request_controller::RequestInfo;
+using test::components::application_manager_test::MockRequestTimeoutHandler;
 
+using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -65,7 +72,7 @@ using ::testing::ReturnRef;
 
 typedef NiceMock<application_manager_test::MockRequest> MRequest;
 typedef std::shared_ptr<MRequest> RequestPtr;
-typedef std::shared_ptr<RequestController> RequestControllerSPtr;
+typedef std::shared_ptr<RequestControllerImpl> RequestControllerSPtr;
 
 namespace {
 const size_t kNumberOfRequests = 10u;
@@ -103,8 +110,10 @@ class RequestControllerTestClass : public ::testing::Test {
   RequestControllerTestClass() {
     ON_CALL(mock_request_controller_settings_, thread_pool_size())
         .WillByDefault(Return(kThreadPoolSize));
-    request_ctrl_ =
-        std::make_shared<RequestController>(mock_request_controller_settings_);
+    request_ctrl_ = std::make_shared<RequestControllerImpl>(
+        mock_request_controller_settings_,
+        mock_request_timeout_handler_,
+        mock_event_dispatcher_);
   }
 
   RequestPtr GetMockRequest(
@@ -126,10 +135,10 @@ class RequestControllerTestClass : public ::testing::Test {
       const mobile_apis::HMILevel::eType& hmi_level =
           mobile_apis::HMILevel::INVALID_ENUM) {
     if (RequestInfo::RequestType::HMIRequest == request_type) {
-      return request_ctrl_->addHMIRequest(request);
+      return request_ctrl_->AddHMIRequest(request);
     }
     CallSettings(settings);
-    return request_ctrl_->addMobileRequest(request, hmi_level);
+    return request_ctrl_->AddMobileRequest(request, hmi_level);
   }
 
   void CallSettings(const TestSettings& settings) const {
@@ -154,6 +163,8 @@ class RequestControllerTestClass : public ::testing::Test {
 
   NiceMock<application_manager_test::MockRequestControlerSettings>
       mock_request_controller_settings_;
+  NiceMock<MockEventDispatcher> mock_event_dispatcher_;
+  MockRequestTimeoutHandler mock_request_timeout_handler_;
   RequestControllerSPtr request_ctrl_;
   RequestPtr empty_mock_request_;
   const TestSettings default_settings_;
@@ -169,7 +180,7 @@ TEST_F(RequestControllerTestClass,
       .Times(1)
       .WillRepeatedly(NotifyTestAsyncWaiter(waiter_valid));
 
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        request_valid,
                        RequestInfo::RequestType::MobileRequest,
@@ -185,7 +196,7 @@ TEST_F(RequestControllerTestClass,
   ON_CALL(*request_dup_corr_id, Run())
       .WillByDefault(NotifyTestAsyncWaiter(waiter_dup));
 
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        request_dup_corr_id,
                        RequestInfo::RequestType::MobileRequest,
@@ -200,7 +211,7 @@ TEST_F(RequestControllerTestClass,
   // app_hmi_level_none_time_scale_max_requests_ equals 0
   // (in the default settings they setted to 0)
   for (size_t i = 0; i < kMaxRequestAmount; ++i) {
-    EXPECT_EQ(RequestController::SUCCESS,
+    EXPECT_EQ(RequestController::TResult::SUCCESS,
               AddRequest(default_settings_,
                          GetMockRequest(i),
                          RequestInfo::RequestType::MobileRequest,
@@ -247,7 +258,7 @@ TEST_F(RequestControllerTestClass, IsLowVoltage_SetOnWakeUp_FALSE) {
 }
 
 TEST_F(RequestControllerTestClass, AddMobileRequest_SetValidData_SUCCESS) {
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        GetMockRequest(),
                        RequestInfo::RequestType::MobileRequest,
@@ -256,7 +267,7 @@ TEST_F(RequestControllerTestClass, AddMobileRequest_SetValidData_SUCCESS) {
 
 TEST_F(RequestControllerTestClass,
        AddMobileRequest_SetInvalidData_INVALID_DATA) {
-  EXPECT_EQ(RequestController::INVALID_DATA,
+  EXPECT_EQ(RequestController::TResult::INVALID_DATA,
             AddRequest(default_settings_,
                        empty_mock_request_,
                        RequestInfo::RequestType::MobileRequest,
@@ -264,14 +275,14 @@ TEST_F(RequestControllerTestClass,
 }
 
 TEST_F(RequestControllerTestClass, AddHMIRequest_AddRequest_SUCCESS) {
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        GetMockRequest(),
                        RequestInfo::RequestType::HMIRequest));
 }
 
 TEST_F(RequestControllerTestClass, AddHMIRequest_AddInvalidData_INVALID_DATA) {
-  EXPECT_EQ(RequestController::INVALID_DATA,
+  EXPECT_EQ(RequestController::TResult::INVALID_DATA,
             AddRequest(default_settings_,
                        empty_mock_request_,
                        RequestInfo::RequestType::HMIRequest));
@@ -283,12 +294,12 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
 
   auto waiter = TestAsyncWaiter::createInstance();
-  EXPECT_EQ(RequestController::SUCCESS,
+  EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
-  EXPECT_CALL(*mock_request, onTimeOut())
+  EXPECT_CALL(*mock_request, HandleTimeOut())
       .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds

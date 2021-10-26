@@ -35,7 +35,6 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -52,13 +51,14 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
+    , tts_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , rc_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {}
 
@@ -146,6 +146,14 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       GetInfo(message, tts_response_info_);
       break;
     }
+    case hmi_apis::FunctionID::RC_SetGlobalProperties: {
+      SDL_LOG_INFO("Received RC_SetGlobalProperties event");
+      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_RC);
+      rc_result_ = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      GetInfo(message, rc_response_info_);
+      break;
+    }
     default: {
       SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
@@ -183,6 +191,8 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
       ui_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   app_mngr::commands::ResponseInfo tts_properties_info(
       tts_result_, HmiInterfaces::HMI_INTERFACE_TTS, application_manager_);
+  app_mngr::commands::ResponseInfo rc_properties_info(
+      rc_result_, HmiInterfaces::HMI_INTERFACE_RC, application_manager_);
 
   HmiInterfaces::InterfaceState tts_interface_state =
       application_manager_.hmi_interfaces().GetInterfaceState(
@@ -195,22 +205,16 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
     out_result_code = mobile_apis::Result::WARNINGS;
     out_response_info = "Unsupported phoneme type sent in a prompt";
   } else {
-    result =
-        PrepareResultForMobileResponse(ui_properties_info, tts_properties_info);
-    out_result_code =
-        PrepareResultCodeForResponse(ui_properties_info, tts_properties_info);
-    out_response_info = app_mngr::commands::MergeInfos(tts_properties_info,
-                                                       tts_response_info_,
-                                                       ui_properties_info,
-                                                       ui_response_info_);
+    result = PrepareResultForMobileResponse(
+        ui_properties_info, tts_properties_info, rc_properties_info);
+    out_result_code = PrepareResultCodeForResponse(
+        ui_properties_info, tts_properties_info, rc_properties_info);
+
+    out_response_info = app_mngr::commands::MergeInfos(
+        tts_response_info_, ui_response_info_, rc_response_info_);
   }
 
   return result;
-}
-
-bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
-         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 }  // namespace commands

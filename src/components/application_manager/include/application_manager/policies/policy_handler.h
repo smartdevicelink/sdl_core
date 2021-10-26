@@ -86,8 +86,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool InitPolicyTable() OVERRIDE;
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
-  DEPRECATED bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                   const std::string& url) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;

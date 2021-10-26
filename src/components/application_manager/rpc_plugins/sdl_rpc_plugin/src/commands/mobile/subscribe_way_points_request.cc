@@ -49,11 +49,11 @@ SubscribeWayPointsRequest::SubscribeWayPointsRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 SubscribeWayPointsRequest::~SubscribeWayPointsRequest() {}
 
@@ -121,7 +121,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void SubscribeWayPointsRequest::onTimeOut() {
+void SubscribeWayPointsRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   if (application_manager_.GetAppServiceManager().FindWayPointsHandler() !=
       nullptr) {

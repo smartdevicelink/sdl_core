@@ -52,11 +52,6 @@ class ResumptionDataJson : public ResumptionData {
       resumption::LastStateWrapperPtr last_state_wrapper,
       const application_manager::ApplicationManager& application_manager);
 
-  DEPRECATED
-  ResumptionDataJson(
-      LastState&,
-      const application_manager::ApplicationManager& application_manager);
-
   /**
    * @brief allows to destroy ResumptionDataJson object
    */
@@ -179,9 +174,6 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Write json resumption info to file system
    */
   void Persist() OVERRIDE;
-
-  DEPRECATED
-  resumption::LastState& last_state() const;
 
  private:
   /**

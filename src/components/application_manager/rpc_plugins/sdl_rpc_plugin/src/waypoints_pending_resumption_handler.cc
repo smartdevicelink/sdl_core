@@ -140,7 +140,7 @@ void WayPointsPendingResumptionHandler::RaiseFakeSuccessfulResponse(
   event.raise(application_manager_.event_dispatcher());
 }
 
-void WayPointsPendingResumptionHandler::on_event(
+void WayPointsPendingResumptionHandler::HandleOnEvent(
     const application_manager::event_engine::Event& event) {
   using namespace application_manager;
   SDL_LOG_AUTO_TRACE();

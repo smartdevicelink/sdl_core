@@ -77,6 +77,7 @@ class TTSGetLanguageRequestTest
 
 TEST_F(TTSGetLanguageRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<TTSGetLanguageRequest>(command_msg));
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
@@ -92,6 +93,7 @@ TEST_F(TTSGetLanguageRequestTest, RUN_SendRequest_SUCCESS) {
 
 TEST_F(TTSGetLanguageRequestTest, onTimeOut_TTSGetLanguageUpdated) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<TTSGetLanguageRequest>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -100,7 +102,7 @@ TEST_F(TTSGetLanguageRequestTest, onTimeOut_TTSGetLanguageUpdated) {
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*command_msg)[strings::params][strings::protocol_type].asInt());

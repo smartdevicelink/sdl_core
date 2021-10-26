@@ -149,8 +149,6 @@ bool HandshakeHandler::OnHandshakeDone(
             return "Certificate is not signed";
           case security_manager::SSLContext::Handshake_Result_AppIDMismatch:
             return "Trying to run handshake with wrong app id";
-          case security_manager::SSLContext::Handshake_Result_AppNameMismatch:
-            return "Trying to run handshake with wrong app name";
           case security_manager::SSLContext::Handshake_Result_AbnormalFail:
             return "Error occurred during handshake";
           case security_manager::SSLContext::Handshake_Result_Fail:

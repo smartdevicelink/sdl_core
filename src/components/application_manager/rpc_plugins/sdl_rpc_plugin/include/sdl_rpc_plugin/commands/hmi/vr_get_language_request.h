@@ -63,7 +63,7 @@ class VRGetLanguageRequest : public app_mngr::commands::RequestToHMI {
 
   void Run() OVERRIDE;
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRGetLanguageRequest);
