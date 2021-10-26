@@ -725,7 +725,8 @@ TEST_F(TransportAdapterTest,
 
   EXPECT_CALL(transport_adapter, FindDevice(uniq_id)).WillOnce(Return(mockdev));
   EXPECT_CALL(transport_adapter, GetDeviceType())
-      .WillOnce(Return(DeviceType::CLOUD_WEBSOCKET));
+      .Times(2)
+      .WillRepeatedly(Return(DeviceType::CLOUD_WEBSOCKET));
   EXPECT_CALL(mock_listener,
               OnDisconnectDeviceDone(&transport_adapter, uniq_id));
   EXPECT_CALL(mock_listener, OnDeviceListUpdated(&transport_adapter)).Times(2);
