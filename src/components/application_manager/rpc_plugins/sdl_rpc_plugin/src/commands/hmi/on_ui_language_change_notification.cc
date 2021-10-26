@@ -80,27 +80,30 @@ void OnUILanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
+  std::vector<ApplicationSharedPtr> to_unregister;
+  auto message_language =
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
-  ApplicationSetConstIt it = accessor.begin();
-  for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it;
-    ++it;
-    (*message_)[strings::params][strings::connection_key] = app->app_id();
-    SendNotificationToMobile(message_);
+  {
+    const ApplicationSet& accessor =
+        application_manager_.applications().GetData();
 
-    if (app->ui_language() !=
-        (*message_)[strings::msg_params][strings::hmi_display_language]
-            .asInt()) {
-      rpc_service_.ManageMobileCommand(
-          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-              app->app_id(),
-              mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
-          SOURCE_SDL);
-      application_manager_.UnregisterApplication(
-          app->app_id(), mobile_apis::Result::SUCCESS, false);
-    }
+    std::copy_if(accessor.begin(),
+                 accessor.end(),
+                 std::back_inserter(to_unregister),
+                 [message_language](const ApplicationSharedPtr& app) {
+                   return app->ui_language() != message_language;
+                 });
+  }
+
+  for (auto app : to_unregister) {
+    rpc_service_.ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app->app_id(),
+            mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
+        SOURCE_SDL);
+    application_manager_.UnregisterApplication(
+        app->app_id(), mobile_apis::Result::SUCCESS, false);
   }
 }
 
