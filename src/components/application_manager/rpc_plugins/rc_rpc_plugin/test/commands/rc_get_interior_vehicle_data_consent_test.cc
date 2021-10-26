@@ -99,7 +99,6 @@ const std::string kResource = "CLIMATE";
 const std::string kResourceId = "34045662-a9dc-4823-8435-91056d4c26cb";
 const std::string kPolicyAppId = "policy_app_id";
 const std::string kMacAddress = "device1";
-const uint32_t kPluginID = RCRPCPlugin::kRCPluginID;
 }  // namespace
 
 class RCGetInteriorVehicleDataConsentTest
@@ -124,7 +123,7 @@ class RCGetInteriorVehicleDataConsentTest
                      hmi_so_factory_,
                      mobile_so_factoy_)
       , rc_app_extension_(
-            std::make_shared<RCAppExtension>(kPluginID, rc_plugin_, *mock_app_))
+            std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
       , rpc_plugin(mock_rpc_plugin)
@@ -140,7 +139,7 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(application_manager::HmiInterfaces::
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
+    ON_CALL(*mock_app_, QueryInterface(RCAppExtension::RCAppExtensionID))
         .WillByDefault(Return(rc_app_extension_));
     testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
         mock_interior_data_cache_;

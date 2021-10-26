@@ -1200,6 +1200,19 @@ void ApplicationManagerImpl::CreatePendingApplication(
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
   application->set_cloud_app_certificate(app_properties.certificate);
 
+  HmiStatePtr initial_state =
+      CreateRegularState(application,
+                         mobile_apis::WindowType::MAIN,
+                         mobile_apis::HMILevel::INVALID_ENUM,
+                         mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
+                         mobile_api::SystemContext::SYSCTXT_MAIN);
+
+  application->SetInitialState(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      std::string(),  // should not be tracked for main window
+      initial_state);
+
   {
     sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
     SDL_LOG_DEBUG(
@@ -1283,6 +1296,19 @@ void ApplicationManagerImpl::CreatePendingLocalApplication(
   application->set_cloud_app_transport_type(app_properties.transport_type);
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
   application->set_cloud_app_certificate(app_properties.certificate);
+
+  HmiStatePtr initial_state =
+      CreateRegularState(application,
+                         mobile_apis::WindowType::MAIN,
+                         mobile_apis::HMILevel::INVALID_ENUM,
+                         mobile_apis::AudioStreamingState::INVALID_ENUM,
+                         mobile_apis::VideoStreamingState::INVALID_ENUM,
+                         mobile_api::SystemContext::SYSCTXT_MAIN);
+
+  application->SetInitialState(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      std::string(),  // should not be tracked for main window
+      initial_state);
 
   sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   apps_to_register_.insert(application);
@@ -4493,8 +4519,17 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       }
 
       if (flag_diffirence_app_hmi_type) {
-        (*it)->set_app_types(transform_app_hmi_types);
-        (*it)->ChangeSupportingAppHMIType();
+        ApplicationSharedPtr app = *it;
+
+        app->set_app_types(transform_app_hmi_types);
+        app->ChangeSupportingAppHMIType();
+
+        auto on_app_hmi_types_changed = [app](
+                                            plugin_manager::RPCPlugin& plugin) {
+          plugin.OnApplicationEvent(plugin_manager::kAppHmiTypesChanged, app);
+        };
+        ApplyFunctorForEachPlugin(on_app_hmi_types_changed);
+
         const mobile_apis::HMILevel::eType app_hmi_level =
             (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
         if (app_hmi_level == mobile_api::HMILevel::HMI_BACKGROUND) {
@@ -4735,9 +4770,6 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
-
-  // Add application to registered app list and set appropriate mark.
-  application->MarkRegistered();
   applications_.insert(application);
   SDL_LOG_DEBUG("App with app_id: "
                 << application->app_id()

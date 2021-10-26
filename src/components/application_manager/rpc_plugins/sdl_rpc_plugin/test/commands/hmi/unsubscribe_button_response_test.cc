@@ -31,9 +31,10 @@
  */
 
 #include <string>
-
-#include "application_manager/mock_event_dispatcher.h"
 #include "gtest/gtest.h"
+
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "hmi/unsubscribe_button_response.h"
 
 namespace test {

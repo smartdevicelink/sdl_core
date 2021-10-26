@@ -1368,6 +1368,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(*app_ptr_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
 
@@ -1412,6 +1413,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(*app_ptr_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
   EXPECT_CALL(app_mngr_, state_controller())
@@ -1697,6 +1699,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(*app_ptr_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*app_ptr_, app_id()).WillOnce(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
 
@@ -1742,6 +1745,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(_));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  EXPECT_CALL(*app_ptr_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
   EXPECT_CALL(mock_message_helper_,

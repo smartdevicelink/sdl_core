@@ -88,12 +88,15 @@ void OnTTSLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
-  ApplicationSetIt it = accessor.begin();
-  for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it;
-    ++it;
+  const auto applications = application_manager_.applications().GetData();
+  for (const auto& app : applications) {
+    if (!app->IsRegistered()) {
+      SDL_LOG_DEBUG("Skipping app "
+                    << app->app_id()
+                    << " which has not finished the registration process");
+      continue;
+    }
+
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
