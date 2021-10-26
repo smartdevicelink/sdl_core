@@ -81,19 +81,21 @@ void OnUILanguageChangeNotification::Run() {
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
   std::vector<ApplicationSharedPtr> to_unregister;
-  auto message_language =
-      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
   {
     const ApplicationSet& accessor =
         application_manager_.applications().GetData();
+    auto message_language =
+        (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
-    std::copy_if(accessor.begin(),
-                 accessor.end(),
-                 std::back_inserter(to_unregister),
-                 [message_language](const ApplicationSharedPtr& app) {
-                   return app->ui_language() != message_language;
-                 });
+    for (auto app : accessor) {
+      (*message_)[strings::params][strings::connection_key] = app->app_id();
+      SendNotificationToMobile(message_);
+
+      if (app->ui_language() != message_language) {
+        to_unregister.push_back(app);
+      }
+    }
   }
 
   for (auto app : to_unregister) {
