@@ -3344,7 +3344,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
         app_to_remove = *it_app;
-        applications_.erase(it_app++);
+        applications_.erase(it_app);
         break;
       } else {
         ++it_app;
