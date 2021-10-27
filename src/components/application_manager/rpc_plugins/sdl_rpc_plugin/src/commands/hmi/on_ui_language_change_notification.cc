@@ -80,7 +80,7 @@ void OnUILanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  std::vector<ApplicationSharedPtr> to_unregister;
+  std::vector<uint32_t> to_unregister;
 
   {
     const ApplicationSet& accessor =
@@ -93,19 +93,19 @@ void OnUILanguageChangeNotification::Run() {
       SendNotificationToMobile(message_);
 
       if (app->ui_language() != message_language) {
-        to_unregister.push_back(app);
+        to_unregister.push_back(app->app_id());
       }
     }
   }
 
-  for (auto app : to_unregister) {
+  for (auto app_id : to_unregister) {
     rpc_service_.ManageMobileCommand(
         MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-            app->app_id(),
+            app_id,
             mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
         SOURCE_SDL);
     application_manager_.UnregisterApplication(
-        app->app_id(), mobile_apis::Result::SUCCESS, false);
+        app_id, mobile_apis::Result::SUCCESS, false);
   }
 }
 
