@@ -80,6 +80,7 @@ void OnUILanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
+  std::vector<uint32_t> app_list;
   std::vector<uint32_t> to_unregister;
 
   {
@@ -89,13 +90,17 @@ void OnUILanguageChangeNotification::Run() {
         (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
 
     for (auto app : accessor) {
-      (*message_)[strings::params][strings::connection_key] = app->app_id();
-      SendNotificationToMobile(message_);
-
+      auto app_id = app->app_id();
+      app_list.push_back(app_id);
       if (app->ui_language() != message_language) {
-        to_unregister.push_back(app->app_id());
+        to_unregister.push_back(app_id);
       }
     }
+  }
+
+  for (auto app_id : app_list) {
+    (*message_)[strings::params][strings::connection_key] = app_id;
+    SendNotificationToMobile(message_);
   }
 
   for (auto app_id : to_unregister) {
