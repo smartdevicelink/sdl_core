@@ -373,7 +373,7 @@ TEST_F(ProfileTest, IntInsteadOfPair) {
 
 TEST_F(ProfileTest, WrongIntValue) {
   // Default value
-  uint32_t heart_beat_timeout = 0;
+  uint32_t heart_beat_timeout = 5000;
   EXPECT_EQ(heart_beat_timeout, profile_.heart_beat_timeout());
 
   // Change config file
@@ -381,7 +381,7 @@ TEST_F(ProfileTest, WrongIntValue) {
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
 
   // Value in file includes letters. Check that value is default
-  heart_beat_timeout = 0;
+  heart_beat_timeout = 5000;
   EXPECT_EQ(heart_beat_timeout, profile_.heart_beat_timeout());
 
   // Update config file
@@ -679,6 +679,7 @@ TEST_F(ProfileTest, CheckVectorContainer) {
   std::vector<int> diagmodes_list =
       profile_.ReadIntContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
+
   // Compare with result of ReadIntContainer
   ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
   bool isEqual = true;

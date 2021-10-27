@@ -371,8 +371,8 @@ const std::string kCreateSchema =
 
     /*endpoint properties*/
     "CREATE TABLE IF NOT EXISTS `endpoint_properties`( "
-    "  `service` VARCHAR(100) NOT NULL, "
-    "  `version` VARCHAR(100) NOT NULL "
+    "  `service` VARCHAR(100) PRIMARY KEY NOT NULL, "
+    "  `version` VARCHAR(100) "
     ");"
 
     "CREATE TABLE IF NOT EXISTS `message`( "

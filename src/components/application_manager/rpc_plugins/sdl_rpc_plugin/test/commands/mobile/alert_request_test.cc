@@ -56,6 +56,7 @@ using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using app_mngr::commands::RequestFromMobileImpl;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::AlertRequest;
 using ::testing::_;
@@ -207,7 +208,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
-  command->onTimeOut();
+  command->OnTimeOut();
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -259,13 +260,13 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+  CallOnTimeOut(RequestFromMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
-  CommandRequestImpl& command_;
+  RequestFromMobileImpl& command_;
 };
 
 TEST_F(AlertRequestTest, Init_DurationExists_SUCCESS) {
@@ -335,7 +336,7 @@ TEST_F(AlertRequestTest, Run_FailToProcessSoftButtons_UNSUCCESS) {
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
-  EXPECT_EQ(result_code,
+  EXPECT_EQ(mobile_apis::Result::GENERIC_ERROR,
             static_cast<mobile_apis::Result::eType>(
                 (*result_msg)[am::strings::msg_params][am::strings::result_code]
                     .asInt()));
@@ -400,27 +401,6 @@ TEST_F(AlertRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   event.set_smart_object(*msg_);
 
   CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  command->on_event(event);
-}
-
-TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
-  PreConditions();
-  Expectations();
-  AddAlertTextsToMsg();
-
-  (*msg_)[am::strings::msg_params][am::strings::duration] = kDefaultTimeout;
-
-  CommandPtr command(CreateCommand<AlertRequest>(msg_));
-  EXPECT_TRUE(command->Init());
-
-  EXPECT_CALL(
-      app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
-
-  ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_ENUM);
-
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
   command->on_event(event);
 }
 

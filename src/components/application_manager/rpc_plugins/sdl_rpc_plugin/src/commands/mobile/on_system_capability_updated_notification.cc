@@ -96,7 +96,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       smart_objects::SmartObject& updated_capabilities =
           msg_params[strings::system_capability]
                     [strings::app_services_capabilities][strings::app_services];
-      for (size_t i = 0; i < updated_capabilities.length(); i++) {
+      for (size_t i = 0; i < updated_capabilities.length(); ++i) {
         std::string service_id =
             updated_capabilities[i][strings::updated_app_service_record]
                                 [strings::service_id]
@@ -239,7 +239,9 @@ void OnSystemCapabilityUpdatedNotification::Run() {
         msg_params[strings::system_capability][strings::display_capabilities] =
             *capabilities;
       } break;
-      default: { SDL_LOG_ERROR("Unknown system capability type"); }
+      default: {
+        SDL_LOG_ERROR("Unknown system capability type");
+      }
     }
 
     SDL_LOG_INFO("Sending OnSystemCapabilityUpdated " << capability_type_string

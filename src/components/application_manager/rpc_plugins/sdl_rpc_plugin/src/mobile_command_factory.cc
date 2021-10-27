@@ -408,7 +408,8 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       using app_mngr::commands::Command;
       return factory.GetCreator<commands::GenericResponse>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -480,7 +481,8 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     case mobile_apis::FunctionID::OnSubtleAlertPressedID: {
       return factory.GetCreator<commands::OnSubtleAlertPressedNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -501,7 +503,8 @@ CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
       return factory
           .GetCreator<commands::mobile::OnAppCapabilityUpdatedNotification>();
     }
-    default: {}
+    default: {
+    }
   }
   return factory.GetCreator<InvalidCommand>();
 }
@@ -532,7 +535,8 @@ CommandCreator& MobileCommandFactory::get_creator_factory(
       }
       break;
     }
-    default: {}
+    default: {
+    }
   }
   CommandCreatorFactory factory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);

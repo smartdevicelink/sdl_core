@@ -50,11 +50,11 @@ GetAppServiceDataRequest::GetAppServiceDataRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 GetAppServiceDataRequest::~GetAppServiceDataRequest() {}
 
@@ -96,7 +96,7 @@ void GetAppServiceDataRequest::on_event(
 
   mobile_apis::Result::eType result = static_cast<mobile_apis::Result::eType>(
       msg_params[strings::result_code].asInt());
-  bool success = IsMobileResultSuccess(result);
+  bool success = application_manager::commands::IsMobileResultSuccess(result);
   if (success) {
     HandleSubscribe();
   }

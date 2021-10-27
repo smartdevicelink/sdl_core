@@ -51,8 +51,7 @@ VIIsReadyRequest::VIIsReadyRequest(
                    params.application_manager_,
                    params.rpc_service_,
                    params.hmi_capabilities_,
-                   params.policy_handler_)
-    , EventObserver(application_manager_.event_dispatcher()) {}
+                   params.policy_handler_) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
@@ -99,7 +98,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void VIIsReadyRequest::onTimeOut() {
+void VIIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VehicleInfo_IsReady);

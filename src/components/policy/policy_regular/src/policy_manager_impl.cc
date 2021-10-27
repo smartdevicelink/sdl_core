@@ -87,8 +87,6 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   update_status_manager_.set_listener(listener);
 }
 
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
-
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
@@ -96,23 +94,8 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
   Json::Value value;
 
   if (reader.parse(json, &value)) {
-    return std::make_shared<policy_table::Table>(&value);
-  } else {
-    return std::make_shared<policy_table::Table>();
-  }
-}
-
-#else
-
-std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
-    const BinaryMessage& pt_content) {
-  std::string json(pt_content.begin(), pt_content.end());
-  utils::JsonReader reader;
-  Json::Value value;
-
-  if (reader.parse(json, &value)) {
     // For PT Update received from SDL Server.
-    if (value["data"].size() != 0) {
+    if (value.isObject() && value["data"].isArray() && !value["data"].empty()) {
       Json::Value data = value["data"];
       return std::make_shared<policy_table::Table>(&data[0]);
     } else {
@@ -122,8 +105,6 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
     return std::shared_ptr<policy_table::Table>();
   }
 }
-
-#endif
 
 void PolicyManagerImpl::CheckTriggers() {
   SDL_LOG_AUTO_TRACE();
@@ -330,16 +311,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   SDL_LOG_DEBUG(
       "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
-#if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
-  // Assuemes Policy Table was parsed, formatted, and/or decrypted by
-  // the HMI after system request before calling OnReceivedPolicyUpdate
-  // Parse message into table struct
   std::shared_ptr<policy_table::Table> pt_update = Parse(pt_content);
-#else
-  // Message Received from server unecnrypted with PTU in first element
-  // of 'data' array. No Parsing was done by HMI.
-  std::shared_ptr<policy_table::Table> pt_update = ParseArray(pt_content);
-#endif
   if (!pt_update) {
     SDL_LOG_WARN("Parsed table pointer is NULL.");
     ;

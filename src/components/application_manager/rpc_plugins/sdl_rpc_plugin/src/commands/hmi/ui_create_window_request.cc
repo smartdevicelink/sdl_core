@@ -60,7 +60,7 @@ void UICreateWindowRequest::Run() {
   SendRequest();
 }
 
-void UICreateWindowRequest::onTimeOut() {
+void UICreateWindowRequest::OnTimeOut() {
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(

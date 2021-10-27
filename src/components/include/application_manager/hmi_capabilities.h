@@ -274,7 +274,7 @@ class HMICapabilities {
 
   /**
    * @brief Sets supported Button's capabilities
-   * @param soft_button_capabilities supported Button's capabilities
+   * @param button_capabilities supported Button's capabilities
    */
   virtual void set_button_capabilities(
       const smart_objects::SmartObject& button_capabilities) = 0;
@@ -518,9 +518,6 @@ class HMICapabilities {
    */
   virtual const smart_objects::SmartObjectSPtr seat_location_capability()
       const = 0;
-
-  DEPRECATED
-  virtual void Init(resumption::LastState* last_state) = 0;
 
   virtual void Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 

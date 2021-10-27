@@ -44,6 +44,14 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
       new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
+std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
+    ISchemaItem* ElementSchemaItem,
+    const TSchemaItemParameter<size_t>& MinSize,
+    const TSchemaItemParameter<size_t>& MaxSize) {
+  return std::shared_ptr<CArraySchemaItem>(
+      new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
+}
+
 errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report,
@@ -146,7 +154,7 @@ void CArraySchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
   if (SmartType_Array == pattern_object.getType()) {
     const size_t array_len = pattern_object.length();
     if (array_len > 0) {
-      for (size_t i = 0u; i < array_len; i++) {
+      for (size_t i = 0u; i < array_len; ++i) {
         mElementSchemaItem->BuildObjectBySchema(pattern_object.getElement(i),
                                                 result_object[i]);
       }
@@ -161,10 +169,19 @@ TypeID CArraySchemaItem::GetType() {
   return TYPE_ARRAY;
 }
 
-CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
+CArraySchemaItem::CArraySchemaItem(ISchemaItem* ElementSchemaItem,
                                    const TSchemaItemParameter<size_t>& MinSize,
                                    const TSchemaItemParameter<size_t>& MaxSize)
     : mElementSchemaItem(ElementSchemaItem)
+    , mElementSchemaItemShared(nullptr)
+    , mMinSize(MinSize)
+    , mMaxSize(MaxSize) {}
+
+CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
+                                   const TSchemaItemParameter<size_t>& MinSize,
+                                   const TSchemaItemParameter<size_t>& MaxSize)
+    : mElementSchemaItem(ElementSchemaItem.get())
+    , mElementSchemaItemShared(ElementSchemaItem)
     , mMinSize(MinSize)
     , mMaxSize(MaxSize) {}
 

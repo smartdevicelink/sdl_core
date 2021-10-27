@@ -87,42 +87,56 @@ void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
 void RCOnRemoteControlSettingsNotification::Run() {
   SDL_LOG_AUTO_TRACE();
 
+  if ((*message_)[app_mngr::strings::msg_params].empty()) {
+    SDL_LOG_DEBUG("Notification is ignored due to absence of any parameters");
+    SDL_LOG_DEBUG("RC Functionality remains unchanged");
+    return;
+  }
+
+  ProcessAccessModeParam();
+  ProcessAllowedParam();
+}
+
+void RCOnRemoteControlSettingsNotification::ProcessAccessModeParam() {
+  if (!(*message_)[app_mngr::strings::msg_params].keyExists(
+          message_params::kAccessMode)) {
+    SDL_LOG_DEBUG(
+        "No access mode received. Using last known: "
+        << AccessModeToString(resource_allocation_manager_.GetAccessMode()));
+    return;
+  }
+
+  const auto access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
+      (*message_)[app_mngr::strings::msg_params][message_params::kAccessMode]
+          .asUInt());
+  SDL_LOG_DEBUG("Setting up access mode : " << AccessModeToString(access_mode));
+  resource_allocation_manager_.SetAccessMode(access_mode);
+}
+
+void RCOnRemoteControlSettingsNotification::ProcessAllowedParam() {
   if (!(*message_)[app_mngr::strings::msg_params].keyExists(
           message_params::kAllowed)) {
-    SDL_LOG_DEBUG("Notification is ignored due to \"allow\" parameter absense");
-    SDL_LOG_DEBUG("RC Functionality remains unchanged");
+    SDL_LOG_DEBUG("No allowed param received. Using last known: "
+                  << std::boolalpha
+                  << resource_allocation_manager_.is_rc_enabled());
     return;
   }
 
   const bool is_allowed =
       (*message_)[app_mngr::strings::msg_params][message_params::kAllowed]
           .asBool();
+
   if (is_allowed) {
-    hmi_apis::Common_RCAccessMode::eType access_mode =
-        hmi_apis::Common_RCAccessMode::INVALID_ENUM;
     SDL_LOG_DEBUG("Allowing RC Functionality");
     resource_allocation_manager_.set_rc_enabled(true);
-    if ((*message_)[app_mngr::strings::msg_params].keyExists(
-            message_params::kAccessMode)) {
-      access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
-          (*message_)[app_mngr::strings::msg_params]
-                     [message_params::kAccessMode]
-                         .asUInt());
-      SDL_LOG_DEBUG(
-          "Setting up access mode : " << AccessModeToString(access_mode));
-    } else {
-      access_mode = resource_allocation_manager_.GetAccessMode();
-      SDL_LOG_DEBUG("No access mode received. Using last known: "
-                    << AccessModeToString(access_mode));
-    }
-    resource_allocation_manager_.SetAccessMode(access_mode);
-  } else {
-    SDL_LOG_DEBUG("Disallowing RC Functionality");
-    DisallowRCFunctionality();
-    resource_allocation_manager_.ResetAllAllocations();
-    resource_allocation_manager_.set_rc_enabled(false);
-    rc_consent_manager_.RemoveAllConsents();
+    return;
   }
+
+  SDL_LOG_DEBUG("Disallowing RC Functionality");
+  DisallowRCFunctionality();
+  resource_allocation_manager_.ResetAllAllocations();
+  resource_allocation_manager_.set_rc_enabled(false);
+  rc_consent_manager_.RemoveAllConsents();
 }
 
 }  // namespace commands

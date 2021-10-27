@@ -70,6 +70,8 @@ void OnVehicleDataNotification::Run() {
   custom_vehicle_data_manager_.CreateMobileMessageParams(
       (*message_)[strings::msg_params]);
 
+  MessageHelper::RemoveEmptyMessageParams((*message_)[strings::msg_params]);
+
   const auto& param_names = (*message_)[strings::msg_params].enumerate();
   for (const auto& name : param_names) {
     SDL_LOG_DEBUG("vehicle_data name: " << name);
@@ -89,21 +91,27 @@ void OnVehicleDataNotification::Run() {
         SDL_LOG_ERROR("NULL pointer");
         continue;
       }
+
+      smart_objects::SmartObject output_message = *message_;
+      if (strings::tire_pressure == name) {
+        MessageHelper::AddDefaultParamsToTireStatus(app, output_message);
+      }
+
       notified_app_it = find(notify_apps.begin(), notify_apps.end(), app);
       if (notified_app_it == notify_apps.end()) {
         notify_apps.push_back(app);
         smart_objects::SmartObject msg_param =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
-        msg_param[name] = (*message_)[strings::msg_params][name];
+        msg_param[name] = output_message[strings::msg_params][name];
         appSO.push_back(msg_param);
       } else {
         size_t idx = std::distance(notify_apps.begin(), notified_app_it);
-        appSO[idx][name] = (*message_)[strings::msg_params][name];
+        appSO[idx][name] = output_message[strings::msg_params][name];
       }
     }
   }
 
-  for (size_t idx = 0; idx < notify_apps.size(); idx++) {
+  for (size_t idx = 0; idx < notify_apps.size(); ++idx) {
     CommandParametersPermissions params_permissions;
     application_manager_.CheckPolicyPermissions(
         notify_apps[idx],

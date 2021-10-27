@@ -19,7 +19,7 @@ function core_start() {
     return 2
   else
     echo "Starting SmartDeviceLink Core"
-    LD_LIBRARY_PATH=$DIR ${DIR}/${CORE_APPLICATION_NAME} &
+    ${DIR}/${CORE_APPLICATION_NAME} &
     CORE_PID=$!
     echo $CORE_PID > $CORE_PID_FILE
     return 0

@@ -1596,7 +1596,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
     FillFunctionalGroupPermissions(
         all_disallowed, group_names, kGroupDisallowed, permissions);
   }
-  return;
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
@@ -2142,18 +2141,6 @@ void PolicyManagerImpl::SetDecryptedCertificate(
     const std::string& certificate) {
   SDL_LOG_AUTO_TRACE();
   cache_->SetDecryptedCertificate(certificate);
-}
-
-AppIdURL PolicyManagerImpl::GetNextUpdateUrl(const EndpointUrls& urls) {
-  SDL_LOG_AUTO_TRACE();
-
-  const AppIdURL next_app_url = RetrySequenceUrl(retry_sequence_url_, urls);
-
-  retry_sequence_url_.url_idx_ = next_app_url.second + 1;
-  retry_sequence_url_.app_idx_ = next_app_url.first;
-  retry_sequence_url_.policy_app_id_ = urls[next_app_url.first].app_id;
-
-  return next_app_url;
 }
 
 AppIdURL PolicyManagerImpl::RetrySequenceUrl(const struct RetrySequenceURL& rs,

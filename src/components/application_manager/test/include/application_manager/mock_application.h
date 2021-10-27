@@ -253,6 +253,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(menu_layout, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(day_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(night_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(display_layout, std::string());
@@ -305,6 +306,8 @@ class MockApplication : public ::application_manager::Application {
                void(const smart_objects::SmartObject& menu_title));
   MOCK_METHOD1(set_menu_icon,
                void(const smart_objects::SmartObject& menu_icon));
+  MOCK_METHOD1(set_menu_layout,
+               void(const smart_objects::SmartObject& menu_layout));
   MOCK_METHOD1(set_day_color_scheme,
                void(const smart_objects::SmartObject& color_scheme));
   MOCK_METHOD1(set_night_color_scheme,

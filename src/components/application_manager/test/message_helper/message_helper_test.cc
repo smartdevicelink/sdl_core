@@ -37,7 +37,6 @@
 #include "gmock/gmock.h"
 #include "utils/macro.h"
 
-#include "application_manager/commands/command_impl.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -53,6 +52,7 @@
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 
+#include "application_manager/commands/command_impl.h"
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
@@ -650,7 +650,6 @@ class MessageHelperTest : public ::testing::Test {
   const StringArray function_id_strings;
   const StringArray events_id_strings;
   const StringArray hmi_level_strings;
-
   const size_t delta_from_functions_id;
 };
 
@@ -963,7 +962,8 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager_);
+                                                  mock_application_manager_,
+                                                  true);
 
   ASSERT_TRUE(result.get());
 
@@ -1003,7 +1003,8 @@ TEST_F(MessageHelperTest,
   MessageHelper::SendGetListOfPermissionsResponse(permissions,
                                                   external_consent_status,
                                                   correlation_id,
-                                                  mock_application_manager_);
+                                                  mock_application_manager_,
+                                                  true);
 
   ASSERT_TRUE(result.get());
 

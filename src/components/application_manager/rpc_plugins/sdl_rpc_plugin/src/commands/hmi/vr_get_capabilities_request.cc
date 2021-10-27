@@ -59,7 +59,7 @@ void VRGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
-void VRGetCapabilitiesRequest::onTimeOut() {
+void VRGetCapabilitiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetCapabilities);

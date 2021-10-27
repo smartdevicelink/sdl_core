@@ -88,25 +88,6 @@ bool VehicleInfoPlugin::Init(
   return true;
 }
 
-bool VehicleInfoPlugin::Init(
-    application_manager::ApplicationManager& application_manager,
-    application_manager::rpc_service::RPCService& rpc_service,
-    application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
-  UNUSED(last_state);
-  application_manager_ = &application_manager;
-  custom_vehicle_data_manager_.reset(
-      new CustomVehicleDataManagerImpl(policy_handler, rpc_service));
-  command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
-      application_manager,
-      rpc_service,
-      hmi_capabilities,
-      policy_handler,
-      *(custom_vehicle_data_manager_.get())));
-  return true;
-}
-
 bool VehicleInfoPlugin::IsAbleToProcess(
     const int32_t function_id, const commands::Command::CommandSource source) {
   return command_factory_->IsAbleToProcess(function_id, source);
@@ -129,12 +110,22 @@ void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
-  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
-    application->AddExtension(
-        std::make_shared<VehicleInfoAppExtension>(*this, *application));
-  } else if ((plugins::ApplicationEvent::kDeleteApplicationData == event) ||
-             (plugins::ApplicationEvent::kApplicationUnregistered == event)) {
-    DeleteSubscriptions(application);
+  switch (event) {
+    case plugins::ApplicationEvent::kApplicationRegistered: {
+      application->AddExtension(
+          std::make_shared<VehicleInfoAppExtension>(*this, *application));
+      break;
+    }
+
+    case plugins::ApplicationEvent::kApplicationUnregistered:
+    case plugins::ApplicationEvent::kDeleteApplicationData: {
+      DeleteSubscriptions(application);
+      break;
+    }
+
+    default: {
+      break;
+    }
   }
 }
 

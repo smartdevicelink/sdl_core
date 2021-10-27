@@ -70,9 +70,23 @@ class EventObserver {
    *
    * @param event The received event
    */
-  virtual void on_event(const Event& event) = 0;
+  virtual void HandleOnEvent(const Event& event) = 0;
 
-  virtual void on_event(const MobileEvent& event);
+  virtual void HandleOnEvent(const MobileEvent& event);
+
+  /**
+   * @brief Increments reference count to avoid observer destruction while
+   * event dispatcher keeping pointer to that observer
+   * @return true if request reference was incremented, otherwise returns false
+   */
+  virtual bool IncrementReferenceCount() const;
+
+  /**
+   * @brief Decrements reference count to allow observer be safely destroyed
+   * as event dispatcher does not keep any pointers to it
+   * @return true if request reference was decremented, otherwise returns false
+   */
+  virtual bool DecrementReferenceCount() const;
 
  protected:
   /*

@@ -275,6 +275,13 @@ const char* vin = "vin";
 const char* gearStatus = "gearStatus";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
+const char* pressure_telltale = "pressureTelltale";
+const char* left_front = "leftFront";
+const char* right_front = "rightFront";
+const char* left_rear = "leftRear";
+const char* right_rear = "rightRear";
+const char* inner_left_rear = "innerLeftRear";
+const char* inner_right_rear = "innerRightRear";
 const char* odometer = "odometer";
 const char* belt_status = "beltStatus";
 const char* electronic_park_brake_status = "electronicParkBrakeStatus";
@@ -454,6 +461,10 @@ const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
 const char* const preferred_fps = "preferredFPS";
+
+// OnResetTimeout
+const char* const request_id = "requestID";
+const char* const reset_period = "resetPeriod";
 }  // namespace strings
 
 namespace hmi_interface {

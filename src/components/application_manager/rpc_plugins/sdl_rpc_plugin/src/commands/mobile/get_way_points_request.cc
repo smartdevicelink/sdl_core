@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_request.h"
+
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
@@ -47,13 +48,11 @@ GetWayPointsRequest::GetWayPointsRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
-}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 GetWayPointsRequest::~GetWayPointsRequest() {}
 
@@ -81,12 +80,6 @@ void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO("Received UI_OnResetTimeout event");
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
-    }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       SDL_LOG_INFO("Received Navigation_GetWayPoints event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);

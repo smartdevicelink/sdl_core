@@ -866,12 +866,11 @@ void PolicyHandler::ExchangePolicyManager(
   atomic_policy_manager_.swap(policy_manager);
 }
 
-std::vector<policy::FunctionalGroupPermission>
-PolicyHandler::CollectRegisteredAppsPermissions() {
+bool PolicyHandler::CollectRegisteredAppsPermissions(
+    std::vector<FunctionalGroupPermission>& out_permissions) {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
-  POLICY_LIB_CHECK_OR_RETURN(policy_manager,
-                             std::vector<policy::FunctionalGroupPermission>());
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   // If no specific app was passed, get permissions for all currently registered
   // applications
   sync_primitives::AutoLock lock(app_to_device_link_lock_);
@@ -887,14 +886,17 @@ PolicyHandler::CollectRegisteredAppsPermissions() {
         it->first, it->second, group_permissions);
     consolidator.Consolidate(group_permissions);
   }
-  return consolidator.GetConsolidatedPermissions();
+
+  out_permissions = consolidator.GetConsolidatedPermissions();
+  return true;
 }
 
-std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
-    const uint32_t connection_key) {
+bool PolicyHandler::CollectAppPermissions(
+    const uint32_t connection_key,
+    std::vector<policy::FunctionalGroupPermission>& out_permissions) {
   std::vector<FunctionalGroupPermission> group_permissions;
   const auto policy_manager = LoadPolicyManager();
-  POLICY_LIB_CHECK_OR_RETURN(policy_manager, group_permissions);
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
 
   // Single app only
   ApplicationSharedPtr app = application_manager_.application(connection_key);
@@ -905,7 +907,7 @@ std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
                  << "' "
                     "not found within registered applications.");
 
-    return group_permissions;
+    return false;
   }
 
   DeviceParams device_params = GetDeviceParams(
@@ -914,14 +916,13 @@ std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
 
   if (device_params.device_mac_address.empty()) {
     SDL_LOG_WARN("Couldn't find device, which hosts application.");
-    return group_permissions;
+    return false;
   }
 
-  policy_manager->GetUserConsentForApp(device_params.device_mac_address,
-                                       app->policy_app_id(),
-                                       group_permissions);
+  policy_manager->GetUserConsentForApp(
+      device_params.device_mac_address, app->policy_app_id(), out_permissions);
 
-  return group_permissions;
+  return true;
 }
 
 void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
@@ -935,15 +936,12 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   const bool is_app_registered = NULL != app.get();
   const bool is_connection_key_valid = is_app_registered && connection_key;
 
-  const std::vector<policy::FunctionalGroupPermission> permissions =
-      is_connection_key_valid ? CollectAppPermissions(connection_key)
-                              : CollectRegisteredAppsPermissions();
+  std::vector<policy::FunctionalGroupPermission> permissions;
 
-  if (permissions.empty() && is_connection_key_valid) {
-    SDL_LOG_ERROR("No permissions found for application with connection key:"
-                  << connection_key);
-    return;
-  }
+  const bool collect_result =
+      is_connection_key_valid
+          ? CollectAppPermissions(connection_key, permissions)
+          : CollectRegisteredAppsPermissions(permissions);
 
   MessageHelper::SendGetListOfPermissionsResponse(
       permissions,
@@ -951,7 +949,14 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
       policy_manager->GetExternalConsentStatus(),
 #endif  // EXTERNAL_PROPRIETARY_MODE
       correlation_id,
-      application_manager_);
+      application_manager_,
+      collect_result);
+
+  if (!collect_result) {
+    SDL_LOG_ERROR(
+        "Permissions collection failed for application with connection key:"
+        << connection_key);
+  }
 }
 
 void PolicyHandler::LinkAppsToDevice() {
@@ -1229,12 +1234,6 @@ void PolicyHandler::OnPendingPermissionChange(
   }
 
   policy_manager->RemovePendingPermissionChanges(policy_app_id);
-}
-
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
-  const uint32_t app_id = GetAppIdForSending();
-  return SendMessageToSDK(pt_string, url, app_id);
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
@@ -2009,7 +2008,9 @@ void PolicyHandler::AddStatisticsInfo(int type) {
       ++count_of_iap_buffer_full;
       break;
     }
-    default: { SDL_LOG_WARN("Type of statistics is unknown"); }
+    default: {
+      SDL_LOG_WARN("Type of statistics is unknown");
+    }
   }
 }
 
@@ -2028,7 +2029,9 @@ void PolicyHandler::OnSystemError(int code) {
       ++count_sync_out_of_memory;
       break;
     }
-    default: { SDL_LOG_WARN("System error is unknown"); }
+    default: {
+      SDL_LOG_WARN("System error is unknown");
+    }
   }
 }
 

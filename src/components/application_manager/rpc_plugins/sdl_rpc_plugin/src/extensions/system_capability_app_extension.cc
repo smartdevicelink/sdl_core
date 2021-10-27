@@ -7,9 +7,6 @@ SDL_CREATE_LOG_VARIABLE("GetSystemCapabilitiesAppExtension")
 namespace app_mngr_ = application_manager;
 namespace strings = app_mngr::strings;
 
-const app_mngr_::AppExtensionUID
-    SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID = 200;
-
 SystemCapabilityAppExtension::SystemCapabilityAppExtension(
     sdl_rpc_plugin::SDLRPCPlugin& plugin, app_mngr_::Application& app)
     : app_mngr_::AppExtension(
@@ -63,7 +60,7 @@ void SystemCapabilityAppExtension::SaveResumptionData(
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
     resumption_data[strings::system_capability][i] = subscription;
-    i++;
+    ++i;
   }
 }
 

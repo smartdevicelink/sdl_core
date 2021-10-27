@@ -262,7 +262,7 @@ ProtocolPacket::ProtocolHeaderValidator::max_payload_size_by_service_type(
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
-  SDL_LOG_DEBUG("Validating header - " << header);
+  SDL_LOG_TRACE("Validating header - " << header);
   // expected payload size will be calculated depending
   // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
@@ -325,21 +325,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
     }
     case FRAME_TYPE_SINGLE:
-      if (header.frameData != FRAME_DATA_SINGLE) {
-        SDL_LOG_WARN("FRAME_TYPE_SINGLE - Invalide frame data "
-                     << static_cast<int>(header.frameData));
-        return RESULT_FAIL;
-      }
-      break;
     case FRAME_TYPE_FIRST:
-      if (header.frameData != FRAME_DATA_FIRST) {
-        SDL_LOG_WARN("FRAME_TYPE_FIRST - Invalide frame data "
-                     << static_cast<int>(header.frameData));
-        return RESULT_FAIL;
-      }
-      break;
     case FRAME_TYPE_CONSECUTIVE:
-      // Could have any FrameInfo value
       break;
     default:
       SDL_LOG_WARN("Unknown frame type " << static_cast<int>(header.frameType));
@@ -390,7 +377,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       return RESULT_FAIL;
     }
   }
-  SDL_LOG_DEBUG("Message header is completely correct.");
+  SDL_LOG_TRACE("Message header is completely correct.");
   return RESULT_OK;
 }
 

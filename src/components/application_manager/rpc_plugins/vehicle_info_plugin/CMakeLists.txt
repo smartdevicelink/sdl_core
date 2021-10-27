@@ -45,7 +45,6 @@ collect_sources(VEHICLE_INFO_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIBRARIES
   HMI_API
   MOBILE_API
-  MessageHelper
   ApplicationManager
   v4_protocol_v1_2_no_extra
   SmartObjects
@@ -54,7 +53,7 @@ set(LIBRARIES
   connectionHandler
 )
 
-if(ENABLE_LOG)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
@@ -63,6 +62,7 @@ target_link_libraries("vehicle_info_plugin_static" ${LIBRARIES})
 
 add_library(vehicle_info_plugin SHARED "src/vehicle_info_plugin.cc" )
 target_link_libraries(vehicle_info_plugin vehicle_info_plugin_static)
+target_link_libraries(vehicle_info_plugin MessageHelper)
 
 
 set(INSTALL_DESTINATION bin)

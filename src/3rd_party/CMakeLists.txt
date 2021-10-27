@@ -47,7 +47,7 @@ if(FORCE_3RD_PARTY)
   endif()
 endif()
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
@@ -186,7 +186,7 @@ find_package(PkgConfig)
 pkg_check_modules(BSON libbson)
 message (STATUS "bson installed in " ${BSON_LIBDIR} ", " ${BSON_INCLUDEDIR})
 
-if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.0"))
+if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.5"))
   message (STATUS "Building bson required")
   set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib CACHE INTERNAL "Sources of bson library" FORCE)
   set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of bson libraries" FORCE)
@@ -222,7 +222,11 @@ endif()
 
 set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
 set(Boost_NO_BOOST_CMAKE ON)
-find_package(Boost 1.72.0 COMPONENTS system thread date_time filesystem regex) 
+set(BOOST_COMPONENTS system thread date_time filesystem regex)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  list(APPEND BOOST_COMPONENTS log log_setup)
+endif()
+find_package(Boost 1.72.0 COMPONENTS ${BOOST_COMPONENTS}) 
 if (NOT ${Boost_FOUND})
   set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
   set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
@@ -234,15 +238,23 @@ if (NOT ${Boost_FOUND})
     set(BOOST_INSTALL_COMMAND sudo ./b2 install)
   endif()
   include(ExternalProject)
+
+  set(boost_component_install_flags --with-system --with-thread --with-date_time --with-filesystem --with-regex)
+  set(boost_component_libraries system thread date_time filesystem regex)
+  if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+    list(APPEND boost_component_install_flags --with-log)
+    list(APPEND boost_component_libraries log)
+  endif()
+  string (REPLACE ";" "," boost_component_libraries_str "${boost_component_libraries}")
   ExternalProject_Add(
     Boost
     URL https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
     URL_HASH SHA1=668c29007e5380d71fac8a39ecba6a02cb0086d5
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=${boost_component_libraries_str} --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --clean --prefix=${3RD_PARTY_INSTALL_PREFIX} && ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --clean --prefix=${3RD_PARTY_INSTALL_PREFIX} && ${BOOST_INSTALL_COMMAND} ${boost_component_install_flags} --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )

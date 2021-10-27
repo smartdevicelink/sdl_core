@@ -74,7 +74,7 @@ class SetInteriorVehicleDataRequestTest
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extension_(
-            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
+            std::make_shared<RCAppExtension>(rc_plugin_, *mock_app_))
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array)) {}
 
@@ -89,7 +89,7 @@ class SetInteriorVehicleDataRequestTest
         .WillByDefault(Return(application_manager::HmiInterfaces::
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
+    ON_CALL(*mock_app_, QueryInterface(RCAppExtension::RCAppExtensionID))
         .WillByDefault(Return(rc_app_extension_));
 
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
@@ -112,6 +112,8 @@ class SetInteriorVehicleDataRequestTest
     ON_CALL(mock_rc_capabilities_manager_, GetModuleDataCapabilities(_, _))
         .WillByDefault(
             Return(std::make_pair("", capabilitiesStatus::kSuccess)));
+    ON_CALL(mock_allocation_manager_, GetAccessMode())
+        .WillByDefault(Return(hmi_apis::Common_RCAccessMode::AUTO_ALLOW));
   }
 
   MessageSharedPtr CreateBasicMessage() {

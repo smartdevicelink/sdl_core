@@ -237,13 +237,13 @@ void ThreadedSocketConnection::Transmit() {
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
-  SDL_LOG_DEBUG("poll " << this);
+  SDL_LOG_TRACE("poll " << this);
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
     SDL_LOG_ERROR_WITH_ERRNO("poll failed for connection " << this);
     Abort();
     return;
   }
-  SDL_LOG_DEBUG("poll is ok " << this << " revents0: " << std::hex
+  SDL_LOG_TRACE("poll is ok " << this << " revents0: " << std::hex
                               << poll_fds[0].revents << " revents1:" << std::hex
                               << poll_fds[1].revents);
   // error check
@@ -307,7 +307,7 @@ bool ThreadedSocketConnection::Receive() {
     bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
 
     if (bytes_read > 0) {
-      SDL_LOG_DEBUG("Received " << bytes_read << " bytes for connection "
+      SDL_LOG_TRACE("Received " << bytes_read << " bytes for connection "
                                 << this);
       ::protocol_handler::RawMessagePtr frame(
           new protocol_handler::RawMessage(0, 0, buffer, bytes_read, false));
