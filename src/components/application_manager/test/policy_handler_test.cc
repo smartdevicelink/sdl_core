@@ -195,13 +195,15 @@ class PolicyHandlerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_session_observer));
 
     mock_app_ = std::make_shared<application_manager_test::MockApplication>();
+    ON_CALL(*mock_app_, IsRegistered()).WillByDefault(Return(true));
   }
 
   virtual void TearDown() OVERRIDE {
-    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    EXPECT_TRUE(policy_handler_.UnloadPolicyLibrary());
     ON_CALL(
         mock_event_dispatcher_,
         remove_observer(_, testing::Matcher<event_engine::EventObserver&>(_)));
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
 
   void ChangePolicyManagerToMock() {
@@ -2268,34 +2270,26 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
 
-  auto waiter_first = TestAsyncWaiter::createInstance();
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
-      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
-#else
-  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
-      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
-#endif
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 
+  auto waiter = TestAsyncWaiter::createInstance();
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  auto waiter_second = TestAsyncWaiter::createInstance();
-
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
+
   policy_handler_.OnAppPermissionConsent(
       kConnectionKey_, permissions, external_consent_status);
 #else
-  policy_handler_.OnAppPermissionConsent(kConnectionKey_, permissions);
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
+  policy_handler_.OnAppPermissionConsent(kConnectionKey_, permissions);
 #endif
-  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
-#endif
+
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2401,6 +2395,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(1u));
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
+  EXPECT_CALL(*mock_app_, mac_address()).WillRepeatedly(ReturnRef(kMacAddr_));
 
   EXPECT_CALL(
       mock_session_observer,
@@ -2418,22 +2413,21 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatusItem item = {1u, 1u, kStatusOn};
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  auto waiter = TestAsyncWaiter::createInstance();
 
+  auto waiter = TestAsyncWaiter::createInstance();
+#ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  Mock::VerifyAndClearExpectations(mock_app_.get());
-#ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
-#endif
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2463,6 +2457,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, device()).WillRepeatedly(Return(1u));
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
+  EXPECT_CALL(*mock_app_, mac_address()).WillRepeatedly(ReturnRef(kMacAddr_));
 
   EXPECT_CALL(
       mock_session_observer,
@@ -2480,24 +2475,25 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatusItem item = {1u, 1u, kStatusOn};
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  auto waiter = TestAsyncWaiter::createInstance();
 
+  auto waiter = TestAsyncWaiter::createInstance();
+#ifdef EXTERNAL_PROPRIETARY_MODE
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
       .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
+  EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  Mock::VerifyAndClearExpectations(mock_app_.get());
-#ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
-#endif
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 ACTION_P(SetEndpoint, endpoint) {
