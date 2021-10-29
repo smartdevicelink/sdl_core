@@ -162,15 +162,6 @@ void SDLActivateAppRequest::Run() {
     }
     policy_handler_.OnActivateApp(application_id, correlation_id());
   }
-
-  connection_handler::DeviceHandle device_handle = app->device();
-  SDL_LOG_ERROR(
-      "Can't find regular foreground app with the same connection id: "
-      << device_handle);
-  SendErrorResponse(correlation_id(),
-                    SDL_ActivateApp,
-                    hmi_apis::Common_Result::NO_APPS_REGISTERED,
-                    "");
 }
 
 #else  // EXTERNAL_PROPRIETARY_MODE

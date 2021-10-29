@@ -327,7 +327,7 @@ TEST_F(SDLActivateAppRequestTest, FirstAppNotActiveNONE_SUCCESS) {
   EXPECT_CALL(mock_state_controller_,
               IsStateActive(am::HmiState::StateID::STATE_ID_DEACTIVATE_HMI))
       .WillOnce(Return(false));
-  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));  // ?
+  EXPECT_CALL(*mock_app, IsRegistered()).WillOnce(Return(true));
   am::HmiStatePtr state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
   state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
 
