@@ -127,7 +127,7 @@ class PolicyHandlerTest : public ::testing::Test {
       , kGroupNameAllowed_("name_allowed")
       , kGroupNameDisallowed_("name_disallowed")
       , kCallsCount_(1u)
-      , kTimeout_(1000u)
+      , kTimeout_(2000u)
       , mock_message_helper_(*MockMessageHelper::message_helper_mock()) {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
   }
