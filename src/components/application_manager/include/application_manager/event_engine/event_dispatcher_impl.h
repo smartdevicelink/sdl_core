@@ -167,8 +167,6 @@ class EventDispatcherImpl : public EventDispatcher {
 
  private:
   // Members section
-  sync_primitives::Lock state_lock_;
-  sync_primitives::Lock mobile_state_lock_;
   sync_primitives::RecursiveLock observer_lock_;
   sync_primitives::RecursiveLock mobile_observer_lock_;
   EventObserverMap observers_event_;

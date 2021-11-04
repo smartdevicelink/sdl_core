@@ -49,6 +49,7 @@ RequestTimeoutHandlerImpl::RequestTimeoutHandlerImpl(
 
 void RequestTimeoutHandlerImpl::AddRequest(const uint32_t hmi_correlation_id,
                                            const Request& request) {
+  sync_primitives::AutoLock lock(requests_lock_);
   requests_.insert(std::make_pair(hmi_correlation_id, request));
 }
 
@@ -101,6 +102,8 @@ void RequestTimeoutHandlerImpl::HandleOnEvent(
     }
     const auto hmi_corr_id =
         message[strings::msg_params][strings::request_id].asUInt();
+
+    sync_primitives::AutoLock lock(requests_lock_);
     auto it = requests_.find(hmi_corr_id);
     if (it != requests_.end()) {
       const auto& request = it->second;
