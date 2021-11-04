@@ -926,20 +926,40 @@ void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
 
 void DynamicApplicationDataImpl::AddChoiceSet(
     uint32_t choice_set_id, const smart_objects::SmartObject& choice_set) {
-  sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
-  ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
-  if (choice_set_map_.end() == it) {
-    choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
+  bool is_choice_set_added = false;
+  {
+    sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
+    ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
+    if (choice_set_map_.end() == it) {
+      choice_set_map_[choice_set_id] =
+          new smart_objects::SmartObject(choice_set);
+      is_choice_set_added = true;
+    }
+  }
+  if (is_choice_set_added) {
+    set_choice_set_allow_mode(choice_set_id, true);
   }
 }
 
 void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
-  sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
-  ChoiceSetMap::iterator it = choice_set_map_.find(choice_set_id);
+  {
+    sync_primitives::AutoLock choice_set_map_lock(choice_set_map_lock_ptr_);
+    ChoiceSetMap::iterator it = choice_set_map_.find(choice_set_id);
 
-  if (choice_set_map_.end() != it) {
-    delete it->second;
-    choice_set_map_.erase(choice_set_id);
+    if (choice_set_map_.end() != it) {
+      delete it->second;
+      choice_set_map_.erase(choice_set_id);
+    }
+  }
+  {
+    sync_primitives::AutoLock allowed_choice_sets_lock(
+        allowed_choice_sets_lock_);
+    auto choise_id_it = allowed_choice_sets_.find(choice_set_id);
+    if (allowed_choice_sets_.end() == choise_id_it) {
+      SDL_LOG_WARN("Choice set with id " << choice_set_id << " is not found");
+      return;
+    }
+    allowed_choice_sets_.erase(choise_id_it);
   }
 }
 
@@ -984,6 +1004,32 @@ void DynamicApplicationDataImpl::set_perform_interaction_active(
 void DynamicApplicationDataImpl::set_reset_global_properties_active(
     bool active) {
   is_reset_global_properties_active_ = active;
+}
+
+void DynamicApplicationDataImpl::set_choice_set_allow_mode(
+    const uint32_t choice_set_id, const bool is_allowed) {
+  SDL_LOG_DEBUG("Choice setID: "
+                << choice_set_id
+                << (is_allowed ? " is allowed" : " disallowed"));
+  sync_primitives::AutoLock lock(allowed_choice_sets_lock_);
+  if (is_allowed) {
+    allowed_choice_sets_.insert(choice_set_id);
+  } else {
+    allowed_choice_sets_.erase(choice_set_id);
+  }
+}
+
+bool DynamicApplicationDataImpl::is_choice_set_allowed(
+    const uint32_t choice_set_id) const {
+  SDL_LOG_DEBUG("Choice setID: " << choice_set_id);
+  sync_primitives::AutoLock lock(allowed_choice_sets_lock_);
+  const auto it = allowed_choice_sets_.find(choice_set_id);
+  if (allowed_choice_sets_.end() == it) {
+    SDL_LOG_ERROR("Choice set with id " << choice_set_id
+                                        << " is not allowed to perform now");
+    return false;
+  }
+  return true;
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_mode(int32_t mode) {

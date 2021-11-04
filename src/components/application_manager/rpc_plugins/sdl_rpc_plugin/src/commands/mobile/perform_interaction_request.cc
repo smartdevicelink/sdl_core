@@ -173,6 +173,27 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
+  auto choice_sets_are_disallowed_to_perform =
+      [](ApplicationSharedPtr app,
+         const smart_objects::SmartObject& choice_set_id_list) {
+        auto choice_set_id_array = choice_set_id_list.asArray();
+
+        return std::any_of(
+            choice_set_id_array->begin(),
+            choice_set_id_array->end(),
+            [app](smart_objects::SmartObject& choice_set_id) {
+              return !app->is_choice_set_allowed(choice_set_id.asInt());
+            });
+      };
+
+  if (choice_sets_are_disallowed_to_perform(
+          app, msg_params[strings::interaction_choice_set_id_list])) {
+    const std::string message = "One of choice sets is not available yet";
+    SDL_LOG_WARN(message);
+    SendResponse(false, mobile_apis::Result::REJECTED, message.c_str());
+    return;
+  }
+
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(

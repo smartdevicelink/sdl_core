@@ -703,6 +703,38 @@ TEST_F(
                             "UI warning message, VR error message");
 }
 
+TEST_F(PerformInteractionRequestTest,
+       ChoiceSetIsNotAllowed_UnsuccessWithREJECT) {
+  MessageSharedPtr msg_from_mobile =
+      CreateMessage(smart_objects::SmartType_Map);
+  const uint32_t kDissalowedChoiceSetId = 11u;
+
+  (*msg_from_mobile)[strings::msg_params]
+                    [strings::interaction_choice_set_id_list][0] =
+                        kDissalowedChoiceSetId;
+  (*msg_from_mobile)[strings::msg_params][strings::interaction_choice_set_id] =
+      kDissalowedChoiceSetId;
+  smart_objects::SmartObject choice_set_id =
+      (*msg_from_mobile)[am::strings::msg_params]
+                        [am::strings::interaction_choice_set_id];
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, FindChoiceSet(kDissalowedChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+  EXPECT_CALL(*mock_app_, is_choice_set_allowed(kDissalowedChoiceSetId))
+      .WillOnce(Return(false));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED), _))
+      .WillOnce(Return(true));
+
+  auto command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
+
+  command->Init();
+  command->Run();
+}
+
 }  // namespace perform_interaction_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test

@@ -836,8 +836,8 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
 
   ON_CALL(mock_message_helper_, CheckChoiceSetVRCommands(_))
       .WillByDefault(Return(am::MessageHelper::ChoiceSetVRCommandsStatus::ALL));

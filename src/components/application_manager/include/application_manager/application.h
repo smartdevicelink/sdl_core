@@ -520,6 +520,25 @@ class DynamicApplicationData {
    * @return TRUE if perform interaction active, otherwise FALSE
    */
   virtual bool is_reset_global_properties_active() const = 0;
+
+  /**
+   * @brief Set allowed mode for specified choice_set_id.
+   * @param choice_set_id Choice set id.
+   * @param is_allowed TRUE if the choice set has to be allowed to perform,
+   * otherwise FALSE.
+   * Allow mode means that the choice_set is not fully processed or not fully
+   * deleted (in both cases request is being processed on HMI side, and HMI
+   * hasn't sent response with result yet)
+   */
+  virtual void set_choice_set_allow_mode(const uint32_t choice_set_id,
+                                         const bool is_allowed) = 0;
+
+  /**
+   * @brief Check if choice set allowed.
+   * @param choice_set_id Choice set id.
+   * @return TRUE if the choice set is allowed to perform, otherwise FALSE.
+   */
+  virtual bool is_choice_set_allowed(const uint32_t choice_set_id) const = 0;
 };
 
 class Application : public virtual InitialApplicationData,
