@@ -348,9 +348,8 @@ policy::StatusNotifier RegisterAppInterfaceRequest::AddApplicationDataToPolicy(
       application->mac_address(), application->policy_app_id(), hmi_types);
 }
 
-void RegisterAppInterfaceRequest::CheckLanguage() {
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
+void RegisterAppInterfaceRequest::CheckLanguage(
+    ApplicationSharedPtr application) {
   DCHECK_OR_RETURN_VOID(application);
   const auto& msg_params = (*message_)[strings::msg_params];
   if (msg_params[strings::language_desired].asInt() !=
@@ -430,6 +429,9 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
                                    policy::StatusNotifier notify_upd_manager) {
   resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
   auto application = app_manager.application(connection_key);
+  if (!application) {
+    return;
+  }
 
   policy::PolicyHandlerInterface& policy_handler =
       app_manager.GetPolicyHandler();
@@ -731,7 +733,7 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  CheckLanguage();
+  CheckLanguage(application);
 
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, status_notifier, add_info);
