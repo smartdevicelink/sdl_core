@@ -1121,5 +1121,11 @@ bool PerformInteractionRequest::SetChoiceIdToResponseMsgParams(
   return true;
 }
 
+void PerformInteractionRequest::Reject(){
+  SDL_LOG_ERROR("Interrupt Rejected");
+  SendResponse(false, mobile_apis::Result::REJECTED);
+  return;
+}
+
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

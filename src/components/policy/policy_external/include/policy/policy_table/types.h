@@ -124,6 +124,10 @@ typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 
+typedef Map<Integer<uint8_t, 0, 255>, 0, 7> rpc_priority_type;
+typedef Map<Integer<uint8_t, 0, 255>, 0, 6> app_priority_type;
+typedef Map<Integer<uint8_t, 0, 255>, 0, 4> hmi_status_priority_type;
+
 struct AppServiceHandledRpc : CompositeType {
  public:
   FunctionIDInt function_id;
@@ -719,6 +723,36 @@ struct VehicleData : CompositeType {
   bool Validate() const;
 };
 
+
+struct InterruptManagerConfig : CompositeType {
+ public:
+  rpc_priority_type rpc_priority;
+  app_priority_type app_priority;
+  hmi_status_priority_type hmi_status_priority;
+  
+ public:
+  InterruptManagerConfig();
+  InterruptManagerConfig(const rpc_priority_type& rpc_priority,
+                         const app_priority_type& app_priority,
+                         const hmi_status_priority_type& hmi_status_priority);
+  ~InterruptManagerConfig();
+  explicit InterruptManagerConfig(const Json::Value* value__);
+  
+  void SafeCopyFrom(const InterruptManagerConfig& from); 
+ 
+  Json::Value ToJsonValue() const;
+ 
+  bool is_valid() const;
+  
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+ 
+ private:
+  bool Validate() const;
+};
+
 struct PolicyTable : CompositeType {
  public:
   ApplicationPoliciesSection app_policies_section;
@@ -729,13 +763,15 @@ struct PolicyTable : CompositeType {
   Optional<UsageAndErrorCounts> usage_and_error_counts;
   Optional<DeviceData> device_data;
   Optional<VehicleData> vehicle_data;
+  InterruptManagerConfig interrupt_manager_config;
 
  public:
   PolicyTable();
   PolicyTable(const ApplicationPoliciesSection& app_policies_section,
               const FunctionalGroupings& functional_groupings,
               const ConsumerFriendlyMessages& consumer_friendly_messages,
-              const ModuleConfig& module_config);
+              const ModuleConfig& module_config,
+              const InterruptManagerConfig& interrupt_manager_config);
   ~PolicyTable();
   explicit PolicyTable(const Json::Value* value__);
   Json::Value ToJsonValue() const;

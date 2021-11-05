@@ -79,6 +79,8 @@
 #include "utils/threads/thread.h"
 #include "utils/timer_task_impl.h"
 
+#include "application_manager/interrupt_manager.h"
+
 namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
@@ -227,6 +229,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
                                                      rpc_protection_manager,
                                                      hmi_so_factory(),
                                                      mobile_so_factory()));
+  interrupt_manager_.reset(new interrupt_manager::InterruptManager(*this, policy_settings));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -240,7 +243,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   protocol_handler_ = NULL;
   SDL_LOG_DEBUG("Destroying Policy Handler");
   RemovePolicyObserver(this);
-
+  interrupt_manager_ = NULL;
   {
     sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
     navi_app_to_stop_.clear();
@@ -2643,6 +2646,8 @@ bool ApplicationManagerImpl::Init(
   };
 
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
+
+  interrupt_manager_->Init();
 
   return true;
 }

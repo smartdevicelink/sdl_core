@@ -684,6 +684,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
+  virtual rpc::policy_table_interface_base::rpc_priority_type  GetRpcPriority() const OVERRIDE;
+  virtual rpc::policy_table_interface_base::app_priority_type GetAppPriority() const OVERRIDE;
+  virtual rpc::policy_table_interface_base::hmi_status_priority_type  GetHmiStatusPriority() const OVERRIDE;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information

@@ -234,6 +234,10 @@ bool ModuleConfig::Validate() const {
   return true;
 }
 
+bool InterruptManagerConfig::Validate() const {
+  return true;
+}
+
 bool MessageString::Validate() const {
   return true;
 }

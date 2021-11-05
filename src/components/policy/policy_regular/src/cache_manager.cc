@@ -306,6 +306,9 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.module_config.endpoint_properties =
       update_pt.policy_table.module_config.endpoint_properties;
 
+  pt_->policy_table.interrupt_manager_config.SafeCopyFrom(
+      update_pt.policy_table.interrupt_manager_config);
+
   // Apply update for vehicle data
   if (update_pt.policy_table.vehicle_data.is_initialized()) {
     policy_table::VehicleDataItems custom_items_before_apply;
@@ -1418,6 +1421,8 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
         pt_->policy_table.vehicle_data->schema_version;
   }
 
+  snapshot_->policy_table.interrupt_manager_config = pt_->policy_table.interrupt_manager_config;
+
   // Set policy table type to Snapshot
   snapshot_->SetPolicyTableType(
       rpc::policy_table_interface_base::PolicyTableType::PT_SNAPSHOT);
@@ -2080,6 +2085,7 @@ bool CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeAP(new_table, current);
     MergeCFM(new_table, current);
     MergeVD(new_table, current);
+    MergeIMC(new_table, current);
     Backup();
   }
   return true;
@@ -2151,6 +2157,12 @@ void CacheManager::MergeVD(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
   SDL_LOG_AUTO_TRACE();
   pt.vehicle_data.assign_if_valid(new_pt.vehicle_data);
+}
+
+void CacheManager::MergeIMC(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  SDL_LOG_AUTO_TRACE();
+  pt.interrupt_manager_config = new_pt.interrupt_manager_config;
 }
 
 const PolicySettings& CacheManager::get_settings() const {
@@ -2258,5 +2270,25 @@ void CacheManager::GetApplicationParams(
 
   application_params = (*it).second;
 }
+
+rpc::policy_table_interface_base::rpc_priority_type
+CacheManager::GetRpcPriority() const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);  
+  return  pt_->policy_table.interrupt_manager_config.rpc_priority;
+}
+
+rpc::policy_table_interface_base::app_priority_type
+CacheManager::GetAppPriority() const {
+  sync_primitives::AutoLock auto_lock(cache_lock_);  
+  return  pt_->policy_table.interrupt_manager_config.app_priority;
+}
+
+rpc::policy_table_interface_base::hmi_status_priority_type
+CacheManager::GetHmiStatusPriority() const {
+  sync_primitives::AutoLock auto_lock(cache_lock_);  
+  return  pt_->policy_table.interrupt_manager_config.hmi_status_priority;
+}
+
 
 }  // namespace policy

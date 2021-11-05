@@ -464,6 +464,7 @@ std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     rpc::Optional<rpc::String<0, 100> > null_version;
     table->policy_table.vehicle_data->schema_version = null_version;
   }
+  GatherInterruptManagerConfig(&table->policy_table.interrupt_manager_config);
   return table;
 }
 
@@ -873,6 +874,48 @@ bool SQLPTRepresentation::GatherVehicleDataItems(
                              non_parameterized_vdi.end());
 
   return true;
+}
+
+void SQLPTRepresentation::GatherInterruptManagerConfig(
+    policy_table::InterruptManagerConfig* config) const {
+  SDL_LOG_INFO("Gather Configuration Info");
+  
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectInterruptManagerConfig) || !query.Next()) {
+    SDL_LOG_WARN("Incorrect select statement for interrupt manager config");
+  }
+
+  utils::dbms::SQLQuery rpc_priority(db());
+  if (!rpc_priority.Prepare(sql_pt::kSelectRpcPriority)) {
+    SDL_LOG_WARN("Incorrect select statement for priority");
+  } else {
+    while (rpc_priority.Next()) {
+      config->rpc_priority[rpc_priority.GetString(0)] =
+          rpc_priority.GetInteger(1);
+    }
+  }
+  SDL_LOG_INFO("rpc_priority.GetString(0) :" << rpc_priority.GetString(0));
+  SDL_LOG_INFO("rpc_priority.GetInteger(1) :" << rpc_priority.GetInteger(1));
+
+  utils::dbms::SQLQuery app_priority(db());
+  if (!app_priority.Prepare(sql_pt::kSelectAppPriority)) {
+    SDL_LOG_WARN("Incorrect select statement for priority");
+  } else {
+    while (app_priority.Next()) {
+      config->app_priority[app_priority.GetString(0)] =
+          app_priority.GetInteger(1);
+    }
+  }
+
+  utils::dbms::SQLQuery hmi_status_priority(db());
+  if (!hmi_status_priority.Prepare(sql_pt::kSelectRpcPriority)) {
+    SDL_LOG_WARN("Incorrect select statement for priority");
+  } else {
+    while (hmi_status_priority.Next()) {
+      config->hmi_status_priority[hmi_status_priority.GetString(0)] =
+          hmi_status_priority.GetInteger(1);
+    }
+  }
 }
 
 bool SQLPTRepresentation::Save(const policy_table::Table& table) {
@@ -2831,6 +2874,93 @@ bool SQLPTRepresentation::DeleteVehicleDataItems() const {
     return false;
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SaveInterruptManagerConfig(
+    const policy_table::InterruptManagerConfig& config) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertInterruptManagerConfig)) {
+    SDL_LOG_WARN("Incorrect update statement for InterruptManager config");
+    return false;
+  }
+  
+  if (!query.Exec()) {
+    SDL_LOG_WARN("Incorrect update InterruptManager config");
+    return false;
+  }
+
+  if (!SaveRpcPriority(config.rpc_priority)) {
+    return false;
+  }
+
+  if (!SaveAppPriority(config.app_priority)) {
+    return false;
+  }
+
+  if (!SaveHmiStatusPriority(config.hmi_status_priority)) {
+    return false;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRpcPriority(
+    const policy_table::rpc_priority_type& priority) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRpcPriority)) {
+    SDL_LOG_WARN("Incorrect insert statement for rpc priority.");
+    return false;
+  }
+
+  policy_table::rpc_priority_type::const_iterator it;
+  for (it = priority.begin(); it != priority.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      SDL_LOG_WARN("Incorrect insert into rpc priority.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppPriority(
+    const policy_table::app_priority_type& priority) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAppPriority)) {
+    SDL_LOG_WARN("Incorrect insert statement for rpc priority.");
+    return false;
+  }
+
+  policy_table::app_priority_type::const_iterator it;
+  for (it = priority.begin(); it != priority.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      SDL_LOG_WARN("Incorrect insert into rpc priority.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveHmiStatusPriority(
+    const policy_table::hmi_status_priority_type& priority) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRpcPriority)) {
+    SDL_LOG_WARN("Incorrect insert statement for rpc priority.");
+    return false;
+  }
+
+  policy_table::hmi_status_priority_type::const_iterator it;
+  for (it = priority.begin(); it != priority.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      SDL_LOG_WARN("Incorrect insert into rpc priority.");
+      return false;
+    }
+  }
   return true;
 }
 

@@ -857,6 +857,9 @@ class CacheManager : public CacheManagerInterface {
   void MergeVD(const policy_table::PolicyTable& new_pt,
                policy_table::PolicyTable& pt);
 
+  void MergeIMC(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+
   const PolicySettings& get_settings() const;
 
   std::shared_ptr<policy_table::Table> pt() const {
@@ -889,6 +892,10 @@ class CacheManager : public CacheManagerInterface {
    */
   static policy_table::VehicleDataItems CollectCustomVDItems(
       const policy_table::VehicleDataItems& vd_items);
+
+  virtual rpc::policy_table_interface_base::rpc_priority_type GetRpcPriority() const OVERRIDE;
+  virtual rpc::policy_table_interface_base::app_priority_type GetAppPriority() const OVERRIDE;
+  virtual rpc::policy_table_interface_base::hmi_status_priority_type GetHmiStatusPriority() const OVERRIDE;
 
  private:
   std::string currentDateTime();

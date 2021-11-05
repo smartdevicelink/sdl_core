@@ -212,6 +212,8 @@ class CommandImpl : public Command {
   bool IsHMIResultSuccess(hmi_apis::Common_Result::eType result_code,
                           HmiInterfaces::InterfaceID interface) const;
 
+  void Reject() OVERRIDE;
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;

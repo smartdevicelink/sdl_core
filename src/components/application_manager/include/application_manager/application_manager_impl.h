@@ -80,6 +80,8 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
+#include "application_manager/interrupt_manager.h"
+
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_listener.h"
 #include "security_manager/ssl_context.h"
@@ -1017,6 +1019,11 @@ class ApplicationManagerImpl
     return *request_ctrl_;
   }
 
+  interrupt_manager::InterruptManager& GetInterruptManager() const OVERRIDE{
+    return *interrupt_manager_;
+  }
+
+
   void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
     rpc_service_ = std::move(rpc_service);
   }
@@ -1748,6 +1755,8 @@ class ApplicationManagerImpl
 
   mutable sync_primitives::Lock expired_button_requests_lock_;
   mutable ExpiredButtonRequestsMap expired_button_requests_;
+ 
+  std::unique_ptr<interrupt_manager::InterruptManager>interrupt_manager_;
 
 #ifdef BUILD_TESTS
  public:

@@ -85,6 +85,8 @@ class PerformAudioPassThruRequest
    */
   void OnTimeOut() FINAL;
 
+  void Reject();
+
  private:
   /**
    * @brief Prepare result code, result and info for sending to mobile

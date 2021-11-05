@@ -2162,6 +2162,101 @@ void VehicleData::SetPolicyTableType(PolicyTableType pt_type) {
   schema_items.SetPolicyTableType(pt_type);
 }
 
+//InterruptManagerConfig methods
+InterruptManagerConfig::InterruptManagerConfig() : CompositeType(kUninitialized) {}
+
+InterruptManagerConfig::InterruptManagerConfig(
+  const rpc_priority_type& rpc_priority,
+  const app_priority_type& app_priority,
+  const hmi_status_priority_type& hmi_status_priority)
+  : CompositeType(kUninitialized)
+  , rpc_priority(rpc_priority)
+  , app_priority(app_priority)
+  , hmi_status_priority(hmi_status_priority){}
+
+InterruptManagerConfig::~InterruptManagerConfig() {}
+
+
+InterruptManagerConfig::InterruptManagerConfig(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , rpc_priority(impl::ValueMember(value__, "rpc_priority"))
+    , app_priority(impl::ValueMember(value__, "app_priority"))
+    , hmi_status_priority(impl::ValueMember(value__, "hmi_status_priority")){}
+
+
+void InterruptManagerConfig::SafeCopyFrom(const InterruptManagerConfig& from) {
+  rpc_priority = from.rpc_priority;
+  app_priority = from.app_priority;
+  hmi_status_priority = from.hmi_status_priority;
+}
+
+Json::Value InterruptManagerConfig::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("rpc_priority", rpc_priority, &result__);
+  impl::WriteJsonField("app_priority", app_priority, &result__);
+  impl::WriteJsonField("hmi_status_priority", hmi_status_priority, &result__);
+  return result__;
+}
+
+
+bool InterruptManagerConfig::is_valid() const {
+  if (!rpc_priority.is_valid()) {
+    return false;
+  }
+  if (!app_priority.is_valid()) {
+    return false;
+  }
+  if (!hmi_status_priority.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+
+bool InterruptManagerConfig::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+
+bool InterruptManagerConfig::struct_empty() const {
+  if (!rpc_priority.is_initialized()) {
+    return false;
+  }
+  if (!app_priority.is_initialized()) {
+    return false;
+  }
+  if (!hmi_status_priority.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+
+void InterruptManagerConfig::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!rpc_priority.is_valid()) {
+    rpc_priority.ReportErrors(
+        &report__->ReportSubobject("rpc_priority"));
+  }
+  if (!app_priority.is_valid()) {
+    app_priority.ReportErrors(
+        &report__->ReportSubobject("app_priority"));
+  }
+  if (!hmi_status_priority.is_valid()) {
+    hmi_status_priority.ReportErrors(
+        &report__->ReportSubobject("hmi_status_priority"));
+  }
+}
+
+void InterruptManagerConfig::SetPolicyTableType(PolicyTableType pt_type) {
+    CompositeType::SetPolicyTableType(pt_type);
+    rpc_priority.SetPolicyTableType(pt_type);
+    app_priority.SetPolicyTableType(pt_type);
+    hmi_status_priority.SetPolicyTableType(pt_type);
+}
+
 // PolicyTable methods
 PolicyTable::PolicyTable() : CompositeType(kUninitialized) {}
 
@@ -2169,12 +2264,14 @@ PolicyTable::PolicyTable(
     const ApplicationPoliciesSection& app_policies_section,
     const FunctionalGroupings& functional_groupings,
     const ConsumerFriendlyMessages& consumer_friendly_messages,
-    const ModuleConfig& module_config)
+    const ModuleConfig& module_config,
+    const InterruptManagerConfig& interrupt_manager_config)
     : CompositeType(kUninitialized)
     , app_policies_section(app_policies_section)
     , functional_groupings(functional_groupings)
     , consumer_friendly_messages(consumer_friendly_messages)
-    , module_config(module_config) {}
+    , module_config(module_config) 
+    , interrupt_manager_config(interrupt_manager_config) {}
 
 PolicyTable::~PolicyTable() {}
 
@@ -2189,7 +2286,8 @@ PolicyTable::PolicyTable(const Json::Value* value__)
     , usage_and_error_counts(
           impl::ValueMember(value__, "usage_and_error_counts"))
     , device_data(impl::ValueMember(value__, "device_data"))
-    , vehicle_data(impl::ValueMember(value__, "vehicle_data")) {}
+    , vehicle_data(impl::ValueMember(value__, "vehicle_data")) 
+    , interrupt_manager_config(impl::ValueMember(value__, "interrupt_manager_config")){}
 
 Json::Value PolicyTable::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -2203,6 +2301,7 @@ Json::Value PolicyTable::ToJsonValue() const {
       "usage_and_error_counts", usage_and_error_counts, &result__);
   impl::WriteJsonField("device_data", device_data, &result__);
   impl::WriteJsonField("vehicle_data", vehicle_data, &result__);
+  impl::WriteJsonField("interrupt_manager_config", interrupt_manager_config, &result__);
   return result__;
 }
 
@@ -2229,6 +2328,9 @@ bool PolicyTable::is_valid() const {
     return false;
   }
   if (!vehicle_data.is_valid()) {
+    return false;
+  }
+  if (!interrupt_manager_config.is_valid()) {
     return false;
   }
   return Validate();
@@ -2264,6 +2366,9 @@ bool PolicyTable::struct_empty() const {
     return false;
   }
   if (vehicle_data.is_initialized()) {
+    return false;
+  }
+  if (interrupt_manager_config.is_initialized()) {
     return false;
   }
   return true;
@@ -2311,6 +2416,9 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (!vehicle_data.is_valid()) {
     vehicle_data.ReportErrors(&report__->ReportSubobject("vehicle_data"));
   }
+  if (!interrupt_manager_config.is_valid()) {
+    interrupt_manager_config.ReportErrors(&report__->ReportSubobject("interrupt_manager_config"));
+  }
 }
 
 void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
@@ -2323,6 +2431,7 @@ void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
   usage_and_error_counts.SetPolicyTableType(pt_type);
   device_data.SetPolicyTableType(pt_type);
   vehicle_data.SetPolicyTableType(pt_type);
+  interrupt_manager_config.SetPolicyTableType(pt_type);
 }
 
 // Table methods

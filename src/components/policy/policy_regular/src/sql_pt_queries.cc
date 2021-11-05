@@ -468,6 +468,39 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`param_name`, `param_key`) "
     "    REFERENCES `vehicle_data_item_definition`(`name`, `key`) "
     "); "
+    "CREATE TABLE IF NOT EXISTS `rpc_priority`( "
+    "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `value` INTEGER NOT NULL, "
+    "  CONSTRAINT `fk_rpc_priority_priority1` "
+    "    FOREIGN KEY(`priority_value`) "
+    "    REFERENCES `priority`(`value`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`rpc_priority.fk_rpc_priority_"
+    "priority1_idx` "
+    "  ON `rpc_priority`(`priority_value`); "
+    "CREATE TABLE IF NOT EXISTS `app_priority`( "
+    "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `value` INTEGER NOT NULL, "
+    "  CONSTRAINT `fk_app_priority_priority1` "
+    "    FOREIGN KEY(`priority_value`) "
+    "    REFERENCES `priority`(`value`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`app_priority.fk_app_priority_"
+    "priority1_idx` "
+    "  ON `app_priority`(`priority_value`); "
+    "CREATE TABLE IF NOT EXISTS `hmi_status_priority`( "
+    "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `value` INTEGER NOT NULL, "
+    "  CONSTRAINT `fk_hmi_status_priority_priority1` "
+    "    FOREIGN KEY(`priority_value`) "
+    "    REFERENCES `priority`(`value`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`hmi_status_priority.fk_hmi_status_priority_"
+    "priority1_idx` "
+    "  ON `hmi_status_priority`(`priority_value`); "
     "COMMIT;";
 
 const std::string kInsertInitData =
@@ -619,6 +652,19 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `vehicle_data`; "
     "DROP TABLE IF EXISTS `vehicle_data_item_definition`; "
     "DROP TABLE IF EXISTS `vehicle_data_item_parameters`; "
+    "DROP INDEX IF EXISTS "
+    "`rpc_priority.fk_rpc_priority_"
+    "priority1_idx`; "
+    "DROP TABLE IF EXISTS `rpc_priority`; "
+    "DROP INDEX IF EXISTS "
+    "`app_priority.fk_app_priority_"
+    "priority1_idx`; "
+    "DROP TABLE IF EXISTS `app_priority`; "
+    "DROP INDEX IF EXISTS "
+    "`hmi_status_priority.fk_hmi_status_priority_"
+    "priority1_idx`; "
+    "DROP TABLE IF EXISTS `hmi_status_priority`; "
+    "DROP TABLE IF EXISTS `interrupt_manager_config`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -655,6 +701,9 @@ const std::string kDeleteData =
     "DELETE FROM `vehicle_data`; "
     "DELETE FROM `vehicle_data_item_definition`; "
     "DELETE FROM `vehicle_data_item_parameters`; "
+    "DELETE FROM `rpc_priority`; "
+    "DELETE FROM `app_priority`; "
+    "DELETE FROM `hmi_status_priority`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -1087,5 +1136,41 @@ const std::string kUpdateMetaParams =
 
 const std::string kUpdateMetaHardwareVersion =
     "UPDATE `module_meta` SET `hardware_version` = ? ";
+
+const std::string kSelectInterruptManagerConfig =
+    "SELECT `rpc_priority`, `app_priority`, "
+    " `hmi_status_priority`, "
+    " FROM `interrupt_manager_config`";
+
+const std::string kUpdateInterruptManagerConfig = 
+    "UPDATE `interrupt_manager_config` SET `rpc_priority` = ?, "
+    "  `app_priority` = ?,"
+    "  `hmi_status_priority` = ? ";
+
+const std::string kInsertInterruptManagerConfig =
+    "INSERT INTO `interrupt_manager_config` (`rpc_priority`, `app_priority`, "
+    "`hmi_status_priority`) "
+    "  VALUES (?, ?, ?)";
+
+const std::string kSelectRpcPriority =
+    "SELECT `priority_value`, `value` FROM rpc_priority";
+
+const std::string kSelectAppPriority =
+    "SELECT `priority_value`, `value` FROM app_priority";
+
+const std::string kSelectHmiStatusPriority =
+    "SELECT `priority_value`, `value` FROM hmi_status_priority";
+
+const std::string kInsertRpcPriority = 
+    "INSERT OR REPLACE INTO `rpc_priority` (`priority_value`, `value`) "
+    "  VALUES (?, ?)";
+
+const std::string kInsertAppPriority =
+    "INSERT OR REPLACE INTO `app_priority` (`priority_value`, `value`) "
+    "  VALUES (?, ?)";
+const std::string kInsertHmiStatusPriority =
+    "INSERT OR REPLACE INTO `hmi_status_priority` (`priority_value`, `value`) "
+    "  VALUES (?, ?)";
+
 }  // namespace sql_pt
 }  // namespace policy

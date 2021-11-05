@@ -2984,4 +2984,26 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   }
   UpdateHMILevel(app, level);
 }
+
+rpc::policy_table_interface_base::rpc_priority_type PolicyHandler::GetRpcPriority() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, rpc::policy_table_interface_base::rpc_priority_type());
+  return policy_manager->GetRpcPriority();
+}
+
+rpc::policy_table_interface_base::app_priority_type PolicyHandler::GetAppPriority() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, rpc::policy_table_interface_base::app_priority_type());
+  return policy_manager->GetAppPriority();
+}
+
+rpc::policy_table_interface_base::hmi_status_priority_type PolicyHandler::GetHmiStatusPriority() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, rpc::policy_table_interface_base::hmi_status_priority_type());
+  return policy_manager->GetHmiStatusPriority();
+}
+
 }  //  namespace policy

@@ -441,6 +441,12 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
          IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
+void PerformAudioPassThruRequest::Reject(){
+  SDL_LOG_INFO("Interrupt Rejected");
+  SendResponse(false, mobile_apis::Result::REJECTED);
+  return;
+}
+
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

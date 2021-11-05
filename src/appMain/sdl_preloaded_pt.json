@@ -4613,6 +4613,35 @@
                     "since": "7.1"
                 }
             ]
+        },
+        "interrupt_manager_config":
+        {
+          "rpc_priority":
+          {
+              "DialNumber": 1,
+              "Alert": 2,
+              "PerformAudioPassThru": 2,
+              "PerformInteraction": 3,
+              "ScrollableMessage": 3,
+              "Slider": 3,
+              "Speak": 3
+          },
+          "app_priority":
+          {
+              "EMERGENCY": 0, 
+              "NAVIGATION": 1,
+              "VOICE_COMMUNICATION": 2,
+              "COMMUNICATION": 3,
+              "NORMAL": 4,
+              "NONE": 5
+          },
+          "hmi_status_priority":
+          {
+              "FULL": 1,
+              "LIMITED": 2,
+              "BACKGROUND": 3,
+              "NONE": 4
+          }
         }
     }
 }

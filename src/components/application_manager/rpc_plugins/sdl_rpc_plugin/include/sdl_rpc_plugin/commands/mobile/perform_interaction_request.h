@@ -84,6 +84,8 @@ class PerformInteractionRequest
 
   void OnTimeOut() FINAL;
 
+  void Reject();
+
  protected:
   /**
    * @brief Prepare result code for sending to mobile application

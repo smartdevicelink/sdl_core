@@ -1024,6 +1024,11 @@ class CacheManagerInterface {
    */
   virtual std::shared_ptr<policy_table::Table> GetPT() const = 0;
 #endif
+
+  virtual rpc::policy_table_interface_base::rpc_priority_type GetRpcPriority() const = 0;
+  virtual rpc::policy_table_interface_base::app_priority_type GetAppPriority() const = 0;
+  virtual rpc::policy_table_interface_base::hmi_status_priority_type GetHmiStatusPriority() const = 0;
+
 };
 
 typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;

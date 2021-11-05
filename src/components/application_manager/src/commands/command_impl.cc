@@ -128,6 +128,8 @@ void CommandImpl::Run() {}
 
 void CommandImpl::OnUpdateTimeOut() {}
 
+void CommandImpl::Reject() {}
+
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
 }

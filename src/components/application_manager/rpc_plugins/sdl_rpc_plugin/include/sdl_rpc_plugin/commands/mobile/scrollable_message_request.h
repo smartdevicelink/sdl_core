@@ -80,6 +80,8 @@ class ScrollableMessageRequest
    */
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
+  void Reject();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ScrollableMessageRequest);
 };
