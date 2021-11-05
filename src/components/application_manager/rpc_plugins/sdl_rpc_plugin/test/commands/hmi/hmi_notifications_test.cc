@@ -1414,12 +1414,6 @@ TEST_F(HMICommandsNotificationsTest,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_ptr_, app_id()).WillRepeatedly(Return(kAppId_));
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
-  EXPECT_CALL(app_mngr_, state_controller())
-      .WillOnce(ReturnRef(mock_state_controller_));
-  EXPECT_CALL(
-      mock_state_controller_,
-      SetRegularState(
-          app_, kDefaultWindowId, mobile_apis::HMILevel::HMI_NONE, false));
   EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kAppId_,

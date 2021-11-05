@@ -92,11 +92,6 @@ void OnVRLanguageChangeNotification::Run() {
       app_list.push_back(app_id);
       if (app->language() != message_language) {
         to_unregister.push_back(app_id);
-        application_manager_.state_controller().SetRegularState(
-            app,
-            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
-            mobile_apis::HMILevel::HMI_NONE,
-            false);
       }
     }
   }
