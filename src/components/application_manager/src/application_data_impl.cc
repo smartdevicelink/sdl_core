@@ -610,8 +610,7 @@ void DynamicApplicationDataImpl::set_display_capabilities(
         (*display_capabilities_)[0][strings::window_capabilities];
   }
 
-  display_capabilities_.reset(
-      new smart_objects::SmartObject(display_capabilities));
+  smart_objects::SmartObject merged_capabilities = display_capabilities;
 
   auto get_window_index = [&tmp_window_capabilities](const WindowID window_id) {
     const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
@@ -647,8 +646,11 @@ void DynamicApplicationDataImpl::set_display_capabilities(
     }
   }
 
-  (*display_capabilities_)[0][strings::window_capabilities] =
+  merged_capabilities[0][strings::window_capabilities] =
       tmp_window_capabilities;
+
+  display_capabilities_.reset(
+      new smart_objects::SmartObject(merged_capabilities));
 }
 
 void DynamicApplicationDataImpl::remove_window_capability(
