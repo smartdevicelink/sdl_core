@@ -136,16 +136,27 @@ void SDLActivateAppRequest::Run() {
                       static_cast<eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
                       "HMIDeactivate is active");
-  } else if (app && !app->IsRegistered() && app->is_cloud_app()) {
-    SDL_LOG_DEBUG("Starting cloud application.");
-    const ApplicationManagerSettings& settings =
-        application_manager_.get_settings();
-    uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
-                                    settings.cloud_app_max_retry_attempts());
-    application_manager_.UpdateRequestTimeout(
-        0, correlation_id(), default_timeout_ + total_retry_timeout);
-    subscribe_on_event(BasicCommunication_OnAppRegistered);
-    application_manager_.connection_handler().ConnectToDevice(app->device());
+  } else if (!app->IsRegistered()) {
+    if (app->is_cloud_app()) {
+      SDL_LOG_DEBUG("Starting cloud application.");
+      const ApplicationManagerSettings& settings =
+          application_manager_.get_settings();
+      uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
+                                      settings.cloud_app_max_retry_attempts());
+      application_manager_.UpdateRequestTimeout(
+          0, correlation_id(), default_timeout_ + total_retry_timeout);
+      subscribe_on_event(BasicCommunication_OnAppRegistered);
+      application_manager_.connection_handler().ConnectToDevice(app->device());
+    } else {
+      connection_handler::DeviceHandle device_handle = app->device();
+      SDL_LOG_ERROR(
+          "Can't find regular foreground app with the same connection id: "
+          << device_handle);
+      SendErrorResponse(correlation_id(),
+                        SDL_ActivateApp,
+                        hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED,
+                        "Application is not registered");
+    }
   } else {
     const uint32_t application_id = app_id();
     auto main_state =
@@ -279,7 +290,7 @@ void SDLActivateAppRequest::OnTimeOut() {
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
   SendErrorResponse(correlation_id(),
                     SDL_ActivateApp,
-                    NO_APPS_REGISTERED,
+                    APPLICATION_NOT_REGISTERED,
                     "App registration timed out");
 }
 
