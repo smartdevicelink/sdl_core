@@ -148,10 +148,9 @@ void SDLActivateAppRequest::Run() {
       subscribe_on_event(BasicCommunication_OnAppRegistered);
       application_manager_.connection_handler().ConnectToDevice(app->device());
     } else {
-      connection_handler::DeviceHandle device_handle = app->device();
       SDL_LOG_ERROR(
-          "Can't find regular foreground app with the same connection id: "
-          << device_handle);
+          "Can't find registered app with the specified app id: "
+          << app_id());
       SendErrorResponse(correlation_id(),
                         SDL_ActivateApp,
                         hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED,

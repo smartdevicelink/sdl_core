@@ -157,6 +157,9 @@ TEST_F(SDLActivateAppRequestTest, Run_ActivateApp_SUCCESS) {
               CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
       .WillOnce(Return(state));
 
+  EXPECT_CALL(*mock_app,IsRegistered())
+      .WillOnce(Return(true));
+
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
 
   command->Run();
