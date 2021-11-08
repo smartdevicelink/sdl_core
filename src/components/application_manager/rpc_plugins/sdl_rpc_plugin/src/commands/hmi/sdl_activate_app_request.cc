@@ -279,7 +279,7 @@ void SDLActivateAppRequest::OnTimeOut() {
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
   SendErrorResponse(correlation_id(),
                     SDL_ActivateApp,
-                    APPLICATION_NOT_REGISTERED,
+                    NO_APPS_REGISTERED,
                     "App registration timed out");
 }
 
