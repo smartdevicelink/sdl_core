@@ -149,8 +149,7 @@ void SDLActivateAppRequest::Run() {
       application_manager_.connection_handler().ConnectToDevice(app->device());
     } else {
       SDL_LOG_ERROR(
-          "Can't find registered app with the specified app id: "
-          << app_id());
+          "Can't find registered app with the specified app id: " << app_id());
       SendErrorResponse(correlation_id(),
                         SDL_ActivateApp,
                         hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED,
