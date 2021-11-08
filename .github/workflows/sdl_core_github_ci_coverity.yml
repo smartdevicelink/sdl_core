@@ -21,7 +21,7 @@ jobs:
       run: git -C ${{ github.workspace }} submodule update --init --recursive
     # Install Dependencies
     - name: Apt Get Dependencies
-      run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools && sudo apt-get install -f clang-format-6.0
+      run: sudo apt-get update && sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip python3-setuptools python3-wheel && sudo apt-get install -f clang-format-8
     - name: Setup CMAKE
       uses: jwlawson/actions-setup-cmake@v1.8
       with:
@@ -51,7 +51,7 @@ jobs:
     - name: unzip
       run: tar zxvf coverity_tool.tgz 
     - name: Build
-      run: make install-3rd_party && ./cov-analysis-linux64-2020.09/bin/cov-build --dir cov-int make -j `nproc` install
+      run: make install-3rd_party && make install_python_dependencies && ./cov-analysis-linux64-2020.09/bin/cov-build --dir cov-int make -j `nproc` install
     - name: Set Library Path
       run: echo "LD_LIBRARY_PATH=$THIRD_PARTY_INSTALL_PREFIX/lib:." >> $GITHUB_ENV
     - name: Compress Coverity

@@ -774,36 +774,34 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(
       4, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(5, app.second.is_null());
-  app_query.Bind(6, *app.second.memory_kb);
-  app_query.Bind(7, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+  app_query.Bind(6, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
   app.second.certificate.is_initialized()
-      ? app_query.Bind(8, *app.second.certificate)
-      : app_query.Bind(8);
+      ? app_query.Bind(7, *app.second.certificate)
+      : app_query.Bind(7);
   app.second.hybrid_app_preference.is_initialized()
-      ? app_query.Bind(9,
+      ? app_query.Bind(8,
                        std::string(policy_table::EnumToJsonString(
                            *app.second.hybrid_app_preference)))
-      : app_query.Bind(9);
-  app.second.endpoint.is_initialized()
-      ? app_query.Bind(10, *app.second.endpoint)
-      : app_query.Bind(10);
-  app.second.enabled.is_initialized() ? app_query.Bind(11, *app.second.enabled)
-                                      : app_query.Bind(11);
+      : app_query.Bind(8);
+  app.second.endpoint.is_initialized() ? app_query.Bind(9, *app.second.endpoint)
+                                       : app_query.Bind(9);
+  app.second.enabled.is_initialized() ? app_query.Bind(10, *app.second.enabled)
+                                      : app_query.Bind(10);
   app.second.auth_token.is_initialized()
-      ? app_query.Bind(12, *app.second.auth_token)
-      : app_query.Bind(12);
+      ? app_query.Bind(11, *app.second.auth_token)
+      : app_query.Bind(11);
   app.second.cloud_transport_type.is_initialized()
-      ? app_query.Bind(13, *app.second.cloud_transport_type)
-      : app_query.Bind(13);
+      ? app_query.Bind(12, *app.second.cloud_transport_type)
+      : app_query.Bind(12);
   app.second.icon_url.is_initialized()
-      ? app_query.Bind(14, *app.second.icon_url)
-      : app_query.Bind(14);
+      ? app_query.Bind(13, *app.second.icon_url)
+      : app_query.Bind(13);
   app.second.allow_unknown_rpc_passthrough.is_initialized()
-      ? app_query.Bind(15, *app.second.allow_unknown_rpc_passthrough)
-      : app_query.Bind(15);
+      ? app_query.Bind(14, *app.second.allow_unknown_rpc_passthrough)
+      : app_query.Bind(14);
   app.second.encryption_required.is_initialized()
-      ? app_query.Bind(16, *app.second.encryption_required)
-      : app_query.Bind(16);
+      ? app_query.Bind(15, *app.second.encryption_required)
+      : app_query.Bind(15);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     SDL_LOG_WARN("Incorrect insert into application.");
@@ -927,28 +925,27 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     params.default_hmi = hmi;
     params.keep_context = query.GetBoolean(3);
     params.steal_focus = query.GetBoolean(4);
-    *params.memory_kb = query.GetInteger(5);
-    *params.heart_beat_timeout_ms = query.GetUInteger(6);
-    if (!query.IsNull(7)) {
-      *params.certificate = query.GetString(7);
+    *params.heart_beat_timeout_ms = query.GetUInteger(5);
+    if (!query.IsNull(6)) {
+      *params.certificate = query.GetString(6);
     }
 
     // Read cloud app properties
     policy_table::HybridAppPreference hap;
-    bool valid = policy_table::EnumFromJsonString(query.GetString(8), &hap);
+    bool valid = policy_table::EnumFromJsonString(query.GetString(7), &hap);
     if (valid) {
       *params.hybrid_app_preference = hap;
     }
-    *params.endpoint = query.GetString(9);
-    if (!query.IsNull(10)) {
-      *params.enabled = query.GetBoolean(10);
+    *params.endpoint = query.GetString(8);
+    if (!query.IsNull(9)) {
+      *params.enabled = query.GetBoolean(9);
     }
-    *params.auth_token = query.GetString(11);
-    *params.cloud_transport_type = query.GetString(12);
-    *params.icon_url = query.GetString(13);
-    *params.allow_unknown_rpc_passthrough = query.GetBoolean(14);
-    if (!query.IsNull(15)) {
-      *params.encryption_required = query.GetBoolean(15);
+    *params.auth_token = query.GetString(10);
+    *params.cloud_transport_type = query.GetString(11);
+    *params.icon_url = query.GetString(12);
+    *params.allow_unknown_rpc_passthrough = query.GetBoolean(13);
+    if (!query.IsNull(14)) {
+      *params.encryption_required = query.GetBoolean(14);
     }
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
