@@ -66,6 +66,12 @@ class AppLaunchCtrl {
    * @brief OnMasterReset clear database of saved applications
    */
   virtual void OnMasterReset() = 0;
+
+  /**
+   * @brief Stop - allows to stop app launcher.
+   */
+  virtual void Stop() = 0;
+
   virtual ~AppLaunchCtrl() {}
 };
 
