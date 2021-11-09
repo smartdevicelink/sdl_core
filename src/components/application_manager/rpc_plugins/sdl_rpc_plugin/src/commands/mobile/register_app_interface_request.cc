@@ -876,6 +876,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
+
+  if (!application) {
+    return;
+  }
+
   utils::SemanticVersion negotiated_version = application->msg_version();
 
   response_params[strings::sync_msg_version][strings::major_version] =
