@@ -78,13 +78,7 @@ void OnVRLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  ApplicationSet apps;
-
-  {
-    const ApplicationSet& accessor =
-        application_manager_.applications().GetData();
-    apps = ApplicationSet(accessor);
-  }
+  auto apps = ApplicationSet(application_manager_.applications().GetData());
 
   auto message_language =
       (*message_)[strings::msg_params][strings::language].asInt();
