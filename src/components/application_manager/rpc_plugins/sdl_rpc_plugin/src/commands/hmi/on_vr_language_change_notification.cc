@@ -78,26 +78,14 @@ void OnVRLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const auto applications = application_manager_.applications().GetData();
-  for (auto app : applications) {
-    if (!app->IsRegistered()) {
-      SDL_LOG_DEBUG("Skipping app "
-                    << app->app_id()
-                    << " which has not finished the registration process");
-      continue;
-    }
+  auto apps = ApplicationSet(application_manager_.applications().GetData());
 
+  auto message_language =
+      (*message_)[strings::msg_params][strings::language].asInt();
+  for (auto app : apps) {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
-
-    if (static_cast<int32_t>(app->language()) !=
-        (*message_)[strings::msg_params][strings::language].asInt()) {
-      application_manager_.state_controller().SetRegularState(
-          app,
-          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
-          mobile_apis::HMILevel::HMI_NONE,
-          false);
-
+    if (app->language() != message_language) {
       rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),
