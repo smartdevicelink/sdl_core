@@ -354,6 +354,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 
   MOCK_CONST_METHOD0(OnSystemRequestReceived, void());
 
+  MOCK_CONST_METHOD0(GetRpcPriority, rpc::policy_table_interface_base::rpc_priority_type());
+  MOCK_CONST_METHOD0(GetAppPriority, rpc::policy_table_interface_base::app_priority_type());
+  MOCK_CONST_METHOD0(GetHmiStatusPriority, rpc::policy_table_interface_base::hmi_status_priority_type());
+
  private:
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnAppPermissionConsentInternal,
