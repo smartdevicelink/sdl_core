@@ -7,7 +7,6 @@
 #include "application_manager/app_launch/device_apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
-#include <boost/bind.hpp>
 #include <iostream>
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
@@ -158,19 +157,16 @@ bool DeviceAppsLauncherImpl::StopLaunchingAppsOnDevice(
   return true;
 }
 
-void DeviceAppsLauncherImpl::StopLauncher(LauncherPtr launcher) {
-  SDL_LOG_AUTO_TRACE();
-  launcher->Clear();
-  free_launchers_.push_back(launcher);
-}
-
 void DeviceAppsLauncherImpl::StopLaunchingAppsOnAllDevices() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(launchers_lock_);
 
   std::for_each(works_launchers_.begin(),
                 works_launchers_.end(),
-                boost::bind(&DeviceAppsLauncherImpl::StopLauncher, this, _1));
+                [this](LauncherPtr launcher) {
+                  launcher->Clear();
+                  free_launchers_.push_back(launcher);
+                });
 
   works_launchers_.clear();
 }

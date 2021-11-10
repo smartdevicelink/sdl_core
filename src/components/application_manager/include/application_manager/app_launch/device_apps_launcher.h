@@ -38,8 +38,6 @@ class DeviceAppsLauncherImpl {
   void StopLaunchingAppsOnAllDevices();
 
  private:
-  void StopLauncher(std::shared_ptr<Launcher> launcher);
-
   sync_primitives::Lock launchers_lock_;
   std::vector<std::shared_ptr<Launcher> > free_launchers_;
   std::vector<std::shared_ptr<Launcher> > works_launchers_;
