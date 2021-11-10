@@ -58,6 +58,8 @@ class RCSetGlobalPropertiesRequest : public app_mngr::commands::RequestToHMI {
    */
   void Run() OVERRIDE;
 
+  void OnTimeOut() OVERRIDE;
+
   ~RCSetGlobalPropertiesRequest();
 };
 }  // namespace commands

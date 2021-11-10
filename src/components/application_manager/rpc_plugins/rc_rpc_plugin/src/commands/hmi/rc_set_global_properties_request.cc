@@ -31,6 +31,7 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_set_global_properties_request.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -51,6 +52,13 @@ RCSetGlobalPropertiesRequest::RCSetGlobalPropertiesRequest(
 void RCSetGlobalPropertiesRequest::Run() {
   SDL_LOG_AUTO_TRACE();
   SendRequest();
+}
+
+void RCSetGlobalPropertiesRequest::OnTimeOut() {
+  auto& resume_ctrl = application_manager_.resume_controller();
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 RCSetGlobalPropertiesRequest::~RCSetGlobalPropertiesRequest() {}
