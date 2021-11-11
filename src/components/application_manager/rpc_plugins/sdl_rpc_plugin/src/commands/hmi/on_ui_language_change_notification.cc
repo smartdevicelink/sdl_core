@@ -80,19 +80,14 @@ void OnUILanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
+  auto apps = ApplicationSet(application_manager_.applications().GetData());
 
-  ApplicationSetConstIt it = accessor.begin();
-  for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it;
-    ++it;
+  auto message_language =
+      (*message_)[strings::msg_params][strings::hmi_display_language].asInt();
+  for (auto app : apps) {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
-
-    if (app->ui_language() !=
-        (*message_)[strings::msg_params][strings::hmi_display_language]
-            .asInt()) {
+    if (app->ui_language() != message_language) {
       rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),

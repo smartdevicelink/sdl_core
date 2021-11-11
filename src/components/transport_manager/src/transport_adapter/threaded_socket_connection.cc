@@ -81,7 +81,8 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
 }
 
 void ThreadedSocketConnection::StopAndJoinThread() {
-  Disconnect();
+  SDL_LOG_AUTO_TRACE();
+  terminate_flag_ = true;
   if (thread_) {
     thread_->Stop(threads::Thread::kThreadSoftStop);
     delete thread_->GetDelegate();
@@ -92,8 +93,10 @@ void ThreadedSocketConnection::StopAndJoinThread() {
 
 void ThreadedSocketConnection::Abort() {
   SDL_LOG_AUTO_TRACE();
-  unexpected_disconnect_ = true;
-  terminate_flag_ = true;
+  if (!terminate_flag_) {
+    unexpected_disconnect_ = true;
+    terminate_flag_ = true;
+  }
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Start() {
@@ -123,18 +126,33 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
   return TransportAdapter::OK;
 }
 
-void ThreadedSocketConnection::Finalize() {
-  SDL_LOG_AUTO_TRACE();
-  if (unexpected_disconnect_) {
-    SDL_LOG_DEBUG("unexpected_disconnect");
-    controller_->ConnectionAborted(
-        device_handle(), application_handle(), CommunicationError());
-  } else {
-    SDL_LOG_DEBUG("not unexpected_disconnect");
-    controller_->ConnectionFinished(device_handle(), application_handle());
+void ThreadedSocketConnection::NotifyAboutAbortedMessages() {
+  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+  while (!frames_to_send_.empty()) {
+    SDL_LOG_INFO("removing message");
+    ::protocol_handler::RawMessagePtr message = frames_to_send_.front();
+    frames_to_send_.pop();
+    controller_->DataSendFailed(
+        device_handle(), application_handle(), message, DataSendError());
   }
+}
+
+void ThreadedSocketConnection::FinalizeUnexpectedDisconnect() {
+  SDL_LOG_DEBUG("Finalizing unexpected disconnect");
+  controller_->ConnectionAborted(
+      device_handle(), application_handle(), CommunicationError());
 
   ShutdownAndCloseSocket();
+  NotifyAboutAbortedMessages();
+}
+
+void ThreadedSocketConnection::FinalizeExpectedDisconnect() {
+  SDL_LOG_DEBUG("Finalizing expected disconnect");
+
+  controller_->ConnectionFinished(device_handle(), application_handle());
+  ShutdownAndCloseSocket();
+  NotifyAboutAbortedMessages();
+  controller_->DisconnectDone(device_handle(), application_handle());
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Notify() const {
@@ -164,9 +182,14 @@ TransportAdapter::Error ThreadedSocketConnection::SendData(
 
 TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   SDL_LOG_AUTO_TRACE();
-  terminate_flag_ = true;
-  ShutdownAndCloseSocket();
-  return Notify();
+
+  if (!unexpected_disconnect_) {
+    terminate_flag_ = true;
+    FinalizeExpectedDisconnect();
+    return TransportAdapter::OK;
+  }
+
+  return TransportAdapter::FAIL;
 }
 
 void ThreadedSocketConnection::Terminate() {
@@ -189,16 +212,12 @@ void ThreadedSocketConnection::threadMain() {
   while (!terminate_flag_) {
     Transmit();
   }
-  SDL_LOG_DEBUG("Connection is to finalize");
-  Finalize();
-  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
-  while (!frames_to_send_.empty()) {
-    SDL_LOG_INFO("removing message");
-    ::protocol_handler::RawMessagePtr message = frames_to_send_.front();
-    frames_to_send_.pop();
-    controller_->DataSendFailed(
-        device_handle(), application_handle(), message, DataSendError());
+
+  if (unexpected_disconnect_) {
+    FinalizeUnexpectedDisconnect();
   }
+
+  SDL_LOG_ERROR("Socket connection thread is closed");
 }
 
 bool ThreadedSocketConnection::IsFramesToSendQueueEmpty() const {
