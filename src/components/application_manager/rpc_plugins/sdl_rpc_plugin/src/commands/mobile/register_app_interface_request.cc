@@ -274,6 +274,11 @@ bool RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed(
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
 
+  if (!application) {
+    SDL_LOG_DEBUG("Application not found, no resumption required");
+    return false;
+  }
+
   const bool hash_id_present = msg_params.keyExists(strings::hash_id);
   const std::string hash_id = msg_params[strings::hash_id].asString();
   const bool resumption = hash_id_present && !hash_id.empty();

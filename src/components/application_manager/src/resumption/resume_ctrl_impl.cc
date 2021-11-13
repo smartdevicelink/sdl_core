@@ -558,7 +558,6 @@ void ResumeCtrlImpl::ResetLaunchTime() {
 bool ResumeCtrlImpl::CheckPersistenceFilesForResumption(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
-  DCHECK_OR_RETURN(application, false);
   SDL_LOG_DEBUG(" Resume app_id = " << application->app_id() << " policy_id = "
                                     << application->policy_app_id());
   smart_objects::SmartObject saved_app;
@@ -584,7 +583,6 @@ bool ResumeCtrlImpl::CheckPersistenceFilesForResumption(
 bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
                                           const std::string& hash) {
   SDL_LOG_AUTO_TRACE();
-  DCHECK_OR_RETURN(application, false);
   SDL_LOG_DEBUG("app_id : " << application->app_id() << " hash : " << hash);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
