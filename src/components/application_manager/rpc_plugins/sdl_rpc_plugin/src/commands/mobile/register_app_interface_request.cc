@@ -274,6 +274,11 @@ bool RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed(
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
 
+  if (!application) {
+    SDL_LOG_DEBUG("Application not found, no resumption required");
+    return false;
+  }
+
   const bool hash_id_present = msg_params.keyExists(strings::hash_id);
   const std::string hash_id = msg_params[strings::hash_id].asString();
   const bool resumption = hash_id_present && !hash_id.empty();
@@ -348,9 +353,8 @@ policy::StatusNotifier RegisterAppInterfaceRequest::AddApplicationDataToPolicy(
       application->mac_address(), application->policy_app_id(), hmi_types);
 }
 
-void RegisterAppInterfaceRequest::CheckLanguage() {
-  ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
+void RegisterAppInterfaceRequest::CheckLanguage(
+    ApplicationSharedPtr application) {
   DCHECK_OR_RETURN_VOID(application);
   const auto& msg_params = (*message_)[strings::msg_params];
   if (msg_params[strings::language_desired].asInt() !=
@@ -430,6 +434,9 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
                                    policy::StatusNotifier notify_upd_manager) {
   resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
   auto application = app_manager.application(connection_key);
+  if (!application) {
+    return;
+  }
 
   policy::PolicyHandlerInterface& policy_handler =
       app_manager.GetPolicyHandler();
@@ -731,7 +738,7 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  CheckLanguage();
+  CheckLanguage(application);
 
   SendRegisterAppInterfaceResponseToMobile(
       ApplicationType::kNewApplication, status_notifier, add_info);
@@ -874,6 +881,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   const uint32_t key = connection_key();
   ApplicationSharedPtr application = application_manager_.application(key);
+
+  if (!application) {
+    return;
+  }
+
   utils::SemanticVersion negotiated_version = application->msg_version();
 
   response_params[strings::sync_msg_version][strings::major_version] =
