@@ -64,6 +64,7 @@ void policy::UpdateNeededStatus::ProcessEvent(
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
+    case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
