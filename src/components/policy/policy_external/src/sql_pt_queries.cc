@@ -699,7 +699,6 @@ const std::string kDropSchema =
     "`hmi_status_priority.fk_hmi_status_priority_"
     "priority1_idx`; "
     "DROP TABLE IF EXISTS `hmi_status_priority`; "
-    "DROP TABLE IF EXISTS `interrupt_manager_config`; "
     "COMMIT; "
     "VACUUM;";
 

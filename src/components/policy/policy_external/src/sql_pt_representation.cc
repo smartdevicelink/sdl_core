@@ -873,11 +873,6 @@ void SQLPTRepresentation::GatherInterruptManagerConfig(
     policy_table::InterruptManagerConfig* config) const {
   SDL_LOG_INFO("Gather Configuration Info");
   
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectInterruptManagerConfig) || !query.Next()) {
-    SDL_LOG_WARN("Incorrect select statement for interrupt manager config");
-  }
-
   utils::dbms::SQLQuery rpc_priority(db());
   if (!rpc_priority.Prepare(sql_pt::kSelectRpcPriority)) {
     SDL_LOG_WARN("Incorrect select statement for priority");
@@ -2897,16 +2892,7 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
 
 bool SQLPTRepresentation::SaveInterruptManagerConfig(
     const policy_table::InterruptManagerConfig& config) {
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertInterruptManagerConfig)) {
-    SDL_LOG_WARN("Incorrect update statement for InterruptManager config");
-    return false;
-  }
-  
-  if (!query.Exec()) {
-    SDL_LOG_WARN("Incorrect update InterruptManager config");
-    return false;
-  }
+  SDL_LOG_AUTO_TRACE();
 
   if (!SaveRpcPriority(config.rpc_priority)) {
     return false;

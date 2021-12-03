@@ -664,7 +664,6 @@ const std::string kDropSchema =
     "`hmi_status_priority.fk_hmi_status_priority_"
     "priority1_idx`; "
     "DROP TABLE IF EXISTS `hmi_status_priority`; "
-    "DROP TABLE IF EXISTS `interrupt_manager_config`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -1136,21 +1135,6 @@ const std::string kUpdateMetaParams =
 
 const std::string kUpdateMetaHardwareVersion =
     "UPDATE `module_meta` SET `hardware_version` = ? ";
-
-const std::string kSelectInterruptManagerConfig =
-    "SELECT `rpc_priority`, `app_priority`, "
-    " `hmi_status_priority`, "
-    " FROM `interrupt_manager_config`";
-
-const std::string kUpdateInterruptManagerConfig = 
-    "UPDATE `interrupt_manager_config` SET `rpc_priority` = ?, "
-    "  `app_priority` = ?,"
-    "  `hmi_status_priority` = ? ";
-
-const std::string kInsertInterruptManagerConfig =
-    "INSERT INTO `interrupt_manager_config` (`rpc_priority`, `app_priority`, "
-    "`hmi_status_priority`) "
-    "  VALUES (?, ?, ?)";
 
 const std::string kSelectRpcPriority =
     "SELECT `priority_value`, `value` FROM rpc_priority";

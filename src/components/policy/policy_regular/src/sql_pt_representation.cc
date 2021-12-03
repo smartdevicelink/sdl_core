@@ -879,11 +879,6 @@ bool SQLPTRepresentation::GatherVehicleDataItems(
 void SQLPTRepresentation::GatherInterruptManagerConfig(
     policy_table::InterruptManagerConfig* config) const {
   SDL_LOG_INFO("Gather Configuration Info");
-  
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectInterruptManagerConfig) || !query.Next()) {
-    SDL_LOG_WARN("Incorrect select statement for interrupt manager config");
-  }
 
   utils::dbms::SQLQuery rpc_priority(db());
   if (!rpc_priority.Prepare(sql_pt::kSelectRpcPriority)) {
@@ -953,6 +948,11 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     return false;
   }
   if (!SaveVehicleData(*table.policy_table.vehicle_data)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveInterruptManagerConfig(
+          table.policy_table.interrupt_manager_config)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -2879,16 +2879,7 @@ bool SQLPTRepresentation::DeleteVehicleDataItems() const {
 
 bool SQLPTRepresentation::SaveInterruptManagerConfig(
     const policy_table::InterruptManagerConfig& config) {
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertInterruptManagerConfig)) {
-    SDL_LOG_WARN("Incorrect update statement for InterruptManager config");
-    return false;
-  }
-  
-  if (!query.Exec()) {
-    SDL_LOG_WARN("Incorrect update InterruptManager config");
-    return false;
-  }
+  SDL_LOG_AUTO_TRACE();
 
   if (!SaveRpcPriority(config.rpc_priority)) {
     return false;
@@ -2907,6 +2898,7 @@ bool SQLPTRepresentation::SaveInterruptManagerConfig(
 bool SQLPTRepresentation::SaveRpcPriority(
     const policy_table::rpc_priority_type& priority) {
   utils::dbms::SQLQuery query(db());
+  SDL_LOG_AUTO_TRACE();
   if (!query.Prepare(sql_pt::kInsertRpcPriority)) {
     SDL_LOG_WARN("Incorrect insert statement for rpc priority.");
     return false;
