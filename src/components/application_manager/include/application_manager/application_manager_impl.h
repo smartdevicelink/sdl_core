@@ -1724,9 +1724,9 @@ class ApplicationManagerImpl
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR
 
-  Timer application_list_update_timer_;
+  TimerSPtr application_list_update_timer_;
 
-  Timer tts_global_properties_timer_;
+  TimerSPtr tts_global_properties_timer_;
 
   Timer clear_pool_timer_;
 
