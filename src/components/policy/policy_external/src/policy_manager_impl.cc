@@ -215,6 +215,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
+    , send_on_update_sent_out_(false)
+    , trigger_ptu_(false)
     , ptu_requested_(false)
     , is_ptu_in_progress_(false) {}
 
