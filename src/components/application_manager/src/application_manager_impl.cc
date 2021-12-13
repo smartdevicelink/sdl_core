@@ -193,13 +193,20 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , pending_device_map_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
     , application_list_update_timer_(
-          "AM ListUpdater",
-          new TimerTaskImpl<ApplicationManagerImpl>(
-              this, &ApplicationManagerImpl::OnApplicationListUpdateTimer))
+          std::make_shared<timer::Timer,
+                           const char*,
+                           ::timer::TimerTaskImpl<ApplicationManagerImpl>*>(
+              "AM ListUpdater",
+              new TimerTaskImpl<ApplicationManagerImpl>(
+                  this, &ApplicationManagerImpl::OnApplicationListUpdateTimer)))
     , tts_global_properties_timer_(
-          "AM TTSGLPRTimer",
-          new TimerTaskImpl<ApplicationManagerImpl>(
-              this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
+          std::make_shared<timer::Timer,
+                           const char*,
+                           ::timer::TimerTaskImpl<ApplicationManagerImpl>*>(
+              "AM TTSGLPRTimer",
+              new TimerTaskImpl<ApplicationManagerImpl>(
+                  this,
+                  &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties)))
     , clear_pool_timer_("ClearPoolTimer",
                         new TimerTaskImpl<ApplicationManagerImpl>(
                             this, &ApplicationManagerImpl::ClearTimerPool))
@@ -581,7 +588,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   SDL_LOG_DEBUG("Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, timer::kSingleShot);
+  if (application_list_update_timer_->is_running() ||
+      application_list_update_timer_->is_completed()) {
+    application_list_update_timer_->Stop();
+  }
+  application_list_update_timer_ =
+      std::make_shared<timer::Timer,
+                       const char*,
+                       ::timer::TimerTaskImpl<ApplicationManagerImpl>*>(
+          "AM ListUpdater",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::OnApplicationListUpdateTimer));
+  application_list_update_timer_->Start(timeout, timer::kSingleShot);
 
   if (!is_all_apps_allowed_) {
     SDL_LOG_WARN("RegisterApplication: access to app's disabled by user");
@@ -1660,7 +1678,18 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   SDL_LOG_DEBUG("Starting application list update timer");
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, timer::kSingleShot);
+  if (application_list_update_timer_->is_running() ||
+      application_list_update_timer_->is_completed()) {
+    application_list_update_timer_->Stop();
+  }
+  application_list_update_timer_ =
+      std::make_shared<timer::Timer,
+                       const char*,
+                       ::timer::TimerTaskImpl<ApplicationManagerImpl>*>(
+          "AM ListUpdater",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::OnApplicationListUpdateTimer));
+  application_list_update_timer_->Start(timeout, timer::kSingleShot);
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
@@ -2632,7 +2661,7 @@ bool ApplicationManagerImpl::Init(
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
   InitiateStopping();
-  application_list_update_timer_.Stop();
+  application_list_update_timer_->Stop();
   try {
     if (unregister_reason_ ==
         mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM) {
@@ -3326,7 +3355,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
         app_to_remove = *it_app;
-        applications_.erase(it_app++);
+        applications_.erase(it_app);
         break;
       } else {
         ++it_app;
@@ -4300,7 +4329,19 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     SDL_LOG_INFO("Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
     const uint32_t timeout_ms = 1000;
-    tts_global_properties_timer_.Start(timeout_ms, timer::kSingleShot);
+    if (tts_global_properties_timer_->is_running() ||
+        tts_global_properties_timer_->is_completed()) {
+      tts_global_properties_timer_->Stop();
+    }
+    tts_global_properties_timer_ =
+        std::make_shared<timer::Timer,
+                         const char*,
+                         ::timer::TimerTaskImpl<ApplicationManagerImpl>*>(
+            "AM TTSGLPRTimer",
+            new TimerTaskImpl<ApplicationManagerImpl>(
+                this,
+                &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties));
+    tts_global_properties_timer_->Start(timeout_ms, timer::kSingleShot);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
@@ -4319,7 +4360,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
       SDL_LOG_DEBUG("Stop tts_global_properties_timer_");
       // if container is empty need to stop timer
       tts_global_properties_app_list_lock_.Release();
-      tts_global_properties_timer_.Stop();
+      tts_global_properties_timer_->Stop();
       return;
     }
   }
@@ -4756,7 +4797,7 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   SDL_LOG_DEBUG("App with app_id: "
                 << application->app_id()
                 << " has been added to registered applications list");
-  if (application_list_update_timer_.is_running() &&
+  if (application_list_update_timer_->is_running() &&
       !registered_during_timer_execution_) {
     GetPolicyHandler().OnAddedNewApplicationToAppList(
         application->app_id(), application->policy_app_id());
