@@ -1956,8 +1956,9 @@ bool ApplicationManagerImpl::StartNaviService(
       /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
-      auto accessor = applications();
-      for (auto app : accessor.GetData()) {
+
+      const ApplicationSet apps = applications().GetData();
+      for (auto app : apps) {
         if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
           SDL_LOG_DEBUG("Continue, Not Navi App Id: " << app->app_id());
           continue;
