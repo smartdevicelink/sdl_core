@@ -83,7 +83,7 @@ bool HmiLevelSorter(const std::pair<int32_t, ApplicationDataPtr>& lval,
 
 void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
   SDL_LOG_AUTO_TRACE();
-  sync_primitives::AutoLock lock(launch_ctrl_lock_);
+  sync_primitives::AutoLock lock(app_launcher_lock_);
 
   std::vector<ApplicationDataPtr> apps_on_device =
       app_launch_data_.GetApplicationDataByDevice(device_mac);
@@ -117,7 +117,7 @@ void AppLaunchCtrlImpl::OnMasterReset() {
 
 void AppLaunchCtrlImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
-  sync_primitives::AutoLock lock(launch_ctrl_lock_);
+  sync_primitives::AutoLock lock(app_launcher_lock_);
   device_apps_launcher_.StopLaunchingAppsOnAllDevices();
 }
 
