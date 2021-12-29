@@ -358,10 +358,10 @@ bool PerformInteractionRequest::ProcessVRResponse(
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
-  const bool isSucess = hmi_apis::Common_Result::REJECTED != code;
+  const bool isResultSuccessful = hmi_apis::Common_Result::REJECTED != code;
 
   if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
-      InteractionMode::MANUAL_ONLY != interaction_mode_ && isSucess) {
+      InteractionMode::MANUAL_ONLY != interaction_mode_ && isResultSuccessful) {
     SDL_LOG_DEBUG("Send Close PopupRequest");
     SendClosePopupRequestToHMI();
   }
@@ -888,7 +888,10 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 void PerformInteractionRequest::TerminatePerformInteraction() {
   SDL_LOG_AUTO_TRACE();
 
-  SendClosePopupRequestToHMI();
+  if (mobile_apis::InteractionMode::VR_ONLY != interaction_mode_) {
+    SendClosePopupRequestToHMI();
+  }
+
   DisablePerformInteraction();
 }
 
