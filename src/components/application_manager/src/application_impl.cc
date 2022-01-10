@@ -614,11 +614,11 @@ void ApplicationImpl::StopStreaming(
 
 void ApplicationImpl::StopNaviStreaming() {
   SDL_LOG_AUTO_TRACE();
+  video_streaming_stopped_ = true;
   video_stream_suspend_timer_.Stop();
   MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
   set_video_stream_retry_number(0);
-  video_streaming_stopped_ = true;
 }
 
 void ApplicationImpl::StopAudioStreaming() {
@@ -662,7 +662,7 @@ void ApplicationImpl::WakeUpStreaming(
       return;
     }
     if (video_streaming_suspended_) {
-      SDL_LOG_DEBUG("Video streaming will be resumed after suspension");
+      SDL_LOG_DEBUG("Video streaming is resuming after suspension");
       application_manager_.OnAppStreaming(app_id(), service_type, true);
       application_manager_.ProcessOnDataStreamingNotification(
           service_type, app_id(), true);
@@ -679,7 +679,7 @@ void ApplicationImpl::WakeUpStreaming(
       return;
     }
     if (audio_streaming_suspended_) {
-      SDL_LOG_DEBUG("Audio streaming will be resumed after suspension");
+      SDL_LOG_DEBUG("Audio streaming is resuming after suspension");
       application_manager_.OnAppStreaming(app_id(), service_type, true);
       application_manager_.ProcessOnDataStreamingNotification(
           service_type, app_id(), true);
