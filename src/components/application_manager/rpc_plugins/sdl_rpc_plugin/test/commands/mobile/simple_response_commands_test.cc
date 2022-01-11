@@ -149,7 +149,6 @@ TYPED_TEST(MobileResponseWithUnsubscribeCommandsTest,
   std::shared_ptr<typename TestFixture::UnsubscribeCommand> command =
       this->template CreateCommand<typename TestFixture::UnsubscribeCommand>();
 
-  EXPECT_CALL(this->app_mngr_, UnsubscribeAppFromSoftButtons(_));
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
 
   command->Init();

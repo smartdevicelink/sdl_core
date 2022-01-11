@@ -1165,7 +1165,8 @@ void ApplicationImpl::SubscribeToSoftButtons(
     return;
   }
 
-  WindowSoftButtons new_window_soft_buttons = *subscribed_window_buttons;
+  WindowSoftButtons new_window_soft_buttons;
+  new_window_soft_buttons.first = window_id;
   new_window_soft_buttons.second.insert(window_softbuttons.second.begin(),
                                         window_softbuttons.second.end());
   command_soft_buttons.erase(subscribed_window_buttons);
