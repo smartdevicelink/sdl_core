@@ -1,5 +1,10 @@
 {
   "UI": {
+	  "hmiCapabilities":{
+			"navigation":false,
+			"phoneCall":true,
+			"videoStreaming":false
+		},
     "systemCapabilities": {
       "phoneCapability": {
         "dialNumberEnabled": true
