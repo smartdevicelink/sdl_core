@@ -78,7 +78,7 @@ class AppLaunchCtrlImpl : public AppLaunchCtrl {
 
   AppsLauncher apps_launcher_;
   DeviceAppsLauncher device_apps_launcher_;
-  sync_primitives::Lock app_launcher_lock_;
+  sync_primitives::Lock device_apps_launcher_lock_;
 
   DISALLOW_COPY_AND_ASSIGN(AppLaunchCtrlImpl);
 };
