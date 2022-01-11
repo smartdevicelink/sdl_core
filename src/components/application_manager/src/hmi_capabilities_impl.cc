@@ -332,6 +332,7 @@ void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
 
 void HMICapabilitiesImpl::set_pcm_stream_capabilities(
     const smart_objects::SmartObject& pcm_stream_capabilities) {
+  SDL_LOG_AUTO_TRACE();
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(pcm_stream_capabilities);
   sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
@@ -538,6 +539,7 @@ HMICapabilitiesImpl::audio_pass_thru_capabilities() const {
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::pcm_stream_capabilities() const {
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return pcm_stream_capabilities_;
 }
