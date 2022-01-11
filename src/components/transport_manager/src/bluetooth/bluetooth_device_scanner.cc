@@ -266,12 +266,12 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
                               BluetoothDevice::GetUniqueDeviceId(bd_address);
                      });
 
-    const bool is_new_device = it_device == discovered_devices->end();
+    const bool is_new_device = (it_device == discovered_devices->end());
     const bool is_new_rfcomm_channel =
         !is_new_device && (*it_device)->GetApplicationList().size() !=
                               sdl_rfcomm_channels[i].size();
     if (is_new_device || is_new_rfcomm_channel) {
-      if (!discovered_devices->empty()) {
+      if (!is_new_device) {
         discovered_devices->erase(it_device);
       }
       auto bluetooth_device = std::make_shared<BluetoothDevice>(
