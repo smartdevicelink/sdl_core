@@ -1956,8 +1956,9 @@ bool ApplicationManagerImpl::StartNaviService(
       /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
-      auto accessor = applications();
-      for (auto app : accessor.GetData()) {
+
+      const ApplicationSet apps = applications().GetData();
+      for (auto app : apps) {
         if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
           SDL_LOG_DEBUG("Continue, Not Navi App Id: " << app->app_id());
           continue;
@@ -3344,7 +3345,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
         app_to_remove = *it_app;
-        applications_.erase(it_app++);
+        applications_.erase(it_app);
         break;
       } else {
         ++it_app;
@@ -4770,6 +4771,9 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+
+  // Add application to registered app list and set appropriate mark.
+  application->MarkRegistered();
   applications_.insert(application);
   SDL_LOG_DEBUG("App with app_id: "
                 << application->app_id()

@@ -141,6 +141,10 @@ TEST_F(WebsocketNotSecureSessionConnectionTest, SUCCESS_SendData) {
   auto error = websocket_connection_->SendData(message);
 
   ASSERT_EQ(TransportAdapter::Error::OK, error);
+
+  auto disconnect_error = websocket_connection_->Disconnect();
+
+  ASSERT_EQ(TransportAdapter::Error::OK, disconnect_error);
 }
 
 TEST_F(WebsocketNotSecureSessionConnectionTest, UNSUCCESS_SendData_BAD_STATE) {

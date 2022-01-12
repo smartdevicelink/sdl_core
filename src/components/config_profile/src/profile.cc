@@ -2298,8 +2298,8 @@ void Profile::UpdateValues() {
                 kProtocolHandlerSection,
                 kMaxSupportedProtocolVersionKey);
 
-  if (max_supported_protocol_version_ < 1) {
-    max_supported_protocol_version_ = 1;
+  if (max_supported_protocol_version_ < 2) {
+    max_supported_protocol_version_ = 2;
   } else if (max_supported_protocol_version_ >
              kDefaultMaxSupportedProtocolVersion) {
     max_supported_protocol_version_ = kDefaultMaxSupportedProtocolVersion;

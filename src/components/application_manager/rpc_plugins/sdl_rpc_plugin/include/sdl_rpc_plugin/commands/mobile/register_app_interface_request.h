@@ -301,7 +301,7 @@ class RegisterAppInterfaceRequest
    * @brief CheckLanguage check if language in RAI matches hmi_capabilities
    * Setup result_code variable in case of does not match
    */
-  void CheckLanguage();
+  void CheckLanguage(application_manager::ApplicationSharedPtr application);
 
   std::string response_info_;
   bool are_tts_chunks_invalid_;

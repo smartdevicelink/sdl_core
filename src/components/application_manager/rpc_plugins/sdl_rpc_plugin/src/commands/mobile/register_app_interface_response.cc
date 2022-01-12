@@ -96,7 +96,7 @@ void RegisterAppInterfaceResponse::Run() {
   }
 
   SendResponse(success, result_code, last_message);
-  if (success) {
+  if (app && success) {
     app->set_is_ready(true);
   }
   event_engine::MobileEvent event(

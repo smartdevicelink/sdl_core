@@ -98,7 +98,8 @@ void UnsubscribeVehicleDataRequest::Run() {
         "VehicleDataType: "
         << key_name);
     vi_still_subscribed_by_another_apps_.insert(key_name);
-    response_params_[key_name][strings::result_code] =
+    const std::string converted_name = ConvertRequestToResponseName(key_name);
+    response_params_[converted_name][strings::result_code] =
         mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
   };
 

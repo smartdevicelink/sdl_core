@@ -504,6 +504,15 @@ TEST_F(HMICapabilitiesTest,
 TEST_F(
     HMICapabilitiesTest,
     LoadCapabilitiesFromFile_CheckNavigationCapabilities_SuccessLoadAndConvert) {
+  const std::string content_to_save =
+      "{\"UI\": {\"hmiCapabilities\": {\"navigation\":true}}}";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
   hmi_capabilities_->Init(last_state_wrapper_);
   const auto navigation_capability_so =
       *(hmi_capabilities_->navigation_capability());
@@ -524,13 +533,42 @@ TEST_F(HMICapabilitiesTest,
 
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckHMICapabilities_SuccessLoadAndConvert) {
+  const std::string content_to_save =
+      "{\"UI\": {\"hmiCapabilities\": "
+      "{\"navigation\":true,\"phoneCall\":true,\"videoStreaming\":true}}}";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  const auto ui_hmi_capability_so = *(hmi_capabilities_->ui_hmi_capabilities());
+  EXPECT_TRUE(ui_hmi_capability_so.keyExists("navigation"));
+  EXPECT_TRUE(ui_hmi_capability_so.keyExists("phoneCall"));
+  EXPECT_TRUE(ui_hmi_capability_so.keyExists("videoStreaming"));
 
   EXPECT_TRUE(hmi_capabilities_->phone_call_supported());
+  EXPECT_TRUE(hmi_capabilities_->navigation_supported());
+  EXPECT_TRUE(hmi_capabilities_->video_streaming_supported());
 }
 
 TEST_F(
     HMICapabilitiesTest,
     LoadCapabilitiesFromFile_CheckVideoStreamingCapability_SuccessLoadAndConvert) {
+  const std::string content_to_save =
+      "{\"UI\": {\"hmiCapabilities\": {\"videoStreaming\":true}}}";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
   hmi_capabilities_->Init(last_state_wrapper_);
   const auto vs_capability_so =
       *(hmi_capabilities_->video_streaming_capability());
@@ -836,7 +874,15 @@ TEST_F(HMICapabilitiesTest,
   const std::string hmi_capabilities_file = "hmi_capabilities_sc1.json";
   ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillByDefault(ReturnRef(hmi_capabilities_file));
+  const std::string content_to_save =
+      "{\"UI\": {\"hmiCapabilities\": "
+      "{\"navigation\":false,\"phoneCall\":true,\"videoStreaming\":false}}}";
 
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
   hmi_capabilities_->Init(last_state_wrapper_);
 
   // Check system capabilities; only phone capability is available
@@ -857,6 +903,15 @@ TEST_F(HMICapabilitiesTest,
   const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
   ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillByDefault(ReturnRef(hmi_capabilities_file));
+  const std::string content_to_save =
+      "{\"UI\": {\"hmiCapabilities\": "
+      "{\"navigation\":true,\"phoneCall\":false,\"videoStreaming\":false}}}";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
 
   hmi_capabilities_->Init(last_state_wrapper_);
 
@@ -1219,7 +1274,7 @@ TEST_F(HMICapabilitiesTest,
       "\"EN-US\",\"languages\":[],\"displayCapabilities\" : "
       "{},\"audioPassThruCapabilities\":[],\"pcmStreamCapabilities\" : "
       "{},\"hmiZoneCapabilities\": \"\",\"softButtonCapabilities\" : "
-      "[],\"systemCapabilities\" : {}}}";
+      "[],\"systemCapabilities\" : {},\"hmiCapabilities\" : {}}}";
 
   const std::vector<uint8_t> binary_data_to_save(
       predefined_ui_capabilities.begin(), predefined_ui_capabilities.end());

@@ -97,6 +97,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , vr_supported_languages_(NULL)
     , display_capabilities_(NULL)
     , hmi_zone_capabilities_(NULL)
+    , ui_hmi_capabilities_(NULL)
     , soft_buttons_capabilities_(NULL)
     , button_capabilities_(NULL)
     , preset_bank_capabilities_(NULL)
@@ -281,6 +282,14 @@ void HMICapabilitiesImpl::set_hmi_zone_capabilities(
   hmi_zone_capabilities_.swap(new_value);
 }
 
+void HMICapabilitiesImpl::set_ui_hmi_capabilities(
+    const smart_objects::SmartObject& ui_hmi_capabilities) {
+  auto new_value =
+      std::make_shared<smart_objects::SmartObject>(ui_hmi_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  ui_hmi_capabilities_.swap(new_value);
+}
+
 void HMICapabilitiesImpl::set_soft_button_capabilities(
     const smart_objects::SmartObject& soft_button_capabilities) {
   auto new_value =
@@ -323,6 +332,7 @@ void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
 
 void HMICapabilitiesImpl::set_pcm_stream_capabilities(
     const smart_objects::SmartObject& pcm_stream_capabilities) {
+  SDL_LOG_AUTO_TRACE();
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(pcm_stream_capabilities);
   sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
@@ -491,6 +501,12 @@ HMICapabilitiesImpl::hmi_zone_capabilities() const {
   return hmi_zone_capabilities_;
 }
 
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::ui_hmi_capabilities()
+    const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
+  return ui_hmi_capabilities_;
+}
+
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::soft_button_capabilities() const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
@@ -523,6 +539,7 @@ HMICapabilitiesImpl::audio_pass_thru_capabilities() const {
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::pcm_stream_capabilities() const {
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return pcm_stream_capabilities_;
 }
@@ -1017,6 +1034,33 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
 
+      auto ui_hmi_capabilities_node =
+          json_ui_getter.GetCachedJsonMember(strings::hmi_capabilities);
+
+      if (!ui_hmi_capabilities_node.isNull()) {
+        smart_objects::SmartObject ui_hmi_capabilities_so;
+        formatters::CFormatterJsonBase::jsonValueToObj(ui_hmi_capabilities_node,
+                                                       ui_hmi_capabilities_so);
+        set_ui_hmi_capabilities(ui_hmi_capabilities_so);
+
+        if (JsonIsMemberSafe(ui_hmi_capabilities_node, strings::navigation)) {
+          Json::Value navigation =
+              ui_hmi_capabilities_node.get(strings::navigation, "");
+          set_navigation_supported(navigation.asBool());
+        }
+        if (JsonIsMemberSafe(ui_hmi_capabilities_node, strings::phone_call)) {
+          Json::Value phoneCall =
+              ui_hmi_capabilities_node.get(strings::phone_call, "");
+          set_phone_call_supported(phoneCall.asBool());
+        }
+        if (JsonIsMemberSafe(ui_hmi_capabilities_node,
+                             strings::video_streaming)) {
+          Json::Value video_streaming =
+              ui_hmi_capabilities_node.get(strings::video_streaming, "");
+          set_video_streaming_supported(video_streaming.asBool());
+        }
+      }
+
       auto ui_system_capabilities_node =
           json_ui_getter.GetJsonMember(strings::system_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
@@ -1030,9 +1074,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
           formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
           set_navigation_capability(navigation_capability_so);
-          if (!navigation_capability_so.empty()) {
-            set_navigation_supported(true);
-          }
         }
         if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::phone_capability)) {
@@ -1042,9 +1083,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
           formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
           set_phone_capability(phone_capability_so);
-          if (!phone_capability_so.empty()) {
-            set_phone_call_supported(true);
-          }
         }
         if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::video_streaming_capability)) {
@@ -1090,9 +1128,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             vs_capability_so[strings::supported_formats] = converted_array;
           }
           set_video_streaming_capability(vs_capability_so);
-          if (!vs_capability_so.empty()) {
-            set_video_streaming_supported(true);
-          }
         }
 
         if (JsonIsMemberSafe(ui_system_capabilities_node,
