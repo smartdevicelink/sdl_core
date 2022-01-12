@@ -78,7 +78,9 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(HmiState::STATE_ID_REGULAR == state->state_id());
 
-  SDL_LOG_DEBUG("Set window #" << window_id << " regular state " << *state);
+  SDL_LOG_DEBUG("Set window #" << window_id << " regular state " << *state
+                               << " hmi_state_change "
+                               << request_hmi_state_change);
 
   if (state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM ||
       state->audio_streaming_state() ==
@@ -113,11 +115,12 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
     const int64_t result = RequestHMIStateChange(app, hmi_level, true);
     if (-1 != result) {
       const uint32_t corr_id = static_cast<uint32_t>(result);
+
       subscribe_on_event(
-          hmi_apis::Common_HMILevel::NONE == hmi_level
-              ? hmi_apis::FunctionID::BasicCommunication_CloseApplication
-              : hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-          corr_id);
+          hmi_apis::FunctionID::BasicCommunication_CloseApplication, corr_id);
+      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                         corr_id);
+
       waiting_for_response_[app->app_id()] = resolved_state;
       app_mngr_.set_application_id(corr_id, app->hmi_app_id());
       return;
@@ -782,6 +785,10 @@ void StateControllerImpl::HandleOnEvent(const event_engine::Event& event) {
     case FunctionID::BasicCommunication_ActivateApp:
     case FunctionID::BasicCommunication_CloseApplication: {
       OnHMIResponse(message);
+      unsubscribe_from_event(
+          hmi_apis::FunctionID::BasicCommunication_CloseApplication);
+      unsubscribe_from_event(
+          hmi_apis::FunctionID::BasicCommunication_ActivateApp);
       break;
     }
     case FunctionID::BasicCommunication_OnAppActivated: {

@@ -66,8 +66,6 @@ MediaManagerImpl::MediaManagerImpl(
     , protocol_handler_(NULL)
     , a2dp_player_(NULL)
     , from_mic_recorder_(NULL)
-    , bits_per_sample_(16)
-    , sampling_rate_(16000)
     , stream_data_size_(0ull)
     , application_manager_(application_manager) {
   Init();
@@ -164,23 +162,6 @@ void MediaManagerImpl::Init() {
   if (streamer_[ServiceType::kAudio]) {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
-  }
-
-  if (application_manager_.hmi_capabilities().pcm_stream_capabilities()) {
-    const auto pcm_caps =
-        application_manager_.hmi_capabilities().pcm_stream_capabilities();
-
-    if (pcm_caps->keyExists(application_manager::strings::bits_per_sample)) {
-      bits_per_sample_ =
-          pcm_caps->getElement(application_manager::strings::bits_per_sample)
-              .asUInt();
-    }
-
-    if (pcm_caps->keyExists(application_manager::strings::sampling_rate)) {
-      sampling_rate_ =
-          pcm_caps->getElement(application_manager::strings::sampling_rate)
-              .asUInt();
-    }
   }
 }
 
@@ -317,6 +298,11 @@ void MediaManagerImpl::OnMessageReceived(
               socket_audio_stream_start_time_)
               .count();
       uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
+      SDL_LOG_DEBUG("stream_data_size_: "
+                    << stream_data_size_
+                    << " ms_for_all_data: " << ms_for_all_data
+                    << " ms_since_stream_start: " << ms_since_stream_start
+                    << " ms_stream_remaining: " << ms_stream_remaining);
 
       app->WakeUpStreaming(service_type, ms_stream_remaining);
     } else {
@@ -341,8 +327,63 @@ const MediaManagerSettings& MediaManagerImpl::settings() const {
 }
 
 uint32_t MediaManagerImpl::DataSizeToMilliseconds(uint64_t data_size) const {
+  uint32_t bits_per_sample = 16;
+  uint32_t sampling_rate = 16000;
+
+  if (application_manager_.hmi_capabilities().pcm_stream_capabilities()) {
+    const auto pcm_caps =
+        application_manager_.hmi_capabilities().pcm_stream_capabilities();
+
+    if (pcm_caps->keyExists(application_manager::strings::bits_per_sample)) {
+      auto type = static_cast<hmi_apis::Common_BitsPerSample::eType>(
+          pcm_caps->getElement(application_manager::strings::bits_per_sample)
+              .asUInt());
+      switch (type) {
+        case hmi_apis::Common_BitsPerSample::RATE_8_BIT: {
+          bits_per_sample = 8;
+          break;
+        }
+        case hmi_apis::Common_BitsPerSample::RATE_16_BIT: {
+          bits_per_sample = 16;
+          break;
+        }
+        default:
+          break;
+      }
+    }
+
+    if (pcm_caps->keyExists(application_manager::strings::sampling_rate)) {
+      auto type = static_cast<hmi_apis::Common_SamplingRate::eType>(
+          pcm_caps->getElement(application_manager::strings::sampling_rate)
+              .asUInt());
+      switch (type) {
+        case hmi_apis::Common_SamplingRate::RATE_8KHZ: {
+          sampling_rate = 8000;
+          break;
+        }
+        case hmi_apis::Common_SamplingRate::RATE_16KHZ: {
+          sampling_rate = 16000;
+          break;
+        }
+        case hmi_apis::Common_SamplingRate::RATE_22KHZ: {
+          sampling_rate = 22000;
+          break;
+        }
+        case hmi_apis::Common_SamplingRate::RATE_44KHZ: {
+          sampling_rate = 44000;
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
+  SDL_LOG_DEBUG("Params of pcm_stream_capabilities: bits_per_sample: "
+                << bits_per_sample << " sampling_rate: " << sampling_rate);
+
   constexpr uint16_t latency_compensation = 500;
-  return 1000 * data_size / (sampling_rate_ * bits_per_sample_ / 8) +
+  return 1000 * data_size / (sampling_rate * bits_per_sample / 8) +
          latency_compensation;
 }
 

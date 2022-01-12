@@ -104,6 +104,8 @@ void UIGetCapabilitiesResponse::Run() {
   }
 
   if (msg_params.keyExists(strings::hmi_capabilities)) {
+    hmi_capabilities_.set_ui_hmi_capabilities(
+        msg_params[strings::hmi_capabilities]);
     if (msg_params[strings::hmi_capabilities].keyExists(strings::navigation)) {
       sections_to_update.push_back(strings::navigation);
       hmi_capabilities_.set_navigation_supported(

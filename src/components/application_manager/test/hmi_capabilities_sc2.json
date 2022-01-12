@@ -1,5 +1,10 @@
 {
   "UI": {
+   "hmiCapabilities":{
+		"navigation":true,
+		"phoneCall":false,
+		"videoStreaming":false
+	},
     "language": "EN_US",
     "languages": [
             "EN_US",

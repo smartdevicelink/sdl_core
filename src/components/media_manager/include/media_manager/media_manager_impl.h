@@ -111,8 +111,6 @@ class MediaManagerImpl : public MediaManager,
   std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
   std::map<protocol_handler::ServiceType, MediaListenerPtr> streamer_listener_;
 
-  uint32_t bits_per_sample_;
-  uint32_t sampling_rate_;
   uint64_t stream_data_size_;
   std::chrono::time_point<std::chrono::system_clock>
       socket_audio_stream_start_time_;
