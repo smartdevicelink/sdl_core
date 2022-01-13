@@ -206,10 +206,19 @@ void BluetoothDeviceScanner::DoInquiry() {
   SDL_LOG_INFO("Check rfcomm channel on " << paired_devices_.size()
                                           << " paired devices.");
 
-  paired_devices_with_sdl_.clear();
   CheckSDLServiceOnDevices(
       paired_devices_, device_handle, &paired_devices_with_sdl_);
-  UpdateTotalDeviceList();
+  const bool new_connect =
+      paired_devices_with_sdl_.end() !=
+      std::find_if(paired_devices_with_sdl_.begin(),
+                   paired_devices_with_sdl_.end(),
+                   [](DeviceSptr devicePtr) {
+                     return devicePtr->connection_status() !=
+                            ConnectionStatus::CONNECTED;
+                   });
+  if (new_connect) {
+    UpdateTotalDeviceList();
+  }
 
   controller_->FindNewApplicationsRequest();
 
@@ -249,13 +258,30 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
       deviceName[name_len - 1] = '\0';
     }
 
-    auto bluetooth_device = std::make_shared<BluetoothDevice>(
-        bd_address, deviceName, sdl_rfcomm_channels[i]);
-    if (bluetooth_device) {
-      SDL_LOG_INFO("Bluetooth device created successfully");
-      discovered_devices->push_back(bluetooth_device);
-    } else {
-      SDL_LOG_WARN("Can't create bluetooth device " << deviceName);
+    auto it_device =
+        std::find_if(discovered_devices->begin(),
+                     discovered_devices->end(),
+                     [bd_address](DeviceSptr device) {
+                       return device->unique_device_id() ==
+                              BluetoothDevice::GetUniqueDeviceId(bd_address);
+                     });
+
+    const bool is_new_device = (it_device == discovered_devices->end());
+    const bool is_new_rfcomm_channel =
+        !is_new_device && (*it_device)->GetApplicationList().size() !=
+                              sdl_rfcomm_channels[i].size();
+    if (is_new_device || is_new_rfcomm_channel) {
+      if (!is_new_device) {
+        discovered_devices->erase(it_device);
+      }
+      auto bluetooth_device = std::make_shared<BluetoothDevice>(
+          bd_address, deviceName, sdl_rfcomm_channels[i]);
+      if (bluetooth_device) {
+        SDL_LOG_INFO("Bluetooth device created successfully");
+        discovered_devices->push_back(bluetooth_device);
+      } else {
+        SDL_LOG_WARN("Can't create bluetooth device " << deviceName);
+      }
     }
   }
   SDL_LOG_TRACE("exit");
