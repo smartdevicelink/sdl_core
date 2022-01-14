@@ -623,11 +623,11 @@ void ApplicationImpl::StopNaviStreaming() {
 
 void ApplicationImpl::StopAudioStreaming() {
   SDL_LOG_AUTO_TRACE();
+  audio_streaming_stopped_ = true;
   audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
-  audio_streaming_stopped_ = true;
 }
 
 void ApplicationImpl::SuspendStreaming(
