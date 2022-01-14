@@ -37,7 +37,6 @@ namespace hmi_message_handler {
 WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
                                    CMessageBrokerController* controller)
     : ws_(std::move(socket))
-    , strand_(ws_.get_executor())
     , controller_(controller)
     , stop(false)
     , m_receivingBuffer("")
@@ -52,10 +51,8 @@ WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
 WebsocketSession::~WebsocketSession() {}
 
 void WebsocketSession::Accept() {
-  ws_.async_accept(boost::asio::bind_executor(
-      strand_,
-      std::bind(
-          &WebsocketSession::Recv, shared_from_this(), std::placeholders::_1)));
+  ws_.async_accept(std::bind(
+      &WebsocketSession::Recv, shared_from_this(), std::placeholders::_1));
 }
 
 void WebsocketSession::Shutdown() {
@@ -85,11 +82,10 @@ void WebsocketSession::Recv(boost::system::error_code ec) {
   }
 
   ws_.async_read(buffer_,
-                 boost::asio::bind_executor(strand_,
-                                            std::bind(&WebsocketSession::Read,
-                                                      shared_from_this(),
-                                                      std::placeholders::_1,
-                                                      std::placeholders::_2)));
+      std::bind(&WebsocketSession::Read,
+                           shared_from_this(),
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
 void WebsocketSession::Send(std::string& message, Json::Value& json_message) {

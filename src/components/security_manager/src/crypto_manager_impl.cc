@@ -136,9 +136,6 @@ bool CryptoManagerImpl::Init() {
   const SSL_METHOD* method;
 #endif
   switch (get_settings().security_manager_protocol_name()) {
-    case SSLv3:
-      method = is_server ? SSLv3_server_method() : SSLv3_client_method();
-      break;
     case TLSv1:
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
       break;

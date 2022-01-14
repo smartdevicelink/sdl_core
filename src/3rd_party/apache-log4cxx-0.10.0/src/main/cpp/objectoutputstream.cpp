@@ -36,8 +36,8 @@ ObjectOutputStream::ObjectOutputStream(OutputStreamPtr outputStream, Pool& p)
        objectHandle(0x7E0000),
        classDescriptions(new ClassDescriptionMap())
 {
-   char start[] = { 0xAC, 0xED, 0x00, 0x05 };
-   ByteBuffer buf(start, sizeof(start));
+   unsigned char start[] = { 0xAC, 0xED, 0x00, 0x05 };
+   ByteBuffer buf((char*)start, sizeof(start));
    os->write(buf, p);
 }
 
@@ -81,7 +81,7 @@ void ObjectOutputStream::writeObject(const MDC::Map& val, Pool& p) {
     //
     //  TC_OBJECT and the classDesc for java.util.Hashtable
     //
-    char prolog[] = {
+    unsigned char prolog[] = {
         0x72, 0x00, 0x13, 0x6A, 0x61, 0x76, 0x61, 
         0x2E, 0x75, 0x74, 0x69, 0x6C, 0x2E, 0x48, 0x61, 
         0x73, 0x68, 0x74, 0x61, 0x62, 0x6C, 0x65, 0x13, 
@@ -90,12 +90,12 @@ void ObjectOutputStream::writeObject(const MDC::Map& val, Pool& p) {
         0x64, 0x46, 0x61, 0x63, 0x74, 0x6F, 0x72, 0x49, 
         0x00, 0x09, 0x74, 0x68, 0x72, 0x65, 0x73, 0x68, 
         0x6F, 0x6C, 0x64, 0x78, 0x70  };
-    writeProlog("java.util.Hashtable", 1, prolog, sizeof(prolog), p);
+    writeProlog("java.util.Hashtable", 1, (char*)prolog, sizeof(prolog), p);
     //
     //   loadFactor = 0.75, threshold = 5, blockdata start, buckets.size = 7
-    char data[] = { 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 
+    unsigned char data[] = { 0x3F, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 
         TC_BLOCKDATA, 0x08, 0x00, 0x00, 0x00, 0x07 };
-    ByteBuffer dataBuf(data, sizeof(data));
+    ByteBuffer dataBuf((char*)data, sizeof(data));
     os->write(dataBuf, p);
     char size[4];
     size_t sz = val.size();
@@ -103,7 +103,7 @@ void ObjectOutputStream::writeObject(const MDC::Map& val, Pool& p) {
     size[2] = (char) ((sz >> 8) & 0xFF);
     size[1] = (char) ((sz >> 16) & 0xFF);
     size[0] = (char) ((sz >> 24) & 0xFF);
-    ByteBuffer sizeBuf(size, sizeof(size));
+    ByteBuffer sizeBuf((char*)size, sizeof(size));
     os->write(sizeBuf, p);
     for(MDC::Map::const_iterator iter = val.begin();
         iter != val.end();

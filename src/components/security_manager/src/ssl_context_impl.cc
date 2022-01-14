@@ -280,7 +280,7 @@ bool CryptoManagerImpl::SSLContextImpl::WriteHandshakeData(
     if (ret <= 0) {
       is_handshake_pending_ = false;
       ResetConnection();
-      return Handshake_Result_AbnormalFail;
+      return false;
     }
   }
   return true;
@@ -477,7 +477,7 @@ void CryptoManagerImpl::SSLContextImpl::ResetConnection() {
     SSL_shutdown(connection_);
   }
   LOG4CXX_DEBUG(logger_, "SSL connection recreation");
-  SSL_CTX* ssl_context = connection_->ctx;
+  SSL_CTX* ssl_context = SSL_get_SSL_CTX(connection_);
   SSL_free(connection_);
   connection_ = SSL_new(ssl_context);
   if (mode_ == SERVER) {
