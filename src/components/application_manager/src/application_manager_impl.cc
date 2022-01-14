@@ -4654,9 +4654,7 @@ void ApplicationManagerImpl::SendDriverDistractionState(
     const auto lock_screen_dismissal =
         policy_handler_->LockScreenDismissalEnabledState();
 
-    if (lock_screen_dismissal &&
-        hmi_apis::Common_DriverDistractionState::DD_ON ==
-            driver_distraction_state()) {
+    if (lock_screen_dismissal) {
       bool dismissal_enabled = *lock_screen_dismissal;
       if (dismissal_enabled) {
         const auto language = EnumToString(application->ui_language());
