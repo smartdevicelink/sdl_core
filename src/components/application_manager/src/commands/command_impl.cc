@@ -47,12 +47,15 @@ struct InfoAppender {
   explicit InfoAppender(std::string& info) : info_(info) {}
 
   void operator()(const RPCParams::value_type& parameter) {
+    std::string param_name = parameter == strings::cluster_mode_status
+                                 ? strings::cluster_modes
+                                 : parameter;
     if (info_.empty()) {
-      info_ = "\'" + parameter + "\'";
+      info_ = "\'" + param_name + "\'";
       return;
     }
 
-    info_ = info_ + ", \'" + parameter + "\'";
+    info_ = info_ + ", \'" + param_name + "\'";
   }
 
  private:
@@ -282,9 +285,11 @@ struct DisallowedParamsInserter {
             ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
             : vehicle_data->second;
 
+    std::string param_name =
+        param == strings::cluster_mode_status ? strings::cluster_modes : param;
     (*disallowed_param)[strings::data_type] = vehicle_data_type;
     (*disallowed_param)[strings::result_code] = code_;
-    response_[strings::msg_params][param.c_str()] = *disallowed_param;
+    response_[strings::msg_params][param_name.c_str()] = *disallowed_param;
     return true;
   }
 
