@@ -577,8 +577,8 @@ class ApplicationImpl : public virtual Application,
   bool audio_streaming_allowed_;
   bool video_streaming_suspended_;
   bool audio_streaming_suspended_;
-  sync_primitives::Lock video_streaming_suspended_lock_;
-  sync_primitives::Lock audio_streaming_suspended_lock_;
+  bool video_streaming_stopped_;
+  bool audio_streaming_stopped_;
   sync_primitives::Lock streaming_stop_lock_;
 
   bool is_app_allowed_;
