@@ -2651,6 +2651,11 @@ bool ApplicationManagerImpl::Init(
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
   InitiateStopping();
+
+  if (app_launch_ctrl_) {
+    app_launch_ctrl_->Stop();
+  }
+
   application_list_update_timer_.Stop();
   try {
     if (unregister_reason_ ==

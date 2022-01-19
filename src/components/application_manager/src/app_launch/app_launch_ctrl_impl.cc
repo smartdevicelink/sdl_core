@@ -83,6 +83,7 @@ bool HmiLevelSorter(const std::pair<int32_t, ApplicationDataPtr>& lval,
 
 void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
   SDL_LOG_AUTO_TRACE();
+
   std::vector<ApplicationDataPtr> apps_on_device =
       app_launch_data_.GetApplicationDataByDevice(device_mac);
   std::vector<std::pair<int32_t, ApplicationDataPtr> > apps_hmi_levels;
@@ -102,6 +103,7 @@ void AppLaunchCtrlImpl::OnDeviceConnected(const std::string& device_mac) {
                  std::back_inserter(apps_on_device),
                  GetAppFromHmiLevelPair);
   if (apps_on_device.size() > 0) {
+    sync_primitives::AutoLock lock(device_apps_launcher_lock_);
     device_apps_launcher_.LaunchAppsOnDevice(device_mac, apps_on_device);
   } else {
     SDL_LOG_DEBUG("No apps in saved for device " << device_mac);
@@ -112,4 +114,11 @@ void AppLaunchCtrlImpl::OnMasterReset() {
   SDL_LOG_AUTO_TRACE();
   app_launch_data_.Clear();
 }
+
+void AppLaunchCtrlImpl::Stop() {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(device_apps_launcher_lock_);
+  device_apps_launcher_.StopLaunchingAppsOnAllDevices();
+}
+
 }  // namespace app_launch
