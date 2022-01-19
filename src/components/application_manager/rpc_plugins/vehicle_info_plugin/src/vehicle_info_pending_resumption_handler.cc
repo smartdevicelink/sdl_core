@@ -223,8 +223,7 @@ void VehicleInfoPendingResumptionHandler::HandleOnEvent(
   custom_vehicle_data_manager_.CreateMobileMessageParams(converted_msg_params);
   response_message[strings::msg_params] = converted_msg_params;
 
-  if (converted_msg_params.enumerate().end() !=
-      converted_msg_params.enumerate().find(strings::cluster_modes)) {
+  if (converted_msg_params.keyExists(strings::cluster_modes)) {
     response_message[strings::msg_params][strings::cluster_mode_status] =
         response_message[strings::msg_params][strings::cluster_modes];
     response_message[strings::msg_params].erase(strings::cluster_modes);
