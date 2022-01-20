@@ -335,8 +335,6 @@ void RequestControllerImpl::TerminateRequest(const uint32_t correlation_id,
     return;
   }
   if (force_terminate || request->request()->AllowedToTerminate()) {
-    event_dispatcher_.remove_observer(
-        static_cast<hmi_apis::FunctionID::eType>(function_id), correlation_id);
     waiting_for_response_.RemoveRequest(request);
     if (RequestInfo::HMIRequest == request->request_type()) {
       request_timeout_handler_.RemoveRequest(request->requestId());
