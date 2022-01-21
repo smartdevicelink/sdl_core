@@ -954,12 +954,12 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
   {
     sync_primitives::AutoLock allowed_choice_sets_lock(
         allowed_choice_sets_lock_);
-    auto choise_id_it = allowed_choice_sets_.find(choice_set_id);
-    if (allowed_choice_sets_.end() == choise_id_it) {
+    auto choice_id_it = allowed_choice_sets_.find(choice_set_id);
+    if (allowed_choice_sets_.end() == choice_id_it) {
       SDL_LOG_WARN("Choice set with id " << choice_set_id << " is not found");
       return;
     }
-    allowed_choice_sets_.erase(choise_id_it);
+    allowed_choice_sets_.erase(choice_id_it);
   }
 }
 
