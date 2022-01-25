@@ -359,7 +359,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
   const bool is_result_successful =
-      application_manager::commands::IsHMIResultSuccess(code);
+      CommandImpl::IsHMIResultSuccess(code, HmiInterfaces::HMI_INTERFACE_VR);
 
   if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
       InteractionMode::MANUAL_ONLY != interaction_mode_ &&
