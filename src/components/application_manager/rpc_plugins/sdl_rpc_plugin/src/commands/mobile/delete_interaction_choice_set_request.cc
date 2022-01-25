@@ -173,6 +173,7 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
     return;
   }
 
+  app->set_choice_set_allow_mode(choice_set_id, false);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();

@@ -315,6 +315,11 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   inline bool is_reset_global_properties_active() const;
 
+  void set_choice_set_allow_mode(const uint32_t choice_set_id,
+                                 const bool is_allowed);
+
+  bool is_choice_set_allowed(const uint32_t choice_set_id) const;
+
  protected:
   smart_objects::SmartObject* help_prompt_;
   smart_objects::SmartObject* timeout_prompt_;
@@ -346,6 +351,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
+  mutable sync_primitives::Lock allowed_choice_sets_lock_;
+  std::set<uint32_t> allowed_choice_sets_;
   DisplayCapabilitiesBuilder display_capabilities_builder_;
 
  private:
