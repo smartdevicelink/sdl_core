@@ -80,7 +80,6 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_scrollable_message_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_app_icon_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_global_properties_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
@@ -198,7 +197,6 @@ typedef Types<sdl_rpc_plugin::commands::hmi::DialNumberRequest,
 typedef Types<sdl_rpc_plugin::commands::UIScrollableMessageRequest,
               sdl_rpc_plugin::commands::VRGetCapabilitiesRequest,
               sdl_rpc_plugin::commands::UISetAppIconRequest,
-              sdl_rpc_plugin::commands::UiSetDisplayLayoutRequest,
               sdl_rpc_plugin::commands::VRGetSupportedLanguagesRequest,
               sdl_rpc_plugin::commands::VRGetLanguageRequest,
               sdl_rpc_plugin::commands::VRPerformInteractionRequest,

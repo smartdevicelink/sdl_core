@@ -147,7 +147,7 @@ TEST_F(SetDisplayLayoutRequestTest,
   (*msg)[am::strings::msg_params][am::strings::info] =
       "UI is not supported by system";
 
-  Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
 
   ON_CALL(mock_hmi_interfaces_,
@@ -197,7 +197,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
       .WillOnce(Return(kCorrelationKey));
   EXPECT_CALL(
       mock_hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetDisplayLayout))
+      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_Show))
       .WillRepeatedly(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
@@ -226,7 +226,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
-  am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  am::event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   MessageSharedPtr msg = CreateMessage();
 
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -260,7 +260,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
-  am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  am::event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   MessageSharedPtr msg = CreateMessage();
 
   (*msg)[am::strings::params][am::hmi_response::code] =

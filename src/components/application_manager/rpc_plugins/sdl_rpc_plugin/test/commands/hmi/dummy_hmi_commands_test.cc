@@ -195,8 +195,6 @@
 #include "hmi/ui_scrollable_message_response.h"
 #include "hmi/ui_set_app_icon_request.h"
 #include "hmi/ui_set_app_icon_response.h"
-#include "hmi/ui_set_display_layout_request.h"
-#include "hmi/ui_set_display_layout_response.h"
 #include "hmi/ui_set_global_properties_request.h"
 #include "hmi/ui_set_global_properties_response.h"
 #include "hmi/ui_set_media_clock_timer_request.h"
@@ -466,8 +464,6 @@ typedef Types<commands::hmi::OnButtonEventNotification,
               commands::OnSystemRequestNotification,
               commands::OnPutFileNotification,
               commands::OnResumeAudioSourceNotification,
-              commands::UiSetDisplayLayoutResponse,
-              commands::UiSetDisplayLayoutRequest,
               commands::OnSDLCloseNotification,
               commands::OnSDLPersistenceCompleteNotification,
               commands::OnFileRemovedNotification,
