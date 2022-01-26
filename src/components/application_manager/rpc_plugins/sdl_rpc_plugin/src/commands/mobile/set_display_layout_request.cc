@@ -53,7 +53,9 @@ SetDisplayLayoutRequest::SetDisplayLayoutRequest(
                             application_manager,
                             rpc_service,
                             hmi_capabilities,
-                            policy_handler) {}
+                            policy_handler) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_Show);
+}
 
 SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {}
 
@@ -73,8 +75,15 @@ void SetDisplayLayoutRequest::Run() {
   std::string old_layout = app->display_layout();
   std::string new_layout = "";
 
+  smart_objects::SmartObject show_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  show_msg_params[hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
   if (msg_params.keyExists(strings::display_layout)) {
     new_layout = msg_params[strings::display_layout].asString();
+    show_msg_params[strings::template_configuration][strings::template_layout] =
+        new_layout;
   }
 
   if (new_layout != old_layout && !new_layout.empty()) {
@@ -109,18 +118,22 @@ void SetDisplayLayoutRequest::Run() {
   if (msg_params.keyExists(strings::day_color_scheme)) {
     SDL_LOG_DEBUG("Allow Day Color Scheme Change");
     app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
+    show_msg_params[strings::template_configuration]
+                   [strings::day_color_scheme] =
+                       msg_params[strings::day_color_scheme];
   }
 
   if (msg_params.keyExists(strings::night_color_scheme)) {
     SDL_LOG_DEBUG("Allow Night Color Scheme Change");
     app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
+    show_msg_params[strings::template_configuration]
+                   [strings::night_color_scheme] =
+                       msg_params[strings::night_color_scheme];
   }
 
-  (*message_)[strings::msg_params][strings::app_id] = app->app_id();
+  show_msg_params[strings::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-  SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
-                 &((*message_)[strings::msg_params]),
-                 true);
+  SendHMIRequest(hmi_apis::FunctionID::UI_Show, &show_msg_params, true);
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
@@ -136,8 +149,8 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_SetDisplayLayout: {
-      SDL_LOG_INFO("Received UI_SetDisplayLayout event");
+    case hmi_apis::FunctionID::UI_Show: {
+      SDL_LOG_INFO("Received UI_Show event (in set display layout)");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
