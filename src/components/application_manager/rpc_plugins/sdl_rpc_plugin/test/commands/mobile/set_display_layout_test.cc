@@ -195,9 +195,8 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationKey));
-  EXPECT_CALL(
-      mock_hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_Show))
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceFromFunction(hmi_apis::FunctionID::UI_Show))
       .WillRepeatedly(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
