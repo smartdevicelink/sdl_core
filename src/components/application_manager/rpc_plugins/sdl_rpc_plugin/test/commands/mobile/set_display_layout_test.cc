@@ -234,12 +234,21 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
-  MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
-  (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
+  MessageSharedPtr display_capabilities_msg = CreateMessage();
+  (*display_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
+  MessageSharedPtr button_capabilities_msg = CreateMessage();
+  MessageSharedPtr soft_button_capabilities_msg = CreateMessage();
+  MessageSharedPtr preset_bank_capabilities_msg = CreateMessage();
 
   EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg));
+      .WillOnce(Return(display_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillOnce(Return(button_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, soft_button_capabilities())
+      .WillOnce(Return(soft_button_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, preset_bank_capabilities())
+      .WillOnce(Return(preset_bank_capabilities_msg));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
@@ -268,12 +277,21 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
-  MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
-  (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
+  MessageSharedPtr display_capabilities_msg = CreateMessage();
+  (*display_capabilities_msg)[am::hmi_response::templates_available] =
       "templates_available";
+  MessageSharedPtr button_capabilities_msg = CreateMessage();
+  MessageSharedPtr soft_button_capabilities_msg = CreateMessage();
+  MessageSharedPtr preset_bank_capabilities_msg = CreateMessage();
 
   EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg));
+      .WillOnce(Return(display_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
+      .WillOnce(Return(button_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, soft_button_capabilities())
+      .WillOnce(Return(soft_button_capabilities_msg));
+  EXPECT_CALL(mock_hmi_capabilities_, preset_bank_capabilities())
+      .WillOnce(Return(preset_bank_capabilities_msg));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),

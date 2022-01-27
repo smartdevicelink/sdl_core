@@ -75,8 +75,7 @@ void SetDisplayLayoutRequest::Run() {
   std::string old_layout = app->display_layout();
   std::string new_layout = "";
 
-  smart_objects::SmartObject show_msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject show_msg_params(smart_objects::SmartType_Map);
   show_msg_params[hmi_request::show_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
