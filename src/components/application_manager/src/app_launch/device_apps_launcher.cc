@@ -195,6 +195,7 @@ DeviceAppsLauncher::DeviceAppsLauncher(
     : app_mngr_(app_mngr)
     , settings_(settings)
     , impl_(new DeviceAppsLauncherImpl(*this, apps_launcher)) {}
+
 DeviceAppsLauncher::~DeviceAppsLauncher() {
   delete impl_;
   impl_ = nullptr;
