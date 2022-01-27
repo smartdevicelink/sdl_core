@@ -163,20 +163,16 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       if (response_success) {
         HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
-        // In case templates_available is empty copy from hmi capabilities
-        if (msg_params.keyExists(hmi_response::display_capabilities)) {
-          if (0 == msg_params[hmi_response::display_capabilities]
-                             [hmi_response::templates_available]
-                                 .length()) {
-            auto display_capabilities = hmi_capabilities.display_capabilities();
-            if (display_capabilities) {
-              msg_params[hmi_response::display_capabilities]
-                        [hmi_response::templates_available] =
-                            display_capabilities->getElement(
-                                hmi_response::templates_available);
-            }
-          }
-        }
+        // Add HMI capabilities to response
+        msg_params[hmi_response::display_capabilities] =
+            *hmi_capabilities.display_capabilities();
+        msg_params[hmi_response::button_capabilities] =
+            *hmi_capabilities.button_capabilities();
+        msg_params[hmi_response::soft_button_capabilities] =
+            *hmi_capabilities.soft_button_capabilities();
+        msg_params[hmi_response::preset_bank_capabilities] =
+            *hmi_capabilities.preset_bank_capabilities();
+
         const Version& app_version = app->version();
         if (app_version.max_supported_api_version >= APIVersion::kAPIV6) {
           // In case of successful response warn user that this RPC is
