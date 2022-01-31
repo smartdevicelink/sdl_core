@@ -196,6 +196,11 @@ DeviceAppsLauncher::DeviceAppsLauncher(
     , settings_(settings)
     , impl_(new DeviceAppsLauncherImpl(*this, apps_launcher)) {}
 
+DeviceAppsLauncher::~DeviceAppsLauncher() {
+  delete impl_;
+  impl_ = nullptr;
+}
+
 bool DeviceAppsLauncher::StopLaunchingAppsOnDevice(
     const std::string& device_mac) {
   return impl_->StopLaunchingAppsOnDevice(device_mac);

@@ -25,6 +25,7 @@ class DeviceAppsLauncher {
   DeviceAppsLauncher(application_manager::ApplicationManager& app_mngr,
                      app_launch::AppsLauncher& apps_launcher,
                      const AppLaunchSettings& settings);
+  ~DeviceAppsLauncher();
 
   bool LaunchAppsOnDevice(
       const std::string& device_mac,
@@ -36,7 +37,7 @@ class DeviceAppsLauncher {
  private:
   application_manager::ApplicationManager& app_mngr_;
   const AppLaunchSettings& settings_;
-  std::auto_ptr<DeviceAppsLauncherImpl> impl_;
+  DeviceAppsLauncherImpl* impl_;
   friend class DeviceAppsLauncherImpl;
   DISALLOW_COPY_AND_ASSIGN(DeviceAppsLauncher);
 };
