@@ -768,8 +768,14 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.module_config.endpoint_properties =
       update_pt.policy_table.module_config.endpoint_properties;
 
-  pt_->policy_table.interrupt_manager_config.SafeCopyFrom(
-      update_pt.policy_table.interrupt_manager_config);
+  pt_->policy_table.rpc_priority.SafeCopyFrom(
+      update_pt.policy_table.rpc_priority);
+  
+  pt_->policy_table.app_priority.SafeCopyFrom(
+      update_pt.policy_table.app_priority);
+
+  pt_->policy_table.hmi_status_priority.SafeCopyFrom(
+      update_pt.policy_table.hmi_status_priority);
 
   // Apply update for vehicle data
   if (update_pt.policy_table.vehicle_data.is_initialized()) {
@@ -2136,10 +2142,11 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
     snapshot_->policy_table.vehicle_data->schema_version =
         pt_->policy_table.vehicle_data->schema_version;
   }
+  snapshot_->policy_table.rpc_priority = pt_->policy_table.rpc_priority;
+  snapshot_->policy_table.app_priority = pt_->policy_table.app_priority;
+  snapshot_->policy_table.hmi_status_priority = pt_->policy_table.hmi_status_priority;
 
   snapshot_->SetPolicyTableType(policy_table::PT_SNAPSHOT);
-
-  snapshot_->policy_table.interrupt_manager_config = pt_->policy_table.interrupt_manager_config;
 
   CheckSnapshotInitialization();
   return snapshot_;
@@ -3087,7 +3094,9 @@ bool CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeAP(new_table, current);
     MergeCFM(new_table, current);
     MergeVD(new_table, current);
-    MergeIMC(new_table, current);
+    MergeRPCP(new_table, current);
+    MergeAPPP(new_table, current);
+    MergeHMISP(new_table, current);
     Backup();
   }
   return true;
@@ -3161,10 +3170,25 @@ void CacheManager::MergeVD(const policy_table::PolicyTable& new_pt,
   pt.vehicle_data.assign_if_valid(new_pt.vehicle_data);
 }
 
-void CacheManager::MergeIMC(const policy_table::PolicyTable& new_pt,
-                           policy_table::PolicyTable& pt) {
+void CacheManager::MergeRPCP(const policy_table::PolicyTable& new_pt,
+                             policy_table::PolicyTable& pt) {
   SDL_LOG_AUTO_TRACE();
-  pt.interrupt_manager_config = new_pt.interrupt_manager_config;
+  policy_table::RpcPriority copy(pt.rpc_priority);
+  pt.rpc_priority = new_pt.rpc_priority;
+}
+
+void CacheManager::MergeAPPP(const policy_table::PolicyTable& new_pt,
+                             policy_table::PolicyTable& pt) {
+  SDL_LOG_AUTO_TRACE();
+  policy_table::AppPriority copy(pt.app_priority);
+  pt.app_priority = new_pt.app_priority;
+}
+
+void CacheManager::MergeHMISP(const policy_table::PolicyTable& new_pt,
+                              policy_table::PolicyTable& pt) {
+  SDL_LOG_AUTO_TRACE();
+  policy_table::HmiStatusPriority copy(pt.hmi_status_priority);
+  pt.hmi_status_priority = new_pt.hmi_status_priority;
 }
 
 void CacheManager::InitBackupThread() {
@@ -3320,20 +3344,57 @@ void CacheManager::GetApplicationParams(
 rpc::policy_table_interface_base::rpc_priority_type
 CacheManager::GetRpcPriority() const {
   SDL_LOG_AUTO_TRACE();
-  sync_primitives::AutoLock auto_lock(cache_lock_);  
-  return  pt_->policy_table.interrupt_manager_config.rpc_priority;
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  
+  rpc::policy_table_interface_base::rpc_priority_type rpc_priority_table = {};
+  std::string rpcPriority[] = {"DialNumber",
+                               "Alert",
+                               "PerformAudioPassThru",
+                               "PerformInteraction",
+                               "ScrollableMessage",
+                               "Slider",
+                               "Speak"};
+  rpc_priority_table[rpcPriority[0]] = pt_->policy_table.rpc_priority.DialNumber;
+  rpc_priority_table[rpcPriority[1]] = pt_->policy_table.rpc_priority.Alert;
+  rpc_priority_table[rpcPriority[2]] = pt_->policy_table.rpc_priority.PerformAudioPassThru;
+  rpc_priority_table[rpcPriority[3]] = pt_->policy_table.rpc_priority.PerformInteraction;
+  rpc_priority_table[rpcPriority[4]] = pt_->policy_table.rpc_priority.ScrollableMessage;
+  rpc_priority_table[rpcPriority[5]] = pt_->policy_table.rpc_priority.Slider;
+  rpc_priority_table[rpcPriority[6]] = pt_->policy_table.rpc_priority.Speak;
+ 
+  return rpc_priority_table;
 }
 
 rpc::policy_table_interface_base::app_priority_type
 CacheManager::GetAppPriority() const {
-  sync_primitives::AutoLock auto_lock(cache_lock_);  
-  return  pt_->policy_table.interrupt_manager_config.app_priority;
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  rpc::policy_table_interface_base::app_priority_type app_priority_table = {};
+  std::string appPriority[] = {"EMERGENCY","NAVIGATION","VOICE_COMMUNICATION","COMMUNICATION","NORMAL","NONE"};
+  app_priority_table[appPriority[0]] = pt_->policy_table.app_priority.EMERGENCY;
+  app_priority_table[appPriority[1]] = pt_->policy_table.app_priority.NAVIGATION;
+  app_priority_table[appPriority[2]] = pt_->policy_table.app_priority.VOICE_COMMUNICATION;
+  app_priority_table[appPriority[3]] = pt_->policy_table.app_priority.COMMUNICATION;
+  app_priority_table[appPriority[4]] = pt_->policy_table.app_priority.NORMAL;
+  app_priority_table[appPriority[5]] = pt_->policy_table.app_priority.NONE;
+
+  return app_priority_table;
 }
 
 rpc::policy_table_interface_base::hmi_status_priority_type
 CacheManager::GetHmiStatusPriority() const {
-  sync_primitives::AutoLock auto_lock(cache_lock_);  
-  return  pt_->policy_table.interrupt_manager_config.hmi_status_priority;
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  rpc::policy_table_interface_base::app_priority_type hmi_status_priority_table = {};
+  std::string hmiStatusPriority[] = {"FULL", "LIMITED", "BACKGROUND", "NONE"};
+  hmi_status_priority_table[hmiStatusPriority[0]] = pt_->policy_table.hmi_status_priority.FULL;
+  hmi_status_priority_table[hmiStatusPriority[1]] = pt_->policy_table.hmi_status_priority.LIMITED;
+  hmi_status_priority_table[hmiStatusPriority[2]] = pt_->policy_table.hmi_status_priority.BACKGROUND;
+  hmi_status_priority_table[hmiStatusPriority[3]] = pt_->policy_table.hmi_status_priority.NONE;
+ 
+  return hmi_status_priority_table;
 }
 
 }  // namespace policy

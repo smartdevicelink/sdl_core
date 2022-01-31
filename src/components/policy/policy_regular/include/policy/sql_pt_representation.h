@@ -144,7 +144,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
-  virtual void GatherInterruptManagerConfig(policy_table::InterruptManagerConfig* config) const;
+  virtual void GatherRpcPriority(policy_table::RpcPriority* priority) const;
+  virtual void GatherAppPriority(policy_table::AppPriority* priority) const;
+  virtual void GatherHmiStatusPriority(policy_table::HmiStatusPriority* priority) const;
+
 
   virtual bool SaveApplicationCustomData(const std::string& app_id,
                                          bool is_revoked,
@@ -173,7 +176,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                                  const std::string& lang,
                                  const policy_table::MessageString& strings);
 
-  virtual bool SaveInterruptManagerConfig(const policy_table::InterruptManagerConfig& config);
+  virtual bool SaveRpcPriority(const policy_table::RpcPriority& priority);
+  virtual bool SaveAppPriority(const policy_table::AppPriority& priority);
+  virtual bool SaveHmiStatusPriority(const policy_table::HmiStatusPriority& priority);
 
   bool SaveAppGroup(const std::string& app_id,
                     const policy_table::Strings& app_groups);

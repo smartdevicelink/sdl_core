@@ -2283,7 +2283,7 @@
       "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
       "timeout_after_x_seconds" : 60
     },
-    "interrupt_manager_config": {
+   
       "rpc_priority":{
           "DialNumber": 1,
           "Alert": 2,
@@ -2307,6 +2307,6 @@
           "BACKGROUND": 3,
           "NONE": 4
       }
-    }
+    
   }
 }

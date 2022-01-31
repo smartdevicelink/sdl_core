@@ -1635,7 +1635,7 @@
          "vehicle_model" : "E-Tron",
          "vehicle_year" : "1992"
       },
-      "interrupt_manager_config": {
+      
          "rpc_priority":{
              "DialNumber": 1,
              "Alert": 2,
@@ -1658,7 +1658,7 @@
              "LIMITED": 2,
              "BACKGROUND": 3,
              "NONE": 4
-         }
-      }
+         },
+      
    }
 }

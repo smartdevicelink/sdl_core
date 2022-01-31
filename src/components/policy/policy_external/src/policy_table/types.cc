@@ -2683,98 +2683,431 @@ void VehicleData::SetPolicyTableType(PolicyTableType pt_type) {
   schema_items.SetPolicyTableType(pt_type);
 }
 
-//InterruptManagerConfig methods
-InterruptManagerConfig::InterruptManagerConfig() : CompositeType(kUninitialized) {}
+//RpcPriority methods
 
-InterruptManagerConfig::InterruptManagerConfig(
-  const rpc_priority_type& rpc_priority,
-  const app_priority_type& app_priority,
-  const hmi_status_priority_type& hmi_status_priority)
-  : CompositeType(kUninitialized)
-  , rpc_priority(rpc_priority)
-  , app_priority(app_priority)
-  , hmi_status_priority(hmi_status_priority){}
+RpcPriority::RpcPriority() : CompositeType(kUninitialized) {}
 
-InterruptManagerConfig::~InterruptManagerConfig() {}
+  Integer<uint8_t, 0, 255> DialNumber;
+  Integer<uint8_t, 0, 255> Alert;
+  Integer<uint8_t, 0, 255> PerformAudioPassThru;
+  Integer<uint8_t, 0, 255> PerformInteraction;
+  Integer<uint8_t, 0, 255> ScrollableMessage;
+  Integer<uint8_t, 0, 255> Slider;
+  Integer<uint8_t, 0, 255> Speak;
 
+RpcPriority::RpcPriority(
+   uint8_t DialNumber,
+   uint8_t Alert,
+   uint8_t PerformAudioPassThru,
+   uint8_t PerformInteraction,
+   uint8_t ScrollableMessage,
+   uint8_t Slider,
+   uint8_t Speak)
+   : CompositeType(kUninitialized)
+   ,DialNumber(DialNumber)
+   ,Alert(Alert)
+   ,PerformAudioPassThru(PerformAudioPassThru)
+   ,PerformInteraction(PerformInteraction)
+   ,ScrollableMessage(ScrollableMessage)
+   ,Slider(Slider)
+   ,Speak(Speak)
+   {}
 
-InterruptManagerConfig::InterruptManagerConfig(const Json::Value* value__)
+RpcPriority::~RpcPriority() {}
+
+RpcPriority::RpcPriority(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
-    , rpc_priority(impl::ValueMember(value__, "rpc_priority"))
-    , app_priority(impl::ValueMember(value__, "app_priority"))
-    , hmi_status_priority(impl::ValueMember(value__, "hmi_status_priority")){}
+     , DialNumber(impl::ValueMember(value__, "DialNumber"))
+     , Alert(impl::ValueMember(value__, "Alert"))
+     , PerformAudioPassThru(impl::ValueMember(value__, "PerformAudioPassThru"))
+     , PerformInteraction(impl::ValueMember(value__, "PerformInteraction"))
+     , ScrollableMessage(impl::ValueMember(value__, "ScrollableMessage"))
+     , Slider(impl::ValueMember(value__, "Slider"))
+     , Speak(impl::ValueMember(value__, "Speak"))
+     {}
 
-
-void InterruptManagerConfig::SafeCopyFrom(const InterruptManagerConfig& from) {
-  rpc_priority = from.rpc_priority;
-  app_priority = from.app_priority;
-  hmi_status_priority = from.hmi_status_priority;
+void RpcPriority::SafeCopyFrom(const RpcPriority& from) {
+  DialNumber = from.DialNumber;
+  Alert = from.Alert;
+  PerformAudioPassThru = from.PerformAudioPassThru;
+  PerformInteraction = from.PerformInteraction;
+  ScrollableMessage = from.ScrollableMessage;
+  Slider = from.Slider;
+  Speak = from.Speak;
 }
 
-Json::Value InterruptManagerConfig::ToJsonValue() const {
+Json::Value RpcPriority::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
-  impl::WriteJsonField("rpc_priority", rpc_priority, &result__);
-  impl::WriteJsonField("app_priority", app_priority, &result__);
-  impl::WriteJsonField("hmi_status_priority", hmi_status_priority, &result__);
+  impl::WriteJsonField("DialNumber", DialNumber, &result__);
+  impl::WriteJsonField("Alert", Alert, &result__);
+  impl::WriteJsonField("PerformAudioPassThru", PerformAudioPassThru, &result__);
+  impl::WriteJsonField("PerformInteraction", PerformInteraction, &result__);
+  impl::WriteJsonField("ScrollableMessage", ScrollableMessage, &result__);
+  impl::WriteJsonField("Slider", Slider, &result__);
+  impl::WriteJsonField("Speak", Speak, &result__);
   return result__;
 }
 
-
-bool InterruptManagerConfig::is_valid() const {
-  if (!rpc_priority.is_valid()) {
+bool RpcPriority::is_valid() const {
+  if (!DialNumber.is_valid()) {
     return false;
   }
-  if (!app_priority.is_valid()) {
+  if (!Alert.is_valid()) {
     return false;
   }
-  if (!hmi_status_priority.is_valid()) {
+  if (!PerformAudioPassThru.is_valid()) {
+    return false;
+  }
+  if (!PerformInteraction.is_valid()) {
+    return false;
+  }
+  if (!ScrollableMessage.is_valid()) {
+    return false;
+  }
+  if (!Slider.is_valid()) {
+    return false;
+  }
+  if (!Speak.is_valid()) {
     return false;
   }
   return Validate();
 }
 
-
-bool InterruptManagerConfig::is_initialized() const {
+bool RpcPriority::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 
-
-bool InterruptManagerConfig::struct_empty() const {
-  if (!rpc_priority.is_initialized()) {
+bool RpcPriority::struct_empty() const {
+  if (DialNumber.is_initialized()) {
     return false;
   }
-  if (!app_priority.is_initialized()) {
+  if (Alert.is_initialized()) {
     return false;
   }
-  if (!hmi_status_priority.is_initialized()) {
+  if (PerformAudioPassThru.is_initialized()) {
+    return false;
+  }
+  if (PerformInteraction.is_initialized()) {
+    return false;
+  }
+  if (ScrollableMessage.is_initialized()) {
+    return false;
+  }
+  if (Slider.is_initialized()) {
+    return false;
+  }
+  if (Speak.is_initialized()) {
     return false;
   }
   return true;
 }
 
-void InterruptManagerConfig::ReportErrors(rpc::ValidationReport* report__) const {
+void RpcPriority::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
-  if (!rpc_priority.is_valid()) {
-    rpc_priority.ReportErrors(
-        &report__->ReportSubobject("rpc_priority"));
+  
+  if (!DialNumber.is_valid()) {
+    DialNumber.ReportErrors(
+        &report__->ReportSubobject("DialNumber"));
   }
-  if (!app_priority.is_valid()) {
-    app_priority.ReportErrors(
-        &report__->ReportSubobject("app_priority"));
+  if (!Alert.is_valid()) {
+    Alert.ReportErrors(
+        &report__->ReportSubobject("Alert"));
   }
-  if (!hmi_status_priority.is_valid()) {
-    hmi_status_priority.ReportErrors(
-        &report__->ReportSubobject("hmi_status_priority"));
+  if (!PerformAudioPassThru.is_valid()) {
+    PerformAudioPassThru.ReportErrors(
+        &report__->ReportSubobject("PerformAudioPassThru"));
+  }
+  if (!PerformInteraction.is_valid()) {
+    PerformInteraction.ReportErrors(
+        &report__->ReportSubobject("PerformInteraction"));
+  }
+  if (!ScrollableMessage.is_valid()) {
+    ScrollableMessage.ReportErrors(
+        &report__->ReportSubobject("ScrollableMessage"));
+  }
+  if (!Slider.is_valid()) {
+    Slider.ReportErrors(
+        &report__->ReportSubobject("Slider"));
+  }
+  if (!Speak.is_valid()) {
+    Speak.ReportErrors(
+        &report__->ReportSubobject("Speak"));
   }
 }
 
-void InterruptManagerConfig::SetPolicyTableType(PolicyTableType pt_type) {
+void RpcPriority::SetPolicyTableType(PolicyTableType pt_type) {
     CompositeType::SetPolicyTableType(pt_type);
-    rpc_priority.SetPolicyTableType(pt_type);
-    app_priority.SetPolicyTableType(pt_type);
-    hmi_status_priority.SetPolicyTableType(pt_type);
+    DialNumber.SetPolicyTableType(pt_type);
+    Alert.SetPolicyTableType(pt_type);
+    PerformAudioPassThru.SetPolicyTableType(pt_type);
+    PerformInteraction.SetPolicyTableType(pt_type);
+    ScrollableMessage.SetPolicyTableType(pt_type);
+    Slider.SetPolicyTableType(pt_type);
+    Speak.SetPolicyTableType(pt_type);
+}
+
+//AppPriority methods
+
+AppPriority::AppPriority() : CompositeType(kUninitialized) {}
+
+  Integer<uint8_t, 0, 255> EMERGENCY;
+  Integer<uint8_t, 0, 255> NAVIGATION;
+  Integer<uint8_t, 0, 255> VOICE_COMMUNICATION;
+  Integer<uint8_t, 0, 255> COMMUNICATION;
+  Integer<uint8_t, 0, 255> NORMAL;
+  Integer<uint8_t, 0, 255> NONE;
+
+AppPriority::AppPriority(
+   uint8_t EMERGENCY,
+   uint8_t NAVIGATION,
+   uint8_t VOICE_COMMUNICATION,
+   uint8_t COMMUNICATION,
+   uint8_t NORMAL,
+   uint8_t NONE)
+   : CompositeType(kUninitialized)
+   ,EMERGENCY(EMERGENCY)
+   ,NAVIGATION(NAVIGATION)
+   ,VOICE_COMMUNICATION(VOICE_COMMUNICATION)
+   ,COMMUNICATION(COMMUNICATION)
+   ,NORMAL(NORMAL)
+   ,NONE(NONE)
+   {}
+
+AppPriority::~AppPriority() {}
+
+AppPriority::AppPriority(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+     , EMERGENCY(impl::ValueMember(value__, "EMERGENCY"))
+     , NAVIGATION(impl::ValueMember(value__, "NAVIGATION"))
+     , VOICE_COMMUNICATION(impl::ValueMember(value__, "VOICE_COMMUNICATION"))
+     , COMMUNICATION(impl::ValueMember(value__, "COMMUNICATION"))
+     , NORMAL(impl::ValueMember(value__, "NORMAL"))
+     , NONE(impl::ValueMember(value__, "NONE"))
+     {}
+
+void AppPriority::SafeCopyFrom(const AppPriority& from) {
+  EMERGENCY = from.EMERGENCY;
+  NAVIGATION = from.NAVIGATION;
+  VOICE_COMMUNICATION = from.VOICE_COMMUNICATION;
+  COMMUNICATION = from.COMMUNICATION;
+  NORMAL = from.NORMAL;
+  NONE = from.NONE;
+}
+
+Json::Value AppPriority::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("EMERGENCY", EMERGENCY, &result__);
+  impl::WriteJsonField("NAVIGATION", NAVIGATION, &result__);
+  impl::WriteJsonField("VOICE_COMMUNICATION", VOICE_COMMUNICATION, &result__);
+  impl::WriteJsonField("COMMUNICATION", COMMUNICATION, &result__);
+  impl::WriteJsonField("NORMAL", NORMAL, &result__);
+  impl::WriteJsonField("NONE", NONE, &result__);
+  return result__;
+}
+
+bool AppPriority::is_valid() const {
+  if (!EMERGENCY.is_valid()) {
+    return false;
+  }
+  if (!NAVIGATION.is_valid()) {
+    return false;
+  }
+  if (!VOICE_COMMUNICATION.is_valid()) {
+    return false;
+  }
+  if (!COMMUNICATION.is_valid()) {
+    return false;
+  }
+  if (!NORMAL.is_valid()) {
+    return false;
+  }
+  if (!NONE.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppPriority::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppPriority::struct_empty() const {
+  if (EMERGENCY.is_initialized()) {
+    return false;
+  }
+  if (NAVIGATION.is_initialized()) {
+    return false;
+  }
+  if (VOICE_COMMUNICATION.is_initialized()) {
+    return false;
+  }
+  if (COMMUNICATION.is_initialized()) {
+    return false;
+  }
+  if (NORMAL.is_initialized()) {
+    return false;
+  }
+  if (NONE.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppPriority::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  
+  if (!EMERGENCY.is_valid()) {
+    EMERGENCY.ReportErrors(
+        &report__->ReportSubobject("EMERGENCY"));
+  }
+  if (!NAVIGATION.is_valid()) {
+    NAVIGATION.ReportErrors(
+        &report__->ReportSubobject("NAVIGATION"));
+  }
+  if (!VOICE_COMMUNICATION.is_valid()) {
+    VOICE_COMMUNICATION.ReportErrors(
+        &report__->ReportSubobject("VOICE_COMMUNICATION"));
+  }
+  if (!COMMUNICATION.is_valid()) {
+    COMMUNICATION.ReportErrors(
+        &report__->ReportSubobject("COMMUNICATION"));
+  }
+  if (!NORMAL.is_valid()) {
+    NORMAL.ReportErrors(
+        &report__->ReportSubobject("NORMAL"));
+  }
+  if (!NONE.is_valid()) {
+    NONE.ReportErrors(
+        &report__->ReportSubobject("NONE"));
+  }
+}
+
+void AppPriority::SetPolicyTableType(PolicyTableType pt_type) {
+    CompositeType::SetPolicyTableType(pt_type);
+    EMERGENCY.SetPolicyTableType(pt_type);
+    NAVIGATION.SetPolicyTableType(pt_type);
+    VOICE_COMMUNICATION.SetPolicyTableType(pt_type);
+    COMMUNICATION.SetPolicyTableType(pt_type);
+    NORMAL.SetPolicyTableType(pt_type);
+    NONE.SetPolicyTableType(pt_type);
+}
+
+//HmiStatusPriority methods
+
+HmiStatusPriority::HmiStatusPriority() : CompositeType(kUninitialized) {}
+
+  Integer<uint8_t, 0, 255> FULL;
+  Integer<uint8_t, 0, 255> LIMITED;
+  Integer<uint8_t, 0, 255> BACKGROUND;
+  //Integer<uint8_t, 0, 255> NONE;
+
+HmiStatusPriority::HmiStatusPriority(
+   uint8_t FULL,
+   uint8_t LIMITED,
+   uint8_t BACKGROUND,
+   uint8_t NONE)
+   : CompositeType(kUninitialized)
+   ,FULL(FULL)
+   ,LIMITED(LIMITED)
+   ,BACKGROUND(BACKGROUND)
+   ,NONE(NONE)
+   {}
+
+HmiStatusPriority::~HmiStatusPriority() {}
+
+HmiStatusPriority::HmiStatusPriority(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+     , FULL(impl::ValueMember(value__, "FULL"))
+     , LIMITED(impl::ValueMember(value__, "LIMITED"))
+     , BACKGROUND(impl::ValueMember(value__, "BACKGROUND"))
+     , NONE(impl::ValueMember(value__, "NONE"))
+     {}
+
+void HmiStatusPriority::SafeCopyFrom(const HmiStatusPriority& from) {
+  FULL = from.FULL;
+  LIMITED = from.LIMITED;
+  BACKGROUND = from.BACKGROUND;
+  NONE = from.NONE;
+}
+
+Json::Value HmiStatusPriority::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("FULL", FULL, &result__);
+  impl::WriteJsonField("LIMITED", LIMITED, &result__);
+  impl::WriteJsonField("BACKGROUND", BACKGROUND, &result__);
+  impl::WriteJsonField("NONE", NONE, &result__);
+  return result__;
+}
+
+bool HmiStatusPriority::is_valid() const {
+  if (!FULL.is_valid()) {
+    return false;
+  }
+  if (!LIMITED.is_valid()) {
+    return false;
+  }
+  if (!BACKGROUND.is_valid()) {
+    return false;
+  }
+  if (!NONE.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool HmiStatusPriority::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool HmiStatusPriority::struct_empty() const {
+  if (FULL.is_initialized()) {
+    return false;
+  }
+  if (LIMITED.is_initialized()) {
+    return false;
+  }
+  if (BACKGROUND.is_initialized()) {
+    return false;
+  }
+  if (NONE.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void HmiStatusPriority::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  
+  if (!FULL.is_valid()) {
+    FULL.ReportErrors(
+        &report__->ReportSubobject("FULL"));
+  }
+  if (!LIMITED.is_valid()) {
+    LIMITED.ReportErrors(
+        &report__->ReportSubobject("LIMITED"));
+  }
+  if (!BACKGROUND.is_valid()) {
+    BACKGROUND.ReportErrors(
+        &report__->ReportSubobject("BACKGROUND"));
+  }
+  if (!NONE.is_valid()) {
+    NONE.ReportErrors(
+        &report__->ReportSubobject("NONE"));
+  }
+}
+
+void HmiStatusPriority::SetPolicyTableType(PolicyTableType pt_type) {
+    CompositeType::SetPolicyTableType(pt_type);
+    FULL.SetPolicyTableType(pt_type);
+    LIMITED.SetPolicyTableType(pt_type);
+    BACKGROUND.SetPolicyTableType(pt_type);
+    NONE.SetPolicyTableType(pt_type);
 }
 
 // PolicyTable methods
@@ -2785,13 +3118,17 @@ PolicyTable::PolicyTable(
     const FunctionalGroupings& functional_groupings,
     const ConsumerFriendlyMessages& consumer_friendly_messages,
     const ModuleConfig& module_config,
-    const InterruptManagerConfig& interrupt_manager_config)
+    const RpcPriority& rpc_priority,
+    const AppPriority& app_priority,
+    const HmiStatusPriority& hmi_status_priority)
     : CompositeType(kUninitialized)
     , app_policies_section(app_policies_section)
     , functional_groupings(functional_groupings)
     , consumer_friendly_messages(consumer_friendly_messages)
     , module_config(module_config)
-    , interrupt_manager_config(interrupt_manager_config) {}
+    , rpc_priority(rpc_priority) 
+    , app_priority(app_priority) 
+    , hmi_status_priority(hmi_status_priority) {}
 
 PolicyTable::~PolicyTable() {}
 
@@ -2807,7 +3144,9 @@ PolicyTable::PolicyTable(const Json::Value* value__)
           impl::ValueMember(value__, "usage_and_error_counts"))
     , device_data(impl::ValueMember(value__, "device_data"))
     , vehicle_data(impl::ValueMember(value__, "vehicle_data"))
-    , interrupt_manager_config(impl::ValueMember(value__, "interrupt_manager_config")){}
+    , rpc_priority(impl::ValueMember(value__, "rpc_priority"))
+    , app_priority(impl::ValueMember(value__, "app_priority"))
+    , hmi_status_priority(impl::ValueMember(value__, "hmi_status_priority")) {}
 
 Json::Value PolicyTable::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -2821,7 +3160,11 @@ Json::Value PolicyTable::ToJsonValue() const {
       "usage_and_error_counts", usage_and_error_counts, &result__);
   impl::WriteJsonField("device_data", device_data, &result__);
   impl::WriteJsonField("vehicle_data", vehicle_data, &result__);
-  impl::WriteJsonField("interrupt_manager_config", interrupt_manager_config, &result__);
+  
+  impl::WriteJsonField("rpc_priority", rpc_priority, &result__);
+  impl::WriteJsonField("app_priority", app_priority, &result__);
+  impl::WriteJsonField("hmi_status_priority", hmi_status_priority, &result__);
+
   return result__;
 }
 
@@ -2850,7 +3193,13 @@ bool PolicyTable::is_valid() const {
   if (!vehicle_data.is_valid()) {
     return false;
   }
-  if (!interrupt_manager_config.is_valid()) {
+  if (!rpc_priority.is_valid()) {
+    return false;
+  }
+  if (!app_priority.is_valid()) {
+    return false;
+  }
+  if (!hmi_status_priority.is_valid()) {
     return false;
   }
   return Validate();
@@ -2889,7 +3238,13 @@ bool PolicyTable::struct_empty() const {
   if (vehicle_data.is_initialized()) {
     return false;
   }
-  if (interrupt_manager_config.is_initialized()) {
+  if (rpc_priority.is_initialized()) {
+    return false;
+  }
+  if (app_priority.is_initialized()) {
+    return false;
+  }
+  if (hmi_status_priority.is_initialized()) {
     return false;
   }
   return true;
@@ -2937,8 +3292,14 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (!vehicle_data.is_valid()) {
     vehicle_data.ReportErrors(&report__->ReportSubobject("vehicle_data"));
   }
-  if (!interrupt_manager_config.is_valid()) {
-    interrupt_manager_config.ReportErrors(&report__->ReportSubobject("interrupt_manager_config"));
+  if (!rpc_priority.is_valid()) {
+    rpc_priority.ReportErrors(&report__->ReportSubobject("rpc_priority"));
+  }
+  if (!app_priority.is_valid()) {
+    app_priority.ReportErrors(&report__->ReportSubobject("app_priority"));
+  }
+  if (!hmi_status_priority.is_valid()) {
+    hmi_status_priority.ReportErrors(&report__->ReportSubobject("hmi_status_priority"));
   }
 }
 
@@ -2952,7 +3313,9 @@ void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
   usage_and_error_counts.SetPolicyTableType(pt_type);
   device_data.SetPolicyTableType(pt_type);
   vehicle_data.SetPolicyTableType(pt_type);
-  interrupt_manager_config.SetPolicyTableType(pt_type);
+  rpc_priority.SetPolicyTableType(pt_type);
+  app_priority.SetPolicyTableType(pt_type);
+  hmi_status_priority.SetPolicyTableType(pt_type);
 }
 
 // Table methods

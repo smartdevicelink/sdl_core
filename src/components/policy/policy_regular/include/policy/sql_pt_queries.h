@@ -159,12 +159,12 @@ extern const std::string kSelectVehicleDataSchemaVersion;
 extern const std::string kInsertVehicleDataSchemaVersion;
 extern const std::string kSelectEndpointProperties;
 extern const std::string kInsertEndpointVersion;
+extern const std::string kUpdateRpcPriority;
+extern const std::string kUpdateAppPriority;
+extern const std::string kUpdateHmiStatusPriority;
 extern const std::string kSelectRpcPriority;
 extern const std::string kSelectAppPriority;
 extern const std::string kSelectHmiStatusPriority;
-extern const std::string kInsertRpcPriority;
-extern const std::string kInsertAppPriority;
-extern const std::string kInsertHmiStatusPriority;
 
 }  // namespace sql_pt
 }  // namespace policy

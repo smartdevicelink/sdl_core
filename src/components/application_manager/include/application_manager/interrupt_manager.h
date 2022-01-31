@@ -39,7 +39,7 @@ public:
     void Init();
 
     InterruptCheckResult CheckRpcInterrupt(const std::shared_ptr<Message> outgoing_message);
-    bool DoRpcReject(mobile_apis::FunctionID::eType function_id);	
+    bool DoRpcReject(int32_t function_id);	
     IMStatus GetRunningStatus();    
     bool ReadInterruptSetting();
     bool IsSubjectMessageToPrioritized(std::shared_ptr<Message> outgoing_message);

@@ -4614,8 +4614,6 @@
                 }
             ]
         },
-        "interrupt_manager_config":
-        {
           "rpc_priority":
           {
               "DialNumber": 1,

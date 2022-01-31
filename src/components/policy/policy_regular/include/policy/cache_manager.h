@@ -857,7 +857,11 @@ class CacheManager : public CacheManagerInterface {
   void MergeVD(const policy_table::PolicyTable& new_pt,
                policy_table::PolicyTable& pt);
 
-  void MergeIMC(const policy_table::PolicyTable& new_pt,
+  void MergeRPCP(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+  void MergeAPPP(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+  void MergeHMISP(const policy_table::PolicyTable& new_pt,
                policy_table::PolicyTable& pt);
 
   const PolicySettings& get_settings() const;

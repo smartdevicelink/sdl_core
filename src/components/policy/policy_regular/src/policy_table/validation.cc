@@ -234,7 +234,13 @@ bool ModuleConfig::Validate() const {
   return true;
 }
 
-bool InterruptManagerConfig::Validate() const {
+bool RpcPriority::Validate() const {
+  return true;
+}
+bool AppPriority::Validate() const {
+  return true;
+}
+bool HmiStatusPriority::Validate() const {
   return true;
 }
 
