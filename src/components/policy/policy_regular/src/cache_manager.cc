@@ -987,8 +987,13 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   std::vector<std::string>::const_iterator it_end = msg_codes.end();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   for (; it != it_end; ++it) {
-    policy_table::MessageLanguages msg_languages =
-        (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
+    auto messages = pt_->policy_table.consumer_friendly_messages->messages;
+    auto messages_it = messages->find(*it);
+    if (messages->end() == messages_it) {
+      SDL_LOG_ERROR("No entry found for message code: " << *it);
+      continue;
+    }
+    policy_table::MessageLanguages msg_languages = messages_it->second;
 
     policy_table::MessageString message_string;
 
