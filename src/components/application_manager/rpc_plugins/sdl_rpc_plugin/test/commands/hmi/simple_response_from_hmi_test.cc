@@ -74,7 +74,6 @@
 #include "hmi/ui_scrollable_message_response.h"
 #include "hmi/ui_send_haptic_data_response.h"
 #include "hmi/ui_set_app_icon_response.h"
-#include "hmi/ui_set_display_layout_response.h"
 #include "hmi/ui_set_global_properties_response.h"
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
@@ -201,8 +200,6 @@ typedef Types<
                 hmi_apis::FunctionID::Navigation_UpdateTurnList>,
     CommandData<sdl_rpc_plugin::commands::UISetAppIconResponse,
                 hmi_apis::FunctionID::UI_SetAppIcon>,
-    CommandData<sdl_rpc_plugin::commands::UiSetDisplayLayoutResponse,
-                hmi_apis::FunctionID::UI_SetDisplayLayout>,
     CommandData<sdl_rpc_plugin::commands::UISetGlobalPropertiesResponse,
                 hmi_apis::FunctionID::UI_SetGlobalProperties>,
     CommandData<sdl_rpc_plugin::commands::UISetGlobalPropertiesResponse,

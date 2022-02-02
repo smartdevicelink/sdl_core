@@ -248,8 +248,6 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
 
@@ -833,11 +831,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnResumeAudioSource: {
       return factory.GetCreator<commands::OnResumeAudioSourceNotification>();
-    }
-    case hmi_apis::FunctionID::UI_SetDisplayLayout: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::UiSetDisplayLayoutRequest>()
-                 : factory.GetCreator<commands::UiSetDisplayLayoutResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
       return factory.GetCreator<commands::OnSDLCloseNotification>();

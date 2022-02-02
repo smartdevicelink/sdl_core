@@ -5431,37 +5431,6 @@
     </param>
   </function>
 
-  <function name="SetDisplayLayout" messagetype="request">
-    <description>This RPC is deprecated. Use Show RPC to change layout.</description>
-    <param name="displayLayout" type="String" maxlength="500" mandatory="true">
-      <description>
-        Predefined or dynamically created screen layout.
-        Currently only predefined screen layouts are defined.
-      </description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application related to this RPC.</description>
-    </param>
-    <param name="dayColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-    <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
-  </function>
-
-  <function name="SetDisplayLayout" messagetype="response">
-    <description>This RPC is deprecated. Use Show RPC to change layout.</description>
-    <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
-      <description>See DisplayCapabilities</description>
-    </param>
-    <param name="buttonCapabilities" type="Common.ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>See ButtonCapabilities</description >
-    </param>
-    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description >
-    </param>
-    <param name="presetBankCapabilities" type="Common.PresetBankCapabilities" mandatory="false">
-      <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
-    </param>
-  </function>
-
   <function name="Show" messagetype="request">
     <param name="showStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="8">
       <description>Array of lines of show text fields. See TextFieldStruct. If some field is not set, the corresponding text should stay unchanged. If field's text is empty "", the field must be cleared.
