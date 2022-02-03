@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "protocol/raw_message.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
 
 #ifdef ENABLE_SECURITY
@@ -103,6 +104,7 @@ class WebSocketSession
   DataSendDoneCallback data_send_done_;
   DataSendFailedCallback data_send_failed_;
   OnIOErrorCallback on_io_error_;
+  mutable sync_primitives::Lock read_write_operations_lock_;
 };
 
 }  // namespace transport_adapter
