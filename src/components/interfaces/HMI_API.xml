@@ -4914,10 +4914,6 @@
         </description>
       </param>
 
-      <param name="FileName" type="String" maxlength="255" mandatory="true">
-        <description>File reference name.</description>
-      </param>
-
       <param name="syncFileName" type="String" maxlength="255" mandatory="true">
         <description>File reference name.</description>
       </param>
