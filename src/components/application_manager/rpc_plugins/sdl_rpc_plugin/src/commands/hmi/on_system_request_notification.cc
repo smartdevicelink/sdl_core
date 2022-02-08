@@ -153,6 +153,9 @@ void OnSystemRequestNotification::Run() {
   if (helpers::Compare<RequestType, helpers::EQ, helpers::ONE>(
           request_type, RequestType::RT_PROPRIETARY, RequestType::RT_HTTP)) {
     policy_handler_.OnSystemRequestReceived();
+#ifdef EXTERNAL_PROPRIETARY_MODE
+    policy_handler_.UpdateLastPTUApp(app->app_id());
+#endif
   }
   SendNotificationToMobile(message_);
 }

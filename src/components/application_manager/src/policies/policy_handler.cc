@@ -491,6 +491,11 @@ void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
   retry_update_url_ = url;
   policy_snapshot_path_ = snapshot_path;
 }
+#else
+void PolicyHandler::UpdateLastPTUApp(const uint32_t app_id) {
+  SDL_LOG_DEBUG("UpdateLastPTUApp to " << app_id);
+  last_ptu_app_id_ = app_id;
+}
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
 uint32_t PolicyHandler::GetAppIdForSending() const {
