@@ -426,6 +426,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
 
   virtual void OnPTInited() = 0;
 
+  virtual bool IsPTUSystemRequestAllowed(const uint32_t app_id) = 0;
+
   /**
    * @brief Force stops retry sequence timer and resets retry sequence
    */

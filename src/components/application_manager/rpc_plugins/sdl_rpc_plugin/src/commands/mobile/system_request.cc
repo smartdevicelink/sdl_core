@@ -580,6 +580,16 @@ void SystemRequest::Run() {
 
   SDL_LOG_DEBUG("Binary data ok.");
 
+  if (mobile_apis::RequestType::PROPRIETARY == request_type ||
+      mobile_apis::RequestType::HTTP == request_type) {
+    auto app_id = application->app_id();
+    if (!policy_handler_.IsPTUSystemRequestAllowed(app_id)) {
+      SDL_LOG_DEBUG("Rejected PTU SystemRequest from app " << app_id);
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
+  }
+
   if (mobile_apis::RequestType::ICON_URL == request_type) {
     application_manager_.SetIconFileFromSystemRequest(file_name);
     SendResponse(true, mobile_apis::Result::SUCCESS);
