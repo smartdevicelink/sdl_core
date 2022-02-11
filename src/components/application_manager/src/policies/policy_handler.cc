@@ -300,14 +300,11 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
     , last_activated_app_id_(0)
-#ifndef EXTERNAL_PROPRIETARY_MODE
     , last_ptu_app_id_(0)
-#endif  // EXTERNAL_PROPRIETARY_MODE
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager)
-    , last_registered_policy_app_id_(std::string()) {
-}
+    , last_registered_policy_app_id_(std::string()) {}
 
 PolicyHandler::~PolicyHandler() {}
 
@@ -423,11 +420,29 @@ void PolicyHandler::StopRetrySequence() {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_VOID(policy_manager);
-#ifndef EXTERNAL_PROPRIETARY_MODE
   // Clear cached PTU app
   last_ptu_app_id_ = 0;
-#endif  // EXTERNAL_PROPRIETARY_MODE
   policy_manager->StopRetrySequence();
+}
+
+bool PolicyHandler::IsPTUSystemRequestAllowed(const uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
+
+  if (policy_manager->GetPolicyTableStatus() != "UPDATING") {
+    SDL_LOG_DEBUG("PTU received while not UPDATING");
+    return false;
+  }
+
+  if (app_id != last_ptu_app_id_) {
+    SDL_LOG_DEBUG(
+        "PTU received from unexpected application, request was sent to "
+        << last_ptu_app_id_);
+    return false;
+  }
+
+  return true;
 }
 
 bool PolicyHandler::ResetPolicyTable() {
@@ -475,6 +490,11 @@ void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
   last_ptu_app_id_ = app_id;
   retry_update_url_ = url;
   policy_snapshot_path_ = snapshot_path;
+}
+#else   // EXTERNAL_PROPRIETARY_MODE
+void PolicyHandler::UpdateLastPTUApp(const uint32_t app_id) {
+  SDL_LOG_DEBUG("UpdateLastPTUApp to " << app_id);
+  last_ptu_app_id_ = app_id;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
@@ -1286,10 +1306,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager->CleanupUnpairedDevices();
     SetDaysAfterEpoch();
     policy_manager->OnPTUFinished(load_pt_result);
-#ifndef EXTERNAL_PROPRIETARY_MODE
     // Clean up retry information
     last_ptu_app_id_ = 0;
-#endif  // EXTERNAL_PROPRIETARY_MODE
 
     uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(

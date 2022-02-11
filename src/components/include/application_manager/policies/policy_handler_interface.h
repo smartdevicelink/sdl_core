@@ -406,6 +406,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
       const uint32_t app_id = 0,
       const std::string url = std::string(),
       const std::string snapshot_path = std::string()) = 0;
+#else
+  virtual void UpdateLastPTUApp(const uint32_t app_id) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
@@ -425,6 +427,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnPTUFinished(const bool ptu_result) = 0;
 
   virtual void OnPTInited() = 0;
+
+  virtual bool IsPTUSystemRequestAllowed(const uint32_t app_id) = 0;
 
   /**
    * @brief Force stops retry sequence timer and resets retry sequence
