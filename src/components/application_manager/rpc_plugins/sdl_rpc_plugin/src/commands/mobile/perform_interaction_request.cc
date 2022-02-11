@@ -372,11 +372,18 @@ bool PerformInteractionRequest::ProcessVRResponse(
 
   if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
       is_vr_result_successful) {
-    if ((mobile_apis::InteractionMode::BOTH == interaction_mode_ &&
-         vr_choice_id_received_ != INVALID_CHOICE_ID) ||
-        mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
-      SDL_LOG_DEBUG("Send Close PopupRequest");
-      SendClosePopupRequestToHMI();
+    switch (interaction_mode_) {
+      case mobile_apis::InteractionMode::BOTH:
+        // Close UI popup only if choice ID was included in VR
+        if (vr_choice_id_received_ != INVALID_CHOICE_ID) {
+          SendClosePopupRequestToHMI();
+        }
+        break;
+      case mobile_apis::InteractionMode::VR_ONLY:
+        SendClosePopupRequestToHMI();
+        break;
+      default:
+        break;
     }
   }
 
