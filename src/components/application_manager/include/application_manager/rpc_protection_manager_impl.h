@@ -106,7 +106,7 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
   policy::PolicyHandlerInterface& policy_handler_;
 
   AppEncryptedRpcMap encrypted_rpcs_;
-  sync_primitives::Lock encrypted_rpcs_lock_;
+  mutable sync_primitives::RecursiveLock encrypted_rpcs_lock_;
 
   std::set<AppIdCorrIdPair> encryption_needed_cache_;
   sync_primitives::Lock message_needed_encryption_lock_;

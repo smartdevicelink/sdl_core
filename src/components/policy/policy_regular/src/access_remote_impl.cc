@@ -97,7 +97,7 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
   if (!cache_->IsApplicationRepresented(app_id)) {
     return false;
   }
-
+  sync_primitives::AutoLock auto_lock(cache_->cache_lock_);
   const policy_table::ApplicationParams& app =
       cache_->pt()->policy_table.app_policies_section.apps[app_id];
   if (!app.moduleType.is_initialized()) {
@@ -168,6 +168,7 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const ApplicationOnDevice& who,
 const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
     const ApplicationOnDevice& who) {
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_->cache_lock_);
   if (cache_->IsDefaultPolicy(who.app_id)) {
     return hmi_types_[who];
   } else {
@@ -226,6 +227,7 @@ void AccessRemoteImpl::GetGroupsIds(const std::string& device_id,
 bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
                                       std::vector<std::string>* modules) {
   DCHECK(modules);
+  sync_primitives::AutoLock auto_lock(cache_->cache_lock_);
   policy_table::ApplicationPolicies& apps =
       cache_->pt()->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator i = apps.find(application_id);

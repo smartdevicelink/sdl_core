@@ -220,7 +220,6 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
     SDL_LOG_INFO("Devices doesn't have groups");
     return;
   }
-
   sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies::const_iterator app_params_iter =
       pt_->policy_table.app_policies_section.apps.find(app_id);
@@ -439,7 +438,6 @@ bool CacheManager::GetDeviceGroupsFromPolicies(
 bool CacheManager::AddDevice(const std::string& device_id,
                              const std::string& connection_type) {
   SDL_LOG_AUTO_TRACE();
-
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
   policy_table::DeviceParams& params =
@@ -465,7 +463,6 @@ bool CacheManager::SetDeviceData(const std::string& device_id,
                                  const uint32_t number_of_ports,
                                  const std::string& connection_type) {
   SDL_LOG_AUTO_TRACE();
-
   sync_primitives::AutoLock auto_lock(cache_lock_);
   CACHE_MANAGER_CHECK(false);
   Backup();
@@ -1313,9 +1310,9 @@ void CacheManager::PersistData() {
     if (pt_.use_count() != 0) {
       // Comma expression is used to hold the lock only during the constructor
       // call
+
       policy_table::Table copy_pt(
           (sync_primitives::AutoLock(cache_lock_), *pt_));
-
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);
 
@@ -1586,7 +1583,7 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 void CacheManager::Increment(const std::string& app_id,
                              usage_statistics::AppCounterId type) {
   CACHE_MANAGER_CHECK_VOID();
-  sync_primitives::AutoLock lock(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   switch (type) {
     case usage_statistics::USER_SELECTIONS:
       ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
@@ -1635,7 +1632,7 @@ void CacheManager::Set(const std::string& app_id,
                        usage_statistics::AppInfoId type,
                        const std::string& value) {
   CACHE_MANAGER_CHECK_VOID();
-  sync_primitives::AutoLock lock(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   switch (type) {
     case usage_statistics::LANGUAGE_GUI:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id]
@@ -1656,7 +1653,7 @@ void CacheManager::Add(const std::string& app_id,
                        usage_statistics::AppStopwatchId type,
                        int seconds) {
   CACHE_MANAGER_CHECK_VOID();
-  sync_primitives::AutoLock lock(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const int minutes = ConvertSecondsToMinute(seconds);
   switch (type) {
     case usage_statistics::SECONDS_HMI_FULL:
@@ -1778,6 +1775,7 @@ bool CacheManager::IsPredataPolicy(const std::string& app_id) const {
 
 bool CacheManager::SetUnpairedDevice(const std::string& device_id,
                                      bool unpaired) {
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   const bool result = pt_->policy_table.device_data->end() !=
                       pt_->policy_table.device_data->find(device_id);
@@ -1805,6 +1803,7 @@ bool CacheManager::SetVINValue(const std::string& value) {
 }
 
 bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   if (kDeviceId == app_id) {
     return true;
@@ -1876,7 +1875,7 @@ void CacheManager::FillDeviceSpecificData() {}
 
 bool CacheManager::LoadFromBackup() {
   SDL_LOG_AUTO_TRACE();
-  sync_primitives::AutoLock lock(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   pt_ = backup_->GenerateSnapshot();
   update_required = backup_->UpdateRequired();
   SDL_LOG_DEBUG("Update required flag from backup: " << std::boolalpha
@@ -1930,7 +1929,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   }
 
   SDL_LOG_TRACE("Start create PT");
-  sync_primitives::AutoLock locker(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
 
   table = policy_table::Table(&value);
 
@@ -1957,6 +1956,7 @@ bool CacheManager::ResetPT(const std::string& file_name) {
 }
 
 bool CacheManager::AppExists(const std::string& app_id) const {
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -2072,6 +2072,7 @@ void CacheManager::GetAppRequestSubTypes(
 }
 
 std::string CacheManager::GetCertificate() const {
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(std::string(""));
   sync_primitives::AutoLock auto_lock(cache_lock_);
   if (pt_->policy_table.module_config.certificate.is_initialized()) {
@@ -2088,7 +2089,7 @@ bool CacheManager::MergePreloadPT(const std::string& file_name) {
     return false;
   }
 
-  sync_primitives::AutoLock lock(cache_lock_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::PolicyTable& current = pt_->policy_table;
   policy_table::PolicyTable& new_table = table.policy_table;
   const std::string date_current = *current.module_config.preloaded_date;

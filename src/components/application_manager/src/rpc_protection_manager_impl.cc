@@ -89,7 +89,7 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
 bool RPCProtectionManagerImpl::IsEncryptionRequiredByPolicy(
     const std::string& policy_app_id, const std::string& function_name) const {
   SDL_LOG_AUTO_TRACE();
-
+  sync_primitives::AutoLock lock(encrypted_rpcs_lock_);
   auto it = encrypted_rpcs_.find(policy_app_id);
 
   if (encrypted_rpcs_.end() == it) {
@@ -160,23 +160,25 @@ void RPCProtectionManagerImpl::OnPTUFinished(const bool ptu_result) {
 
 void RPCProtectionManagerImpl::SaveEncryptedRPC() {
   SDL_LOG_AUTO_TRACE();
-
+  sync_primitives::AutoLock lock(encrypted_rpcs_lock_);
   const auto policy_encryption_flag_getter =
       policy_handler_.PolicyEncryptionFlagGetter();
 
-  const auto policy_policy_app_ids =
-      policy_encryption_flag_getter->GetApplicationPolicyIDs();
+  if (policy_encryption_flag_getter) {
+    const auto policy_policy_app_ids =
+        policy_encryption_flag_getter->GetApplicationPolicyIDs();
 
-  for (const auto& app : policy_policy_app_ids) {
-    SDL_LOG_DEBUG("Processing app name: " << app);
+    for (const auto& app : policy_policy_app_ids) {
+      SDL_LOG_DEBUG("Processing app name: " << app);
 
-    encrypted_rpcs_[app] = GetEncryptedRPCsForApp(app);
+      encrypted_rpcs_[app] = GetEncryptedRPCsForApp(app);
+    }
   }
 }
 
 void RPCProtectionManagerImpl::OnPTInited() {
   SDL_LOG_AUTO_TRACE();
-
+  sync_primitives::AutoLock lock(encrypted_rpcs_lock_);
   encrypted_rpcs_.clear();
 
   SaveEncryptedRPC();
