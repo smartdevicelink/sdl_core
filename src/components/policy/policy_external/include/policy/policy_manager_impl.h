@@ -1266,6 +1266,11 @@ class PolicyManagerImpl : public PolicyManager {
   sync_primitives::Lock apps_registration_lock_;
 
   /**
+   * @brief lock guard for protecting policy table snapshot
+   */
+  sync_primitives::Lock policy_table_lock_;
+
+  /**
    * @brief lock guard for protecting application permissions access
    */
   sync_primitives::Lock app_permissions_diff_lock_;

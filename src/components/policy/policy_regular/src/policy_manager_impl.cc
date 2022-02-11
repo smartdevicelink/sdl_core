@@ -337,6 +337,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   cache_->SaveUpdateRequired(false);
 
   sync_primitives::AutoLock lock(apps_registration_lock_);
+  sync_primitives::AutoLock policy_lock(policy_table_lock_);
 
   // Get current DB data, since it could be updated during awaiting of PTU
   auto policy_table_snapshot = cache_->GenerateSnapshot();
@@ -516,6 +517,7 @@ void PolicyManagerImpl::SendPermissionsToApp(
   Permissions notification_data;
 
   // Need to get rid of this call
+  sync_primitives::AutoLock policy_lock(policy_table_lock_);
   auto policy_table_snapshot = cache_->GenerateSnapshot();
 
   PrepareNotificationData(
@@ -585,6 +587,7 @@ bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   SDL_LOG_AUTO_TRACE();
   BinaryMessage update;
   if (PTUIterationType::DefaultIteration == iteration_type) {
+    sync_primitives::AutoLock policy_lock(policy_table_lock_);
     std::shared_ptr<policy_table::Table> policy_table_snapshot =
         cache_->GenerateSnapshot();
     if (!policy_table_snapshot) {

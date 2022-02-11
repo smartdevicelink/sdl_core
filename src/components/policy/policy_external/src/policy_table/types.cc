@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <regex>
-
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {
