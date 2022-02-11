@@ -246,6 +246,8 @@ void PerformInteractionRequest::Run() {
   // increment amount of active requests
   ++pi_requests_count_;
 
+  SDL_LOG_DEBUG("Send PerformInteraction requests");
+
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
@@ -369,14 +371,8 @@ bool PerformInteractionRequest::ProcessVRResponse(
 
     SDL_LOG_DEBUG("Update timeout for UI");
     application_manager_.UpdateRequestTimeout(
-
         connection_key(), correlation_id(), default_timeout_);
     return false;
-  }
-
-  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
-      InteractionMode::MANUAL_ONLY != interaction_mode_) {
-    SendClosePopupRequestToHMI();
   }
 
   const SmartObject& hmi_msg_params = message[strings::msg_params];
@@ -392,22 +388,31 @@ bool PerformInteractionRequest::ProcessVRResponse(
     vr_choice_id_received_ = choice_id;
   }
 
+  const bool is_vr_result_successful = CommandImpl::IsHMIResultSuccess(
+      vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR);
+
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
+      is_vr_result_successful) {
+    switch (interaction_mode_) {
+      case mobile_apis::InteractionMode::BOTH:
+        // Close UI popup only if choice ID was included in VR
+        if (vr_choice_id_received_ != INVALID_CHOICE_ID) {
+          SendClosePopupRequestToHMI();
+        }
+        break;
+      case mobile_apis::InteractionMode::VR_ONLY:
+        SendClosePopupRequestToHMI();
+        break;
+      default:
+        break;
+    }
+  }
+
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
     SDL_LOG_DEBUG("Update timeout for UI");
     application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout_);
-  }
-
-  const bool is_vr_result_success = Compare<Common_Result::eType, EQ, ONE>(
-      vr_result_code_, Common_Result::SUCCESS, Common_Result::WARNINGS);
-
-  if (is_vr_result_success &&
-      InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    SDL_LOG_DEBUG("VR response is successfull in MANUAL_ONLY mode "
-                  << "Wait for UI response");
-    // in case MANUAL_ONLY mode VR.PI SUCCESS just return
-    return false;
   }
 
   return false;
@@ -901,7 +906,10 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 void PerformInteractionRequest::TerminatePerformInteraction() {
   SDL_LOG_AUTO_TRACE();
 
-  SendClosePopupRequestToHMI();
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
+    SendClosePopupRequestToHMI();
+  }
+
   DisablePerformInteraction();
 }
 
