@@ -183,5 +183,11 @@ bool SliderRequest::IsWhiteSpaceExist() {
   return false;
 }
 
+void SliderRequest::Reject() {
+  SDL_LOG_INFO("Interrupt Rejected");
+  SendResponse(false, mobile_apis::Result::REJECTED);
+  return;
+}
+
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

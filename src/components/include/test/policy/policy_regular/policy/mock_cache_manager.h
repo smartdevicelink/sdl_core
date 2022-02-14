@@ -275,6 +275,11 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                      void(const std::string& application_name,
                           policy_table::ApplicationParams& application_params));
   MOCK_CONST_METHOD0(GetPolicyAppIDs, const policy_table::Strings());
+
+  MOCK_CONST_METHOD0(GetRpcPriority, rpc::policy_table_interface_base::rpc_priority_type());
+  MOCK_CONST_METHOD0(GetAppPriority, rpc::policy_table_interface_base::app_priority_type());
+  MOCK_CONST_METHOD0(GetHmiStatusPriority, rpc::policy_table_interface_base::hmi_status_priority_type());
+
 };
 
 }  // namespace policy_test

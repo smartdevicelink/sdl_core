@@ -132,6 +132,8 @@ class CommandRequestImpl : public CommandImpl,
 
   bool DecrementReferenceCount() const OVERRIDE;
 
+  void Reject() OVERRIDE;
+
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table

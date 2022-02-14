@@ -480,6 +480,9 @@ std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     rpc::Optional<rpc::String<0, 100> > null_version;
     table->policy_table.vehicle_data->schema_version = null_version;
   }
+  GatherRpcPriority(&table->policy_table.rpc_priority);
+  GatherAppPriority(&table->policy_table.app_priority);
+  GatherHmiStatusPriority(&table->policy_table.hmi_status_priority);
   return table;
 }
 
@@ -868,6 +871,56 @@ bool SQLPTRepresentation::GatherVehicleDataItems(
   return true;
 }
 
+void SQLPTRepresentation::GatherRpcPriority(
+    policy_table::RpcPriority* priority) const {
+  SDL_LOG_INFO("Gather Configuration Info");
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRpcPriority) || !query.Next()) {
+    SDL_LOG_WARN("Incorrect select statement for rpc priority");
+  } else {
+    priority->DialNumber = query.GetInteger(0);
+    priority->Alert = query.GetInteger(1);
+    priority->PerformAudioPassThru = query.GetInteger(2);
+    priority->PerformInteraction = query.GetInteger(3);
+    priority->ScrollableMessage = query.GetInteger(4);
+    priority->Slider = query.GetInteger(5);
+    priority->Speak = query.GetInteger(6);
+  }
+}
+
+void SQLPTRepresentation::GatherAppPriority(
+    policy_table::AppPriority* priority) const {
+  SDL_LOG_INFO("Gather Configuration Info");
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAppPriority) || !query.Next()) {
+    SDL_LOG_WARN("Incorrect select statement for app priority");
+  } else {
+    priority->EMERGENCY = query.GetInteger(0);
+    priority->NAVIGATION = query.GetInteger(1);
+    priority->VOICE_COMMUNICATION = query.GetInteger(2);
+    priority->COMMUNICATION = query.GetInteger(3);
+    priority->NORMAL = query.GetInteger(4);
+    priority->NONE = query.GetInteger(5);
+  }
+}
+
+void SQLPTRepresentation::GatherHmiStatusPriority(
+    policy_table::HmiStatusPriority* priority) const {
+  SDL_LOG_INFO("Gather Configuration Info");
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectHmiStatusPriority) || !query.Next()) {
+    SDL_LOG_WARN("Incorrect select statement for hmi status priority");
+  } else {
+    priority->FULL = query.GetInteger(0);
+    priority->LIMITED = query.GetInteger(1);
+    priority->BACKGROUND = query.GetInteger(2);
+    priority->NONE = query.GetInteger(3);
+  }
+}
+
 bool SQLPTRepresentation::Save(const policy_table::Table& table) {
   SDL_LOG_AUTO_TRACE();
   db_->BeginTransaction();
@@ -903,6 +956,21 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     return false;
   }
   if (!SaveVehicleData(*table.policy_table.vehicle_data)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveRpcPriority(
+         table.policy_table.rpc_priority)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveAppPriority(
+         table.policy_table.app_priority)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveHmiStatusPriority(
+         table.policy_table.hmi_status_priority)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -2842,6 +2910,79 @@ bool SQLPTRepresentation::SaveExternalConsentEntities(
                                      << "' external consent entity.");
       return false;
     }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRpcPriority(
+    const policy_table::RpcPriority& priority) {
+  utils::dbms::SQLQuery query(db());
+  SDL_LOG_AUTO_TRACE();
+
+  if (!query.Prepare(sql_pt::kUpdateRpcPriority)) {
+    SDL_LOG_WARN("Incorrect update  statement for rpc priority.");
+    return false;
+  }
+
+  query.Bind(0, priority.DialNumber);
+  query.Bind(1, priority.Alert);
+  query.Bind(2, priority.PerformAudioPassThru);
+  query.Bind(3, priority.PerformInteraction);
+  query.Bind(4, priority.ScrollableMessage);
+  query.Bind(5, priority.Slider);
+  query.Bind(6, priority.Speak);
+
+  if (!query.Exec()) {
+    SDL_LOG_WARN("Incorrect update rpc priority");
+    return false;
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppPriority(
+    const policy_table::AppPriority& priority) {
+  utils::dbms::SQLQuery query(db());
+  SDL_LOG_AUTO_TRACE();
+
+  if (!query.Prepare(sql_pt::kUpdateAppPriority)) {
+    SDL_LOG_WARN("Incorrect update  statement for app priority.");
+    return false;
+  }
+  query.Bind(0, priority.EMERGENCY);
+  query.Bind(1, priority.NAVIGATION);
+  query.Bind(2, priority.VOICE_COMMUNICATION);
+  query.Bind(3, priority.COMMUNICATION);
+  query.Bind(4, priority.NORMAL);
+  query.Bind(5, priority.NONE);
+
+  if (!query.Exec()) {
+    SDL_LOG_WARN("Incorrect update app priority");
+    return false;
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveHmiStatusPriority(
+    const policy_table::HmiStatusPriority& priority) {
+  utils::dbms::SQLQuery query(db());
+  SDL_LOG_AUTO_TRACE();
+
+  if (!query.Prepare(sql_pt::kUpdateHmiStatusPriority)) {
+    SDL_LOG_WARN("Incorrect update  statement for hmi status priority.");
+    return false;
+  }
+
+  query.Bind(0, priority.FULL);
+  query.Bind(1, priority.LIMITED);
+  query.Bind(2, priority.BACKGROUND);
+  query.Bind(3, priority.NONE);
+
+  if (!query.Exec()) {
+    SDL_LOG_WARN("Incorrect update hmi status priority");
+    return false;
   }
 
   return true;

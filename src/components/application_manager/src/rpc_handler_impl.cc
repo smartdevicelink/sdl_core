@@ -257,6 +257,9 @@ void RPCHandlerImpl::OnMessageReceived(
   std::shared_ptr<Message> outgoing_message = ConvertRawMsgToMessage(message);
 
   if (outgoing_message) {
+    if(app_manager_.GetInterruptManager().GetRunningStatus() == application_manager::interrupt_manager::IM_ACTIVATE){
+        app_manager_.GetInterruptManager().CheckRpcInterrupt(outgoing_message);
+    }
     SDL_LOG_DEBUG("Posting new Message");
     messages_from_mobile_.PostMessage(
         impl::MessageFromMobile(outgoing_message));

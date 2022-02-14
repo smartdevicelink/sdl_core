@@ -173,6 +173,12 @@ bool SpeakRequest::IsWhiteSpaceExist() {
   return false;
 }
 
+void SpeakRequest::Reject(){
+  SDL_LOG_INFO("Interrupt Rejected");
+  SendResponse(false, mobile_apis::Result::REJECTED);
+  return;
+}
+
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

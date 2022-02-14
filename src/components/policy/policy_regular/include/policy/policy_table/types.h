@@ -119,6 +119,10 @@ typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 
+typedef std::map<std::string, int> rpc_priority_type;
+typedef std::map<std::string, int> app_priority_type;
+typedef std::map<std::string, int> hmi_status_priority_type;
+
 struct AppServiceHandledRpc : CompositeType {
  public:
   FunctionIDInt function_id;
@@ -304,6 +308,100 @@ struct EndpointProperty : CompositeType {
   bool struct_empty() const;
   void ReportErrors(rpc::ValidationReport* report__) const;
   void SetPolicyTableType(PolicyTableType pt_type) OVERRIDE;
+
+ private:
+  bool Validate() const;
+};
+
+struct RpcPriority : CompositeType {
+ public:
+  Integer<uint8_t, 0, 255> DialNumber;
+  Integer<uint8_t, 0, 255> Alert;
+  Integer<uint8_t, 0, 255> PerformAudioPassThru;
+  Integer<uint8_t, 0, 255> PerformInteraction;
+  Integer<uint8_t, 0, 255> ScrollableMessage;
+  Integer<uint8_t, 0, 255> Slider;
+  Integer<uint8_t, 0, 255> Speak;
+
+ public:
+  RpcPriority();
+  RpcPriority(uint8_t DialNumber,
+              uint8_t Alert,
+              uint8_t PerformAudioPassThru,
+              uint8_t PerformInteraction,
+              uint8_t ScrollableMessage,
+              uint8_t Slider,
+              uint8_t Speak);
+  ~RpcPriority();
+
+  explicit RpcPriority(const Json::Value* value__);
+  void SafeCopyFrom(const RpcPriority& from);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+ private:
+  bool Validate() const;
+};
+
+struct AppPriority : CompositeType {
+ public:
+  Integer<uint8_t, 0, 255> EMERGENCY;
+  Integer<uint8_t, 0, 255> NAVIGATION;
+  Integer<uint8_t, 0, 255> VOICE_COMMUNICATION;
+  Integer<uint8_t, 0, 255> COMMUNICATION;
+  Integer<uint8_t, 0, 255> NORMAL;
+  Integer<uint8_t, 0, 255> NONE;
+
+ public:
+  AppPriority();
+  AppPriority(uint8_t EMERGENCY,
+              uint8_t NAVIGATION,
+              uint8_t VOICE_COMMUNICATION,
+              uint8_t COMMUNICATION,
+              uint8_t NORMAL,
+              uint8_t NONE);
+  ~AppPriority();
+
+  explicit AppPriority(const Json::Value* value__);
+  void SafeCopyFrom(const AppPriority& from);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+ private:
+  bool Validate() const;
+};
+
+struct HmiStatusPriority : CompositeType {
+ public:
+  Integer<uint8_t, 0, 255> FULL;
+  Integer<uint8_t, 0, 255> LIMITED;
+  Integer<uint8_t, 0, 255> BACKGROUND;
+  Integer<uint8_t, 0, 255> NONE;
+
+ public:
+  HmiStatusPriority();
+  HmiStatusPriority(uint8_t FULL,
+                    uint8_t LIMITED,
+                    uint8_t BACKGROUND,
+                    uint8_t NONE);
+  ~HmiStatusPriority();
+
+  explicit HmiStatusPriority(const Json::Value* value__);
+  void SafeCopyFrom(const HmiStatusPriority& from);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
 
  private:
   bool Validate() const;
@@ -625,13 +723,19 @@ struct PolicyTable : CompositeType {
   Optional<UsageAndErrorCounts> usage_and_error_counts;
   Optional<DeviceData> device_data;
   Optional<VehicleData> vehicle_data;
+  RpcPriority rpc_priority;
+  AppPriority app_priority;
+  HmiStatusPriority hmi_status_priority;
 
  public:
   PolicyTable();
   PolicyTable(const ApplicationPoliciesSection& app_policies_section,
               const FunctionalGroupings& functional_groupings,
               const ConsumerFriendlyMessages& consumer_friendly_messages,
-              const ModuleConfig& module_config);
+              const ModuleConfig& module_config,
+              const RpcPriority& rpc_priority,
+              const AppPriority& app_priority,
+              const HmiStatusPriority& hmi_status_priority);
   ~PolicyTable();
   explicit PolicyTable(const Json::Value* value__);
   Json::Value ToJsonValue() const;

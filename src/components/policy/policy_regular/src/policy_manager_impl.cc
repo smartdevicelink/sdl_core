@@ -1886,6 +1886,17 @@ const std::vector<std::string> PolicyManagerImpl::GetRPCsForFunctionGroup(
   return rpcs_for_group;
 }
 
+rpc::policy_table_interface_base::rpc_priority_type PolicyManagerImpl::GetRpcPriority() const {
+  SDL_LOG_AUTO_TRACE();
+  return cache_->GetRpcPriority();
+}
+rpc::policy_table_interface_base::app_priority_type PolicyManagerImpl::GetAppPriority() const {
+  return cache_->GetAppPriority();
+}
+rpc::policy_table_interface_base::hmi_status_priority_type PolicyManagerImpl::GetHmiStatusPriority() const {
+  return cache_->GetHmiStatusPriority();
+}
+
 }  //  namespace policy
 
 __attribute__((visibility("default"))) policy::PolicyManager* CreateManager(

@@ -457,8 +457,8 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
 
-  // There are 38 tables in the database, now.
-  const int32_t total_tables_number = 38;
+  // There are 41 tables in the database, now.
+  const int32_t total_tables_number = 41;
   ASSERT_EQ(total_tables_number, FetchOneInt(query_select));
 
   const std::string query_select_count_of_iap_buffer_full =

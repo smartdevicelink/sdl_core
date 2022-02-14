@@ -311,6 +311,11 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ResetTimeout, void());
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
   MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
+
+  MOCK_CONST_METHOD0(GetRpcPriority, rpc::policy_table_interface_base::rpc_priority_type());
+  MOCK_CONST_METHOD0(GetAppPriority, rpc::policy_table_interface_base::app_priority_type());
+  MOCK_CONST_METHOD0(GetHmiStatusPriority, rpc::policy_table_interface_base::hmi_status_priority_type());
+ 
 };
 }  // namespace policy_manager_test
 }  // namespace components

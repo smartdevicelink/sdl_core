@@ -73,6 +73,8 @@ class SpeakRequest : public app_mngr::commands::RequestFromMobileImpl {
    */
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
+  void Reject();
+
  private:
   /*
    * @brief Sends Speak response to mobile side

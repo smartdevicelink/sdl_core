@@ -80,6 +80,8 @@ class AlertRequest : public app_mngr::commands::RequestFromMobileImpl {
 
   void OnTimeOut() FINAL;
 
+  void Reject();
+
  protected:
  private:
   /*

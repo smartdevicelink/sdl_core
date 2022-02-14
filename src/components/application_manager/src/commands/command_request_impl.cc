@@ -216,5 +216,7 @@ void CommandRequestImpl::set_current_state(
   current_state_ = state;
 }
 
+void CommandRequestImpl::Reject() {}
+
 }  // namespace commands
 }  // namespace application_manager

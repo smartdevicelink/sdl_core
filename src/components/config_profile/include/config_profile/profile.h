@@ -868,6 +868,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const std::string ErrorDescription() const;
 
+  bool enable_rpc_conflict_manager() const;
+
  private:
   /**
    * @brief Checks that filename consists of portable symbols
@@ -1177,6 +1179,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string hmi_origin_id_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
+
+  bool enable_rpc_conflict_manager_;
+  
 };
 }  //  namespace profile
 

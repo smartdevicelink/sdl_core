@@ -353,8 +353,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  // 42 - is current total tables number created by schema
-  const int policy_tables_number = 42;
+  // 41 - is current total tables number created by schema
+  const int policy_tables_number = 41;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =

@@ -220,6 +220,13 @@ bool RPCServiceImpl::ManageMobileCommand(
     return false;
   }
 
+  if (app_manager_.GetInterruptManager().DoRpcReject(function_id)) {
+    SDL_LOG_INFO("Rejected_by_InterruptManager");
+    command->Reject();
+    command->CleanUp();
+    return false;
+  }
+
   if (message_type == mobile_apis::messageType::response) {
     if (command->Init() && command->CheckPermissions()) {
       command->Run();

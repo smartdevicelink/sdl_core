@@ -38,6 +38,8 @@ class PolicySettings {
    */
   virtual const std::string& system_files_path() const = 0;
 
+  virtual bool enable_rpc_conflict_manager() const = 0;
+
   virtual ~PolicySettings() {}
 };
 }  // namespace policy

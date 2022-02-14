@@ -234,6 +234,16 @@ bool ModuleConfig::Validate() const {
   return true;
 }
 
+bool RpcPriority::Validate() const {
+  return true;
+}
+bool AppPriority::Validate() const {
+  return true;
+}
+bool HmiStatusPriority::Validate() const {
+  return true;
+}
+
 bool MessageString::Validate() const {
   return true;
 }

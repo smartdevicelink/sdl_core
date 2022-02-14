@@ -137,6 +137,8 @@ class Command {
    */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
+  virtual void Reject() = 0;
+
   enum CommandSource {
     SOURCE_SDL,
     SOURCE_MOBILE,

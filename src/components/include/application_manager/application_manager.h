@@ -53,6 +53,8 @@
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
 
+#include "application_manager/interrupt_manager.h"
+
 namespace app_launch {
 class AppLaunchCtrl;
 }  // namespace app_launch
@@ -88,6 +90,9 @@ class RPCService;
 }
 namespace rpc_handler {
 class RPCHandler;
+}
+namespace interrupt_manager {
+class InterruptManager;
 }
 namespace request_controller {
 class RequestTimeoutHandler;
@@ -1019,6 +1024,8 @@ class ApplicationManager {
    * @param corr_id Correlation id
    */
   virtual void DeleteExpiredButtonRequest(const int32_t corr_id) = 0;
+
+  virtual interrupt_manager::InterruptManager& GetInterruptManager() const = 0;
 };
 
 }  // namespace application_manager

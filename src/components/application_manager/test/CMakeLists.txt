@@ -73,6 +73,7 @@ set(testSources
   ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
   ${AM_TEST_DIR}/request_timeout_handler_test.cc
+  ${AM_TEST_DIR}/interrupt_manager_test.cc
 )
 
 set(testSourcesMockHmi

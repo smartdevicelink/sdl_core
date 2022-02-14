@@ -417,6 +417,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       utils::Optional<application_manager::ExpiredButtonRequestData>(
           const int32_t corr_id));
   MOCK_METHOD1(DeleteExpiredButtonRequest, void(const int32_t corr_id));
+
+  MOCK_CONST_METHOD0(GetInterruptManager,
+                     application_manager::interrupt_manager::InterruptManager&());
 };
 
 }  // namespace application_manager_test

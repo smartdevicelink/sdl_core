@@ -144,6 +144,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool GatherNickName(const std::string& app_id,
                       policy_table::Strings* nicknames) const;
 
+  virtual void GatherRpcPriority(policy_table::RpcPriority* priority) const;
+  virtual void GatherAppPriority(policy_table::AppPriority* priority) const;
+  virtual void GatherHmiStatusPriority(policy_table::HmiStatusPriority* priority) const;
+
+
   virtual bool SaveApplicationCustomData(const std::string& app_id,
                                          bool is_revoked,
                                          bool is_default,
@@ -170,6 +175,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   virtual bool SaveMessageString(const std::string& type,
                                  const std::string& lang,
                                  const policy_table::MessageString& strings);
+
+  virtual bool SaveRpcPriority(const policy_table::RpcPriority& priority);
+  virtual bool SaveAppPriority(const policy_table::AppPriority& priority);
+  virtual bool SaveHmiStatusPriority(const policy_table::HmiStatusPriority& priority);
 
   bool SaveAppGroup(const std::string& app_id,
                     const policy_table::Strings& app_groups);
@@ -256,6 +265,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveLanguage(const std::string& code);
   policy_table::VehicleDataItem PopulateVDIFromQuery(
       const utils::dbms::SQLQuery& query) const;
+  bool SaveRpcPriority(const policy_table::rpc_priority_type& priority);
+  bool SaveAppPriority(const policy_table::app_priority_type& priority);
+  bool SaveHmiStatusPriority(const policy_table::hmi_status_priority_type& priority);
   bool DeleteVehicleDataItems() const;
 
   bool is_in_memory;

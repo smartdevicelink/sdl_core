@@ -468,6 +468,29 @@ const std::string kCreateSchema =
     "    FOREIGN KEY(`param_name`, `param_key`) "
     "    REFERENCES `vehicle_data_item_definition`(`name`, `key`) "
     "); "
+    "CREATE TABLE IF NOT EXISTS `rpc_priority`( "
+    "  `DialNumber` INTEGER NOT NULL, "
+    "  `Alert` INTEGER NOT NULL, "
+    "  `PerformAudioPassThru` INTEGER NOT NULL, "
+    "  `PerformInteraction` INTEGER NOT NULL, "
+    "  `ScrollableMessage` INTEGER NOT NULL, "
+    "  `Slider` INTEGER NOT NULL, "
+    "  `Speak` INTEGER NOT NULL "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `app_priority`( "
+    "  `EMERGENCY` INTEGER NOT NULL, "
+    "  `NAVIGATION` INTEGER NOT NULL, "
+    "  `VOICE_COMMUNICATION` INTEGER NOT NULL, "
+    "  `COMMUNICATION` INTEGER NOT NULL, "
+    "  `NORMAL` INTEGER NOT NULL, "
+    "  `NONE` INTEGER NOT NULL "
+    "); "
+    "CREATE TABLE IF NOT EXISTS `hmi_status_priority`( "
+    "  `FULL` INTEGER NOT NULL, "
+    "  `LIMITED` INTEGER NOT NULL, "
+    "  `BACKGROUND` INTEGER NOT NULL, "
+    "  `NONE` INTEGER NOT NULL "
+    "); "
     "COMMIT;";
 
 const std::string kInsertInitData =
@@ -485,6 +508,26 @@ const std::string kInsertInitData =
     "  VALUES(1, 0, 0, 0, 0, 0); "
     "INSERT OR IGNORE INTO `vehicle_data` (`schema_version`) "
     "VALUES('0'); "
+    "INSERT OR IGNORE INTO `rpc_priority` (`DialNumber`,"
+    " `Alert`,"
+    " `PerformAudioPassThru`,"
+    " `PerformInteraction`,"
+    " `ScrollableMessage`,"
+    " `Slider`,"
+    " `Speak`)"
+    "  VALUES(0, 0, 0, 0, 0, 0, 0); "
+    "INSERT OR IGNORE INTO `app_priority` (`EMERGENCY`,"
+    " `NAVIGATION`,"
+    " `VOICE_COMMUNICATION`,"
+    " `COMMUNICATION`,"
+    " `NORMAL`,"
+    " `NONE`)"
+    "  VALUES(0, 0, 0, 0, 0, 0); "
+    "INSERT OR IGNORE INTO `hmi_Status_priority` (`FULL`,"
+    " `LIMITED`,"
+    " `BACKGROUND`,"
+    " `NONE`)"
+    "  VALUES(0, 0, 0, 0); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
     "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -619,6 +662,9 @@ const std::string kDropSchema =
     "DROP TABLE IF EXISTS `vehicle_data`; "
     "DROP TABLE IF EXISTS `vehicle_data_item_definition`; "
     "DROP TABLE IF EXISTS `vehicle_data_item_parameters`; "
+    "DROP TABLE IF EXISTS `rpc_priority`; "
+    "DROP TABLE IF EXISTS `app_priority`; "
+    "DROP TABLE IF EXISTS `hmi_status_priority`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -655,6 +701,9 @@ const std::string kDeleteData =
     "DELETE FROM `vehicle_data`; "
     "DELETE FROM `vehicle_data_item_definition`; "
     "DELETE FROM `vehicle_data_item_parameters`; "
+    "DELETE FROM `rpc_priority`; "
+    "DELETE FROM `app_priority`; "
+    "DELETE FROM `hmi_status_priority`; "
     "COMMIT; "
     "VACUUM;";
 
@@ -1087,5 +1136,54 @@ const std::string kUpdateMetaParams =
 
 const std::string kUpdateMetaHardwareVersion =
     "UPDATE `module_meta` SET `hardware_version` = ? ";
+
+const std::string kUpdateRpcPriority =
+    "UPDATE `rpc_priority` SET `DialNumber` = ?,"
+    "  `Alert` = ?,"
+    "  `PerformAudioPassThru` = ?,"
+    "  `PerformInteraction` = ?,"
+    "  `ScrollableMessage` = ?,"
+    "  `Slider` = ?,"
+    "  `Speak` = ?";
+
+const std::string kUpdateAppPriority =
+    "UPDATE `app_priority` SET `EMERGENCY` = ?,"
+    "  `NAVIGATION` = ?,"
+    "  `VOICE_COMMUNICATION` = ?,"
+    "  `COMMUNICATION` = ?,"
+    "  `NORMAL` = ?,"
+    "  `NONE` = ?";
+
+const std::string kUpdateHmiStatusPriority =
+    "UPDATE `hmi_status_priority` SET `FULL` = ?,"
+    "  `LIMITED` = ?,"
+    "  `BACKGROUND` = ?,"
+    "  `NONE` = ?";
+
+const std::string kSelectRpcPriority =
+    "SELECT `DialNumber`, "
+    "`Alert`,"
+    "`PerformAudioPassThru`,"
+    "`PerformInteraction`,"
+    "`ScrollableMessage`,"
+    "`Slider`,"
+    "`Speak`"
+    "FROM `rpc_priority`";
+
+const std::string kSelectAppPriority =
+    "SELECT `EMERGENCY`, "
+    "`NAVIGATION`,"
+    "`VOICE_COMMUNICATION`,"
+    "`COMMUNICATION`,"
+    "`NORMAL`,"
+    "`NONE`"
+    "FROM `app_priority`";
+
+const std::string kSelectHmiStatusPriority =
+    "SELECT `FULL`, "
+    "`LIMITED`,"
+    "`BACKGROUND`,"
+    "`NONE`"
+    "FROM `hmi_status_priority`";
 }  // namespace sql_pt
 }  // namespace policy

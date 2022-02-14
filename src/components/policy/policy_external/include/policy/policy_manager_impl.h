@@ -1125,6 +1125,10 @@ class PolicyManagerImpl : public PolicyManager {
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
+  rpc::policy_table_interface_base::rpc_priority_type GetRpcPriority() const OVERRIDE;
+  rpc::policy_table_interface_base::app_priority_type GetAppPriority() const OVERRIDE;
+  rpc::policy_table_interface_base::hmi_status_priority_type GetHmiStatusPriority() const OVERRIDE;
+
   void ResetTimeout() OVERRIDE;
 
   /**

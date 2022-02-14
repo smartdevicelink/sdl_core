@@ -38,6 +38,8 @@ class PolicySettings {
 
   virtual bool use_full_app_id() const = 0;
 
+  virtual bool enable_rpc_conflict_manager() const = 0;
+
   virtual ~PolicySettings() {}
 };
 }  // namespace policy

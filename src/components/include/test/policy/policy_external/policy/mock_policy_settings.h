@@ -50,6 +50,7 @@ class MockPolicySettings : public ::policy::PolicySettings {
   MOCK_CONST_METHOD0(policies_snapshot_file_name, const std::string&());
   MOCK_CONST_METHOD0(system_files_path, const std::string&());
   MOCK_CONST_METHOD0(use_full_app_id, bool());
+  MOCK_CONST_METHOD0(enable_rpc_conflict_manager, bool());
 };
 
 }  // namespace policy_handler_test

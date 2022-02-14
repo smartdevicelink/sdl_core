@@ -309,6 +309,8 @@ const char* kMediaLowBandwidthResumptionLevelKey =
 const char* kHMIOriginIDKey = "HMIOriginID";
 const char* kEmbeddedServicesKey = "EmbeddedServices";
 
+const char* kEnableRPCConflictManagerKey = "EnableRPCConflictManager";
+
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -444,6 +446,7 @@ const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
 const char* kDefaultAOAFilterVersion = "1.0";
 const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
 const char* kDefaultAOAFilterSerialNumber = "N000000";
+const bool kDefaultEnableRPCConflictManager = false;
 }  // namespace
 
 namespace profile {
@@ -574,7 +577,8 @@ Profile::Profile()
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
     , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
-    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) 
+    , enable_rpc_conflict_manager_(kDefaultEnableRPCConflictManager){
 }
 
 Profile::~Profile() {}
@@ -1295,6 +1299,11 @@ void Profile::ParseConfiguration() {
     fclose(config_file_);
     config_file_ = nullptr;
   }
+}
+
+bool Profile::enable_rpc_conflict_manager() const {
+  SDL_LOG_AUTO_TRACE();
+  return enable_rpc_conflict_manager_;
 }
 
 void Profile::UpdateValues() {
@@ -2724,6 +2733,10 @@ void Profile::UpdateValues() {
       ++entry;
     }
   }
+  ReadBoolValue(&enable_rpc_conflict_manager_,
+                kDefaultEnableRPCConflictManager,
+                kPolicySection,
+                kEnableRPCConflictManagerKey);
 }
 
 bool Profile::ReadValue(bool* value,
