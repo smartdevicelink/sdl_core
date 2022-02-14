@@ -175,6 +175,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
               hmi_apis::Common_Result::WRONG_LANGUAGE,
               hmi_apis::Common_Result::RETRY,
               hmi_apis::Common_Result::SAVED,
+              hmi_apis::Common_Result::TRUNCATED_DATA,
               hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
       if (is_tts_speak_success_unsuported) {
@@ -198,7 +199,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const ResponseParams response_params = PrepareResponseParameters();
+  ResponseParams response_params = PrepareResponseParameters();
 
   SendResponse(
       response_params.success,
@@ -220,7 +221,9 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
 
   response_params_.success =
       PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
-  if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
+
+  if ((ui_perform_info.result_code == hmi_apis::Common_Result::SUCCESS) &&
+      ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     response_params_.result_code = mobile_apis::Result::WARNINGS;
     response_params_.info = app_mngr::commands::MergeInfos(
@@ -231,12 +234,13 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
 
   if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
     response_params_.result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
-  } else {
-    AudioPassThruResults results = PrepareAudioPassThruResultCodeForResponse(
-        ui_perform_info, tts_perform_info);
-    response_params_.success = results.second;
-    response_params_.result_code = results.first;
   }
+
+  AudioPassThruResults results = PrepareAudioPassThruResultCodeForResponse(
+      ui_perform_info, tts_perform_info);
+  response_params_.success = results.second;
+  response_params_.result_code = results.first;
+
   response_params_.info = app_mngr::commands::MergeInfos(
       ui_perform_info, ui_info_, tts_perform_info, tts_info_);
 
@@ -407,23 +411,19 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   const hmi_apis::Common_Result::eType tts_result = tts_response.result_code;
   bool result = false;
 
-  if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result == hmi_apis::Common_Result::SUCCESS)) {
+  if ((application_manager::commands::IsHMIResultSuccess(ui_result) ||
+       (ui_result == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE)) &&
+      (application_manager::commands::IsHMIResultSuccess(tts_result) ||
+       (tts_result == hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) ||
+       (tts_result == hmi_apis::Common_Result::INVALID_ENUM))) {
     result = true;
   }
 
   if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result == hmi_apis::Common_Result::INVALID_ENUM)) {
-    result = true;
-  }
-
-  if ((ui_result == hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result != hmi_apis::Common_Result::SUCCESS) &&
-      (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) {
-    common_result = hmi_apis::Common_Result::WARNINGS;
-    result = true;
-  } else if (ui_response.is_ok &&
-             tts_result == hmi_apis::Common_Result::WARNINGS) {
+      (((tts_result != hmi_apis::Common_Result::SUCCESS) &&
+        (tts_result != hmi_apis::Common_Result::INVALID_ENUM)) ||
+       (ui_response.is_ok &&
+        tts_result == hmi_apis::Common_Result::WARNINGS))) {
     common_result = hmi_apis::Common_Result::WARNINGS;
     result = true;
   } else if (ui_result == hmi_apis::Common_Result::INVALID_ENUM) {
@@ -431,6 +431,7 @@ PerformAudioPassThruRequest::PrepareAudioPassThruResultCodeForResponse(
   } else {
     common_result = ui_result;
   }
+
   result_code = MessageHelper::HMIToMobileResult(common_result);
   return std::make_pair(result_code, result);
 }
