@@ -200,9 +200,6 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
   }
 
   ResponseParams response_params = PrepareResponseParameters();
-  if (message[strings::params].keyExists(hmi_response::message)) {
-    response_params.success = false;
-  }
 
   SendResponse(
       response_params.success,
