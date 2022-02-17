@@ -406,9 +406,10 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
       const uint32_t app_id = 0,
       const std::string url = std::string(),
       const std::string snapshot_path = std::string()) = 0;
-#else
-  virtual void UpdateLastPTUApp(const uint32_t app_id) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
+#ifndef PROPRIETARY_MODE
+  virtual void UpdateLastPTUApp(const uint32_t app_id) = 0;
+#endif  // PROPRIETARY_MODE
 
   /**
    * @brief Retrieve potential application id to be used for snapshot sending
