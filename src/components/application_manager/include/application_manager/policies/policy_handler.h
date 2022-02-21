@@ -429,9 +429,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void CacheRetryInfo(const uint32_t app_id = 0,
                       const std::string url = std::string(),
                       const std::string snapshot_path = std::string()) OVERRIDE;
-#else   // EXTERNAL_PROPRIETARY_MODE
-  void UpdateLastPTUApp(const uint32_t app_id) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
+#ifndef PROPRIETARY_MODE
+  void UpdateLastPTUApp(const uint32_t app_id) OVERRIDE;
+#endif  // PROPRIETARY_MODE
 
   uint32_t GetAppIdForSending() const OVERRIDE;
 

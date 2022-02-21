@@ -200,7 +200,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const uint32_t app_id,
                     const std::string url,
                     const std::string snapshot_path));
-#else
+#endif
+#ifndef PROPRIETARY_MODE
   MOCK_METHOD1(UpdateLastPTUApp, void(const uint32_t app_id));
 #endif
   MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
