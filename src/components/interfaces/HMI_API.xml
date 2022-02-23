@@ -1178,10 +1178,10 @@
     <description>No GPS at all</description>
   </element>
   <element name="2D" internal_name="Dimension_2D">
-    <description>Longitude and lattitude</description>
+    <description>Longitude and latitude</description>
   </element>
   <element name="3D" internal_name="Dimension_3D">
-    <description>Longitude and lattitude and altitude</description>
+    <description>Longitude and latitude and altitude</description>
   </element>
 </enum>
 
