@@ -1487,6 +1487,11 @@ void ConnectionHandlerImpl::AddCloudAppDevice(
     const transport_manager::transport_adapter::CloudAppProperties&
         cloud_properties) {
   cloud_app_id_map_lock_.Acquire();
+  if (cloud_app_id_map_.find(policy_app_id) != cloud_app_id_map_.end()) {
+    // Cloud app already exists
+    cloud_app_id_map_lock_.Release();
+    return;
+  }
   cloud_app_id_map_[policy_app_id] =
       std::make_pair(cloud_properties.endpoint, 0);
   cloud_app_id_map_lock_.Release();
