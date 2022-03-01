@@ -1488,7 +1488,8 @@ void ConnectionHandlerImpl::AddCloudAppDevice(
         cloud_properties) {
   cloud_app_id_map_lock_.Acquire();
   auto it = cloud_app_id_map_.find(policy_app_id);
-  if (cloud_app_id_map_.end() == it || cloud_properties.endpoint != it->second.first) {
+  if (cloud_app_id_map_.end() == it ||
+      cloud_properties.endpoint != it->second.first) {
     // Init map entry if does not exist or if endpoint changed
     cloud_app_id_map_[policy_app_id] =
         std::make_pair(cloud_properties.endpoint, 0);
