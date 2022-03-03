@@ -2463,6 +2463,98 @@ TEST_F(ConnectionHandlerTest, CloseSession_LastSession_ConnectionOpened) {
   EXPECT_EQ(0u, connection->session_map().size());
   EXPECT_EQ(1u, connection_list.size());
 }
+
+TEST_F(ConnectionHandlerTest, AddCloudAppDevice_GetCloudAppID_Success) {
+  const transport_manager::transport_adapter::CloudAppProperties properties{
+      "ws://192.168.1.100:9876", "", true, "iAmAAuthToken!", "WS", "CLOUD"};
+  std::string policyID = "iAmAPolicyID-12345";
+  EXPECT_CALL(mock_transport_manager_, AddCloudDevice(_));
+  connection_handler_->AddCloudAppDevice(policyID, properties);
+
+  const std::string result = connection_handler_->GetCloudAppID(0);
+  EXPECT_EQ(result, policyID);
+}
+
+TEST_F(ConnectionHandlerTest, AddCloudAppDevice_OnConnectPending_Success) {
+  std::string endpoint = "ws://192.168.1.100:9876";
+  const transport_manager::transport_adapter::CloudAppProperties properties{
+      endpoint, "", true, "iAmAAuthToken!", "WS", "CLOUD"};
+  std::string policyID = "iAmAPolicyID-12345";
+  const transport_manager::DeviceInfo device_info(1, endpoint, endpoint, "WS");
+
+  connection_handler_->OnDeviceAdded(device_info);
+
+  EXPECT_CALL(mock_transport_manager_, AddCloudDevice(_));
+  connection_handler_->AddCloudAppDevice(policyID, properties);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  EXPECT_CALL(mock_connection_handler_observer,
+              CreatePendingApplication(1, device_info, _));
+  connection_handler_->OnConnectionPending(device_info, 1);
+
+  const std::string result = connection_handler_->GetCloudAppID(1);
+  EXPECT_EQ(result, policyID);
+}
+
+TEST_F(ConnectionHandlerTest, AddCloudAppDevice_Repeated_Success) {
+  std::string endpoint = "ws://192.168.1.100:9876";
+  const transport_manager::transport_adapter::CloudAppProperties properties{
+      endpoint, "", true, "iAmAAuthToken!", "WS", "CLOUD"};
+  std::string policyID = "iAmAPolicyID-12345";
+  const transport_manager::DeviceInfo device_info(1, endpoint, endpoint, "WS");
+
+  connection_handler_->OnDeviceAdded(device_info);
+
+  EXPECT_CALL(mock_transport_manager_, AddCloudDevice(_)).Times(2);
+  connection_handler_->AddCloudAppDevice(policyID, properties);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  EXPECT_CALL(mock_connection_handler_observer,
+              CreatePendingApplication(1, device_info, _));
+  connection_handler_->OnConnectionPending(device_info, 1);
+
+  // Call AddCloudAppDevice and verify policy id is still recoverable
+  connection_handler_->AddCloudAppDevice(policyID, properties);
+  const std::string result = connection_handler_->GetCloudAppID(1);
+  EXPECT_EQ(result, policyID);
+}
+
+TEST_F(ConnectionHandlerTest, AddCloudAppDevice_NewEndpoint_Success) {
+  std::string endpoint = "ws://192.168.1.100:9876";
+  const transport_manager::transport_adapter::CloudAppProperties properties{
+      endpoint, "", true, "iAmAAuthToken!", "WS", "CLOUD"};
+  std::string policyID = "iAmAPolicyID-12345";
+  const transport_manager::DeviceInfo device_info(1, endpoint, endpoint, "WS");
+
+  connection_handler_->OnDeviceAdded(device_info);
+
+  EXPECT_CALL(mock_transport_manager_, AddCloudDevice(_)).Times(2);
+  connection_handler_->AddCloudAppDevice(policyID, properties);
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+  EXPECT_CALL(mock_connection_handler_observer,
+              CreatePendingApplication(1, device_info, _));
+  connection_handler_->OnConnectionPending(device_info, 1);
+
+  // Call AddCloudAppDevice with new endpoint and verify connection id re-init
+  // to 0
+  std::string endpoint2 = "ws://192.168.1.111:9888";
+  const transport_manager::transport_adapter::CloudAppProperties properties2{
+      endpoint2, "", true, "iAmAAuthToken2!", "WS", "CLOUD"};
+  connection_handler_->AddCloudAppDevice(policyID, properties2);
+  const std::string result = connection_handler_->GetCloudAppID(0);
+  EXPECT_EQ(result, policyID);
+}
+
 }  // namespace connection_handler_test
 }  // namespace components
 }  // namespace test
