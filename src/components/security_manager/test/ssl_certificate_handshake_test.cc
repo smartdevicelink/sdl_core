@@ -450,7 +450,7 @@ TEST_P(SSLHandshakeTest, CAVerification_ClientSide_NoCACertificate) {
       << client_manager_->LastError();
 
   GTEST_TRACE(HandshakeProcedure_ClientSideFail(
-      security_manager::SSLContext::Handshake_Result_Fail));
+      security_manager::SSLContext::Handshake_Result_CertNotSigned));
 
   ASSERT_TRUE(InitClientManagers(GetParam().client_protocol,
                                  client_certificate,
