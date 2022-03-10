@@ -236,16 +236,18 @@ void RequestControllerImpl::AddNotification(const RequestPtr ptr) {
         "Impossible to add notification due to Low Voltage is active");
     return;
   }
+  AutoLock auto_lock(notification_list_lock_);
   notification_list_.push_back(ptr);
 }
 
 void RequestControllerImpl::RemoveNotification(
     const commands::Command* notification) {
   SDL_LOG_AUTO_TRACE();
-  std::list<RequestPtr>::iterator it = notification_list_.begin();
+  AutoLock auto_lock(notification_list_lock_);
+  auto it = notification_list_.begin();
   for (; notification_list_.end() != it;) {
     if (it->get() == notification) {
-      notification_list_.erase(it++);
+      it = notification_list_.erase(it);
       SDL_LOG_DEBUG("Notification removed");
       return;
     } else {

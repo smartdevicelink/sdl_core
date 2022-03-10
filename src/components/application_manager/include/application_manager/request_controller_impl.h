@@ -234,6 +234,7 @@ class RequestControllerImpl : public RequestController, threads::AsyncRunner {
    * @brief Set of HMI notifications with timeout.
    */
   std::list<RequestPtr> notification_list_;
+  sync_primitives::Lock notification_list_lock_;
 
   /**
    * @brief Map keeping track of how many duplicate messages were sent for a
