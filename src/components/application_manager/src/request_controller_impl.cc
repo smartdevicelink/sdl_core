@@ -374,7 +374,7 @@ void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
     if ((request.use_count() != 0) && (request->connection_key() == app_id)) {
-      mobile_request_list_.erase(request_it++);
+      request_it = mobile_request_list_.erase(request_it);
     } else {
       ++request_it;
     }
