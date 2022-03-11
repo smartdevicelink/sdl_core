@@ -154,7 +154,7 @@ bool HandshakeHandler::OnHandshakeDone(
           case security_manager::SSLContext::Handshake_Result_Fail:
             return "";
           default:
-            return "";
+            return "Unknown handshake result";
         }
       };
 
