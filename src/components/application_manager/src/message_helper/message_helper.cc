@@ -1059,10 +1059,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
-  if (!set_icon) {
-    return NULL;
-  }
-
   smart_objects::SmartObject& object = *set_icon;
   object[strings::sync_file_name][strings::value] = path_to_icon;
   // TODO(PV): need to store actual image type
@@ -1419,9 +1415,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!result) {
-    return NULL;
-  }
+
   smart_objects::SmartObject& vr_help = *result;
   const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
   if (vr_help_title) {
@@ -2266,9 +2260,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
@@ -3050,9 +3041,6 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetStatusUpdate;
@@ -3090,9 +3078,6 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_OnStatusUpdate;

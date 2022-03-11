@@ -1959,7 +1959,10 @@ bool ApplicationManagerImpl::StartNaviService(
 
       const ApplicationSet apps = applications().GetData();
       for (auto app : apps) {
-        if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+        if (!app) {
+          SDL_LOG_ERROR("NULL pointer for application");
+          continue;
+        } else if (!app->is_navi() && !app->mobile_projection_enabled()) {
           SDL_LOG_DEBUG("Continue, Not Navi App Id: " << app->app_id());
           continue;
         }
@@ -3174,12 +3177,6 @@ void ApplicationManagerImpl::SendOnSDLClose() {
       commands::CommandImpl::hmi_protocol_type_;
   (*msg)[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
-
-  if (!msg) {
-    SDL_LOG_WARN("Null-pointer message received.");
-    NOTREACHED();
-    return;
-  }
 
   // SmartObject |message| has no way to declare priority for now
   std::shared_ptr<Message> message_to_send(

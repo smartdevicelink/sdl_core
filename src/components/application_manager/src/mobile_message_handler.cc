@@ -135,15 +135,15 @@ application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
     const ::protocol_handler::RawMessagePtr message) {
   SDL_LOG_AUTO_TRACE();
+
+  if (!message) {
+    NOTREACHED();
+    return NULL;
+  }
   application_manager::Message* outgoing_message =
       new application_manager::Message(
           protocol_handler::MessagePriority::FromServiceType(
               message->service_type()));
-  if (!message) {
-    NOTREACHED();
-    delete outgoing_message;
-    return NULL;
-  }
 
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
