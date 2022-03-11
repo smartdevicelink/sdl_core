@@ -315,6 +315,10 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
   while (!message_queue_.empty()) {
     Message message_ptr;
     message_queue_.pop(message_ptr);
+    if (!message_ptr) {
+      SDL_LOG_ERROR("Invalid message in message queue");
+      continue;
+    }
     if (!shutdown_) {
       boost::system::error_code ec;
       if (handler_.cloud_properties.cloud_transport_type == "WS") {
