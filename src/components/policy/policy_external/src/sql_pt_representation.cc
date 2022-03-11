@@ -1611,9 +1611,7 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
 
   utils::dbms::SQLQuery query(db());
   bool delete_query_exec_result = true;
-  if (!messages.messages->empty()) {
-    delete_query_exec_result = query.Exec(sql_pt::kDeleteMessageString);
-  }
+  delete_query_exec_result = query.Exec(sql_pt::kDeleteMessageString);
 
   if (!delete_query_exec_result) {
     SDL_LOG_WARN("Failed to delete messages from DB.");
