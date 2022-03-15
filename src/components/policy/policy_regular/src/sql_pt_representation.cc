@@ -1540,7 +1540,7 @@ bool SQLPTRepresentation::SaveServiceEndpointProperties(
     const policy_table::ServiceEndpointProperties& endpoint_properties) {
   utils::dbms::SQLQuery query(db());
 
-  if (endpoint_properties.empty()) {
+  if (endpoint_properties.is_initialized() && endpoint_properties.empty()) {
     bool delete_query_exec_result =
         query.Exec(sql_pt::kDeleteEndpointProperties);
 
