@@ -99,6 +99,7 @@ extern const std::string kInsertDeviceData;
 extern const std::string kInsertAppLevel;
 extern const std::string kDeleteSecondsBetweenRetries;
 extern const std::string kDeleteEndpoint;
+extern const std::string kDeleteEndpointProperties;
 extern const std::string kDeleteAppLevel;
 extern const std::string kDeleteMessageString;
 extern const std::string kDeleteFunctionalGroup;

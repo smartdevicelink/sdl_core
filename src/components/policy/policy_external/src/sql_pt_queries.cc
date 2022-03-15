@@ -918,6 +918,9 @@ const std::string kDeleteSecondsBetweenRetries =
 
 const std::string kDeleteEndpoint = "DELETE FROM `endpoint`";
 
+const std::string kDeleteEndpointProperties =
+    "DELETE FROM `endpoint_properties`";
+
 const std::string kDeleteAppLevel = "DELETE FROM `app_level`";
 
 const std::string kDeleteMessageString = "DELETE FROM `message`";

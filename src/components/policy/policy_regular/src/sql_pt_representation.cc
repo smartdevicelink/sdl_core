@@ -1539,6 +1539,18 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
 bool SQLPTRepresentation::SaveServiceEndpointProperties(
     const policy_table::ServiceEndpointProperties& endpoint_properties) {
   utils::dbms::SQLQuery query(db());
+
+  if (endpoint_properties.is_initialized() && endpoint_properties.empty()) {
+    bool delete_query_exec_result =
+        query.Exec(sql_pt::kDeleteEndpointProperties);
+
+    if (!delete_query_exec_result) {
+      SDL_LOG_WARN("Failed to delete endpoint properties from DB.");
+      return false;
+    }
+    return true;
+  }
+
   if (!query.Prepare(sql_pt::kInsertEndpointVersion)) {
     SDL_LOG_WARN(
         "Incorrect insert of endpoint property to endpoint_properties.");
