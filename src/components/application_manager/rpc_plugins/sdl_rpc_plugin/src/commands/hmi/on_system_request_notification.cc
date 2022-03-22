@@ -83,9 +83,14 @@ void OnSystemRequestNotification::Run() {
     if (msg_params.keyExists(strings::url)) {
       // For backward-compatibility, the URL is cached for retries if provided
       // by HMI
-      policy_handler_.CacheRetryInfo(msg_params.keyExists(strings::app_id)
-                                         ? msg_params[strings::app_id].asUInt()
-                                         : 0,
+      uint32_t app_id;
+      if (msg_params.keyExists(strings::app_id)) {
+        app_id = msg_params[strings::app_id].asUInt();
+      } else {
+        app_id = policy_handler_.ChoosePTUApplication(
+            policy::PTUIterationType::DefaultIteration);
+      }
+      policy_handler_.CacheRetryInfo(app_id,
                                      msg_params[strings::url].asString(),
                                      msg_params[strings::file_name].asString());
     } else {
