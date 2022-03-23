@@ -59,7 +59,6 @@ WebsocketClientConnection::WebsocketClientConnection(
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , io_pool_(1) {
-  // SSL_CTX_set_security_level(ctx_.native_handle(), 1);
 #ifdef ENABLE_SECURITY
   const char* wss_ciphers =
       "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-"
