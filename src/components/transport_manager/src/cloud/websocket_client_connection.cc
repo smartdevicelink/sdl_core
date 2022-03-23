@@ -50,7 +50,7 @@ WebsocketClientConnection::WebsocketClientConnection(
     , resolver_(ioc_)
     , ws_(ioc_)
 #ifdef ENABLE_SECURITY
-    , ctx_(ssl::context::sslv23_client)
+    , ctx_(ssl::context::tlsv12_client)
     , wss_(ioc_, ctx_)
 #endif  // ENABLE_SECURITY
     , shutdown_(false)
@@ -59,6 +59,14 @@ WebsocketClientConnection::WebsocketClientConnection(
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , io_pool_(1) {
+#ifdef ENABLE_SECURITY
+  const char* wss_ciphers =
+      "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-"
+      "CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-"
+      "SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-"
+      "AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256";
+  SSL_CTX_set_cipher_list(ctx_.native_handle(), wss_ciphers);
+#endif
 }
 
 WebsocketClientConnection::~WebsocketClientConnection() {
