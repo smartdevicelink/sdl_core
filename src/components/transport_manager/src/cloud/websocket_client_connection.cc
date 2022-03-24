@@ -55,7 +55,8 @@ WebsocketClientConnection::WebsocketClientConnection(
 #endif  // ENABLE_SECURITY
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
-    , write_thread_(threads::CreateThread("WS Async Send", thread_delegate_))
+    , write_thread_(
+          threads::CreateThread("Client WS Async Send", thread_delegate_))
     , device_uid_(device_uid)
     , app_handle_(app_handle)
     , io_pool_(1) {
@@ -141,7 +142,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       SDL_LOG_ERROR("Failed to add certificate authority: "
                     << cloud_properties.certificate);
       SDL_LOG_ERROR(str_err);
-      Shutdown();
+      websocket::teardown(
+          boost::beast::role_type::client, wss_.next_layer().next_layer(), ec);
       return TransportAdapter::FAIL;
     }
 
@@ -153,7 +155,9 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       SDL_LOG_ERROR("Could not complete SSL Handshake failed with host/port: "
                     << host << ":" << port);
       SDL_LOG_ERROR(str_err);
-      Shutdown();
+      websocket::teardown(
+          boost::beast::role_type::client, wss_.next_layer().next_layer(), ec);
+
       return TransportAdapter::FAIL;
     }
   }
@@ -287,7 +291,10 @@ void WebsocketClientConnection::Shutdown() {
 
   if (thread_delegate_) {
     thread_delegate_->SetShutdown();
-    write_thread_->Stop(threads::Thread::kThreadSoftStop);
+
+    if (write_thread_->IsRunning()) {
+      write_thread_->Stop(threads::Thread::kThreadSoftStop);
+    }
     delete thread_delegate_;
     thread_delegate_ = NULL;
     threads::DeleteThread(write_thread_);
