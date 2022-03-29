@@ -2676,6 +2676,7 @@ policy_table::VehicleDataItem SQLPTRepresentation::PopulateVDIFromQuery(
 
 bool SQLPTRepresentation::InsertVehicleDataItem(
     const policy_table::VehicleDataItem& vehicle_data_item) {
+  SDL_LOG_AUTO_TRACE();
   utils::dbms::SQLQuery query(db());
 
   if (!vehicle_data_item.is_initialized() || !vehicle_data_item.is_valid()) {
