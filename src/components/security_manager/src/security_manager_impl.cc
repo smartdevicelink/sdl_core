@@ -607,10 +607,11 @@ bool SecurityManagerImpl::ProcessInternalError(
   Json::Value root;
   utils::JsonReader reader;
 
-  if (!reader.parse(str, &root)) {
+  if (!reader.parse(str, &root) || !root.isObject()) {
     SDL_LOG_DEBUG("Json parsing fails.");
     return false;
   }
+
   uint8_t id = root[kErrId].asInt();
   SDL_LOG_DEBUG("Received InternalError id " << std::to_string(id) << ", text: "
                                              << root[kErrText].asString());
