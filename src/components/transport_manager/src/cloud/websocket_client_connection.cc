@@ -61,12 +61,12 @@ WebsocketClientConnection::WebsocketClientConnection(
     , app_handle_(app_handle)
     , io_pool_(1) {
 #ifdef ENABLE_SECURITY
-  const char* wss_ciphers =
+  wss_ciphers_ =
       "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-"
       "CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-"
       "SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-"
       "AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256";
-  SSL_CTX_set_cipher_list(ctx_.native_handle(), wss_ciphers);
+  SSL_CTX_set_cipher_list(ctx_.native_handle(), wss_ciphers_);
 #endif
 }
 
@@ -142,9 +142,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       SDL_LOG_ERROR("Failed to add certificate authority: "
                     << cloud_properties.certificate);
       SDL_LOG_ERROR(str_err);
-      // Reset Websocket stream
-      wss_.reset();
-      wss_ = std::make_shared<WSS>(ioc_, ctx_);
+      ResetWebsocketStream(cloud_properties.cloud_transport_type);
       return TransportAdapter::FAIL;
     }
 
@@ -156,10 +154,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
       SDL_LOG_ERROR("Could not complete SSL Handshake failed with host/port: "
                     << host << ":" << port);
       SDL_LOG_ERROR(str_err);
-      // Reset SSL Context and websocket stream
-      ctx_ = ssl::context(ssl::context::tlsv12_client);
-      wss_.reset();
-      wss_ = std::make_shared<WSS>(ioc_, ctx_);
+      ResetWebsocketStream(cloud_properties.cloud_transport_type);
       return TransportAdapter::FAIL;
     }
   }
@@ -179,6 +174,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     SDL_LOG_ERROR("Could not complete handshake with host/port: " << host << ":"
                                                                   << port);
     SDL_LOG_ERROR(str_err);
+    ResetWebsocketStream(cloud_properties.cloud_transport_type);
     return TransportAdapter::FAIL;
   }
 
@@ -314,6 +310,22 @@ void WebsocketClientConnection::Shutdown() {
     buffer_.consume(buffer_.size());
   }
   controller_->DisconnectDone(device_uid_, app_handle_);
+}
+
+void WebsocketClientConnection::ResetWebsocketStream(
+    std::string cloud_transport_type) {
+  if (cloud_transport_type == "WS") {
+    ws_.reset();
+    ws_ = std::make_shared<WS>(ioc_);
+  }
+#ifdef ENABLE_SECURITY
+  else if (cloud_transport_type == "WSS") {
+    ctx_ = ssl::context(ssl::context::tlsv12_client);
+    SSL_CTX_set_cipher_list(ctx_.native_handle(), wss_ciphers_);
+    wss_.reset();
+    wss_ = std::make_shared<WSS>(ioc_, ctx_);
+  }
+#endif  // ENABLE_SECURITY
 }
 
 WebsocketClientConnection::LoopThreadDelegate::LoopThreadDelegate(
