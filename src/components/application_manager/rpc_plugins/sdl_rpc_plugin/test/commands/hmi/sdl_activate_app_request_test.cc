@@ -542,6 +542,28 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
   MockAppPtr invalid_mock_app;
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
       .WillOnce(Return(invalid_mock_app));
+  EXPECT_CALL(app_mngr_, pending_application_by_hmi_app(_))
+      .WillOnce(Return(nullptr));
+
+  command->on_event(event);
+}
+
+TEST_F(SDLActivateAppRequestTest, OnEvent_PendingApp_UNSUCCESS) {
+  MessageSharedPtr event_msg = CreateMessage();
+  (*event_msg)[strings::msg_params][strings::application][strings::app_id] =
+      kAppID;
+
+  std::shared_ptr<SDLActivateAppRequest> command(
+      CreateCommand<SDLActivateAppRequest>());
+
+  Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event.set_smart_object(*event_msg);
+
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, pending_application_by_hmi_app(_))
+      .WillOnce(Return(mock_app));
+  EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, OnActivateApp(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -561,6 +583,8 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).WillOnce(Return(mock_app));
+  EXPECT_CALL(app_mngr_, pending_application_by_hmi_app(_))
+      .WillOnce(Return(nullptr));
 
   auto hmi_state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
   hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
