@@ -144,16 +144,19 @@ class WebsocketClientConnection
   void OnRead(boost::system::error_code ec, std::size_t bytes_transferred);
 
  private:
+  void ResetWebsocketStream(std::string cloud_transport_type);
+
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
   tcp::resolver resolver_;
   boost::beast::flat_buffer buffer_;
   std::string host_;
   std::string text_;
-  WS ws_;
+  std::shared_ptr<WS> ws_;
 #ifdef ENABLE_SECURITY
+  const char* wss_ciphers_;
   ssl::context ctx_;
-  WSS wss_;
+  std::shared_ptr<WSS> wss_;
 #endif  // ENABLE_SECURITY
 
   std::atomic_bool shutdown_;
