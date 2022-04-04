@@ -297,7 +297,13 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   if (event.id() != BasicCommunication_OnAppRegistered) {
     return;
   }
-  unsubscribe_from_event(BasicCommunication_OnAppRegistered);
+
+  ApplicationSharedPtr pending_app =
+      application_manager_.pending_application_by_hmi_app(app_id());
+  if (pending_app) {
+    SDL_LOG_ERROR("Application is still pending connection: " << app_id());
+    return;
+  }
 
   // Have to use HMI app id from event, since HMI app id from original request
   // message will be changed after app, initially requested for launch via
@@ -311,6 +317,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
+
+  unsubscribe_from_event(BasicCommunication_OnAppRegistered);
 
   auto main_state =
       app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);

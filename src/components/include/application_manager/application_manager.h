@@ -216,6 +216,9 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
+  virtual ApplicationSharedPtr pending_application_by_hmi_app(
+      uint32_t hmi_app_id) const = 0;
+
   virtual ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 

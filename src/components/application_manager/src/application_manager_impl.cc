@@ -301,6 +301,13 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return FindApp(accessor, finder);
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_hmi_app(
+    uint32_t hmi_app_id) const {
+  HmiAppIdPredicate finder(hmi_app_id);
+  DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
+  return FindPendingApp(accessor, finder);
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
