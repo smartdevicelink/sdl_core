@@ -543,7 +543,7 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidAppId_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_))
       .WillOnce(Return(invalid_mock_app));
   EXPECT_CALL(app_mngr_, pending_application_by_hmi_app(_))
-      .WillOnce(Return(nullptr));
+      .WillOnce(Return(ApplicationSharedPtr()));
 
   command->on_event(event);
 }
@@ -584,7 +584,7 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).WillOnce(Return(mock_app));
   EXPECT_CALL(app_mngr_, pending_application_by_hmi_app(_))
-      .WillOnce(Return(nullptr));
+      .WillOnce(Return(ApplicationSharedPtr()));
 
   auto hmi_state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
   hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
