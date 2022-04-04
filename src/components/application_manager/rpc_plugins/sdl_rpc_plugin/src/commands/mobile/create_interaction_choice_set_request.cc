@@ -368,7 +368,8 @@ bool CreateInteractionChoiceSetRequest::ProcessSuccesfulHMIResponse(
   return true;
 }
 
-void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
+void CreateInteractionChoiceSetRequest::CountReceivedVRResponses(
+    const hmi_apis::Common_Result::eType vr_result) {
   ++received_chs_count_;
   SDL_LOG_DEBUG("Got VR.AddCommand response, there are "
                 << expected_chs_count_ - received_chs_count_
@@ -378,7 +379,7 @@ void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
         connection_key(), correlation_id(), default_timeout());
     SDL_LOG_DEBUG("Timeout for request was updated");
   } else {
-    OnAllHMIResponsesReceived();
+    OnAllHMIResponsesReceived(vr_result);
   }
 }
 
@@ -392,7 +393,15 @@ void CreateInteractionChoiceSetRequest::on_event(
   const Common_Result::eType result = static_cast<Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
   const bool is_no_error = Compare<Common_Result::eType, EQ, ONE>(
-      result, Common_Result::SUCCESS, Common_Result::WARNINGS);
+      result,
+      Common_Result::SUCCESS,
+      Common_Result::WARNINGS,
+      Common_Result::WRONG_LANGUAGE,
+      Common_Result::RETRY,
+      Common_Result::SAVED,
+      Common_Result::TRUNCATED_DATA,
+      Common_Result::UNSUPPORTED_RESOURCE);
+
   uint32_t corr_id = static_cast<uint32_t>(
       message[strings::params][strings::correlation_id].asUInt());
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
@@ -407,7 +416,7 @@ void CreateInteractionChoiceSetRequest::on_event(
         ProcessHmiError(result);
       }
     }
-    CountReceivedVRResponses();
+    CountReceivedVRResponses(result);
   }
 }
 
@@ -464,7 +473,8 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
   sent_commands_map_.clear();
 }
 
-void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
+void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived(
+    const hmi_apis::Common_Result::eType vr_result) {
   SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
@@ -478,7 +488,7 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   if (!error_from_hmi_ && should_send_warnings_) {
     SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
   } else if (!error_from_hmi_) {
-    SendResponse(true, mobile_apis::Result::SUCCESS);
+    SendResponse(true, MessageHelper::HMIToMobileResult(vr_result));
   } else {
     DeleteChoices();
   }

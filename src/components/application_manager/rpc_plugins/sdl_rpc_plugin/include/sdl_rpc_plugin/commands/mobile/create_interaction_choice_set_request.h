@@ -97,8 +97,10 @@ class CreateInteractionChoiceSetRequest
    * @brief Calls after all responses from HMI were received.
    * Terminates request and sends successful response to mobile
    * if all responses were SUCCESS or calls DeleteChoices in other case.
+   * @param vr_result the result code from hmi.
    */
-  void OnAllHMIResponsesReceived();
+  void OnAllHMIResponsesReceived(
+      const hmi_apis::Common_Result::eType vr_result);
 
   /**
    * @brief The VRCommand struct
@@ -201,8 +203,9 @@ class CreateInteractionChoiceSetRequest
    * @brief CountReceivedVRResponses counts received HMI responses. Updated
    * request timeout if not all responses received
    * Send response to mobile if all responses received.
+   * @param vr_result the result code from hmi.
    */
-  void CountReceivedVRResponses();
+  void CountReceivedVRResponses(const hmi_apis::Common_Result::eType vr_result);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };
