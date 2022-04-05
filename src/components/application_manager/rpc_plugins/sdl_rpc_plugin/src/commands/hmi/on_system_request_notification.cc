@@ -93,6 +93,7 @@ void OnSystemRequestNotification::Run() {
       policy_handler_.CacheRetryInfo(app_id,
                                      msg_params[strings::url].asString(),
                                      msg_params[strings::file_name].asString());
+      msg_params[strings::app_id] = app_id;
     } else {
       // Clear cached retry info
       policy_handler_.CacheRetryInfo(
