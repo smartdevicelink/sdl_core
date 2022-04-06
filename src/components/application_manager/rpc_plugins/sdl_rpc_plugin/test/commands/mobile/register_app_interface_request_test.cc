@@ -168,6 +168,10 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, is_cloud_app()).WillByDefault(Return(false));
     ON_CALL(*mock_app, hybrid_app_preference())
         .WillByDefault(ReturnRef(kHybridAppPreference));
+    ON_CALL(*mock_app, vr_synonyms())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
+    ON_CALL(*mock_app, tts_name())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
     ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId1));
     ON_CALL(*mock_app, msg_version())
         .WillByDefault(ReturnRef(mock_semantic_version));

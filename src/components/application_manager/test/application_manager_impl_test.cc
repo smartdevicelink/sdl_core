@@ -29,8 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "application_manager/application_manager_impl.h"
+
 #include <bson_object.h>
 #include <stdint.h>
+
 #include <memory>
 #include <set>
 #include <string>
@@ -38,7 +41,6 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
@@ -51,6 +53,7 @@
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "encryption/hashing.h"
 #include "gtest/gtest.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "media_manager/mock_media_manager.h"
@@ -64,8 +67,6 @@
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/lock.h"
-
-#include "encryption/hashing.h"
 
 namespace test {
 namespace components {
@@ -324,7 +325,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
   }
 
   bool CheckResumptionRequiredTransportAvailableTest(
-      smart_objects::SmartObject* app_types_array,
+      smart_objects::SmartObjectSPtr app_types_array,
       connection_handler::DeviceHandle primary_device_handle,
       std::string primary_transport_device_string,
       connection_handler::DeviceHandle secondary_device_handle,
@@ -1402,7 +1403,7 @@ static std::map<std::string, std::vector<std::string> > CreateTransportMap() {
 }
 
 bool ApplicationManagerImplTest::CheckResumptionRequiredTransportAvailableTest(
-    smart_objects::SmartObject* app_types_array,
+    smart_objects::SmartObjectSPtr app_types_array,
     connection_handler::DeviceHandle primary_device_handle,
     std::string primary_transport_device_string,
     connection_handler::DeviceHandle secondary_device_handle,
@@ -1446,8 +1447,9 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Success) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::DEFAULT;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::DEFAULT;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
@@ -1462,7 +1464,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We have SPP_BLUETOOTH for primary transport.
   //   -> Conclusion: the app has required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1474,8 +1476,9 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NotListed) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::SOCIAL;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::SOCIAL;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
@@ -1487,7 +1490,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We do not have an entry in .ini file for SOCIAL apps.
   //   -> In this case, resumption is always enabled for backward compatibility.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1499,8 +1502,9 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_Disabled) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::TESTING;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::TESTING;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 0;
@@ -1512,7 +1516,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We do not have any transports allowed for TESTING apps.
   //   -> In this case, resumption is always disabled.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1524,7 +1528,8 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_PrimaryOnly_NoAppTypes) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
   // we don't specify any app type
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
@@ -1537,7 +1542,7 @@ TEST_F(ApplicationManagerImplTest,
   // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
   //   -> The app does not have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1571,8 +1576,9 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_TwoTransports_Success) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::MEDIA;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
@@ -1587,7 +1593,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We have TCP_WIFI for secondary transport.
   //   -> Conclusion: the app has required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1599,8 +1605,9 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_TwoTransports_Failure) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
@@ -1615,7 +1622,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We have IAP_USB for primary and TCP_WIFI for secondary transport.
   //   -> Conclusion: the app does not have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1627,9 +1634,10 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Failure) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::MEDIA;
-  app_types_array[1] = mobile_apis::AppHMIType::eType::NAVIGATION;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::MEDIA;
+  (*app_types_array)[1] = mobile_apis::AppHMIType::eType::NAVIGATION;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
@@ -1645,7 +1653,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We have IAP_USB for primary and TCP_WIFI is secondary
   //   -> Conclusion: the app does NOT have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -1657,9 +1665,10 @@ TEST_F(ApplicationManagerImplTest,
        CheckResumptionRequiredTransportAvailableTest_MultipleAppTypes_Empty) {
   using namespace ns_smart_device_link::ns_smart_objects;
 
-  smart_objects::SmartObject app_types_array(SmartType_Array);
-  app_types_array[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
-  app_types_array[1] = mobile_apis::AppHMIType::eType::SYSTEM;
+  smart_objects::SmartObjectSPtr app_types_array =
+      std::make_shared<smart_objects::SmartObject>(SmartType_Array);
+  (*app_types_array)[0] = mobile_apis::AppHMIType::eType::NAVIGATION;
+  (*app_types_array)[1] = mobile_apis::AppHMIType::eType::SYSTEM;
 
   const connection_handler::DeviceHandle primary_device_handle = 1;
   const connection_handler::DeviceHandle secondary_device_handle = 2;
@@ -1675,7 +1684,7 @@ TEST_F(ApplicationManagerImplTest,
   // - We have SPP_BLUETOOTH for primary and TCP_WIFI is secondary
   //   -> Conclusion: the app does NOT have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      &app_types_array,
+      app_types_array,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,

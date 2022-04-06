@@ -97,10 +97,12 @@ class ButtonPressRequestTest
     ON_CALL(mock_hmi_capabilities_, rc_capability())
         .WillByDefault(Return(rc_capabilities_));
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
-    ON_CALL(mock_policy_handler_,
-            CheckHMIType(kPolicyAppId,
-                         mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
-                         nullptr))
+    ON_CALL(*mock_app_, app_types())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
+    ON_CALL(
+        mock_policy_handler_,
+        CheckHMIType(
+            kPolicyAppId, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, _))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));

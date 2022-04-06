@@ -30,18 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/resumption_data_test.h"
+
 #include <algorithm>
 #include <string>
-#include "gtest/gtest.h"
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/usage_statistics.h"
+#include "gtest/gtest.h"
 #include "utils/custom_string.h"
 #include "utils/data_accessor.h"
-
-#include "application_manager/resumption_data_test.h"
 
 namespace test {
 namespace components {
@@ -53,15 +53,6 @@ using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
 
 ResumptionDataTest::~ResumptionDataTest() {
-  delete help_prompt_;
-  delete timeout_prompt_;
-  delete vr_help_;
-  delete vr_help_title_;
-  delete vr_synonyms_;
-  delete keyboard_props_;
-  delete menu_title_;
-  delete menu_icon_;
-
   for (am::CommandsMap::iterator it = test_commands_map.begin();
        test_commands_map.end() != it;
        ++it) {
@@ -266,6 +257,7 @@ void ResumptionDataTest::CheckGlobalProporties(sm::SmartObject& res_list) {
   CheckKeyboardProperties(res_list[am::strings::keyboard_properties]);
   CheckMenuTitle(res_list[am::strings::menu_title]);
   CheckMenuIcon(res_list[am::strings::menu_icon]);
+  CheckMenuLayout(res_list[am::strings::menu_layout]);
 }
 
 void ResumptionDataTest::CheckKeyboardProperties(sm::SmartObject& res_list) {
@@ -315,6 +307,12 @@ void ResumptionDataTest::CheckMenuIcon(sm::SmartObject& res_list) {
   EXPECT_EQ(
       type,
       static_cast<ImageType::eType>(res_list[am::strings::image_type].asInt()));
+}
+
+void ResumptionDataTest::CheckMenuLayout(sm::SmartObject& res_list) {
+  MenuLayout::eType value = static_cast<MenuLayout::eType>(
+      (*menu_layout_)[am::strings::menu_layout].asInt());
+  EXPECT_EQ(value, res_list[am::strings::menu_layout].asInt());
 }
 
 void ResumptionDataTest::CheckHelpPrompt(sm::SmartObject& res_list) {
@@ -420,17 +418,15 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, sub_menu_map()).WillByDefault(Return(sub_menu_m));
   ON_CALL(*app_mock, choice_set_map()).WillByDefault(Return(choice_set_m));
 
-  ON_CALL(*app_mock, help_prompt()).WillByDefault(ReturnPointee(&help_prompt_));
-  ON_CALL(*app_mock, timeout_prompt())
-      .WillByDefault(ReturnPointee(&timeout_prompt_));
-  ON_CALL(*app_mock, vr_help()).WillByDefault(ReturnPointee(&vr_help_));
-  ON_CALL(*app_mock, vr_help_title())
-      .WillByDefault(ReturnPointee(&vr_help_title_));
+  ON_CALL(*app_mock, help_prompt()).WillByDefault(Return(help_prompt_));
+  ON_CALL(*app_mock, timeout_prompt()).WillByDefault(Return(timeout_prompt_));
+  ON_CALL(*app_mock, vr_help()).WillByDefault(Return(vr_help_));
+  ON_CALL(*app_mock, vr_help_title()).WillByDefault(Return(vr_help_title_));
 
-  ON_CALL(*app_mock, keyboard_props())
-      .WillByDefault(ReturnPointee(&keyboard_props_));
-  ON_CALL(*app_mock, menu_title()).WillByDefault(ReturnPointee(&menu_title_));
-  ON_CALL(*app_mock, menu_icon()).WillByDefault(ReturnPointee(&menu_icon_));
+  ON_CALL(*app_mock, keyboard_props()).WillByDefault(Return(keyboard_props_));
+  ON_CALL(*app_mock, menu_title()).WillByDefault(Return(menu_title_));
+  ON_CALL(*app_mock, menu_icon()).WillByDefault(Return(menu_icon_));
+  ON_CALL(*app_mock, menu_layout()).WillByDefault(Return(menu_layout_));
 
   ON_CALL(*app_mock, SubscribedButtons()).WillByDefault(Return(btn_sub));
 
@@ -456,12 +452,12 @@ void ResumptionDataTest::SetDefaultWindowIds() {
 
 void ResumptionDataTest::SetGlobalProporties() {
   SetKeyboardProperties();
-  SetMenuTitleAndIcon();
+  SetMenuParams();
   SetHelpAndTimeoutPrompt();
   SetVRHelpTitle();
 }
 
-void ResumptionDataTest::SetMenuTitleAndIcon() {
+void ResumptionDataTest::SetMenuParams() {
   custom_str::CustomString icon_name("test icon");
   sm::SmartObject sm_icon;
   sm_icon[am::strings::value] = "test icon";
@@ -470,8 +466,13 @@ void ResumptionDataTest::SetMenuTitleAndIcon() {
 
   sm::SmartObject sm_title;
   sm_title = "test title";
-  menu_title_ = new sm::SmartObject(sm_title);
-  menu_icon_ = new sm::SmartObject(sm_icon);
+
+  sm::SmartObject sm_layout;
+  sm_layout = MenuLayout::LIST;
+
+  menu_title_ = std::make_shared<sm::SmartObject>(sm_title);
+  menu_icon_ = std::make_shared<sm::SmartObject>(sm_icon);
+  menu_layout_ = std::make_shared<sm::SmartObject>(sm_layout);
 }
 
 void ResumptionDataTest::SetHelpAndTimeoutPrompt() {
@@ -484,7 +485,7 @@ void ResumptionDataTest::SetHelpAndTimeoutPrompt() {
     help_prompt[i][am::strings::text] = "help prompt name" + std::string(numb);
     help_prompt[i][am::strings::type] = SpeechCapabilities::PRE_RECORDED;
   }
-  help_prompt_ = new sm::SmartObject(help_prompt);
+  help_prompt_ = std::make_shared<sm::SmartObject>(help_prompt);
   for (uint i = 0; i < tts_chunks_count; ++i) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
@@ -492,7 +493,7 @@ void ResumptionDataTest::SetHelpAndTimeoutPrompt() {
     timeout_prompt[i][am::strings::type] = SpeechCapabilities::SC_TEXT;
   }
 
-  timeout_prompt_ = new sm::SmartObject(timeout_prompt);
+  timeout_prompt_ = std::make_shared<sm::SmartObject>(timeout_prompt);
 }
 
 void ResumptionDataTest::SetVRHelpTitle() {
@@ -507,8 +508,8 @@ void ResumptionDataTest::SetVRHelpTitle() {
     vr_help[i][am::strings::position] = i;
   }
 
-  vr_help_ = new sm::SmartObject(vr_help);
-  vr_help_title_ = new sm::SmartObject(vr_help_title);
+  vr_help_ = std::make_shared<sm::SmartObject>(vr_help);
+  vr_help_title_ = std::make_shared<sm::SmartObject>(vr_help_title);
 }
 
 void ResumptionDataTest::SetCommands() {
@@ -618,7 +619,7 @@ void ResumptionDataTest::SetKeyboardProperties() {
   keyboard[am::strings::auto_complete_text] = "complete";
   keyboard[am::strings::limited_character_list][0] = "y";
   keyboard[am::strings::limited_character_list][1] = "n";
-  keyboard_props_ = new sm::SmartObject(keyboard);
+  keyboard_props_ = std::make_shared<sm::SmartObject>(keyboard);
 }
 
 void ResumptionDataTest::SetSubscriptions() {

@@ -217,12 +217,12 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(IsVideoApplication, bool());
   MOCK_METHOD0(LoadPersistentFiles, void());
   // InitialApplicationData methods
-  MOCK_CONST_METHOD0(app_types, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(vr_synonyms, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(app_types, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(vr_synonyms, const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(policy_app_id, std::string());
-  MOCK_CONST_METHOD0(tts_name, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(tts_name, const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(ngn_media_screen_name,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(language, const mobile_apis::Language::eType&());
   MOCK_CONST_METHOD0(ui_language, const mobile_apis::Language::eType&());
   MOCK_CONST_METHOD0(msg_version, const utils::SemanticVersion&());
@@ -240,20 +240,20 @@ class MockApplication : public ::application_manager::Application {
                void(const mobile_apis::Language::eType& ui_language));
   MOCK_METHOD1(set_msg_version, void(const utils::SemanticVersion& version));
   // DynamicApplicationData methods
-  MOCK_CONST_METHOD0(help_prompt, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(timeout_prompt, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(vr_help_title, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(vr_help, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(help_prompt, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(timeout_prompt, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(vr_help_title, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(vr_help, const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(tbt_state, const mobile_apis::TBTState::eType&());
-  MOCK_CONST_METHOD0(show_command, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(tbt_show_command, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(show_command, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(tbt_show_command, const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(
       SubscribedButtons,
       DataAccessor< ::application_manager::ButtonSubscriptions>());
-  MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(menu_layout, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD0(menu_layout, const smart_objects::SmartObjectSPtr());
   MOCK_CONST_METHOD0(day_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(night_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(display_layout, std::string());

@@ -269,7 +269,7 @@ class ResumptionData {
    * @return smartObject from pointer
    */
   smart_objects::SmartObject PointerToSmartObj(
-      const smart_objects::SmartObject* ptr) const;
+      const smart_objects::SmartObjectSPtr ptr) const;
 
   /**
    * @brief creates smart object containing window info

@@ -98,6 +98,8 @@ class SetInteriorVehicleDataRequestTest
     ON_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
         .WillByDefault(Return(AcquireResult::ALLOWED));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app_, app_types())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(kPolicyAppId,
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
