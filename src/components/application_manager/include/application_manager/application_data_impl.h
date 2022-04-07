@@ -50,11 +50,11 @@ class InitialApplicationDataImpl : public virtual Application {
   InitialApplicationDataImpl();
   ~InitialApplicationDataImpl();
 
-  const smart_objects::SmartObject* app_types() const;
-  const smart_objects::SmartObject* vr_synonyms() const;
+  const smart_objects::SmartObjectSPtr app_types() const;
+  const smart_objects::SmartObjectSPtr vr_synonyms() const;
   virtual std::string policy_app_id() const;
-  const smart_objects::SmartObject* tts_name() const;
-  const smart_objects::SmartObject* ngn_media_screen_name() const;
+  const smart_objects::SmartObjectSPtr tts_name() const;
+  const smart_objects::SmartObjectSPtr ngn_media_screen_name() const;
   const mobile_api::Language::eType& language() const;
   const mobile_api::Language::eType& ui_language() const;
   const utils::SemanticVersion& msg_version() const;
@@ -73,11 +73,11 @@ class InitialApplicationDataImpl : public virtual Application {
   mobile_api::LayoutMode::eType perform_interaction_layout() const OVERRIDE;
 
  protected:
-  smart_objects::SmartObject* app_types_;
-  smart_objects::SmartObject* vr_synonyms_;
+  smart_objects::SmartObjectSPtr app_types_;
+  smart_objects::SmartObjectSPtr vr_synonyms_;
   std::string mobile_app_id_;
-  smart_objects::SmartObject* tts_name_;
-  smart_objects::SmartObject* ngn_media_screen_name_;
+  smart_objects::SmartObjectSPtr tts_name_;
+  smart_objects::SmartObjectSPtr ngn_media_screen_name_;
   mobile_api::Language::eType language_;
   mobile_api::Language::eType ui_language_;
   mobile_apis::LayoutMode::eType perform_interaction_layout_;
@@ -92,17 +92,17 @@ class DynamicApplicationDataImpl : public virtual Application {
   typedef std::map<WindowID, smart_objects::SmartObject> AppWindowsTemplates;
   DynamicApplicationDataImpl();
   ~DynamicApplicationDataImpl();
-  const smart_objects::SmartObject* help_prompt() const;
-  const smart_objects::SmartObject* timeout_prompt() const;
-  const smart_objects::SmartObject* vr_help_title() const;
-  const smart_objects::SmartObject* vr_help() const;
+  const smart_objects::SmartObjectSPtr help_prompt() const;
+  const smart_objects::SmartObjectSPtr timeout_prompt() const;
+  const smart_objects::SmartObjectSPtr vr_help_title() const;
+  const smart_objects::SmartObjectSPtr vr_help() const;
   const mobile_api::TBTState::eType& tbt_state() const;
-  const smart_objects::SmartObject* show_command() const;
-  const smart_objects::SmartObject* tbt_show_command() const;
-  const smart_objects::SmartObject* keyboard_props() const;
-  const smart_objects::SmartObject* menu_title() const;
-  const smart_objects::SmartObject* menu_icon() const;
-  const smart_objects::SmartObject* menu_layout() const;
+  const smart_objects::SmartObjectSPtr show_command() const;
+  const smart_objects::SmartObjectSPtr tbt_show_command() const;
+  const smart_objects::SmartObjectSPtr keyboard_props() const;
+  const smart_objects::SmartObjectSPtr menu_title() const;
+  const smart_objects::SmartObjectSPtr menu_icon() const;
+  const smart_objects::SmartObjectSPtr menu_layout() const;
 
   smart_objects::SmartObject day_color_scheme() const OVERRIDE;
   smart_objects::SmartObject night_color_scheme() const OVERRIDE;
@@ -321,17 +321,17 @@ class DynamicApplicationDataImpl : public virtual Application {
   bool is_choice_set_allowed(const uint32_t choice_set_id) const;
 
  protected:
-  smart_objects::SmartObject* help_prompt_;
-  smart_objects::SmartObject* timeout_prompt_;
-  smart_objects::SmartObject* vr_help_title_;
-  smart_objects::SmartObject* vr_help_;
+  smart_objects::SmartObjectSPtr help_prompt_;
+  smart_objects::SmartObjectSPtr timeout_prompt_;
+  smart_objects::SmartObjectSPtr vr_help_title_;
+  smart_objects::SmartObjectSPtr vr_help_;
   mobile_api::TBTState::eType tbt_state_;
-  smart_objects::SmartObject* show_command_;
-  smart_objects::SmartObject* keyboard_props_;
-  smart_objects::SmartObject* menu_title_;
-  smart_objects::SmartObject* menu_icon_;
-  smart_objects::SmartObject* menu_layout_;
-  smart_objects::SmartObject* tbt_show_command_;
+  smart_objects::SmartObjectSPtr show_command_;
+  smart_objects::SmartObjectSPtr keyboard_props_;
+  smart_objects::SmartObjectSPtr menu_title_;
+  smart_objects::SmartObjectSPtr menu_icon_;
+  smart_objects::SmartObjectSPtr menu_layout_;
+  smart_objects::SmartObjectSPtr tbt_show_command_;
   smart_objects::SmartObjectSPtr display_capabilities_;
   AppWindowsTemplates window_templates_;
 

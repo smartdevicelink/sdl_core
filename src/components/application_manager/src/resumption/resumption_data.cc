@@ -250,10 +250,10 @@ smart_objects::SmartObject ResumptionData::CreateWindowInfoSO(
 }
 
 smart_objects::SmartObject ResumptionData::PointerToSmartObj(
-    const smart_objects::SmartObject* ptr) const {
+    const smart_objects::SmartObjectSPtr ptr) const {
   SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject temp;
-  if (ptr != NULL) {
+  if (ptr) {
     temp = *ptr;
   }
   return temp;

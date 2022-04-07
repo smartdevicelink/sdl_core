@@ -801,8 +801,8 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   {
     SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::help_prompt] = application->help_prompt();
-    msg_params[strings::timeout_prompt] = application->timeout_prompt();
+    msg_params[strings::help_prompt] = *(application->help_prompt());
+    msg_params[strings::timeout_prompt] = *(application->timeout_prompt());
     msg_params[strings::app_id] = application->app_id();
 
     SmartObjectSPtr message = CreateMessageForHMI(
@@ -1417,7 +1417,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
           smart_objects::SmartType_Map);
 
   smart_objects::SmartObject& vr_help = *result;
-  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
+  const smart_objects::SmartObjectSPtr vr_help_title = app->vr_help_title();
   if (vr_help_title) {
     vr_help[strings::vr_help_title] = vr_help_title->asString();
   }
@@ -1646,7 +1646,7 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
         CreateChangeRegistration(hmi_apis::FunctionID::UI_ChangeRegistration,
                                  app->ui_language(),
                                  app->app_id(),
-                                 app->app_types(),
+                                 app->app_types().get(),
                                  app_mngr);
 
     if (ui_command) {
@@ -1823,8 +1823,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
     return false;
   }
 
-  const smart_objects::SmartObject* app_types = app->app_types();
-  const smart_objects::SmartObject* ngn_media_screen_name =
+  const smart_objects::SmartObjectSPtr app_types = app->app_types();
+  const smart_objects::SmartObjectSPtr ngn_media_screen_name =
       app->ngn_media_screen_name();
   const smart_objects::SmartObject day_color_scheme = app->day_color_scheme();
   const smart_objects::SmartObject night_color_scheme =

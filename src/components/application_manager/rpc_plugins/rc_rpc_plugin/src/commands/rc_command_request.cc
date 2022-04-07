@@ -146,7 +146,7 @@ void RCCommandRequest::Run() {
   if (!policy_handler_.CheckHMIType(
           app->policy_app_id(),
           mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
-          app->app_types())) {
+          app->app_types().get())) {
     SDL_LOG_WARN("Application has no remote control functions");
     SendResponse(false, mobile_apis::Result::DISALLOWED, "");
     return;

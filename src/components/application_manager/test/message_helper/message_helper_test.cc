@@ -156,10 +156,32 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendPathImagetype_Equal) {
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_EmptyList) {
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
-  EXPECT_CALL(*appSharedMock, vr_help_title()).Times(AtLeast(1));
-  EXPECT_CALL(*appSharedMock, vr_help()).Times(AtLeast(1));
-  EXPECT_CALL(*appSharedMock, help_prompt()).Times(AtLeast(1));
-  EXPECT_CALL(*appSharedMock, timeout_prompt()).Times(AtLeast(1));
+  smart_objects::SmartObjectSPtr emptyObject =
+      std::shared_ptr<smart_objects::SmartObject>();
+  EXPECT_CALL(*appSharedMock, vr_help_title())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, vr_help())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, help_prompt())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, timeout_prompt())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, menu_title())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, menu_icon())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, menu_layout())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
+  EXPECT_CALL(*appSharedMock, keyboard_props())
+      .Times(AtLeast(1))
+      .WillOnce(Return(emptyObject));
 
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
       std::make_shared<MockHelpPromptManager>();
@@ -185,16 +207,23 @@ TEST(MessageHelperTestCreate,
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_NotEmpty) {
   MockApplicationSharedPtr appSharedMock = std::make_shared<MockApplication>();
-  smart_objects::SmartObjectSPtr objPtr =
-      std::make_shared<smart_objects::SmartObject>();
 
-  (*objPtr)[0][strings::vr_help_title] = "111";
-  (*objPtr)[1][strings::vr_help] = "222";
-  (*objPtr)[2][strings::keyboard_properties] = "333";
-  (*objPtr)[3][strings::menu_title] = "444";
-  (*objPtr)[4][strings::menu_icon] = "555";
-  (*objPtr)[5][strings::help_prompt] = "666";
-  (*objPtr)[6][strings::timeout_prompt] = "777";
+  smart_objects::SmartObjectSPtr vrHelpTitle =
+      std::make_shared<smart_objects::SmartObject>("111");
+  smart_objects::SmartObjectSPtr vrHelp =
+      std::make_shared<smart_objects::SmartObject>("222");
+  smart_objects::SmartObjectSPtr keyboardProperties =
+      std::make_shared<smart_objects::SmartObject>("333");
+  smart_objects::SmartObjectSPtr menuTitle =
+      std::make_shared<smart_objects::SmartObject>("444");
+  smart_objects::SmartObjectSPtr menuIcon =
+      std::make_shared<smart_objects::SmartObject>("555");
+  smart_objects::SmartObjectSPtr helpPrompt =
+      std::make_shared<smart_objects::SmartObject>("666");
+  smart_objects::SmartObjectSPtr timeoutPrompt =
+      std::make_shared<smart_objects::SmartObject>("777");
+  smart_objects::SmartObjectSPtr menuLayout =
+      std::make_shared<smart_objects::SmartObject>("888");
 
   smart_objects::SmartObject user_loc =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -202,25 +231,28 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, vr_help_title())
       .Times(AtLeast(3))
-      .WillRepeatedly(Return(&(*objPtr)[0]));
+      .WillRepeatedly(Return(vrHelpTitle));
   EXPECT_CALL(*appSharedMock, vr_help())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&(*objPtr)[1]));
+      .WillRepeatedly(Return(vrHelp));
   EXPECT_CALL(*appSharedMock, help_prompt())
       .Times(AtLeast(3))
-      .WillRepeatedly(Return(&(*objPtr)[5]));
+      .WillRepeatedly(Return(helpPrompt));
   EXPECT_CALL(*appSharedMock, timeout_prompt())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&(*objPtr)[6]));
+      .WillRepeatedly(Return(timeoutPrompt));
   EXPECT_CALL(*appSharedMock, keyboard_props())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&(*objPtr)[2]));
+      .WillRepeatedly(Return(keyboardProperties));
   EXPECT_CALL(*appSharedMock, menu_title())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&(*objPtr)[3]));
+      .WillRepeatedly(Return(menuTitle));
   EXPECT_CALL(*appSharedMock, menu_icon())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&(*objPtr)[4]));
+      .WillRepeatedly(Return(menuIcon));
+  EXPECT_CALL(*appSharedMock, menu_layout())
+      .Times(AtLeast(2))
+      .WillRepeatedly(Return(menuLayout));
   EXPECT_CALL(*appSharedMock, app_id()).WillRepeatedly(Return(0));
   EXPECT_CALL(*appSharedMock, get_user_location())
       .WillRepeatedly(ReturnRef(user_loc));
@@ -242,14 +274,16 @@ TEST(MessageHelperTestCreate,
   smart_objects::SmartObject& first = *ptr[0];
   smart_objects::SmartObject& second = *ptr[1];
 
-  EXPECT_EQ((*objPtr)[0], first[strings::msg_params][strings::vr_help_title]);
-  EXPECT_EQ((*objPtr)[1], first[strings::msg_params][strings::vr_help]);
-  EXPECT_EQ((*objPtr)[2],
+  EXPECT_EQ(*vrHelpTitle, first[strings::msg_params][strings::vr_help_title]);
+  EXPECT_EQ(*vrHelp, first[strings::msg_params][strings::vr_help]);
+  EXPECT_EQ(*keyboardProperties,
             first[strings::msg_params][strings::keyboard_properties]);
-  EXPECT_EQ((*objPtr)[3], first[strings::msg_params][strings::menu_title]);
-  EXPECT_EQ((*objPtr)[4], first[strings::msg_params][strings::menu_icon]);
-  EXPECT_EQ((*objPtr)[5], second[strings::msg_params][strings::help_prompt]);
-  EXPECT_EQ((*objPtr)[6], second[strings::msg_params][strings::timeout_prompt]);
+  EXPECT_EQ(*menuTitle, first[strings::msg_params][strings::menu_title]);
+  EXPECT_EQ(*menuIcon, first[strings::msg_params][strings::menu_icon]);
+  EXPECT_EQ(*helpPrompt, second[strings::msg_params][strings::help_prompt]);
+  EXPECT_EQ(*timeoutPrompt,
+            second[strings::msg_params][strings::timeout_prompt]);
+  EXPECT_EQ(*menuLayout, first[strings::msg_params][strings::menu_layout]);
 }
 
 TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
@@ -258,11 +292,9 @@ TEST(MessageHelperTestCreate, CreateShowRequestToHMI_SendSmartObject_Equal) {
   smart_objects::SmartObjectSPtr smartObjectPtr =
       std::make_shared<smart_objects::SmartObject>();
 
-  const smart_objects::SmartObject& object = *smartObjectPtr;
-
   EXPECT_CALL(*appSharedMock, show_command())
       .Times(AtLeast(2))
-      .WillRepeatedly(Return(&object));
+      .WillRepeatedly(Return(smartObjectPtr));
 
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateShowRequestToHMI(appSharedMock, 0u);

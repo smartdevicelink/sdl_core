@@ -1856,8 +1856,9 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
   const std::string secondary_transport_type =
       GetTransportTypeProfileString(application->secondary_device());
 
-  const smart_objects::SmartObject* app_types_array = application->app_types();
-  if (app_types_array == NULL || app_types_array->length() == 0) {
+  const smart_objects::SmartObjectSPtr app_types_array =
+      application->app_types();
+  if (!app_types_array || app_types_array->length() == 0) {
     // This app does not have any AppHMIType. In this case, check "EMPTY_APP"
     // entry
     std::map<std::string, std::vector<std::string> >::const_iterator it =
@@ -4493,7 +4494,7 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   std::vector<std::string> hmi_types_from_policy;
   smart_objects::SmartObject transform_app_hmi_types(
       smart_objects::SmartType_Array);
-  bool flag_diffirence_app_hmi_type;
+  bool flag_difference_app_hmi_type;
   DataAccessor<ApplicationSet> accessor(applications());
   for (ApplicationSetIt it = accessor.GetData().begin();
        it != accessor.GetData().end();
@@ -4516,19 +4517,18 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       }
 
       ApplicationConstSharedPtr app = *it;
-      const smart_objects::SmartObject* save_application_hmi_type =
+      const smart_objects::SmartObjectSPtr save_application_hmi_type =
           app->app_types();
 
-      if (save_application_hmi_type == NULL ||
-          ((*save_application_hmi_type).length() !=
-           transform_app_hmi_types.length())) {
-        flag_diffirence_app_hmi_type = true;
+      if (!save_application_hmi_type || (save_application_hmi_type->length() !=
+                                         transform_app_hmi_types.length())) {
+        flag_difference_app_hmi_type = true;
       } else {
-        flag_diffirence_app_hmi_type = !(CompareAppHMIType(
+        flag_difference_app_hmi_type = !(CompareAppHMIType(
             transform_app_hmi_types, *save_application_hmi_type));
       }
 
-      if (flag_diffirence_app_hmi_type) {
+      if (flag_difference_app_hmi_type) {
         ApplicationSharedPtr app = *it;
 
         app->set_app_types(transform_app_hmi_types);
