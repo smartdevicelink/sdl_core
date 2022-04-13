@@ -628,6 +628,7 @@ CryptoManagerImpl::SSLContextImpl::openssl_error_convert_to_internal(
     case X509_V_ERR_SUBJECT_ISSUER_MISMATCH:
     case X509_V_ERR_CERT_SIGNATURE_FAILURE:
     case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+    case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
     case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
       return Handshake_Result_CertNotSigned;
     default:

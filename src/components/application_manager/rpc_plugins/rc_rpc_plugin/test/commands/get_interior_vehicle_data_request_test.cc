@@ -104,6 +104,10 @@ class GetInteriorVehicleDataRequestTest
             smart_objects::SmartType::SmartType_Array)) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app2_, app_id()).WillByDefault(Return(kAppId2));
+    ON_CALL(*mock_app_, app_types())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
+    ON_CALL(*mock_app2_, app_types())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
     ON_CALL(*mock_app_, is_remote_control_supported())
         .WillByDefault(Return(true));
     ON_CALL(*mock_app2_, is_remote_control_supported())
@@ -158,8 +162,7 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(mock_hmi_capabilities_, rc_capability())
         .WillByDefault(Return(rc_capabilities_));
     ON_CALL(mock_policy_handler_,
-            CheckHMIType(
-                _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
+            CheckHMIType(_, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, _))
         .WillByDefault(Return(true));
     ON_CALL(mock_policy_handler_, CheckModule(_, _))
         .WillByDefault(Return(true));

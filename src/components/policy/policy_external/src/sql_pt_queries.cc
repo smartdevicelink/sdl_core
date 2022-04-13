@@ -162,7 +162,6 @@ const std::string kCreateSchema =
     "  `is_revoked` BOOLEAN, "
     "  `is_default` BOOLEAN, "
     "  `is_predata` BOOLEAN, "
-    "  `memory_kb` INTEGER NOT NULL, "
     "  `heart_beat_timeout_ms` INTEGER NOT NULL, "
     "  `certificate` VARCHAR(65535), "
     "  `hybrid_app_preference_value` VARCHAR(255), "
@@ -821,12 +820,12 @@ const std::string kInsertRpcWithParameter =
 
 const std::string kInsertApplication =
     "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, "
-    "`is_revoked`, `memory_kb`, `heart_beat_timeout_ms`, `certificate`, "
+    "`is_revoked`, `heart_beat_timeout_ms`, `certificate`, "
     "`hybrid_app_preference_value`, `endpoint`, `enabled`, `auth_token`, "
     "`cloud_transport_type`, `icon_url`, `allow_unknown_rpc_passthrough`, "
     "`encryption_required`) "
     "VALUES "
-    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
     "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -919,6 +918,9 @@ const std::string kDeleteSecondsBetweenRetries =
 
 const std::string kDeleteEndpoint = "DELETE FROM `endpoint`";
 
+const std::string kDeleteEndpointProperties =
+    "DELETE FROM `endpoint_properties`";
+
 const std::string kDeleteAppLevel = "DELETE FROM `app_level`";
 
 const std::string kDeleteMessageString = "DELETE FROM `message`";
@@ -972,7 +974,7 @@ const std::string kSelectUserMsgsVersion =
     "SELECT DISTINCT `number` FROM `version`";
 
 const std::string kSelectAppPolicies =
-    "SELECT `id`, `priority_value`, `memory_kb`, "
+    "SELECT `id`, `priority_value`, "
     " `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     " `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, `icon_url`, "
     " `allow_unknown_rpc_passthrough`, `encryption_required` "
@@ -1103,15 +1105,15 @@ const std::string kDeleteAppGroupByApplicationId =
 const std::string kInsertApplicationFull =
     "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "
     " `default_hmi`, `priority_value`, `is_revoked`, `is_default`, "
-    " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
+    " `is_predata`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
     " `auth_token`, `cloud_transport_type`, `icon_url`, "
     "`allow_unknown_rpc_passthrough`, `encryption_required`) "
-    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
     "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
-    "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
+    "  `is_revoked`, `is_default`, `is_predata`, "
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
     "`icon_url`, "

@@ -113,6 +113,8 @@ ApplicationImpl::ApplicationImpl(
     , audio_streaming_allowed_(false)
     , video_streaming_suspended_(true)
     , audio_streaming_suspended_(true)
+    , video_streaming_stopped_(false)
+    , audio_streaming_stopped_(false)
     , is_app_allowed_(true)
     , is_app_data_resumption_allowed_(false)
     , has_been_activated_(false)
@@ -560,6 +562,7 @@ void ApplicationImpl::StartStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     SDL_LOG_TRACE("ServiceType = Video");
+    video_streaming_stopped_ = false;
     if (!video_streaming_approved()) {
       SDL_LOG_TRACE("Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id(), application_manager_);
@@ -567,6 +570,7 @@ void ApplicationImpl::StartStreaming(
     }
   } else if (ServiceType::kAudio == service_type) {
     SDL_LOG_TRACE("ServiceType = Audio");
+    audio_streaming_stopped_ = false;
     if (!audio_streaming_approved()) {
       SDL_LOG_TRACE("Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id(), application_manager_);
@@ -580,7 +584,6 @@ void ApplicationImpl::StopStreamingForce(
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
-  // see the comment in StopStreaming()
   sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   SuspendStreaming(service_type);
@@ -597,10 +600,6 @@ void ApplicationImpl::StopStreaming(
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
-  // since WakeUpStreaming() is called from another thread, it is possible that
-  // the stream will be restarted after we call SuspendStreaming() and before
-  // we call StopXxxStreaming(). To avoid such timing issue, make sure that
-  // we run SuspendStreaming() and StopXxxStreaming() atomically.
   sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   SuspendStreaming(service_type);
@@ -615,6 +614,7 @@ void ApplicationImpl::StopStreaming(
 
 void ApplicationImpl::StopNaviStreaming() {
   SDL_LOG_AUTO_TRACE();
+  video_streaming_stopped_ = true;
   video_stream_suspend_timer_.Stop();
   MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
@@ -623,6 +623,7 @@ void ApplicationImpl::StopNaviStreaming() {
 
 void ApplicationImpl::StopAudioStreaming() {
   SDL_LOG_AUTO_TRACE();
+  audio_streaming_stopped_ = true;
   audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
@@ -637,12 +638,10 @@ void ApplicationImpl::SuspendStreaming(
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
     application_manager_.OnAppStreaming(app_id(), service_type, false);
-    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
     application_manager_.OnAppStreaming(app_id(), service_type, false);
-    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
   application_manager_.ProcessOnDataStreamingNotification(
@@ -654,32 +653,37 @@ void ApplicationImpl::WakeUpStreaming(
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
-  // See the comment in StopStreaming(). Also, please make sure that we acquire
-  // streaming_stop_lock_ then xxx_streaming_suspended_lock_ in this order!
   sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   if (ServiceType::kMobileNav == service_type) {
-    {  // reduce the range of video_streaming_suspended_lock_
-      sync_primitives::AutoLock auto_lock(video_streaming_suspended_lock_);
-      if (video_streaming_suspended_) {
-        application_manager_.OnAppStreaming(app_id(), service_type, true);
-        application_manager_.ProcessOnDataStreamingNotification(
-            service_type, app_id(), true);
-        video_streaming_suspended_ = false;
-      }
+    if (video_streaming_stopped_) {
+      SDL_LOG_WARN(
+          "Video streaming is stopped, received data packet will be dropped");
+      return;
     }
+    if (video_streaming_suspended_) {
+      SDL_LOG_DEBUG("Video streaming is resuming after suspension");
+      application_manager_.OnAppStreaming(app_id(), service_type, true);
+      application_manager_.ProcessOnDataStreamingNotification(
+          service_type, app_id(), true);
+      video_streaming_suspended_ = false;
+    }
+
     video_stream_suspend_timer_.Start(
         timer_len == 0 ? video_stream_suspend_timeout_ : timer_len,
         timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
-    {  // reduce the range of audio_streaming_suspended_lock_
-      sync_primitives::AutoLock auto_lock(audio_streaming_suspended_lock_);
-      if (audio_streaming_suspended_) {
-        application_manager_.OnAppStreaming(app_id(), service_type, true);
-        application_manager_.ProcessOnDataStreamingNotification(
-            service_type, app_id(), true);
-        audio_streaming_suspended_ = false;
-      }
+    if (audio_streaming_stopped_) {
+      SDL_LOG_WARN(
+          "Audio streaming is stopped, received data packet will be dropped");
+      return;
+    }
+    if (audio_streaming_suspended_) {
+      SDL_LOG_DEBUG("Audio streaming is resuming after suspension");
+      application_manager_.OnAppStreaming(app_id(), service_type, true);
+      application_manager_.ProcessOnDataStreamingNotification(
+          service_type, app_id(), true);
+      audio_streaming_suspended_ = false;
     }
     audio_stream_suspend_timer_.Start(
         timer_len == 0 ? audio_stream_suspend_timeout_ : timer_len,
@@ -1165,7 +1169,8 @@ void ApplicationImpl::SubscribeToSoftButtons(
     return;
   }
 
-  WindowSoftButtons new_window_soft_buttons = *subscribed_window_buttons;
+  WindowSoftButtons new_window_soft_buttons;
+  new_window_soft_buttons.first = window_id;
   new_window_soft_buttons.second.insert(window_softbuttons.second.begin(),
                                         window_softbuttons.second.end());
   command_soft_buttons.erase(subscribed_window_buttons);

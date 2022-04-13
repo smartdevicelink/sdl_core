@@ -29,14 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Copy RPC spec submodule files to interfaces directory
-if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml
-                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd
-                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xsd)
-else ()
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
   message( FATAL_ERROR "Missing the RPC Spec submodule" )
   message( FATAL_ERROR "Please run `git submodule update --init` in the SDL Core source directory" )
 endif ()
@@ -52,9 +45,20 @@ include_directories (
   ${CMAKE_BINARY_DIR}
 )
 
-execute_process(COMMAND /usr/bin/env python3 -m pip install --upgrade --user pip setuptools wheel)
 set(GENERATOR_REQUIREMENTS "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/requirements.txt")
-execute_process(COMMAND /usr/bin/env python3 -m pip install --user --requirement ${GENERATOR_REQUIREMENTS})
+file(STRINGS ${GENERATOR_REQUIREMENTS} REQUIREMENTS_LIST)
+execute_process(COMMAND /usr/bin/env python3 -m pip list --user OUTPUT_VARIABLE PYTHON_PACKAGES_LIST)
+
+foreach(REQUIREMENT_PACKAGE IN LISTS REQUIREMENTS_LIST)
+  string(FIND "${PYTHON_PACKAGES_LIST}" "${REQUIREMENT_PACKAGE}" PACKAGE_FOUND)
+  if (PACKAGE_FOUND EQUAL -1)
+    message(WARNING "${REQUIREMENT_PACKAGE} not found!")
+  endif()
+endforeach()
+
+add_custom_target(install_python_dependencies
+  COMMAND /usr/bin/env python3 -m pip install --user --requirement ${GENERATOR_REQUIREMENTS}
+)
 
 generate_interface("v4_protocol_v1_2_no_extra.xml" "ns_smart_device_link_rpc::V1" "sdlrpcv1")
 add_library(v4_protocol_v1_2_no_extra ${CMAKE_CURRENT_BINARY_DIR}/v4_protocol_v1_2_no_extra_schema.cc)

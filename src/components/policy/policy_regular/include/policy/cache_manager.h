@@ -988,8 +988,8 @@ class CacheManager : public CacheManagerInterface {
   BackgroundBackuper* backuper_;
   const PolicySettings* settings_;
 
-#ifdef BUILD_TESTS
   friend class AccessRemoteImpl;
+#ifdef BUILD_TESTS
   FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
   FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
   FRIEND_TEST(AccessRemoteImplTest, GetGroups);

@@ -685,6 +685,7 @@ void CacheManager::ProcessUpdate(
   const std::string& app_id = initial_policy_iter->first;
   bool update_request_types = true;
 
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   ApplicationParams& params =
       pt_->policy_table.app_policies_section.apps[app_id];
   if (kPreDataConsentId == app_id) {
@@ -1454,15 +1455,19 @@ CacheManager::GetRemovedVehicleDataItems() const {
 }
 
 Json::Value CacheManager::GetPolicyTableData() const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.ToJsonValue();
 }
 
 void CacheManager::GetEnabledCloudApps(
     std::vector<std::string>& enabled_apps) const {
+  SDL_LOG_AUTO_TRACE();
 #if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   enabled_apps.clear();
   return;
 #else
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
@@ -1478,6 +1483,8 @@ void CacheManager::GetEnabledCloudApps(
 
 bool CacheManager::GetAppProperties(const std::string& policy_app_id,
                                     AppProperties& out_app_properties) const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
@@ -1509,10 +1516,12 @@ bool CacheManager::GetAppProperties(const std::string& policy_app_id,
 }
 
 std::vector<std::string> CacheManager::GetEnabledLocalApps() const {
+  SDL_LOG_AUTO_TRACE();
 #if !defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
   return std::vector<std::string>();
 #else
   std::vector<std::string> enabled_apps;
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& app_policies =
       pt_->policy_table.app_policies_section.apps;
   for (const auto& app_policies_item : app_policies) {
@@ -1551,6 +1560,8 @@ void CacheManager::InitCloudApp(const std::string& policy_app_id) {
 
 void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
                                       const bool enabled) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -1562,6 +1573,8 @@ void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
 
 void CacheManager::SetAppAuthToken(const std::string& policy_app_id,
                                    const std::string& auth_token) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -1573,6 +1586,8 @@ void CacheManager::SetAppAuthToken(const std::string& policy_app_id,
 
 void CacheManager::SetAppCloudTransportType(
     const std::string& policy_app_id, const std::string& cloud_transport_type) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -1584,6 +1599,8 @@ void CacheManager::SetAppCloudTransportType(
 
 void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
                                   const std::string& endpoint) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -1595,6 +1612,8 @@ void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
 
 void CacheManager::SetAppNicknames(const std::string& policy_app_id,
                                    const StringArray& nicknames) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::iterator policy_iter =
@@ -1607,6 +1626,8 @@ void CacheManager::SetAppNicknames(const std::string& policy_app_id,
 void CacheManager::SetHybridAppPreference(
     const std::string& policy_app_id,
     const std::string& hybrid_app_preference) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::HybridAppPreference value;
   bool valid = EnumFromJsonString(hybrid_app_preference, &value);
   policy_table::ApplicationPolicies& policies =
@@ -1622,6 +1643,7 @@ void CacheManager::GetAppServiceParameters(
     const std::string& policy_app_id,
     policy_table::AppServiceParameters* app_service_parameters) const {
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
@@ -1636,6 +1658,8 @@ void CacheManager::GetAppServiceParameters(
 
 bool CacheManager::UnknownRPCPassthroughAllowed(
     const std::string& policy_app_id) const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
@@ -1695,8 +1719,13 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   std::vector<std::string>::const_iterator it_end = msg_codes.end();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   for (; it != it_end; ++it) {
-    policy_table::MessageLanguages msg_languages =
-        (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
+    auto messages = pt_->policy_table.consumer_friendly_messages->messages;
+    auto messages_it = messages->find(*it);
+    if (messages->end() == messages_it) {
+      SDL_LOG_ERROR("No entry found for message code: " << *it);
+      continue;
+    }
+    policy_table::MessageLanguages msg_languages = messages_it->second;
 
     // If message has no records with required language, fallback language
     // should be used instead.
@@ -1742,6 +1771,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
                                  EndpointUrls& out_end_points) const {
+  SDL_LOG_AUTO_TRACE();
   auto find_hexademical =
       [service_type](policy_table::ServiceEndpoints::value_type end_point) {
         uint32_t decimal;
@@ -1749,6 +1779,7 @@ void CacheManager::GetUpdateUrls(const uint32_t service_type,
         return end_point.first.compare(0, 2, "0x") == 0 &&
                decimal == service_type;
       };
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   auto& end_points = pt_->policy_table.module_config.endpoints;
   const auto end_point =
       std::find_if(end_points.begin(), end_points.end(), find_hexademical);
@@ -1786,8 +1817,10 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
 }
 
 std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(std::string());
   std::string url;
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
@@ -2125,7 +2158,6 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   snapshot_ = std::make_shared<policy_table::Table>();
   sync_primitives::AutoLock auto_lock(cache_lock_);
   snapshot_->policy_table = pt_->policy_table;
-
   if (pt_->policy_table.vehicle_data.is_initialized()) {
     snapshot_->policy_table.vehicle_data =
         rpc::Optional<policy_table::VehicleData>();
@@ -2133,7 +2165,6 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
     snapshot_->policy_table.vehicle_data->schema_version =
         pt_->policy_table.vehicle_data->schema_version;
   }
-
   snapshot_->SetPolicyTableType(policy_table::PT_SNAPSHOT);
 
   CheckSnapshotInitialization();
@@ -2279,6 +2310,7 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
 
 void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   *pt_->policy_table.module_config.preloaded_pt = is_preloaded;
   Backup();
 }
@@ -2675,7 +2707,7 @@ bool CacheManager::Init(const std::string& file_name,
 
       result &= snapshot->is_valid();
       SDL_LOG_DEBUG("Check if snapshot valid: " << std::boolalpha << result);
-
+      sync_primitives::AutoLock auto_lock(cache_lock_);
       if (!UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps)) {
         SDL_LOG_ERROR("Cannot unwrap application policies");
       }

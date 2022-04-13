@@ -226,9 +226,12 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
     } else {
       auto res_code =
           static_cast<hmi_apis::Common_VehicleDataResultCode::eType>(
-              msg_params[*vi_name][strings::result_code].asInt());
+              msg_params[ConvertRequestToResponseName(*vi_name)]
+                        [strings::result_code]
+                            .asInt());
       if (skiped_result_codes.find(res_code) != skiped_result_codes.end()) {
-        msg_params[*vi_name][strings::result_code] = res_code;
+        msg_params[ConvertRequestToResponseName(*vi_name)]
+                  [strings::result_code] = res_code;
         vi_name = vi_waiting_for_subscribe_.erase(vi_name);
       } else {
         ++vi_name;
@@ -325,11 +328,13 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
         }
         SDL_LOG_DEBUG("App with connection key "
                       << connection_key()
-                      << " have been subscribed for VehicleDataType: "
+                      << " has been subscribed for VehicleDataType: "
                       << key_name);
         vi_already_subscribed_by_another_apps_.insert(key_name);
-        out_response_params[key_name][strings::data_type] = vd_type;
-        out_response_params[key_name][strings::result_code] =
+        const std::string converted_name =
+            ConvertRequestToResponseName(key_name);
+        out_response_params[converted_name][strings::data_type] = vd_type;
+        out_response_params[converted_name][strings::result_code] =
             mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
         ++subscribed_items;
       };

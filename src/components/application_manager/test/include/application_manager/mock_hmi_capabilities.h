@@ -114,6 +114,11 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_hmi_zone_capabilities,
                void(const smart_objects::SmartObject& hmi_zone_capabilities));
 
+  MOCK_CONST_METHOD0(ui_hmi_capabilities,
+                     const smart_objects::SmartObjectSPtr());
+  MOCK_METHOD1(set_ui_hmi_capabilities,
+               void(const smart_objects::SmartObject& ui_hmi_capabilities));
+
   MOCK_CONST_METHOD0(soft_button_capabilities,
                      const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(

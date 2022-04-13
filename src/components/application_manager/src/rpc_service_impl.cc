@@ -228,8 +228,8 @@ bool RPCServiceImpl::ManageMobileCommand(
     return true;
   }
   if (message_type == mobile_apis::messageType::notification) {
-    request_ctrl_.AddNotification(command);
     if (command->Init() && command->CheckPermissions()) {
+      request_ctrl_.AddNotification(command);
       command->Run();
       if (command->CleanUp()) {
         request_ctrl_.RemoveNotification(command.get());

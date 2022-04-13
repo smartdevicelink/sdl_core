@@ -63,7 +63,11 @@ macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
   )
 
   set(CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.cc")
-  set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
+  if("${ARG_XML_NAME}" STREQUAL "MOBILE_API.xml")
+	set(FULL_XML_NAME "${CMAKE_SOURCE_DIR}/tools/rpc_spec/${ARG_XML_NAME}")
+  else()
+    set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
+endif()
 
   add_custom_command(
     OUTPUT ${HPP_FILE} ${CPP_FILE}

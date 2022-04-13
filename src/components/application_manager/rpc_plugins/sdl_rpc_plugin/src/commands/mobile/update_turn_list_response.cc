@@ -59,8 +59,6 @@ UpdateTurnListResponse::~UpdateTurnListResponse() {}
 void UpdateTurnListResponse::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  application_manager_.UnsubscribeAppFromSoftButtons(message_);
-
   rpc_service_.SendMessageToMobile(message_);
 }
 

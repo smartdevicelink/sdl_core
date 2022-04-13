@@ -104,6 +104,61 @@ class SetDisplayLayoutRequestTest
 
     return msg;
   }
+
+  void CreateResponseCapabilities() {
+    using namespace smart_objects;
+    // Display capabilities
+    SmartObjectSPtr display_capabilities =
+        std::make_shared<SmartObject>(SmartType_Map);
+    SmartObject text_fields(SmartType_Array);
+    text_fields[0] = SmartObject(SmartType_Map);
+    text_fields[0][am::hmi_response::button_name] = am::strings::main_field_1;
+    text_fields[0][am::strings::character_set] = "UTF-8";
+    text_fields[0]["rows"] = 1;
+    text_fields[0]["width"] = 500;
+    (*display_capabilities)[am::hmi_response::display_type] = "SDL_GENERIC";
+    (*display_capabilities)[am::hmi_response::text_fields] = text_fields;
+    (*display_capabilities)[am::hmi_response::media_clock_formats] =
+        SmartObject(SmartType_Array);
+    (*display_capabilities)[am::hmi_response::graphic_supported] = true;
+
+    // Button capabilities
+    SmartObjectSPtr button_capabilities =
+        std::make_shared<SmartObject>(SmartType_Array);
+    SmartObject button_capability(SmartType_Map);
+    button_capability[strings::button_name] = "OK";
+    button_capability["shortPressAvailable"] = true;
+    button_capability["longPressAvailable"] = true;
+    button_capability["upDownAvailable"] = true;
+    (*button_capabilities)[0] = button_capability;
+
+    // Soft Button capabilities
+    SmartObjectSPtr soft_button_capabilities =
+        std::make_shared<SmartObject>(SmartType_Array);
+    SmartObject soft_button_capability(SmartType_Map);
+    soft_button_capability[am::hmi_response::image_supported] = true;
+    soft_button_capability["longPressAvailable"] = true;
+    soft_button_capability["shortPressAvailable"] = true;
+    soft_button_capability["upDownAvailable"] = true;
+    soft_button_capability["imageSupported"] = false;
+    (*soft_button_capabilities) = soft_button_capability;
+
+    // Preset Bank capabilities
+    SmartObjectSPtr preset_bank_capabilities =
+        std::make_shared<SmartObject>(SmartType_Map);
+    (*preset_bank_capabilities)[am::hmi_response::on_screen_presets_available] =
+        false;
+
+    EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
+        .WillOnce(Return(display_capabilities));
+    EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
+        .WillOnce(Return(button_capabilities));
+    EXPECT_CALL(mock_hmi_capabilities_, soft_button_capabilities())
+        .WillOnce(Return(soft_button_capabilities));
+    EXPECT_CALL(mock_hmi_capabilities_, preset_bank_capabilities())
+        .WillOnce(Return(preset_bank_capabilities));
+  }
+
   typedef TypeIf<kMocksAreNice,
                  NiceMock<application_manager_test::MockHMICapabilities>,
                  application_manager_test::MockHMICapabilities>::Result
@@ -147,7 +202,7 @@ TEST_F(SetDisplayLayoutRequestTest,
   (*msg)[am::strings::msg_params][am::strings::info] =
       "UI is not supported by system";
 
-  Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
 
   ON_CALL(mock_hmi_interfaces_,
@@ -195,9 +250,8 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationKey));
-  EXPECT_CALL(
-      mock_hmi_interfaces_,
-      GetInterfaceFromFunction(hmi_apis::FunctionID::UI_SetDisplayLayout))
+  EXPECT_CALL(mock_hmi_interfaces_,
+              GetInterfaceFromFunction(hmi_apis::FunctionID::UI_Show))
       .WillRepeatedly(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
   EXPECT_CALL(mock_hmi_interfaces_,
               GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
@@ -226,7 +280,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
-  am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  am::event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   MessageSharedPtr msg = CreateMessage();
 
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -235,12 +289,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
-  MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
-  (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
-      "templates_available";
-
-  EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg));
+  CreateResponseCapabilities();
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
@@ -260,7 +309,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
-  am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  am::event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   MessageSharedPtr msg = CreateMessage();
 
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -269,12 +318,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   event.set_smart_object(*msg);
 
-  MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
-  (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
-      "templates_available";
-
-  EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg));
+  CreateResponseCapabilities();
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),

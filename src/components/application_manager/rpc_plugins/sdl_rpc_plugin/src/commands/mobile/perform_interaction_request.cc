@@ -173,6 +173,27 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
+  auto choice_sets_are_disallowed_to_perform =
+      [](ApplicationSharedPtr app,
+         const smart_objects::SmartObject& choice_set_id_list) {
+        auto choice_set_id_array = choice_set_id_list.asArray();
+
+        return std::any_of(
+            choice_set_id_array->begin(),
+            choice_set_id_array->end(),
+            [app](smart_objects::SmartObject& choice_set_id) {
+              return !app->is_choice_set_allowed(choice_set_id.asInt());
+            });
+      };
+
+  if (choice_sets_are_disallowed_to_perform(
+          app, msg_params[strings::interaction_choice_set_id_list])) {
+    const std::string message = "One of choice sets is not available yet";
+    SDL_LOG_WARN(message);
+    SendResponse(false, mobile_apis::Result::REJECTED, message.c_str());
+    return;
+  }
+
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::INVALID_DATA ==
         MessageHelper::VerifyImageVrHelpItems(
@@ -224,6 +245,8 @@ void PerformInteractionRequest::Run() {
   app->set_perform_interaction_layout(interaction_layout);
   // increment amount of active requests
   ++pi_requests_count_;
+
+  SDL_LOG_DEBUG("Send PerformInteraction requests");
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
@@ -348,14 +371,8 @@ bool PerformInteractionRequest::ProcessVRResponse(
 
     SDL_LOG_DEBUG("Update timeout for UI");
     application_manager_.UpdateRequestTimeout(
-
         connection_key(), correlation_id(), default_timeout_);
     return false;
-  }
-
-  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
-      InteractionMode::MANUAL_ONLY != interaction_mode_) {
-    SendClosePopupRequestToHMI();
   }
 
   const SmartObject& hmi_msg_params = message[strings::msg_params];
@@ -371,22 +388,31 @@ bool PerformInteractionRequest::ProcessVRResponse(
     vr_choice_id_received_ = choice_id;
   }
 
+  const bool is_vr_result_successful = CommandImpl::IsHMIResultSuccess(
+      vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR);
+
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
+      is_vr_result_successful) {
+    switch (interaction_mode_) {
+      case mobile_apis::InteractionMode::BOTH:
+        // Close UI popup only if choice ID was included in VR
+        if (vr_choice_id_received_ != INVALID_CHOICE_ID) {
+          SendClosePopupRequestToHMI();
+        }
+        break;
+      case mobile_apis::InteractionMode::VR_ONLY:
+        SendClosePopupRequestToHMI();
+        break;
+      default:
+        break;
+    }
+  }
+
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
     SDL_LOG_DEBUG("Update timeout for UI");
     application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout_);
-  }
-
-  const bool is_vr_result_success = Compare<Common_Result::eType, EQ, ONE>(
-      vr_result_code_, Common_Result::SUCCESS, Common_Result::WARNINGS);
-
-  if (is_vr_result_success &&
-      InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    SDL_LOG_DEBUG("VR response is successfull in MANUAL_ONLY mode "
-                  << "Wait for UI response");
-    // in case MANUAL_ONLY mode VR.PI SUCCESS just return
-    return false;
   }
 
   return false;
@@ -880,7 +906,10 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 void PerformInteractionRequest::TerminatePerformInteraction() {
   SDL_LOG_AUTO_TRACE();
 
-  SendClosePopupRequestToHMI();
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
+    SendClosePopupRequestToHMI();
+  }
+
   DisablePerformInteraction();
 }
 

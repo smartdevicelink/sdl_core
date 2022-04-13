@@ -236,16 +236,18 @@ void RequestControllerImpl::AddNotification(const RequestPtr ptr) {
         "Impossible to add notification due to Low Voltage is active");
     return;
   }
+  AutoLock auto_lock(notification_list_lock_);
   notification_list_.push_back(ptr);
 }
 
 void RequestControllerImpl::RemoveNotification(
     const commands::Command* notification) {
   SDL_LOG_AUTO_TRACE();
-  std::list<RequestPtr>::iterator it = notification_list_.begin();
+  AutoLock auto_lock(notification_list_lock_);
+  auto it = notification_list_.begin();
   for (; notification_list_.end() != it;) {
     if (it->get() == notification) {
-      notification_list_.erase(it++);
+      it = notification_list_.erase(it);
       SDL_LOG_DEBUG("Notification removed");
       return;
     } else {
@@ -335,8 +337,6 @@ void RequestControllerImpl::TerminateRequest(const uint32_t correlation_id,
     return;
   }
   if (force_terminate || request->request()->AllowedToTerminate()) {
-    event_dispatcher_.remove_observer(
-        static_cast<hmi_apis::FunctionID::eType>(function_id), correlation_id);
     waiting_for_response_.RemoveRequest(request);
     if (RequestInfo::HMIRequest == request->request_type()) {
       request_timeout_handler_.RemoveRequest(request->requestId());
@@ -374,7 +374,7 @@ void RequestControllerImpl::TerminateWaitingForExecutionAppRequests(
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
     if ((request.use_count() != 0) && (request->connection_key() == app_id)) {
-      mobile_request_list_.erase(request_it++);
+      request_it = mobile_request_list_.erase(request_it);
     } else {
       ++request_it;
     }

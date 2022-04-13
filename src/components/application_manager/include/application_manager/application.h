@@ -113,14 +113,15 @@ class InitialApplicationData {
  public:
   virtual ~InitialApplicationData() {}
 
-  virtual const smart_objects::SmartObject* app_types() const = 0;
-  virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
+  virtual const smart_objects::SmartObjectSPtr app_types() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
   virtual const std::string& bundle_id() const = 0;
   virtual void set_bundle_id(const std::string& bundle_id) = 0;
   virtual std::string policy_app_id() const = 0;
-  virtual const smart_objects::SmartObject* tts_name() const = 0;
-  virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
+  virtual const smart_objects::SmartObjectSPtr tts_name() const = 0;
+  virtual const smart_objects::SmartObjectSPtr ngn_media_screen_name()
+      const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
   virtual const mobile_api::Language::eType& ui_language() const = 0;
   virtual const utils::SemanticVersion& msg_version() const = 0;
@@ -195,18 +196,18 @@ typedef std::vector<smart_objects::SmartObjectSPtr> MobileMessageQueue;
 class DynamicApplicationData {
  public:
   virtual ~DynamicApplicationData() {}
-  virtual const smart_objects::SmartObject* help_prompt() const = 0;
-  virtual const smart_objects::SmartObject* timeout_prompt() const = 0;
-  virtual const smart_objects::SmartObject* vr_help_title() const = 0;
-  virtual const smart_objects::SmartObject* vr_help() const = 0;
+  virtual const smart_objects::SmartObjectSPtr help_prompt() const = 0;
+  virtual const smart_objects::SmartObjectSPtr timeout_prompt() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_help_title() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_help() const = 0;
   virtual const mobile_api::TBTState::eType& tbt_state() const = 0;
-  virtual const smart_objects::SmartObject* show_command() const = 0;
-  virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
+  virtual const smart_objects::SmartObjectSPtr show_command() const = 0;
+  virtual const smart_objects::SmartObjectSPtr tbt_show_command() const = 0;
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
-  virtual const smart_objects::SmartObject* keyboard_props() const = 0;
-  virtual const smart_objects::SmartObject* menu_title() const = 0;
-  virtual const smart_objects::SmartObject* menu_icon() const = 0;
-  virtual const smart_objects::SmartObject* menu_layout() const = 0;
+  virtual const smart_objects::SmartObjectSPtr keyboard_props() const = 0;
+  virtual const smart_objects::SmartObjectSPtr menu_title() const = 0;
+  virtual const smart_objects::SmartObjectSPtr menu_icon() const = 0;
+  virtual const smart_objects::SmartObjectSPtr menu_layout() const = 0;
   virtual smart_objects::SmartObject day_color_scheme() const = 0;
   virtual smart_objects::SmartObject night_color_scheme() const = 0;
   virtual std::string display_layout() const = 0;
@@ -520,6 +521,25 @@ class DynamicApplicationData {
    * @return TRUE if perform interaction active, otherwise FALSE
    */
   virtual bool is_reset_global_properties_active() const = 0;
+
+  /**
+   * @brief Set allowed mode for specified choice_set_id.
+   * @param choice_set_id Choice set id.
+   * @param is_allowed TRUE if the choice set has to be allowed to perform,
+   * otherwise FALSE.
+   * Allow mode means that the choice_set is not fully processed or not fully
+   * deleted (in both cases request is being processed on HMI side, and HMI
+   * hasn't sent response with result yet)
+   */
+  virtual void set_choice_set_allow_mode(const uint32_t choice_set_id,
+                                         const bool is_allowed) = 0;
+
+  /**
+   * @brief Check if choice set allowed.
+   * @param choice_set_id Choice set id.
+   * @return TRUE if the choice set is allowed to perform, otherwise FALSE.
+   */
+  virtual bool is_choice_set_allowed(const uint32_t choice_set_id) const = 0;
 };
 
 class Application : public virtual InitialApplicationData,
@@ -539,8 +559,10 @@ class Application : public virtual InitialApplicationData,
    * @brief Returns message belonging to the application
    * that is currently executed (i.e. on HMI).
    * @return smart_objects::SmartObject * Active message
+   * @deprecated will always return NULL
    */
-  virtual const smart_objects::SmartObject* active_message() const = 0;
+  DEPRECATED virtual const smart_objects::SmartObject* active_message()
+      const = 0;
 
   /**
    * @brief returns current hash value
@@ -596,7 +618,8 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void set_app_data_resumption_allowance(const bool allowed) = 0;
 
-  virtual void CloseActiveMessage() = 0;
+  // Deprecated, has no effect
+  DEPRECATED virtual void CloseActiveMessage() = 0;
   virtual bool IsFullscreen() const = 0;
   virtual void ChangeSupportingAppHMIType() = 0;
 

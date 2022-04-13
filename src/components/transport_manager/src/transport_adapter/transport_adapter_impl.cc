@@ -273,7 +273,8 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
       retry_timer_pool_.push(std::make_pair(retry_timer, device_handle));
       retry_timer->Start(get_settings().cloud_app_retry_timeout(),
                          timer::kSingleShot);
-    } else if (OK == err) {
+    } else if (OK == err &&
+               ConnectionStatus::CONNECTED != device->connection_status()) {
       ConnectionStatusUpdated(device, ConnectionStatus::CONNECTED);
     }
     SDL_LOG_TRACE("exit with error: " << err);

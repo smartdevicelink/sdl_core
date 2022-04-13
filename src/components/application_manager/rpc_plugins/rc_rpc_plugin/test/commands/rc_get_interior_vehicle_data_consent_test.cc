@@ -131,6 +131,8 @@ class RCGetInteriorVehicleDataConsentTest
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
     (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app_, app_types())
+        .WillByDefault(Return(std::shared_ptr<smart_objects::SmartObject>()));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(

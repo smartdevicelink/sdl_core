@@ -301,6 +301,13 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return FindApp(accessor, finder);
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_hmi_app(
+    uint32_t hmi_app_id) const {
+  HmiAppIdPredicate finder(hmi_app_id);
+  DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
+  return FindPendingApp(accessor, finder);
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
@@ -1849,8 +1856,9 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
   const std::string secondary_transport_type =
       GetTransportTypeProfileString(application->secondary_device());
 
-  const smart_objects::SmartObject* app_types_array = application->app_types();
-  if (app_types_array == NULL || app_types_array->length() == 0) {
+  const smart_objects::SmartObjectSPtr app_types_array =
+      application->app_types();
+  if (!app_types_array || app_types_array->length() == 0) {
     // This app does not have any AppHMIType. In this case, check "EMPTY_APP"
     // entry
     std::map<std::string, std::vector<std::string> >::const_iterator it =
@@ -1956,9 +1964,13 @@ bool ApplicationManagerImpl::StartNaviService(
       /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
-      auto accessor = applications();
-      for (auto app : accessor.GetData()) {
-        if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+
+      const ApplicationSet apps = applications().GetData();
+      for (auto app : apps) {
+        if (!app) {
+          SDL_LOG_ERROR("NULL pointer for application");
+          continue;
+        } else if (!app->is_navi() && !app->mobile_projection_enabled()) {
           SDL_LOG_DEBUG("Continue, Not Navi App Id: " << app->app_id());
           continue;
         }
@@ -2650,6 +2662,11 @@ bool ApplicationManagerImpl::Init(
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
   InitiateStopping();
+
+  if (app_launch_ctrl_) {
+    app_launch_ctrl_->Stop();
+  }
+
   application_list_update_timer_.Stop();
   try {
     if (unregister_reason_ ==
@@ -3169,12 +3186,6 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   (*msg)[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
 
-  if (!msg) {
-    SDL_LOG_WARN("Null-pointer message received.");
-    NOTREACHED();
-    return;
-  }
-
   // SmartObject |message| has no way to declare priority for now
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -3344,7 +3355,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     while (applications_.end() != it_app) {
       if (app_id == (*it_app)->app_id()) {
         app_to_remove = *it_app;
-        applications_.erase(it_app++);
+        applications_.erase(it_app);
         break;
       } else {
         ++it_app;
@@ -4483,7 +4494,7 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   std::vector<std::string> hmi_types_from_policy;
   smart_objects::SmartObject transform_app_hmi_types(
       smart_objects::SmartType_Array);
-  bool flag_diffirence_app_hmi_type;
+  bool flag_difference_app_hmi_type;
   DataAccessor<ApplicationSet> accessor(applications());
   for (ApplicationSetIt it = accessor.GetData().begin();
        it != accessor.GetData().end();
@@ -4506,19 +4517,18 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       }
 
       ApplicationConstSharedPtr app = *it;
-      const smart_objects::SmartObject* save_application_hmi_type =
+      const smart_objects::SmartObjectSPtr save_application_hmi_type =
           app->app_types();
 
-      if (save_application_hmi_type == NULL ||
-          ((*save_application_hmi_type).length() !=
-           transform_app_hmi_types.length())) {
-        flag_diffirence_app_hmi_type = true;
+      if (!save_application_hmi_type || (save_application_hmi_type->length() !=
+                                         transform_app_hmi_types.length())) {
+        flag_difference_app_hmi_type = true;
       } else {
-        flag_diffirence_app_hmi_type = !(CompareAppHMIType(
+        flag_difference_app_hmi_type = !(CompareAppHMIType(
             transform_app_hmi_types, *save_application_hmi_type));
       }
 
-      if (flag_diffirence_app_hmi_type) {
+      if (flag_difference_app_hmi_type) {
         ApplicationSharedPtr app = *it;
 
         app->set_app_types(transform_app_hmi_types);
@@ -4653,9 +4663,7 @@ void ApplicationManagerImpl::SendDriverDistractionState(
     const auto lock_screen_dismissal =
         policy_handler_->LockScreenDismissalEnabledState();
 
-    if (lock_screen_dismissal &&
-        hmi_apis::Common_DriverDistractionState::DD_ON ==
-            driver_distraction_state()) {
+    if (lock_screen_dismissal) {
       bool dismissal_enabled = *lock_screen_dismissal;
       if (dismissal_enabled) {
         const auto language = EnumToString(application->ui_language());
@@ -4770,6 +4778,9 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(application);
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+
+  // Add application to registered app list and set appropriate mark.
+  application->MarkRegistered();
   applications_.insert(application);
   SDL_LOG_DEBUG("App with app_id: "
                 << application->app_id()

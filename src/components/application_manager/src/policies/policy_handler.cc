@@ -300,14 +300,11 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
     , last_activated_app_id_(0)
-#ifndef EXTERNAL_PROPRIETARY_MODE
     , last_ptu_app_id_(0)
-#endif  // EXTERNAL_PROPRIETARY_MODE
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager)
-    , last_registered_policy_app_id_(std::string()) {
-}
+    , last_registered_policy_app_id_(std::string()) {}
 
 PolicyHandler::~PolicyHandler() {}
 
@@ -423,11 +420,29 @@ void PolicyHandler::StopRetrySequence() {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_VOID(policy_manager);
-#ifndef EXTERNAL_PROPRIETARY_MODE
   // Clear cached PTU app
   last_ptu_app_id_ = 0;
-#endif  // EXTERNAL_PROPRIETARY_MODE
   policy_manager->StopRetrySequence();
+}
+
+bool PolicyHandler::IsPTUSystemRequestAllowed(const uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
+
+  if (policy_manager->GetPolicyTableStatus() != "UPDATING") {
+    SDL_LOG_DEBUG("PTU received while not UPDATING");
+    return false;
+  }
+
+  if (app_id != last_ptu_app_id_) {
+    SDL_LOG_DEBUG(
+        "PTU received from unexpected application, request was sent to "
+        << last_ptu_app_id_);
+    return false;
+  }
+
+  return true;
 }
 
 bool PolicyHandler::ResetPolicyTable() {
@@ -477,6 +492,13 @@ void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
   policy_snapshot_path_ = snapshot_path;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
+#ifndef PROPRIETARY_MODE
+void PolicyHandler::UpdateLastPTUApp(const uint32_t app_id) {
+  SDL_LOG_DEBUG("UpdateLastPTUApp to " << app_id);
+  last_ptu_app_id_ = app_id;
+}
+#endif  // PROPRIETARY_MODE
 
 uint32_t PolicyHandler::GetAppIdForSending() const {
   SDL_LOG_AUTO_TRACE();
@@ -720,7 +742,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else if (!app_to_device_link_.empty()) {
+  } else {
     const ApplicationSet& accessor =
         application_manager_.applications().GetData();
     for (const auto& app : accessor) {
@@ -759,10 +781,6 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       policy_manager->SetUserConsentForApp(out_permissions);
 #endif
     }
-  } else {
-    SDL_LOG_WARN(
-        "There are no applications previously stored for "
-        "setting common permissions.");
   }
 #ifdef EXTERNAL_PROPRIETARY_MODE
   if (!policy_manager->SetExternalConsentStatus(external_consent_status)) {
@@ -1290,10 +1308,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager->CleanupUnpairedDevices();
     SetDaysAfterEpoch();
     policy_manager->OnPTUFinished(load_pt_result);
-#ifndef EXTERNAL_PROPRIETARY_MODE
     // Clean up retry information
     last_ptu_app_id_ = 0;
-#endif  // EXTERNAL_PROPRIETARY_MODE
 
     uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(
@@ -2873,6 +2889,10 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 
 bool PolicyHandler::CheckModule(const PTString& app_id,
                                 const PTString& module) {
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   return policy_manager->CheckModule(app_id, module);
@@ -2943,6 +2963,10 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
                                  mobile_apis::AppHMIType::eType hmi,
                                  const smart_objects::SmartObject* app_types) {
   SDL_LOG_AUTO_TRACE();
+  if (!PolicyEnabled()) {
+    SDL_LOG_DEBUG("Policy table is disabled");
+    return true;
+  }
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, false);
   std::vector<int> policy_hmi_types;

@@ -68,12 +68,6 @@ class EventDispatcherImpl : public EventDispatcher {
   EventObserverMap get_observers() const {
     return observers_event_;
   }
-  MobileEventObserverMap get_mobile_observers() const {
-    return mobile_observers_event_;
-  }
-  ObserverVector get_observers_list() const {
-    return observers_;
-  }
 #endif  // BUILD_TESTS
 
   /*
@@ -82,9 +76,6 @@ class EventDispatcherImpl : public EventDispatcher {
    * @param event Received event
    */
   void raise_event(const Event& event) OVERRIDE;
-
-  void remove_observer(const Event::EventID& event_id,
-                       const int32_t hmi_correlation_id) OVERRIDE;
 
   /*
    * @brief Subscribe the observer to event
@@ -149,32 +140,14 @@ class EventDispatcherImpl : public EventDispatcher {
   void remove_mobile_observer(EventObserver& observer) OVERRIDE;
 
  private:
-  /*
-   * @brief removes observer
-   * when occurs unsubscribe from event
-   * @param observer to be removed
-   */
-  void remove_observer_from_vector(EventObserver& observer);
-
-  /*
-   * @brief removes observer
-   * when occurs unsubscribe from event
-   * @param observer to be removed
-   */
-  void remove_mobile_observer_from_vector(EventObserver& observer);
-
   DISALLOW_COPY_AND_ASSIGN(EventDispatcherImpl);
 
  private:
   // Members section
-  sync_primitives::Lock state_lock_;
-  sync_primitives::Lock mobile_state_lock_;
   sync_primitives::RecursiveLock observer_lock_;
   sync_primitives::RecursiveLock mobile_observer_lock_;
   EventObserverMap observers_event_;
   MobileEventObserverMap mobile_observers_event_;
-  ObserverVector observers_;
-  ObserverVector mobile_observers_;
 };
 
 }  // namespace event_engine

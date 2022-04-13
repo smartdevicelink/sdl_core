@@ -430,6 +430,9 @@ class PolicyHandler : public PolicyHandlerInterface,
                       const std::string url = std::string(),
                       const std::string snapshot_path = std::string()) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
+#ifndef PROPRIETARY_MODE
+  void UpdateLastPTUApp(const uint32_t app_id) OVERRIDE;
+#endif  // PROPRIETARY_MODE
 
   uint32_t GetAppIdForSending() const OVERRIDE;
 
@@ -721,6 +724,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   void StopRetrySequence() OVERRIDE;
 
+  bool IsPTUSystemRequestAllowed(const uint32_t app_id) OVERRIDE;
+
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so
    * policy permissions should be processed accordingly
@@ -932,10 +937,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<PolicyManager> atomic_policy_manager_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
+  uint32_t last_ptu_app_id_;
 
 #ifndef EXTERNAL_PROPRIETARY_MODE
   // PTU retry information
-  uint32_t last_ptu_app_id_;
   std::string retry_update_url_;
   std::string policy_snapshot_path_;
 #endif  // EXTERNAL_PROPRIETARY_MODE

@@ -63,15 +63,7 @@ using namespace mobile_apis;
 class ResumptionDataTest : public ::testing::Test {
  protected:
   ResumptionDataTest()
-      : help_prompt_(NULL)
-      , timeout_prompt_(NULL)
-      , vr_help_(NULL)
-      , vr_help_title_(NULL)
-      , vr_synonyms_(NULL)
-      , keyboard_props_(NULL)
-      , menu_title_(NULL)
-      , menu_icon_(NULL)
-      , kCountOfCommands_(5u)
+      : kCountOfCommands_(5u)
       , kCountOfChoice_(2u)
       , kCountOfChoiceSets_(4u)
       , kCountOfSubmenues_(3u)
@@ -106,14 +98,15 @@ class ResumptionDataTest : public ::testing::Test {
   bool is_audio_;
   const connection_handler::DeviceHandle device_handle_ = 10;
 
-  sm::SmartObject* help_prompt_;
-  sm::SmartObject* timeout_prompt_;
-  sm::SmartObject* vr_help_;
-  sm::SmartObject* vr_help_title_;
-  sm::SmartObject* vr_synonyms_;
-  sm::SmartObject* keyboard_props_;
-  sm::SmartObject* menu_title_;
-  sm::SmartObject* menu_icon_;
+  sm::SmartObjectSPtr help_prompt_;
+  sm::SmartObjectSPtr timeout_prompt_;
+  sm::SmartObjectSPtr vr_help_;
+  sm::SmartObjectSPtr vr_help_title_;
+  sm::SmartObjectSPtr vr_synonyms_;
+  sm::SmartObjectSPtr keyboard_props_;
+  sm::SmartObjectSPtr menu_title_;
+  sm::SmartObjectSPtr menu_icon_;
+  sm::SmartObjectSPtr menu_layout_;
 
   void SetCommands();
   void SetSubmenues();
@@ -121,7 +114,7 @@ class ResumptionDataTest : public ::testing::Test {
   void SetAppFiles();
   void SetGlobalProporties();
   void SetKeyboardProperties();
-  void SetMenuTitleAndIcon();
+  void SetMenuParams();
   void SetHelpAndTimeoutPrompt();
   void SetVRHelpTitle();
   void SetSubscriptions();
@@ -137,6 +130,7 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckKeyboardProperties(sm::SmartObject& res_list);
   void CheckMenuTitle(sm::SmartObject& res_list);
   void CheckMenuIcon(sm::SmartObject& res_list);
+  void CheckMenuLayout(sm::SmartObject& res_list);
   void CheckHelpPrompt(sm::SmartObject& res_list);
   void CheckTimeoutPrompt(sm::SmartObject& res_list);
   void CheckVRHelp(

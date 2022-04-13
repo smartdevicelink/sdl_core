@@ -261,7 +261,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   EXPECT_EQ((*response_to_mobile)[am::strings::msg_params][am::strings::success]
                 .asBool(),
-            false);
+            true);
   EXPECT_EQ(
       (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
           .asInt(),

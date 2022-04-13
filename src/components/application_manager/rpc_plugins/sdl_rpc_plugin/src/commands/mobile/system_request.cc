@@ -75,34 +75,37 @@ const unsigned int kLanguageArraySizeMax = 100U;
 typedef std::set<std::string> SynonymsSet;
 typedef std::map<std::string, SynonymsSet> SynonymsMap;
 
-bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
-                                const std::string& language_name,
-                                SynonymsMap& synonyms_map) {
+enum class ValidateSynonymsResult { OK, NOT_EXIST, INVALID };
+
+ValidateSynonymsResult ValidateSynonymsAtLanguage(
+    const smart_objects::SmartObject& language,
+    const std::string& language_name,
+    SynonymsMap& synonyms_map) {
   if (!language[language_name].keyExists(json::vrSynonyms)) {
     SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                  << "'languages.vrSynonyms' doesn't exist");
-    return false;
+    return ValidateSynonymsResult::NOT_EXIST;
   }
   const smart_objects::SmartArray* synonyms_array =
       language[language_name][json::vrSynonyms].asArray();
   if (!synonyms_array) {
     SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                  << "vrSynonyms is not array.");
-    return false;
+    return ValidateSynonymsResult::INVALID;
   }
   const size_t synonyms_array_size = synonyms_array->size();
   if (synonyms_array_size < kVrArraySizeMin) {
     SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                  << "vrSynomyms array has [" << synonyms_array_size
                  << "] size < allowed min size [" << kVrArraySizeMin << "]");
-    return false;
+    return ValidateSynonymsResult::INVALID;
   }
   if (synonyms_array_size > kVrArraySizeMax) {
     SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                  << "vrSynomyms array size [" << synonyms_array_size
                  << "] exceeds maximum allowed size [" << kVrArraySizeMax
                  << "]");
-    return false;
+    return ValidateSynonymsResult::INVALID;
   }
 
   for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
@@ -113,14 +116,14 @@ bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
                    << "vrSYnomym item [" << idx << "] exceeds max length ["
                    << vrSynonym.length() << "]>[" << kVrSynonymLengthMax
                    << "]");
-      return false;
+      return ValidateSynonymsResult::INVALID;
     }
     if (vrSynonym.length() < kVrSynonymLengthMin) {
       SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                    << "vrSYnomym item [" << idx << "] length ["
                    << vrSynonym.length() << "] is less then min length ["
                    << kVrSynonymLengthMin << "] allowed.");
-      return false;
+      return ValidateSynonymsResult::INVALID;
     }
     // Verify duplicates
     SynonymsMap::iterator synonyms_map_iter = synonyms_map.find(language_name);
@@ -129,11 +132,11 @@ bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
         SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
                      << "vrSYnomym item already defined [" << vrSynonym.c_str()
                      << "] for language [" << language_name << "]");
-        return false;
+        return ValidateSynonymsResult::INVALID;
       }
     }
   }
-  return true;
+  return ValidateSynonymsResult::OK;
 }
 
 bool CheckMandatoryParametersPresent(
@@ -278,6 +281,7 @@ class QueryAppsDataValidator {
   }
 
   bool ValidateAppIdAndAppName(const smart_objects::SmartObject& app_data) {
+    SDL_LOG_AUTO_TRACE();
     // Verify appid length
     const std::string app_id(app_data[json::appId].asString());
     if (app_id.length() > kAppIdLengthMax) {
@@ -315,6 +319,7 @@ class QueryAppsDataValidator {
 
   bool ValidateLanguages(const smart_objects::SmartObject& languages,
                          SynonymsMap& synonyms_map) const {
+    SDL_LOG_AUTO_TRACE();
     bool default_language_found = false;
     const size_t languages_array_size = languages.length();
     if (languages_array_size > kLanguageArraySizeMax) {
@@ -351,32 +356,37 @@ class QueryAppsDataValidator {
       if (synonyms_map.find(language_name) == synonyms_map.end()) {
         synonyms_map[language_name] = SynonymsSet();
       }
-      // ttsName verification
-      if (!language[language_name].keyExists(json::ttsName)) {
-        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                     << "'languages.ttsName' doesn't exist");
-        return false;
-      }
-      const smart_objects::SmartObject& ttsNameObject =
-          language[language_name][json::ttsName];
-      // ttsName is string
-      if (smart_objects::SmartType_String == ttsNameObject.getType()) {
-        const std::string ttsName =
-            language[language_name][json::ttsName].asString();
-        if (ttsName.length() > kTtsNameLengthMax) {
+
+      const bool ttsNameExist =
+          language[language_name].keyExists(json::ttsName);
+
+      if (ttsNameExist) {
+        const smart_objects::SmartObject& ttsNameObject =
+            language[language_name][json::ttsName];
+        // ttsName is string
+        if (smart_objects::SmartType_String == ttsNameObject.getType()) {
+          const std::string ttsName =
+              language[language_name][json::ttsName].asString();
+          if (ttsName.length() > kTtsNameLengthMax) {
+            SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                         << "ttsName string exceeds max length ["
+                         << ttsName.length() << "]>[" << kTtsNameLengthMax
+                         << "]");
+            return false;
+          }
+        } else {
           SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                       << "ttsName string exceeds max length ["
-                       << ttsName.length() << "]>[" << kTtsNameLengthMax
-                       << "]");
+                       << "ttsName is not the string type.");
           return false;
         }
       } else {
-        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                     << "ttsName is not the string type.");
-        return false;
+        SDL_LOG_WARN("ttsName does not exist.");
       }
 
-      if (!ValidateSynonymsAtLanguage(language, language_name, synonyms_map)) {
+      const auto result =
+          ValidateSynonymsAtLanguage(language, language_name, synonyms_map);
+
+      if (result == ValidateSynonymsResult::INVALID) {
         return false;
       }
     }
@@ -569,6 +579,16 @@ void SystemRequest::Run() {
   }
 
   SDL_LOG_DEBUG("Binary data ok.");
+
+  if (mobile_apis::RequestType::PROPRIETARY == request_type ||
+      mobile_apis::RequestType::HTTP == request_type) {
+    auto app_id = application->app_id();
+    if (!policy_handler_.IsPTUSystemRequestAllowed(app_id)) {
+      SDL_LOG_DEBUG("Rejected PTU SystemRequest from app " << app_id);
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
+  }
 
   if (mobile_apis::RequestType::ICON_URL == request_type) {
     application_manager_.SetIconFileFromSystemRequest(file_name);

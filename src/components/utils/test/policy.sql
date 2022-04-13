@@ -117,7 +117,6 @@ BEGIN TRANSACTION;
     `is_revoked` BOOLEAN, 
     `is_default` BOOLEAN, 
     `is_predata` BOOLEAN,
-    `memory_kb` INTEGER NOT NULL, 
     `heart_beat_timeout_ms` INTEGER NOT NULL, 
     `certificate` VARCHAR(45), 
     CONSTRAINT `fk_application_hmi_level1` 

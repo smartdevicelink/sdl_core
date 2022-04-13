@@ -201,6 +201,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const std::string url,
                     const std::string snapshot_path));
 #endif
+#ifndef PROPRIETARY_MODE
+  MOCK_METHOD1(UpdateLastPTUApp, void(const uint32_t app_id));
+#endif
   MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
   MOCK_METHOD1(
       GetAppName,
@@ -210,6 +213,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string& certificate_data));
   MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
   MOCK_METHOD0(OnPTInited, void());
+  MOCK_METHOD1(IsPTUSystemRequestAllowed, bool(const uint32_t app_id));
   MOCK_METHOD0(StopRetrySequence, void());
   MOCK_METHOD1(OnCertificateDecrypted, void(bool is_succeeded));
   MOCK_METHOD0(CanUpdate, bool());

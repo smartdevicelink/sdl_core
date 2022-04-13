@@ -801,8 +801,8 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   {
     SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::help_prompt] = application->help_prompt();
-    msg_params[strings::timeout_prompt] = application->timeout_prompt();
+    msg_params[strings::help_prompt] = *(application->help_prompt());
+    msg_params[strings::timeout_prompt] = *(application->timeout_prompt());
     msg_params[strings::app_id] = application->app_id();
 
     SmartObjectSPtr message = CreateMessageForHMI(
@@ -1058,10 +1058,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
   smart_objects::SmartObjectSPtr set_icon =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-
-  if (!set_icon) {
-    return NULL;
-  }
 
   smart_objects::SmartObject& object = *set_icon;
   object[strings::sync_file_name][strings::value] = path_to_icon;
@@ -1419,11 +1415,9 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!result) {
-    return NULL;
-  }
+
   smart_objects::SmartObject& vr_help = *result;
-  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
+  const smart_objects::SmartObjectSPtr vr_help_title = app->vr_help_title();
   if (vr_help_title) {
     vr_help[strings::vr_help_title] = vr_help_title->asString();
   }
@@ -1652,7 +1646,7 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
         CreateChangeRegistration(hmi_apis::FunctionID::UI_ChangeRegistration,
                                  app->ui_language(),
                                  app->app_id(),
-                                 app->app_types(),
+                                 app->app_types().get(),
                                  app_mngr);
 
     if (ui_command) {
@@ -1829,8 +1823,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
     return false;
   }
 
-  const smart_objects::SmartObject* app_types = app->app_types();
-  const smart_objects::SmartObject* ngn_media_screen_name =
+  const smart_objects::SmartObjectSPtr app_types = app->app_types();
+  const smart_objects::SmartObjectSPtr ngn_media_screen_name =
       app->ngn_media_screen_name();
   const smart_objects::SmartObject day_color_scheme = app->day_color_scheme();
   const smart_objects::SmartObject night_color_scheme =
@@ -1848,7 +1842,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   if (file_system::FileExists(app->app_icon_path())) {
     message[strings::icon] = icon_path;
   }
-  if (app->app_id() > 0 || app->IsRegistered()) {
+  if (app->IsRegistered()) {
     message[strings::hmi_display_language_desired] = app->ui_language();
     message[strings::is_media_application] = app->is_media_application();
   } else {
@@ -2266,9 +2260,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
@@ -3050,9 +3041,6 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_GetStatusUpdate;
@@ -3090,9 +3078,6 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
 
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::SDL_OnStatusUpdate;

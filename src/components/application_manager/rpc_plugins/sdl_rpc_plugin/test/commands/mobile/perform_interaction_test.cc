@@ -467,9 +467,8 @@ TEST_F(
 
   command->StartAwaitForInterfaces();
 
-  MessageSharedPtr response_msg_vr =
-      CreateHMIResponseMessage(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-                               "VR is not supported by system");
+  MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
+      hmi_apis::Common_Result::WRONG_LANGUAGE, "VR error message");
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
   event_vr.set_smart_object(*response_msg_vr);
 
@@ -484,23 +483,13 @@ TEST_F(
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
-  MessageSharedPtr request_to_hmi;
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
-      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
-
   command->on_event(event_vr);
   command->on_event(event_ui);
 
-  HMIRequestExpectations(request_to_hmi,
-                         hmi_apis::FunctionID::UI_ClosePopUp,
-                         "UI.PerformInteraction");
-
   ResultCommandExpectations(response_to_mobile,
                             true,
-                            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-                            "VR is not supported by system");
+                            hmi_apis::Common_Result::WRONG_LANGUAGE,
+                            "VR error message");
 }
 
 TEST_F(
@@ -618,8 +607,8 @@ TEST_F(
 
   command->StartAwaitForInterfaces();
 
-  MessageSharedPtr response_msg_vr =
-      CreateHMIResponseMessage(hmi_apis::Common_Result::SUCCESS, "");
+  MessageSharedPtr response_msg_vr = CreateHMIResponseMessageWithChoiceID(
+      hmi_apis::Common_Result::SUCCESS, "", kVrChoiceID);
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
   event_vr.set_smart_object(*response_msg_vr);
 
@@ -684,23 +673,45 @@ TEST_F(
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
-  MessageSharedPtr request_to_hmi;
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
-      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
-
   command->on_event(event_vr);
   command->on_event(event_ui);
-
-  HMIRequestExpectations(request_to_hmi,
-                         hmi_apis::FunctionID::UI_ClosePopUp,
-                         "UI.PerformInteraction");
 
   ResultCommandExpectations(response_to_mobile,
                             true,
                             hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
                             "UI warning message, VR error message");
+}
+
+TEST_F(PerformInteractionRequestTest,
+       ChoiceSetIsNotAllowed_UnsuccessWithREJECT) {
+  MessageSharedPtr msg_from_mobile =
+      CreateMessage(smart_objects::SmartType_Map);
+  const uint32_t kDissalowedChoiceSetId = 11u;
+
+  (*msg_from_mobile)[strings::msg_params]
+                    [strings::interaction_choice_set_id_list][0] =
+                        kDissalowedChoiceSetId;
+  (*msg_from_mobile)[strings::msg_params][strings::interaction_choice_set_id] =
+      kDissalowedChoiceSetId;
+  smart_objects::SmartObject choice_set_id =
+      (*msg_from_mobile)[am::strings::msg_params]
+                        [am::strings::interaction_choice_set_id];
+
+  ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
+  EXPECT_CALL(*mock_app_, FindChoiceSet(kDissalowedChoiceSetId))
+      .WillOnce(Return(choice_set_id));
+  EXPECT_CALL(*mock_app_, is_choice_set_allowed(kDissalowedChoiceSetId))
+      .WillOnce(Return(false));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED), _))
+      .WillOnce(Return(true));
+
+  auto command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
+
+  command->Init();
+  command->Run();
 }
 
 }  // namespace perform_interaction_request

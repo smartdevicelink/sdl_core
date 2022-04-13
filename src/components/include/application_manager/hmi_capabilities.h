@@ -253,6 +253,19 @@ class HMICapabilities {
       const smart_objects::SmartObject& hmi_zone_capabilities) = 0;
 
   /**
+   * @brief Retrieves information about the HMI capabilities
+   * @return Currently supported UI HMI capabilities
+   */
+  virtual const smart_objects::SmartObjectSPtr ui_hmi_capabilities() const = 0;
+
+  /**
+   * @brief Sets supported HMI capabilities
+   * @param ui_hmi_capabilities supported HMI capabilities
+   */
+  virtual void set_ui_hmi_capabilities(
+      const smart_objects::SmartObject& ui_hmi_capabilities) = 0;
+
+  /**
    * @brief Retrieves information about the SoftButton's capabilities
    * @return Currently supported SoftButton's capabilities
    */

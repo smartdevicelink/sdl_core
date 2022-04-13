@@ -89,6 +89,7 @@ void WebSocketSession<ExecutorType>::AsyncAccept() {
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(read_write_operations_lock_);
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
     SDL_LOG_ERROR(str_err);
@@ -106,6 +107,7 @@ void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
 
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::WriteDown(Message message) {
+  sync_primitives::AutoLock lock(read_write_operations_lock_);
   boost::system::error_code ec;
   ws_.write(boost::asio::buffer(message->data(), message->data_size()), ec);
 
