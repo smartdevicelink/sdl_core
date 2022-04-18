@@ -3654,7 +3654,11 @@ TEST_F(StateControllerImplTest,
       static_cast<hmi_apis::Common_HMILevel::eType>(new_state->hmi_level()),
       kCorrID);
 
-  smart_objects::SmartObjectSPtr bc_activate_app_request;
+  smart_objects::SmartObjectSPtr bc_activate_app_request =
+      std::make_shared<smart_objects::SmartObject>();
+  (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =
+      kCorrID;
+
   EXPECT_CALL(message_helper_mock_, GetBCActivateAppRequestToHMI(_, _, _, _, _))
       .WillOnce(Return(bc_activate_app_request));
   EXPECT_CALL(*simple_app_ptr_, SetRegularState(_, _)).Times(0);
