@@ -25,12 +25,17 @@ parser.add_argument("--encryption", action="store_true",
 
 
 def http_header(data):
+# The Content-Length to be sent in the HTTP Request header should be
+# adjusted for additional escape characters added for newline strings
+# The mobile proxy will remove the escape characters after receiving this request.
+    content_length = len(data) - data.count('\\n')
+
     header = {}
     header["HTTPRequest"] = {}
     header["HTTPRequest"]["headers"] = {
         "ConnectTimeout": 60,
         "ContentType": "application/json",
-        "Content-Length": len(data),
+        "Content-Length": content_length,
         "DoInput": True,
         "DoOutput": True,
         "InstanceFollowRedirects": False,
