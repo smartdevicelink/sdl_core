@@ -231,6 +231,9 @@ size_t OnSystemRequestNotification::ParsePTString(
       --result_length;  // contentLength is adjusted when this character is
                         // not copied to result.
       continue;
+    } else if (pt_string[i] == 'n' && i > 0 && pt_string[i - 1] == '\\') {
+      --result_length;  // contentLength is adjusted for additonal escape
+                        // character added before the newline string
     }
     result += pt_string[i];
   }
