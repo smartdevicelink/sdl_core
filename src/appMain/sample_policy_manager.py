@@ -28,7 +28,7 @@ def http_header(data):
 # The Content-Length to be sent in the HTTP Request header should be
 # adjusted for additional escape characters added for newline strings
 # The mobile proxy will remove the escape characters after receiving this request.
-    content_length = len(data) - data.count('\\n')
+    content_length = len(data) - data.count('\\')
 
     header = {}
     header["HTTPRequest"] = {}

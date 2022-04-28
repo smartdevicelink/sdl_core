@@ -225,15 +225,17 @@ size_t OnSystemRequestNotification::ParsePTString(
   size_t result_length = length;
   result.reserve(length * 2);
   for (size_t i = 0; i < length; ++i) {
-    if (pt_string[i] == '\"' || pt_string[i] == '\\') {
+    if (pt_string[i] == '\"') {
       result += '\\';
+    } else if (pt_string[i] == '\\') {
+      result += '\\';
+      --result_length;  // contentLength is adjusted for the additional escape
+                        // character added before special characters (like the
+                        // newline string)
     } else if (pt_string[i] == '\n') {
       --result_length;  // contentLength is adjusted when this character is
                         // not copied to result.
       continue;
-    } else if (pt_string[i] == 'n' && i > 0 && pt_string[i - 1] == '\\') {
-      --result_length;  // contentLength is adjusted for the additional escape
-                        // character added before the newline string
     }
     result += pt_string[i];
   }
