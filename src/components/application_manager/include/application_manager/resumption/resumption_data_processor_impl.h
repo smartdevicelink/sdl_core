@@ -129,8 +129,9 @@ class ResumptionDataProcessorImpl
    * requests
    * @param app_id ID of application, related to event
    * @param found_request reference to found request
+   * @return true, if request is found and erased
    */
-  void EraseProcessedRequest(const uint32_t app_id,
+  bool EraseProcessedRequest(const uint32_t app_id,
                              const ResumptionRequest& found_request);
 
   /**
