@@ -3986,8 +3986,15 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
   smart_objects::SmartObject so_vr_help_title(vr_help_title);
 
   app->reset_vr_help_title();
-  app->reset_vr_help();
   app->set_vr_help_title(so_vr_help_title);
+
+  app->reset_vr_help();
+  smart_objects::SmartObjectSPtr vr_help = MessageHelper::CreateAppVrHelp(app);
+  if (!vr_help.get()) {
+    SDL_LOG_WARN("Failed to create vr_help");
+    return false;
+  }
+  app->set_vr_help(*vr_help);
 
   return true;
 }
