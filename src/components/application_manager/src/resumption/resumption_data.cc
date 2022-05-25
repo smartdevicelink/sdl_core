@@ -163,7 +163,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
            subscriptions);
   }
 
-  for (auto extension : application->Extensions()) {
+  auto extensions = application->Extensions();
+  for (auto extension : extensions.GetData()) {
     extension->SaveResumptionData(subscriptions);
   }
 

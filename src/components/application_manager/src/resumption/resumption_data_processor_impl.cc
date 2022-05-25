@@ -890,7 +890,8 @@ void ResumptionDataProcessorImpl::AddPluginsSubscriptions(
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
-  for (auto& extension : application->Extensions()) {
+  auto extensions = application->Extensions();
+  for (auto& extension : extensions.GetData()) {
     extension->ProcessResumption(saved_app);
   }
 }
@@ -995,7 +996,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
   resumption_status_lock_.Release();
 
   auto extensions = application->Extensions();
-  for (auto& extension : extensions) {
+  for (auto& extension : extensions.GetData()) {
     extension->RevertResumption(resumption_data_to_revert);
   }
 }

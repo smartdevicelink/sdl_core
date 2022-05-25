@@ -98,7 +98,8 @@ class ResumeCtrlTest : public ::testing::Test {
       , kDefaultDeferredTestLevel_(eType::INVALID_ENUM)
       , kNaviLowbandwidthLevel_("LIMITED")
       , kProjectionLowbandwidthLevel_("NONE")
-      , kMediaLowbandwidthLevel_("NONE") {
+      , kMediaLowbandwidthLevel_("NONE")
+      , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>()) {
     profile::Profile profile_;
     profile_.set_config_file_name("smartDeviceLink.ini");
     resumption_delay_before_ign_ = profile_.resumption_delay_before_ign();
@@ -245,6 +246,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kMediaLowbandwidthLevel_;
   NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
   resumption::ResumeCtrl::ResumptionCallBack callback_;
+  std::shared_ptr<sync_primitives::RecursiveLock> extensions_lock_;
 };
 
 /**
@@ -327,7 +329,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithFiles) {
       .WillRepeatedly(Return(requests));
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
   for (uint32_t i = 0; i < count_of_files; ++i) {
     EXPECT_CALL(*mock_app_,
@@ -387,7 +391,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubmenues) {
 
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
@@ -461,7 +467,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
       .WillRepeatedly(Return(requests));
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
@@ -521,7 +529,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
 
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
@@ -560,9 +570,12 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               CreateAddCommandRequestToHMI(_, _))
       .WillRepeatedly(Return(requests));
+
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
@@ -613,8 +626,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
 
   std::list<application_manager::AppExtensionPtr> extensions;
   extensions.insert(extensions.begin(), mock_app_extension_);
-
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
@@ -660,10 +674,10 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
   smart_objects::SmartObjectList requests;
 
   std::list<application_manager::AppExtensionPtr> extensions;
-
   extensions.insert(extensions.begin(), mock_app_extension_);
-
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app));
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
@@ -690,10 +704,12 @@ TEST_F(ResumeCtrlTest,
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               CreateSubscribeWayPointsMessageToHMI(_))
       .WillRepeatedly(Return(subscribe_waypoints_msg));
+
   std::list<application_manager::AppExtensionPtr> extensions;
-  // It will work only for WayPointsAppExtension, need to rework this test
   extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions, extensions_lock_);
+  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(Return(accessor));
 
   EXPECT_CALL(mock_app_mngr_,
               SubscribeAppForWayPoints(
