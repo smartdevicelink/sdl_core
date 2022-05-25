@@ -174,6 +174,10 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
   allowed_to_terminate_ = allowed;
 }
 
+const ApplicationManager& CommandImpl::GetApplicationManager() const {
+  return application_manager_;
+}
+
 bool CommandImpl::CheckAllowedParameters(const Command::CommandSource source) {
   SDL_LOG_AUTO_TRACE();
 
