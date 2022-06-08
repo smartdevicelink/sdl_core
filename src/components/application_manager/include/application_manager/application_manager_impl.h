@@ -1023,8 +1023,6 @@ class ApplicationManagerImpl
     rpc_service_ = std::move(rpc_service);
   }
 
-  bool is_stopping() const OVERRIDE;
-
   bool is_audio_pass_thru_active() const OVERRIDE;
   /*
    * @brief Function Should be called when Low Voltage is occured

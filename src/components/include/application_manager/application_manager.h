@@ -512,7 +512,6 @@ class ApplicationManager {
   get_request_timeout_handler() const = 0;
   virtual request_controller::RequestController& get_request_controller()
       const = 0;
-  virtual bool is_stopping() const = 0;
   virtual bool is_audio_pass_thru_active() const = 0;
 
   virtual uint32_t GetNextMobileCorrelationID() = 0;
