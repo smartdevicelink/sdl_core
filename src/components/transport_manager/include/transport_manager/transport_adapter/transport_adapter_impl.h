@@ -645,6 +645,7 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   ConnectionMap connections_;
 
+  mutable sync_primitives::Lock connections_dublicate;
   /**
    * @brief Queue of retry timers.
    */
