@@ -383,13 +383,10 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
           smart_objects::SmartType_Map);
 
   if (reset_result.vr_help_title_items) {
-    smart_objects::SmartObjectSPtr vr_help = CreateAppVrHelp(application);
-    if (!vr_help.get()) {
-      SDL_LOG_WARN("Failed to create vr_help");
-      return smart_objects::SmartObjectSPtr();
-    } else {
-      ui_reset_global_prop_request = vr_help;
-    }
+    (*ui_reset_global_prop_request)[strings::vr_help_title] =
+        *(application->vr_help_title());
+    (*ui_reset_global_prop_request)[strings::vr_help] =
+        *(application->vr_help());
   }
   if (reset_result.menu_name) {
     (*ui_reset_global_prop_request)[hmi_request::menu_title] = "";
