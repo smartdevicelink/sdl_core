@@ -4542,11 +4542,10 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
         const mobile_apis::HMILevel::eType app_hmi_level =
             (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
-        if (app_hmi_level == mobile_api::HMILevel::HMI_BACKGROUND) {
-          MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
-        } else if ((app_hmi_level == mobile_api::HMILevel::HMI_FULL) ||
-                   (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
-          MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
+
+        MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
+        if ((app_hmi_level == mobile_api::HMILevel::HMI_FULL) ||
+            (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
           state_controller().SetRegularState(
               *it,
               mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
