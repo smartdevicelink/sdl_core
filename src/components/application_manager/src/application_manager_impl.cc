@@ -3984,10 +3984,18 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
 
   const std::string& vr_help_title = get_settings().vr_help_title();
   smart_objects::SmartObject so_vr_help_title(vr_help_title);
-
   app->reset_vr_help_title();
-  app->reset_vr_help();
   app->set_vr_help_title(so_vr_help_title);
+
+  app->reset_vr_help();
+  smart_objects::SmartObjectSPtr so_vr_help =
+      MessageHelper::CreateAppVrHelp(app);
+  if (!so_vr_help->keyExists(strings::vr_help)) {
+    SDL_LOG_WARN("Failed to create vr_help items. Resetting to empty array");
+    (*so_vr_help)[strings::vr_help] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+  }
+  app->set_vr_help((*so_vr_help)[strings::vr_help]);
 
   return true;
 }
