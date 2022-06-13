@@ -2567,7 +2567,7 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
     application_manager::commands::MessageSharedPtr& message,
     const hmi_apis::FunctionID::eType& function_id) {
   SDL_LOG_AUTO_TRACE();
-  hmi_apis::HMI_API factory;
+
   if (!(*message)[jhs::S_PARAMS].keyExists(jhs::S_FUNCTION_ID)) {
     SDL_LOG_ERROR("RemoveHMIFakeParameters message missing function id");
     return;
@@ -2576,7 +2576,7 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = function_id;
-  factory.attachSchema(*message, true);
+  hmi_so_factory().attachSchema(*message, true);
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
