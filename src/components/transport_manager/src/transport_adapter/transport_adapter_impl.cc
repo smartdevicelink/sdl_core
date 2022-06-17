@@ -994,7 +994,9 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
         "RemoveFinalizedConnection copying connection with Device_id: "
         << &device_uid << ", app_handle: " << &app_handle);
     ConnectionSPtr connection = info.connection;
+    connections_dublicate.Acquire();
     connections_.erase(it_conn);
+    connections_dublicate.Release();
     connections_lock_.Release();
     SDL_LOG_DEBUG("RemoveFinalizedConnection Connections Lock Released");
   }
@@ -1024,7 +1026,9 @@ void TransportAdapterImpl::RemoveConnection(
     SDL_LOG_DEBUG("Copying connection with Device_id: "
                   << &device_id << ", app_handle: " << &app_handle);
     connection = it->second.connection;
+    connections_dublicate.Acquire();
     connections_.erase(it);
+    connections_dublicate.Release();
   }
   connections_lock_.Release();
   SDL_LOG_DEBUG("Connections Lock Released");
