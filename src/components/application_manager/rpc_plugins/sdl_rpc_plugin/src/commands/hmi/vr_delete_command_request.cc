@@ -56,7 +56,19 @@ VRDeleteCommandRequest::~VRDeleteCommandRequest() {}
 void VRDeleteCommandRequest::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  SendRequest();
+  if ((*message_)[strings::msg_params].keyExists(strings::grammar_id)) {
+    SendRequest();
+  } else {
+    event_engine::Event event(hmi_apis::FunctionID::VR_DeleteCommand);
+
+    (*message_)[strings::params][strings::message_type] =
+        static_cast<int32_t>(application_manager::MessageType::kResponse);
+    (*message_)[strings::params][application_manager::hmi_response::code] =
+        static_cast<int32_t>(hmi_apis::Common_Result::SUCCESS);
+
+    event.set_smart_object(*message_);
+    event.raise(application_manager_.event_dispatcher());
+  }
 }
 
 }  // namespace commands
