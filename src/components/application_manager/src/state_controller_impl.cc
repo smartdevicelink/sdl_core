@@ -112,20 +112,7 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
           resolved_state->hmi_level());
 
   if (request_hmi_state_change) {
-    const int64_t result = RequestHMIStateChange(app, hmi_level, true);
-    if (-1 != result) {
-      const uint32_t corr_id = static_cast<uint32_t>(result);
-
-      subscribe_on_event(
-          hmi_apis::FunctionID::BasicCommunication_CloseApplication, corr_id);
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         corr_id);
-
-      waiting_for_response_[app->app_id()] = resolved_state;
-      app_mngr_.set_application_id(corr_id, app->hmi_app_id());
-      return;
-    }
-    SDL_LOG_ERROR("Unable to send BC.ActivateApp");
+    RequestHMIStateChange(app, resolved_state, hmi_level, true);
     return;
   }
   ApplyRegularState(app, window_id, resolved_state);
@@ -1104,8 +1091,9 @@ void StateControllerImpl::OnAppWindowAdded(
   OnStateChanged(app, window_id, initial_state, new_state);
 }
 
-int64_t StateControllerImpl::RequestHMIStateChange(
+void StateControllerImpl::RequestHMIStateChange(
     ApplicationConstSharedPtr app,
+    HmiStatePtr resolved_state,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   SDL_LOG_AUTO_TRACE();
@@ -1122,15 +1110,21 @@ int64_t StateControllerImpl::RequestHMIStateChange(
   }
   if (!request) {
     SDL_LOG_ERROR("Unable to create request");
-    return -1;
+    return;
   }
-  if (!app_mngr_.GetRPCService().ManageHMICommand(request)) {
-    SDL_LOG_ERROR("Unable to send request");
-    return -1;
-  }
+
   const uint32_t corr_id =
       (*request)[strings::params][strings::correlation_id].asUInt();
-  return static_cast<int64_t>(corr_id);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_CloseApplication,
+                     corr_id);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                     corr_id);
+  waiting_for_response_[app->app_id()] = resolved_state;
+  app_mngr_.set_application_id(corr_id, app->hmi_app_id());
+
+  if (!app_mngr_.GetRPCService().ManageHMICommand(request)) {
+    SDL_LOG_ERROR("Unable to send request");
+  }
 }
 
 void StateControllerImpl::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
