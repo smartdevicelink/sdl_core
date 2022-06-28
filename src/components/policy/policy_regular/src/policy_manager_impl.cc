@@ -629,6 +629,9 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
 
+  sync_primitives::AutoLock policy_table_exchange_lock(
+      policy_table_exchange_lock_);
+
   if (update_status_manager_.IsUpdatePending() && update_required) {
     if (trigger_ptu_)
       update_status_manager_.ScheduleUpdate();
