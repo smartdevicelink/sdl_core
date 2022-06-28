@@ -32,10 +32,27 @@
 
 #include "utils/atomic_object.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 
 namespace test {
 namespace utils {
+
+class AtomicString {
+ public:
+  AtomicString(const std::string& str) : atomic_str_(str) {}
+
+  void SetValue(const std::string& str) {
+    atomic_str_ = str;
+  }
+  std::string GetValue() const {
+    return atomic_str_;
+  }
+
+ private:
+  sync_primitives::Atomic<std::string> atomic_str_;
+};
 
 TEST(AtomicObjectTest, Construct) {
   sync_primitives::atomic_int var(5);
@@ -50,6 +67,13 @@ TEST(AtomicObjectTest, Construct) {
 
   flag = false;
   EXPECT_EQ(false, static_cast<bool>(flag));
+
+  AtomicString atomic_str("string");
+
+  EXPECT_EQ("string", atomic_str.GetValue());
+
+  atomic_str.SetValue("string2");
+  EXPECT_EQ("string2", atomic_str.GetValue());
 }
 
 }  // namespace utils
