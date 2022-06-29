@@ -37,6 +37,7 @@
 #include <list>
 #include <memory>
 #include "interfaces/MOBILE_API.h"
+#include "utils/atomic_object.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -116,13 +117,13 @@ class HmiState {
    * @return return hmi level member
    */
   virtual mobile_apis::HMILevel::eType hmi_level() const {
-    if (parent_) {
+    if (parent()) {
       if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level_) {
-        return parent_->hmi_level();
+        return parent()->hmi_level();
       }
       // Higher values correlate to lower states
       // (FULL = 0, LIMITED = 1, etc.)
-      return std::max(parent_->max_hmi_level(), hmi_level_);
+      return std::max(parent()->max_hmi_level(), hmi_level_);
     }
     return hmi_level_;
   }
@@ -132,8 +133,8 @@ class HmiState {
    * @return return maximum hmi level for app
    */
   virtual mobile_apis::HMILevel::eType max_hmi_level() const {
-    if (parent_) {
-      return parent_->max_hmi_level();
+    if (parent()) {
+      return parent()->max_hmi_level();
     }
     return mobile_apis::HMILevel::HMI_FULL;
   }
@@ -152,14 +153,14 @@ class HmiState {
    */
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const {
-    if (parent_) {
+    if (parent()) {
       if (mobile_apis::AudioStreamingState::INVALID_ENUM ==
           audio_streaming_state_) {
-        return parent_->audio_streaming_state();
+        return parent()->audio_streaming_state();
       }
       // Higher values correlate to lower states
       // (AUDIBLE = 0, ATTENUATED = 1, etc.)
-      return std::max(parent_->max_audio_streaming_state(),
+      return std::max(parent()->max_audio_streaming_state(),
                       audio_streaming_state_);
     }
     return audio_streaming_state_;
@@ -171,8 +172,8 @@ class HmiState {
    */
   virtual mobile_apis::AudioStreamingState::eType max_audio_streaming_state()
       const {
-    if (parent_) {
-      return parent_->max_audio_streaming_state();
+    if (parent()) {
+      return parent()->max_audio_streaming_state();
     }
     return mobile_apis::AudioStreamingState::AUDIBLE;
   }
@@ -183,14 +184,14 @@ class HmiState {
    */
   virtual mobile_apis::VideoStreamingState::eType video_streaming_state()
       const {
-    if (parent_) {
+    if (parent()) {
       if (mobile_apis::VideoStreamingState::INVALID_ENUM ==
           video_streaming_state_) {
-        return parent_->video_streaming_state();
+        return parent()->video_streaming_state();
       }
       // Higher values correlate to lower states
       // (STREAMABLE = 0, NOT_STREAMABLE = 1)
-      return std::max(parent_->max_video_streaming_state(),
+      return std::max(parent()->max_video_streaming_state(),
                       video_streaming_state_);
     }
     return video_streaming_state_;
@@ -202,8 +203,8 @@ class HmiState {
    */
   virtual mobile_apis::VideoStreamingState::eType max_video_streaming_state()
       const {
-    if (parent_) {
-      return parent_->max_video_streaming_state();
+    if (parent()) {
+      return parent()->max_video_streaming_state();
     }
     return mobile_apis::VideoStreamingState::STREAMABLE;
   }
@@ -232,9 +233,9 @@ class HmiState {
    */
   virtual mobile_apis::SystemContext::eType system_context() const {
     // Parent's context should be used if not available for current state
-    if (parent_ &&
+    if (parent() &&
         system_context_ == mobile_apis::SystemContext::INVALID_ENUM) {
-      return parent_->system_context();
+      return parent()->system_context();
     }
     return system_context_;
   }
@@ -280,7 +281,7 @@ class HmiState {
   uint32_t hmi_app_id_;
   StateID state_id_;
   const ApplicationManager& app_mngr_;
-  HmiStatePtr parent_;
+  sync_primitives::Atomic<HmiStatePtr> parent_;
   mobile_apis::WindowType::eType window_type_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
