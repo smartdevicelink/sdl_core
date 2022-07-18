@@ -104,6 +104,14 @@ class HelpPromptManagerImpl : public HelpPromptManager {
                                      const bool is_response) OVERRIDE;
 
   /**
+   * @brief Triggered when ResetGlobalProperties request is received from an
+   * application. Reset sending_type_ based on which global properties are reset
+   * @param msg containing GlobalProperties
+   */
+  void OnResetGlobalPropertiesReceived(
+      const smart_objects::SmartObject& msg) OVERRIDE;
+
+  /**
    * @brief Get current sending type
    * @return current sending type
    */

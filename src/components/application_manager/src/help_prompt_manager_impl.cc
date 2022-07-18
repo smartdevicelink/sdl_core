@@ -183,6 +183,38 @@ void HelpPromptManagerImpl::OnSetGlobalPropertiesReceived(
   SetSendingType(msg);
 }
 
+void HelpPromptManagerImpl::OnResetGlobalPropertiesReceived(
+    const smart_objects::SmartObject& msg) {
+  SDL_LOG_AUTO_TRACE();
+  auto& global_properties_ids = msg[strings::properties];
+
+  for (size_t i = 0; i < global_properties_ids.length(); ++i) {
+    mobile_apis::GlobalProperty::eType global_property =
+        static_cast<mobile_apis::GlobalProperty::eType>(
+            global_properties_ids[i].asInt());
+    switch (global_property) {
+      case mobile_apis::GlobalProperty::HELPPROMPT: {
+        sending_type_ = SendingType::kNoneSend == sending_type_
+                            ? SendingType::kSendHelpPrompt
+                            : SendingType::kSendBoth;
+        break;
+      }
+      case mobile_apis::GlobalProperty::VRHELPTITLE:
+      case mobile_apis::GlobalProperty::VRHELPITEMS: {
+        sending_type_ = SendingType::kNoneSend == sending_type_
+                            ? SendingType::kSendVRHelp
+                            : SendingType::kSendBoth;
+        break;
+      }
+      default: {
+        return;
+      }
+    }
+  }
+
+  SDL_LOG_DEBUG("Sending type set to:" << static_cast<uint32_t>(sending_type_));
+}
+
 HelpPromptManagerImpl::SendingType HelpPromptManagerImpl::GetSendingType()
     const {
   return sending_type_;

@@ -80,6 +80,14 @@ class HelpPromptManager {
       const smart_objects::SmartObject& msg, const bool is_response) = 0;
 
   /**
+   * @brief Triggered when ResetGlobalProperties request is received from an
+   * application. Reset sending_type_ based on which global properties are reset
+   * @param msg containing GlobalProperties
+   */
+  virtual void OnResetGlobalPropertiesReceived(
+      const smart_objects::SmartObject& msg) = 0;
+
+  /**
    * @brief Requests sending type behavior
    */
   enum class SendingType { kNoneSend, kSendHelpPrompt, kSendVRHelp, kSendBoth };
