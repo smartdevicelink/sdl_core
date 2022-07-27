@@ -194,14 +194,16 @@ void HelpPromptManagerImpl::OnResetGlobalPropertiesReceived(
             global_properties_ids[i].asInt());
     switch (global_property) {
       case mobile_apis::GlobalProperty::HELPPROMPT: {
-        sending_type_ = SendingType::kNoneSend == sending_type_
+        sending_type_ = (SendingType::kNoneSend == sending_type_ ||
+                         SendingType::kSendHelpPrompt == sending_type_)
                             ? SendingType::kSendHelpPrompt
                             : SendingType::kSendBoth;
         break;
       }
       case mobile_apis::GlobalProperty::VRHELPTITLE:
       case mobile_apis::GlobalProperty::VRHELPITEMS: {
-        sending_type_ = SendingType::kNoneSend == sending_type_
+        sending_type_ = (SendingType::kNoneSend == sending_type_ ||
+                         SendingType::kSendVRHelp == sending_type_)
                             ? SendingType::kSendVRHelp
                             : SendingType::kSendBoth;
         break;
