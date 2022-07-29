@@ -741,10 +741,13 @@ void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
   msg_params[strings::app_id] = application->app_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
 
-  if (cmd->keyExists(strings::grammar_id) &&
-      (*cmd)[strings::grammar_id].asInt() != -1) {
-    msg_params[strings::grammar_id] = (*cmd)[strings::grammar_id];
+  if (!cmd->keyExists(strings::grammar_id) ||
+      (*cmd)[strings::grammar_id].asInt() == -1) {
+    return;
   }
+
+  msg_params[strings::grammar_id] = (*cmd)[strings::grammar_id];
+
   cmd = &((*cmd)[strings::choice_set]);
   for (uint32_t i = 0; i < (*cmd).length(); ++i) {
     msg_params[strings::cmd_id] = (*cmd)[i][strings::choice_id];
@@ -1598,11 +1601,13 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
       msg_params[strings::grammar_id] = choice_grammar_id;
       msg_params[strings::cmd_id] =
           (*(it->second))[strings::choice_set][j][strings::choice_id];
-      if ((*(it->second))[strings::choice_set][j].keyExists(
+      if (!(*(it->second))[strings::choice_set][j].keyExists(
               strings::vr_commands)) {
-        msg_params[strings::vr_commands] =
-            (*(it->second))[strings::choice_set][j][strings::vr_commands];
+        continue;
       }
+      msg_params[strings::vr_commands] =
+          (*(it->second))[strings::choice_set][j][strings::vr_commands];
+
       (*vr_command)[strings::msg_params] = msg_params;
       requests.push_back(vr_command);
     }
