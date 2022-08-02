@@ -117,6 +117,16 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    */
   SendingType GetSendingType() const OVERRIDE;
 
+  /**
+   * @brief Construct the helpPrompt parameter
+   */
+  void CreatePromptMsg(smart_objects::SmartObject& out_msg_params);
+
+  /**
+   * @brief Construct the vrHelp parameter
+   */
+  void CreateVRMsg(smart_objects::SmartObject& out_msg_params);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(HelpPromptManagerImpl);
 
@@ -156,16 +166,6 @@ class HelpPromptManagerImpl : public HelpPromptManager {
    * @brief Send TTS or UI or both Requests
    */
   void SendRequests();
-
-  /**
-   * @brief Construct the helpPrompt parameter
-   */
-  void CreatePromptMsg(smart_objects::SmartObject& out_msg_params);
-
-  /**
-   * @brief Construct the vrHelp parameter
-   */
-  void CreateVRMsg(smart_objects::SmartObject& out_msg_params);
 
   /**
    * @brief Setting request type to send HMI

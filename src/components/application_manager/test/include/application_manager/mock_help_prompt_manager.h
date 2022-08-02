@@ -55,6 +55,9 @@ class MockHelpPromptManager : public ::application_manager::HelpPromptManager {
                void(const smart_objects::SmartObject& msg));
 
   MOCK_CONST_METHOD0(GetSendingType, SendingType());
+  MOCK_METHOD1(CreatePromptMsg,
+               void(smart_objects::SmartObject& out_msg_params));
+  MOCK_METHOD1(CreateVRMsg, void(smart_objects::SmartObject& out_msg_params));
 };
 
 }  // namespace application_manager_test

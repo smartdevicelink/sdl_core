@@ -97,6 +97,16 @@ class HelpPromptManager {
    * @return current sending type
    */
   virtual SendingType GetSendingType() const = 0;
+
+  /**
+   * @brief Construct the helpPrompt parameter
+   */
+  virtual void CreatePromptMsg(smart_objects::SmartObject& out_msg_params) = 0;
+
+  /**
+   * @brief Construct the vrHelp parameter
+   */
+  virtual void CreateVRMsg(smart_objects::SmartObject& out_msg_params) = 0;
 };
 
 }  //  namespace application_manager
