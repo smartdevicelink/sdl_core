@@ -364,12 +364,22 @@ void HelpPromptManagerImpl::CreateVRMsg(
   GenerateVrItems(out_msg_params, strings::vr_help);
 
   if (out_msg_params[strings::vr_help].empty()) {
-    out_msg_params.erase(strings::vr_help);
-    app_.reset_vr_help();
-  } else {
-    app_.set_vr_help(out_msg_params[strings::vr_help]);
+    int32_t index = 0;
+
+    smart_objects::SmartObject so_default_vr_help(smart_objects::SmartType_Map);
+    so_default_vr_help[strings::position] = index + 1;
+    so_default_vr_help[strings::text] = app_.name();
+    out_msg_params[strings::vr_help][index++] = so_default_vr_help;
+
+    if (app_.vr_synonyms()) {
+      smart_objects::SmartObject item(smart_objects::SmartType_Map);
+      item[strings::text] = (*(app_.vr_synonyms())).getElement(0);
+      item[strings::position] = index + 1;
+      out_msg_params[strings::vr_help][index++] = item;
+    }
   }
-}
+  app_.set_vr_help(out_msg_params[strings::vr_help]);
+}  // namespace application_manager
 
 void HelpPromptManagerImpl::SetSendingType(
     const smart_objects::SmartObject& msg) {

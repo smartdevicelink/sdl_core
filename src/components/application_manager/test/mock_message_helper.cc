@@ -479,11 +479,6 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
                                                           app_man);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
-    ApplicationConstSharedPtr app) {
-  return MockMessageHelper::message_helper_mock()->CreateAppVrHelp(app);
-}
-
 mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,

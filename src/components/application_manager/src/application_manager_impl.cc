@@ -3988,14 +3988,18 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
   app->set_vr_help_title(so_vr_help_title);
 
   app->reset_vr_help();
-  smart_objects::SmartObjectSPtr so_vr_help =
-      MessageHelper::CreateAppVrHelp(app);
-  if (!so_vr_help->keyExists(strings::vr_help)) {
+  auto& help_prompt_manager = app->help_prompt_manager();
+
+  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
+  help_prompt_manager.CreateVRMsg(so_vr_help);
+
+  if (!so_vr_help.keyExists(strings::vr_help)) {
     SDL_LOG_WARN("Failed to create vr_help items. Resetting to empty array");
-    (*so_vr_help)[strings::vr_help] =
+    so_vr_help[strings::vr_help] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
   }
-  app->set_vr_help((*so_vr_help)[strings::vr_help]);
+
+  app->set_vr_help(so_vr_help[strings::vr_help]);
 
   return true;
 }

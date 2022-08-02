@@ -766,7 +766,10 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   using namespace smart_objects;
 
   {
-    SmartObject msg_params = *MessageHelper::CreateAppVrHelp(application);
+    auto& help_prompt_manager = application->help_prompt_manager();
+    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+    help_prompt_manager.CreateVRMsg(msg_params);
+
     msg_params[hmi_request::menu_title] = "";
 
     smart_objects::SmartObject keyboard_properties =
@@ -1405,46 +1408,6 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
     so_to_send[strings::msg_params] = msg_params;
     app_man.GetRPCService().ManageHMICommand(tts_global_properties);
   }
-}
-
-smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
-    ApplicationConstSharedPtr app) {
-  smart_objects::SmartObjectSPtr result =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-
-  smart_objects::SmartObject& vr_help = *result;
-  const smart_objects::SmartObjectSPtr vr_help_title = app->vr_help_title();
-  if (vr_help_title) {
-    vr_help[strings::vr_help_title] = vr_help_title->asString();
-  }
-
-  int32_t index = 0;
-
-  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
-  so_vr_help[strings::position] = index + 1;
-  so_vr_help[strings::text] = app->name();
-  vr_help[strings::vr_help][index++] = so_vr_help;
-
-  if (app->vr_synonyms()) {
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = (*(app->vr_synonyms())).getElement(0);
-    item[strings::position] = index + 1;
-    vr_help[strings::vr_help][index++] = item;
-  }
-
-  // copy all app VR commands
-  const DataAccessor<CommandsMap> cmd_accessor = app->commands_map();
-  const CommandsMap& commands = cmd_accessor.GetData();
-  CommandsMap::const_iterator it = commands.begin();
-
-  for (; commands.end() != it; ++it) {
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = (*it->second)[strings::vr_commands][0].asString();
-    item[strings::position] = index + 1;
-    vr_help[strings::vr_help][index++] = item;
-  }
-  return result;
 }
 
 smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
