@@ -93,6 +93,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
       choice_set[strings::grammar_id].asInt() != -1) {
     SendVrDeleteCommand(app);
   } else {
+    response_result_codes_.push_back(hmi_apis::Common_Result::SUCCESS);
     SendDeleteInteractionChoiceSetResponse();
   }
 }
