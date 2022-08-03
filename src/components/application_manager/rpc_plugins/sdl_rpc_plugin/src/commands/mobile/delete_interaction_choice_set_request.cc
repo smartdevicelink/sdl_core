@@ -183,32 +183,20 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-
-  bool should_send_request = false;
-  if (choice_set.keyExists(strings::grammar_id)) {
-    msg_params[strings::grammar_id] = choice_set[strings::grammar_id];
-    should_send_request = true;
-  }
-
+  msg_params[strings::grammar_id] = choice_set[strings::grammar_id];
   choice_set = choice_set[strings::choice_set];
+
   sync_primitives::AutoLock auto_lock(requests_lock_);
   for (uint32_t i = 0; i < choice_set.length(); ++i) {
     msg_params[strings::cmd_id] = choice_set[i][strings::choice_id];
-
-    if (should_send_request) {
-      const uint32_t delete_cmd_hmi_corr_id = SendHMIRequest(
-          hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
-      sent_requests_.insert(delete_cmd_hmi_corr_id);
-    } else {
-      response_result_codes_.push_back(hmi_apis::Common_Result::SUCCESS);
-      SendDeleteInteractionChoiceSetResponse();
-    }
+    const uint32_t delte_cmd_hmi_corr_id = SendHMIRequest(
+        hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
+    sent_requests_.insert(delte_cmd_hmi_corr_id);
   }
 }
 
 void DeleteInteractionChoiceSetRequest::
     SendDeleteInteractionChoiceSetResponse() {
-  SDL_LOG_AUTO_TRACE();
   hmi_apis::Common_Result::eType result_code =
       hmi_apis::Common_Result::INVALID_ENUM;
   for (const auto& code : response_result_codes_) {
