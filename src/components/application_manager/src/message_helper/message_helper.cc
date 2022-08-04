@@ -1588,6 +1588,7 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
               strings::vr_commands)) {
         continue;
       }
+
       smart_objects::SmartObjectSPtr vr_command = CreateMessageForHMI(
           hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       if (!vr_command) {
