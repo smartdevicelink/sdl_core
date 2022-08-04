@@ -51,7 +51,13 @@ class MockHelpPromptManager : public ::application_manager::HelpPromptManager {
                void(uint32_t cmd_id, const bool should_send_requests));
   MOCK_METHOD2(OnSetGlobalPropertiesReceived,
                void(const smart_objects::SmartObject& msg, bool is_response));
+  MOCK_METHOD1(OnResetGlobalPropertiesReceived,
+               void(const smart_objects::SmartObject& msg));
+
   MOCK_CONST_METHOD0(GetSendingType, SendingType());
+  MOCK_METHOD1(CreatePromptMsg,
+               void(smart_objects::SmartObject& out_msg_params));
+  MOCK_METHOD1(CreateVRMsg, void(smart_objects::SmartObject& out_msg_params));
 };
 
 }  // namespace application_manager_test

@@ -312,8 +312,6 @@ class MockMessageHelper {
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,
                     ApplicationManager& app_man));
-  MOCK_METHOD1(CreateAppVrHelp,
-               smart_objects::SmartObjectSPtr(ApplicationConstSharedPtr app));
   MOCK_METHOD3(VerifyImageVrHelpItems,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app,
