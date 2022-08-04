@@ -737,11 +737,16 @@ void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
   DCHECK_OR_RETURN_VOID(cmd);
   using namespace smart_objects;
 
-  SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
+  if (!cmd->keyExists(strings::grammar_id) ||
+      (*cmd)[strings::grammar_id].asInt() == -1) {
+    return;
+  }
 
+  SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = application->app_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
   msg_params[strings::grammar_id] = (*cmd)[strings::grammar_id];
+
   cmd = &((*cmd)[strings::choice_set]);
   for (uint32_t i = 0; i < (*cmd).length(); ++i) {
     msg_params[strings::cmd_id] = (*cmd)[i][strings::choice_id];
@@ -1527,6 +1532,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 smart_objects::SmartObjectList
 MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectList requests;
   if (!app) {
     SDL_LOG_ERROR("Invalid application");
@@ -1541,6 +1547,11 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
         (*(it->second))[strings::grammar_id].asUInt();
     const size_t size = (*(it->second))[strings::choice_set].length();
     for (size_t j = 0; j < size; ++j) {
+      if (!(*(it->second))[strings::choice_set][j].keyExists(
+              strings::vr_commands)) {
+        continue;
+      }
+
       smart_objects::SmartObjectSPtr vr_command = CreateMessageForHMI(
           hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       if (!vr_command) {
