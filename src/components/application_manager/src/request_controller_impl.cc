@@ -72,6 +72,27 @@ RequestControllerImpl::RequestControllerImpl(
 RequestControllerImpl::~RequestControllerImpl() {
   SDL_LOG_AUTO_TRACE();
   Stop();
+
+  retained_mobile_requests_.clear();
+
+  {
+    notification_list_lock_.Acquire();
+    notification_list_.clear();
+    notification_list_lock_.Release();
+  }
+
+  {
+    duplicate_message_count_lock_.Acquire();
+    duplicate_message_count_.clear();
+    duplicate_message_count_lock_.Release();
+  }
+
+  {
+    mobile_request_list_lock_.Acquire();
+    mobile_request_list_.clear();
+    waiting_for_response_.RemoveMobileRequests();
+    mobile_request_list_lock_.Release();
+  }
 }
 
 void RequestControllerImpl::Stop() {
@@ -111,7 +132,6 @@ void RequestControllerImpl::InitializeThreadpool() {
 void RequestControllerImpl::DestroyThreadpool() {
   SDL_LOG_AUTO_TRACE();
   {
-    AutoLock auto_lock(mobile_request_list_lock_);
     pool_state_ = TPoolState::STOPPED;
     SDL_LOG_DEBUG("Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
@@ -159,7 +179,9 @@ bool RequestControllerImpl::CheckPendingRequestsAmount(
   SDL_LOG_AUTO_TRACE();
 
   if (pending_requests_amount > 0) {
+    mobile_request_list_lock_.Acquire();
     const size_t pending_requests_size = mobile_request_list_.size();
+    mobile_request_list_lock_.Release();
     const bool available_to_add =
         pending_requests_amount > pending_requests_size;
     if (!available_to_add) {
@@ -181,11 +203,12 @@ RequestController::TResult RequestControllerImpl::AddMobileRequest(
     cond_var_.NotifyOne();
     return TResult::INVALID_DATA;
   }
+
   SDL_LOG_DEBUG("correlation_id : " << request->correlation_id()
                                     << "connection_key : "
                                     << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request, hmi_level);
-  if (TResult::SUCCESS == result) {
+  if (TResult::SUCCESS == result && pool_state_ != TPoolState::STOPPED) {
     AutoLock auto_lock_list(mobile_request_list_lock_);
     mobile_request_list_.push_back(request);
     SDL_LOG_DEBUG("Waiting for execution: " << mobile_request_list_.size());
@@ -431,11 +454,13 @@ void RequestControllerImpl::TerminateWaitingForResponseAppRequests(
 
 void RequestControllerImpl::TerminateAppRequests(const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
+  mobile_request_list_lock_.Acquire();
   SDL_LOG_DEBUG("app_id : " << app_id
                             << "Requests waiting for execution count : "
                             << mobile_request_list_.size()
                             << "Requests waiting for response count : "
                             << waiting_for_response_.Size());
+  mobile_request_list_lock_.Release();
 
   TerminateWaitingForExecutionAppRequests(app_id);
   TerminateWaitingForResponseAppRequests(app_id);
@@ -452,8 +477,9 @@ void RequestControllerImpl::TerminateAllMobileRequests() {
 
   waiting_for_response_.RemoveMobileRequests();
   SDL_LOG_DEBUG("Mobile Requests waiting for response cleared");
-  AutoLock waiting_execution_auto_lock(mobile_request_list_lock_);
+  mobile_request_list_lock_.Acquire();
   mobile_request_list_.clear();
+  mobile_request_list_lock_.Release();
   SDL_LOG_DEBUG("Mobile Requests waiting for execution cleared");
   NotifyTimer();
 }
@@ -590,27 +616,32 @@ RequestControllerImpl::Worker::~Worker() {}
 
 void RequestControllerImpl::Worker::threadMain() {
   SDL_LOG_AUTO_TRACE();
-  AutoLock auto_lock(thread_lock_);
+  AutoLock auto_thread_lock_(thread_lock_);
   while (!stop_flag_) {
     // Try to pick a request
-    AutoLock auto_lock(request_controller_->mobile_request_list_lock_);
+    request_controller_->mobile_request_list_lock_.Acquire();
 
     while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
            (request_controller_->mobile_request_list_.empty())) {
       // Wait until there is a task in the queue
       // Unlock mutex while wait, then lock it back when signaled
       SDL_LOG_INFO("Unlocking and waiting");
-      request_controller_->cond_var_.Wait(auto_lock);
+      request_controller_->cond_var_.Wait(
+          request_controller_->mobile_request_list_lock_);
       SDL_LOG_INFO("Signaled and locking");
     }
 
     // If the thread was shutdown, return from here
     if (request_controller_->pool_state_ == TPoolState::STOPPED) {
+      SDL_LOG_WARN("TPoolState::STOPPED");
+      request_controller_->mobile_request_list_.clear();
+      request_controller_->mobile_request_list_lock_.Release();
       break;
     }
 
     if (request_controller_->mobile_request_list_.empty()) {
       SDL_LOG_WARN("Mobile request list is empty");
+      request_controller_->mobile_request_list_lock_.Release();
       break;
     }
 
@@ -640,6 +671,7 @@ void RequestControllerImpl::Worker::threadMain() {
         cmd_request->SendResponse(
             false, mobile_apis::Result::INVALID_ID, "Duplicate correlation_id");
       }
+      request_controller_->mobile_request_list_lock_.Release();
       continue;
     }
     SDL_LOG_DEBUG("timeout_in_mseconds " << timeout_in_mseconds);
@@ -653,7 +685,7 @@ void RequestControllerImpl::Worker::threadMain() {
           "of this request.");
     }
 
-    AutoUnlock unlock(auto_lock);
+    request_controller_->mobile_request_list_lock_.Release();
 
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
@@ -662,6 +694,12 @@ void RequestControllerImpl::Worker::threadMain() {
                     << request_info_ptr->requestId()
                     << " with timeout: " << timeout_in_mseconds);
       request_ptr->Run();
+    }
+    if (request_ptr->GetApplicationManager().IsStopping()) {
+      request_controller_->mobile_request_list_lock_.Acquire();
+      request_controller_->mobile_request_list_.clear();
+      request_controller_->waiting_for_response_.RemoveMobileRequests();
+      request_controller_->mobile_request_list_lock_.Release();
     }
   }
 }

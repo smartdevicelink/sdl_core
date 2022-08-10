@@ -148,8 +148,8 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>())
     , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
-    , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
@@ -178,12 +178,27 @@ ApplicationImpl::~ApplicationImpl() {
     active_message_ = NULL;
   }
 
+  button_lock_ptr_->Acquire();
   subscribed_buttons_.clear();
+  button_lock_ptr_->Release();
+  {
+    sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+    cmd_softbuttonid_.clear();
+  }
+  cmd_number_to_time_limits_.clear();
+
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
   }
   CleanupFiles();
+  sync_primitives::AutoLock lock(mobile_message_lock_);
+  mobile_message_queue_.clear();
+  {
+    extensions_lock_->Acquire();
+    extensions_.clear();
+    extensions_lock_->Release();
+  }
 }
 
 void ApplicationImpl::CloseActiveMessage() {
@@ -1301,12 +1316,15 @@ void ApplicationImpl::set_hmi_level(
 }
 
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  extensions_lock_->Acquire();
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
     if ((*it)->uid() == uid) {
+      extensions_lock_->Release();
       return (*it);
     }
   }
+  extensions_lock_->Release();
   return AppExtensionPtr();
 }
 
@@ -1315,7 +1333,9 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
   if (!QueryInterface(extension->uid())) {
     SDL_LOG_TRACE("Add extenstion to add id" << app_id() << " with uid "
                                              << extension->uid());
+    extensions_lock_->Acquire();
     extensions_.push_back(extension);
+    extensions_lock_->Release();
     return true;
   }
   return false;
@@ -1323,6 +1343,7 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   SDL_LOG_AUTO_TRACE();
+  extensions_lock_->Acquire();
   auto it = std::find_if(
       extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
         return extension->uid() == uid;
@@ -1330,14 +1351,21 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 
   if (extensions_.end() != it) {
     extensions_.erase(it);
+    extensions_lock_->Release();
     return true;
   }
 
+  extensions_lock_->Release();
   return false;
 }
 
-const std::list<AppExtensionPtr>& ApplicationImpl::Extensions() const {
-  return extensions_;
+const DataAccessor<std::list<AppExtensionPtr> > ApplicationImpl::Extensions()
+    const {
+  extensions_lock_->Acquire();
+  DataAccessor<std::list<AppExtensionPtr> > accessor(extensions_,
+                                                     extensions_lock_);
+  extensions_lock_->Release();
+  return accessor;
 }
 
 const std::string& ApplicationImpl::cloud_app_endpoint() const {
@@ -1403,14 +1431,16 @@ const smart_objects::SmartObject& ApplicationImpl::get_user_location() const {
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {
-  sync_primitives::AutoLock lock(mobile_message_lock_);
+  mobile_message_lock_.Acquire();
   mobile_message_queue_.push_back(mobile_message);
+  mobile_message_lock_.Release();
 }
 
 void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
-  sync_primitives::AutoLock lock(mobile_message_lock_);
+  mobile_message_lock_.Acquire();
   mobile_messages.swap(mobile_message_queue_);
+  mobile_message_lock_.Release();
 }
 
 }  // namespace application_manager

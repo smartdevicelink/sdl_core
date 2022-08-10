@@ -383,7 +383,9 @@ void ResumptionDataTest::PrepareData() {
   mock_app_extension_ =
       std::make_shared<NiceMock<application_manager_test::MockAppExtension> >();
   extensions_.insert(extensions_.begin(), mock_app_extension_);
-  ON_CALL(*app_mock, Extensions()).WillByDefault(ReturnRef(extensions_));
+  DataAccessor<std::list<application_manager::AppExtensionPtr> > accessor(
+      extensions_, extensions_lock_);
+  ON_CALL(*app_mock, Extensions()).WillByDefault(Return(accessor));
   SetGlobalProporties();
   SetCommands();
   SetSubmenues();

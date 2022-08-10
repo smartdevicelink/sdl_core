@@ -555,7 +555,7 @@ class ApplicationImpl : public virtual Application,
    */
   bool RemoveExtension(AppExtensionUID uid) OVERRIDE;
 
-  const std::list<AppExtensionPtr>& Extensions() const OVERRIDE;
+  const DataAccessor<std::list<AppExtensionPtr> > Extensions() const OVERRIDE;
 
   std::string hash_val_;
   uint32_t grammar_id_;
@@ -617,6 +617,7 @@ class ApplicationImpl : public virtual Application,
   Timer audio_stream_suspend_timer_;
 
   std::list<AppExtensionPtr> extensions_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> extensions_lock_;
 
   // Cloud app properties
   std::string endpoint_;
@@ -644,7 +645,6 @@ class ApplicationImpl : public virtual Application,
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
-  mutable std::shared_ptr<sync_primitives::Lock> vi_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock> button_lock_ptr_;
   std::string folder_name_;
   ApplicationManager& application_manager_;

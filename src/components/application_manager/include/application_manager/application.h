@@ -1181,7 +1181,8 @@ class Application : public virtual InitialApplicationData,
    * @brief Get list of available application extensions
    * @return application extensions
    */
-  virtual const std::list<AppExtensionPtr>& Extensions() const = 0;
+  virtual const DataAccessor<std::list<AppExtensionPtr> > Extensions()
+      const = 0;
 
   /**
    * @brief Get cloud app endpoint for websocket connection
