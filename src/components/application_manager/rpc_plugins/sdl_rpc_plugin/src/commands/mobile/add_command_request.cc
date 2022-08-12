@@ -444,12 +444,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       result_code = ui_result_ == hmi_apis::Common_Result::REJECTED
                         ? mobile_apis::Result::REJECTED
                         : mobile_apis::Result::GENERIC_ERROR;
-
-      msg_params[strings::grammar_id] = application->get_grammar_id();
-      msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
-
-      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-      application->RemoveCommand(cmd_id);
       result = false;
       SDL_LOG_DEBUG("Result " << result);
     }
@@ -461,10 +455,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     result_code = vr_result_ == hmi_apis::Common_Result::REJECTED
                       ? mobile_apis::Result::REJECTED
                       : mobile_apis::Result::GENERIC_ERROR;
-
-    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
-
-    application->RemoveCommand(cmd_id);
     result = false;
     SDL_LOG_DEBUG("Result " << result);
   }
@@ -588,11 +578,29 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
 
 void AddCommandRequest::RemoveCommand() {
   SDL_LOG_AUTO_TRACE();
+  using namespace helpers;
+
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (app.use_count() == 0) {
     SDL_LOG_ERROR("No application associated with session key");
     return;
   }
+
+  const bool is_ui_result_ok_or_missing =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          ui_result_,
+          hmi_apis::Common_Result::INVALID_ENUM,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_vr_result_ok_or_missing =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          vr_result_,
+          hmi_apis::Common_Result::INVALID_ENUM,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
@@ -602,21 +610,15 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR) &&
-                     IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI))) {
-    // in case we have send bth UI and VR and no one respond
-    // we have nothing to remove from HMI so no DeleteCommand expected
-    return;
-  }
-
-  if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
+  if (ui_is_sent_ && is_ui_result_ok_or_missing) {
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
   }
 
-  if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
-    msg_params[strings::grammar_id] = app->get_grammar_id();
-    msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
-    SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
+  if (vr_is_sent_ && is_vr_result_ok_or_missing) {
+    smart_objects::SmartObject vr_msg_params = msg_params;
+    vr_msg_params[strings::grammar_id] = app->get_grammar_id();
+    vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+    SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &vr_msg_params);
   }
 }
 
