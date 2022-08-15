@@ -1316,15 +1316,13 @@ void ApplicationImpl::set_hmi_level(
 }
 
 AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
-  extensions_lock_->Acquire();
+  sync_primitives::AutoLock auto_lock_list(extensions_lock_);
   std::list<AppExtensionPtr>::const_iterator it = extensions_.begin();
   for (; it != extensions_.end(); ++it) {
     if ((*it)->uid() == uid) {
-      extensions_lock_->Release();
       return (*it);
     }
   }
-  extensions_lock_->Release();
   return AppExtensionPtr();
 }
 
@@ -1431,16 +1429,14 @@ const smart_objects::SmartObject& ApplicationImpl::get_user_location() const {
 
 void ApplicationImpl::PushMobileMessage(
     smart_objects::SmartObjectSPtr mobile_message) {
-  mobile_message_lock_.Acquire();
+  sync_primitives::AutoLock lock(mobile_message_lock_);
   mobile_message_queue_.push_back(mobile_message);
-  mobile_message_lock_.Release();
 }
 
 void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
-  mobile_message_lock_.Acquire();
+  sync_primitives::AutoLock lock(mobile_message_lock_);
   mobile_messages.swap(mobile_message_queue_);
-  mobile_message_lock_.Release();
 }
 
 }  // namespace application_manager

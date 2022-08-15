@@ -76,22 +76,19 @@ RequestControllerImpl::~RequestControllerImpl() {
   retained_mobile_requests_.clear();
 
   {
-    notification_list_lock_.Acquire();
+    sync_primitives::AutoLock auto_lock_list(notification_list_lock_);
     notification_list_.clear();
-    notification_list_lock_.Release();
   }
 
   {
-    duplicate_message_count_lock_.Acquire();
+    sync_primitives::AutoLock auto_lock_list(duplicate_message_count_lock_);
     duplicate_message_count_.clear();
-    duplicate_message_count_lock_.Release();
   }
 
   {
-    mobile_request_list_lock_.Acquire();
+    sync_primitives::AutoLock auto_lock_list(mobile_request_list_lock_);
     mobile_request_list_.clear();
     waiting_for_response_.RemoveMobileRequests();
-    mobile_request_list_lock_.Release();
   }
 }
 

@@ -138,7 +138,6 @@ void TransportAdapterImpl::Terminate() {
   std::swap(connections, connections_);
   connections_lock_.Release();
 
-  connections_duplicate.Acquire();
   for (const auto& connection : connections) {
     auto& info = connection.second;
     if (info.connection) {
@@ -146,7 +145,6 @@ void TransportAdapterImpl::Terminate() {
     }
   }
   connections.clear();
-  connections_duplicate.Release();
 
   SDL_LOG_DEBUG("Connections deleted");
 
@@ -389,7 +387,6 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
   }
   connections_lock_.Release();
 
-  connections_duplicate.Acquire();
   for (std::vector<ConnectionInfo>::const_iterator j = to_disconnect.begin();
        j != to_disconnect.end();
        ++j) {
@@ -399,7 +396,6 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
       SDL_LOG_ERROR("Error on disconnect " << error);
     }
   }
-  connections_duplicate.Release();
 
   return error;
 }

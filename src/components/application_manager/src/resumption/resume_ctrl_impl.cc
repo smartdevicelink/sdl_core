@@ -252,7 +252,6 @@ bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
 
 void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
   SDL_LOG_AUTO_TRACE();
-  DataAccessor<ApplicationSet> apps = application_manager_.applications();
   sync_primitives::AutoLock auto_lock(queue_lock_);
   WaitingForTimerList::iterator it = waiting_for_timer_.begin();
 
