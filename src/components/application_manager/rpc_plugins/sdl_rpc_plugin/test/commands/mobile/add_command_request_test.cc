@@ -167,8 +167,7 @@ class AddCommandRequestTest
   }
 
   void CheckOnTimeOutCommandDeletion(
-      const hmi_apis::FunctionID::eType incoming_cmd,
-      const hmi_apis::FunctionID::eType cmd_to_delete) {
+      const hmi_apis::FunctionID::eType incoming_cmd) {
     CreateBasicParamsVRRequest();
     CreateBasicParamsUIRequest();
     SmartObject& msg_params = (*msg_)[strings::msg_params];
@@ -209,9 +208,15 @@ class AddCommandRequestTest
     EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
 
     EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(cmd_to_delete), _))
-
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand), _))
         .WillOnce(Return(true));
+
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand), _))
+        .WillOnce(Return(true));
+
     SmartObjectSPtr response = std::make_shared<SmartObject>(SmartType_Map);
     (*response)[strings::msg_params][strings::info] = "info";
     EXPECT_CALL(
@@ -598,13 +603,11 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
 }
 
 TEST_F(AddCommandRequestTest, OnTimeOut_EXPECT_VR_DeleteCommand) {
-  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::VR_AddCommand,
-                                hmi_apis::FunctionID::VR_DeleteCommand);
+  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::VR_AddCommand);
 }
 
 TEST_F(AddCommandRequestTest, OnTimeOut_EXPECT_UI_DeleteCommand) {
-  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::UI_AddCommand,
-                                hmi_apis::FunctionID::UI_DeleteCommand);
+  CheckOnTimeOutCommandDeletion(hmi_apis::FunctionID::UI_AddCommand);
 }
 
 TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
@@ -744,7 +747,7 @@ TEST_F(AddCommandRequestTest,
 
 TEST_F(
     AddCommandRequestTest,
-    OnEvent_UI_HmiResponseCodeIsGenericError_VR_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
+    OnEvent_UI_HmiResponseCodeIsGenericError_VR_HmiResponseCodeIsUnsupportedResource_ExpectCommandRemoved) {
   CreateBasicParamsVRRequest();
   CreateBasicParamsUIRequest();
   SmartObject& params = (*msg_)[strings::params];
@@ -788,7 +791,7 @@ TEST_F(
 
 TEST_F(
     AddCommandRequestTest,
-    OnEvent_VR_HmiResponseCodeIsGenericError_UI_HmiResponseCodeIsUnsupportedResourse_ExpectCommandRemoved) {
+    OnEvent_VR_HmiResponseCodeIsGenericError_UI_HmiResponseCodeIsUnsupportedResource_ExpectCommandRemoved) {
   CreateBasicParamsVRRequest();
   CreateBasicParamsUIRequest();
   SmartObject& params = (*msg_)[strings::params];
@@ -833,7 +836,7 @@ TEST_F(
 
 TEST_F(
     AddCommandRequestTest,
-    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_UI_NotAvailableInterfaceState_ExpectCommandRemoved) {
+    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResource_UI_NotAvailableInterfaceState_ExpectCommandRemoved) {
   CreateBasicParamsVRRequest();
   CreateBasicParamsUIRequest();
   SmartObject& params = (*msg_)[strings::params];
@@ -883,7 +886,7 @@ TEST_F(
 
 TEST_F(
     AddCommandRequestTest,
-    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResourse_VR_NotAvailableInterfaceState_ExpectCommandRemoved) {
+    OnEvent_UI_VR_HmiResponseCodeIsUnsupportedResource_VR_NotAvailableInterfaceState_ExpectCommandRemoved) {
   CreateBasicParamsVRRequest();
   CreateBasicParamsUIRequest();
   SmartObject& params = (*msg_)[strings::params];
@@ -1006,7 +1009,7 @@ TEST_F(
 }
 
 TEST_F(AddCommandRequestTest,
-       OnEvent_UI_EventWithNotSuccesResponseCode_ExpectVRCommandDelete) {
+       OnEvent_UI_EventWithNotSuccessResponseCode_ExpectVRCommandDelete) {
   CreateBasicParamsVRRequest();
   CreateBasicParamsUIRequest();
   SmartObject& params = (*msg_)[strings::params];
@@ -1048,7 +1051,7 @@ TEST_F(AddCommandRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand), _))
       .WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
   request_ptr->on_event(event_ui);
   request_ptr->on_event(event_vr);
 }
@@ -1091,7 +1094,7 @@ TEST_F(AddCommandRequestTest,
               ManageHMICommand(
                   HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand), _))
       .WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
+  EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   MessageSharedPtr msg_vr = CreateMessage(SmartType_Map);
   (*msg_vr)[strings::params][hmi_response::code] =
@@ -1157,6 +1160,15 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
       CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand), _))
+      .WillOnce(Return(true));
+
   SmartObjectSPtr response = std::make_shared<SmartObject>(SmartType_Map);
   (*response)[strings::msg_params][strings::info] = "info";
   EXPECT_CALL(
@@ -1166,6 +1178,7 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
   std::shared_ptr<RequestFromMobileImpl> base_class_request =
       static_cast<std::shared_ptr<RequestFromMobileImpl> >(request_ptr);
   base_class_request->OnTimeOut();

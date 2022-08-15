@@ -591,16 +591,14 @@ void AddCommandRequest::RemoveCommand() {
           ui_result_,
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+          hmi_apis::Common_Result::WARNINGS);
 
   const bool is_vr_result_ok_or_missing =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           vr_result_,
           hmi_apis::Common_Result::INVALID_ENUM,
           hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+          hmi_apis::Common_Result::WARNINGS);
 
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
