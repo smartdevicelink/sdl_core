@@ -32,6 +32,8 @@
 
 #include "utils/logger/boostlogger.h"
 
+#include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/format.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
@@ -40,31 +42,31 @@
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/sources/severity_channel_logger.hpp>
-#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/support/date_time.hpp>
-#include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/from_settings.hpp>
 #include <boost/log/utility/setup/settings_parser.hpp>
-#include <fstream>
-
-#include <boost/date_time/c_local_time_adjustor.hpp>
-#include <boost/date_time/local_time_adjustor.hpp>
-
 #include <boost/regex.hpp>
+#include <fstream>
 
 namespace logger {
 
-namespace logging = boost::log;
-namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 namespace expr = boost::log::expressions;
-namespace attrs = boost::log::attributes;
 
-BoostLogger::BoostLogger(const std::string& filename) : filename_(filename) {}
+BoostLogger::BoostLogger(const std::string& filename)
+    : filename_(filename)
+    , slg_()
+    , lg_attr_({.timestamp_ = attrs::mutable_constant<boost::posix_time::ptime>(
+                    boost::posix_time::not_a_date_time),
+                .thread_id_ = attrs::mutable_constant<std::thread::id>(
+                    std::this_thread::get_id()),
+                .component_ = attrs::mutable_constant<std::string>(""),
+                .file_name_ = attrs::mutable_constant<std::string>(""),
+                .line_num_ = attrs::mutable_constant<int>(0),
+                .trace_ = attrs::mutable_constant<std::string>("")}) {}
 
 void BoostLogger::Init() {
   // Add formatting parameters to INI file
@@ -91,6 +93,13 @@ void BoostLogger::Init() {
 
   std::ifstream file(filename_);
   boost::log::settings settings = boost::log::parse_settings(file);
+
+  slg_.add_attribute("TimeStamp", lg_attr_.timestamp_);
+  slg_.add_attribute("ThreadId", lg_attr_.thread_id_);
+  slg_.add_attribute("Component", lg_attr_.component_);
+  slg_.add_attribute("FileName", lg_attr_.file_name_);
+  slg_.add_attribute("LineNum", lg_attr_.line_num_);
+  slg_.add_attribute("Trace", lg_attr_.trace_);
 
   // Custom Settings
 
@@ -188,21 +197,14 @@ void BoostLogger::PushLog(const LogMessage& log_message) {
   std::string func_name =
       GetFilteredFunctionTrace(log_message.location_.function_name);
 
-  src::severity_logger<logging::trivial::severity_level> slg;
-  slg.add_attribute("TimeStamp",
-                    attrs::constant<boost::posix_time::ptime>(local_time));
-  slg.add_attribute("ThreadId",
-                    attrs::constant<std::thread::id>(log_message.thread_id_));
-  slg.add_attribute("Component",
-                    attrs::constant<std::string>(log_message.component_));
-  slg.add_attribute(
-      "FileName",
-      attrs::constant<std::string>(log_message.location_.file_name));
-  slg.add_attribute("LineNum",
-                    attrs::constant<int>(log_message.location_.line_number));
-  slg.add_attribute("Trace", attrs::constant<std::string>(func_name));
+  lg_attr_.timestamp_.set(local_time);
+  lg_attr_.thread_id_.set(log_message.thread_id_);
+  lg_attr_.component_.set(log_message.component_);
+  lg_attr_.file_name_.set(log_message.location_.file_name);
+  lg_attr_.line_num_.set(log_message.location_.line_number);
+  lg_attr_.trace_.set(func_name);
 
-  BOOST_LOG_SEV(slg, getBoostLogLevel(log_message.log_level_))
+  BOOST_LOG_SEV(slg_, getBoostLogLevel(log_message.log_level_))
       << log_message.log_event_;
 }
 
