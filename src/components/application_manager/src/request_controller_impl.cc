@@ -205,7 +205,7 @@ RequestController::TResult RequestControllerImpl::AddMobileRequest(
                                     << "connection_key : "
                                     << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request, hmi_level);
-  if (TResult::SUCCESS == result && pool_state_ != TPoolState::STOPPED) {
+  if (TResult::SUCCESS == result && TPoolState::STOPPED != pool_state_) {
     AutoLock auto_lock_list(mobile_request_list_lock_);
     mobile_request_list_.push_back(request);
     SDL_LOG_DEBUG("Waiting for execution: " << mobile_request_list_.size());

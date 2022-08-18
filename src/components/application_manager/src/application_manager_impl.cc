@@ -273,8 +273,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   {
     sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
-    reregister_wait_list_.erase(reregister_wait_list_.begin(),
-                                reregister_wait_list_.end());
+    reregister_wait_list_.clear();
   }
 
   {

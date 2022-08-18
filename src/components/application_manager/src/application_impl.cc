@@ -192,10 +192,12 @@ ApplicationImpl::~ApplicationImpl() {
     set_perform_interaction_mode(-1);
   }
   CleanupFiles();
-  sync_primitives::AutoLock lock(mobile_message_lock_);
-  mobile_message_queue_.clear();
   {
-    extensions_lock_->Acquire();
+    sync_primitives::AutoLock lock(mobile_message_lock_);
+    mobile_message_queue_.clear();
+  }
+  {
+    sync_primitives::AutoLock lock(extensions_lock_);
     extensions_.clear();
     extensions_lock_->Release();
   }
