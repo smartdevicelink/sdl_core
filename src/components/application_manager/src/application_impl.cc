@@ -148,7 +148,7 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
-    , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>())
+    , extensions_lock_(std::make_shared<sync_primitives::Lock>())
     , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
@@ -199,7 +199,6 @@ ApplicationImpl::~ApplicationImpl() {
   {
     sync_primitives::AutoLock lock(extensions_lock_);
     extensions_.clear();
-    extensions_lock_->Release();
   }
 }
 
@@ -1343,7 +1342,7 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   SDL_LOG_AUTO_TRACE();
-  extensions_lock_->Acquire();
+  sync_primitives::AutoLock auto_lock_list(extensions_lock_);
   auto it = std::find_if(
       extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
         return extension->uid() == uid;
@@ -1351,20 +1350,16 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
 
   if (extensions_.end() != it) {
     extensions_.erase(it);
-    extensions_lock_->Release();
     return true;
   }
 
-  extensions_lock_->Release();
   return false;
 }
 
 const DataAccessor<std::list<AppExtensionPtr> > ApplicationImpl::Extensions()
     const {
-  extensions_lock_->Acquire();
   DataAccessor<std::list<AppExtensionPtr> > accessor(extensions_,
                                                      extensions_lock_);
-  extensions_lock_->Release();
   return accessor;
 }
 

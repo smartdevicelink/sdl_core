@@ -617,7 +617,7 @@ class ApplicationImpl : public virtual Application,
   Timer audio_stream_suspend_timer_;
 
   std::list<AppExtensionPtr> extensions_;
-  mutable std::shared_ptr<sync_primitives::RecursiveLock> extensions_lock_;
+  mutable std::shared_ptr<sync_primitives::Lock> extensions_lock_;
 
   // Cloud app properties
   std::string endpoint_;
