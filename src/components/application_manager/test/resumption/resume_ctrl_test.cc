@@ -99,7 +99,7 @@ class ResumeCtrlTest : public ::testing::Test {
       , kNaviLowbandwidthLevel_("LIMITED")
       , kProjectionLowbandwidthLevel_("NONE")
       , kMediaLowbandwidthLevel_("NONE")
-      , extensions_lock_(std::make_shared<sync_primitives::Lock>()) {
+      , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>()) {
     profile::Profile profile_;
     profile_.set_config_file_name("smartDeviceLink.ini");
     resumption_delay_before_ign_ = profile_.resumption_delay_before_ign();
@@ -246,7 +246,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kMediaLowbandwidthLevel_;
   NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
   resumption::ResumeCtrl::ResumptionCallBack callback_;
-  std::shared_ptr<sync_primitives::Lock> extensions_lock_;
+  std::shared_ptr<sync_primitives::RecursiveLock> extensions_lock_;
 };
 
 /**

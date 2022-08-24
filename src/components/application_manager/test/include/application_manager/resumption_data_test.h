@@ -75,7 +75,7 @@ class ResumptionDataTest : public ::testing::Test {
       , setlock_ptr_(std::make_shared<sync_primitives::Lock>())
       , btnlock_ptr_(std::make_shared<sync_primitives::Lock>())
       , ivilock_ptr_(std::make_shared<sync_primitives::Lock>())
-      , extensions_lock_(std::make_shared<sync_primitives::Lock>())
+      , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>())
       , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {
   }
   virtual ~ResumptionDataTest();
@@ -163,7 +163,7 @@ class ResumptionDataTest : public ::testing::Test {
   std::shared_ptr<sync_primitives::Lock> setlock_ptr_;
   std::shared_ptr<sync_primitives::Lock> btnlock_ptr_;
   std::shared_ptr<sync_primitives::Lock> ivilock_ptr_;
-  std::shared_ptr<sync_primitives::Lock> extensions_lock_;
+  std::shared_ptr<sync_primitives::RecursiveLock> extensions_lock_;
   std::shared_ptr<sync_primitives::Lock> window_params_map_lock_ptr_;
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;

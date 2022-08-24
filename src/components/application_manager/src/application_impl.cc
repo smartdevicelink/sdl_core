@@ -148,7 +148,7 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
-    , extensions_lock_(std::make_shared<sync_primitives::Lock>())
+    , extensions_lock_(std::make_shared<sync_primitives::RecursiveLock>())
     , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
