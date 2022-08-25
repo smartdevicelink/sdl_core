@@ -256,8 +256,35 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     streaming_timer_pool_.clear();
   }
 
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+    navi_service_status_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+    tts_global_properties_app_list_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    apps_to_register_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+    reregister_wait_list_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(query_apps_devices_lock_);
+    query_apps_devices_.clear();
+  }
   clear_pool_timer_.Stop();
   secondary_transport_devices_cache_.clear();
+  applications_list_lock_ptr_->Acquire();
+  applications_.clear();
+  applications_list_lock_ptr_->Release();
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
@@ -984,7 +1011,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   return;
 #else
   SDL_LOG_AUTO_TRACE();
-  if (is_stopping()) {
+  if (IsStopping()) {
     return;
   }
   std::vector<std::string> enabled_apps;
@@ -3502,10 +3529,6 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   }
   SDL_LOG_DEBUG("Request is allowed by policies. " << log_msg);
   return mobile_api::Result::SUCCESS;
-}
-
-bool ApplicationManagerImpl::is_stopping() const {
-  return is_stopping_;
 }
 
 bool ApplicationManagerImpl::is_audio_pass_thru_active() const {

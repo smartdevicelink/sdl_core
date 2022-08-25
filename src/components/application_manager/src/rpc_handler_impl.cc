@@ -212,7 +212,7 @@ void RPCHandlerImpl::Handle(const impl::MessageFromMobile message) {
     SDL_LOG_ERROR("Null-pointer message received.");
     return;
   }
-  if (app_manager_.is_stopping()) {
+  if (app_manager_.IsStopping()) {
     SDL_LOG_INFO("Application manager is stopping");
     return;
   }
