@@ -32,10 +32,18 @@
 #pragma once
 
 #define BOOST_LOG_DYN_LINK 1
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/log/sources/severity_channel_logger.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/trivial.hpp>
 #include "utils/ilogger.h"
 
 namespace logger {
+
+namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace attrs = boost::log::attributes;
 
 class BoostLogger : public ThirdPartyLoggerInterface {
  public:
@@ -47,6 +55,15 @@ class BoostLogger : public ThirdPartyLoggerInterface {
   void PushLog(const LogMessage& log_message) override;
 
  private:
+  struct LogAttributes {
+    attrs::mutable_constant<boost::posix_time::ptime> timestamp_;
+    attrs::mutable_constant<std::thread::id> thread_id_;
+    attrs::mutable_constant<std::string> component_;
+    attrs::mutable_constant<std::string> file_name_;
+    attrs::mutable_constant<int> line_num_;
+    attrs::mutable_constant<std::string> trace_;
+  };
+
   boost::posix_time::ptime GetLocalPosixTime(
       const logger::TimePoint& timestamp);
 
@@ -54,6 +71,8 @@ class BoostLogger : public ThirdPartyLoggerInterface {
       const std::string& full_function_signature);
 
   std::string filename_;
+  src::severity_logger<logging::trivial::severity_level> slg_;
+  LogAttributes lg_attr_;
 };
 
 }  // namespace logger
