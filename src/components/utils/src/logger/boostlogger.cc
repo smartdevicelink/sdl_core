@@ -170,17 +170,14 @@ boost::posix_time::ptime BoostLogger::GetLocalPosixTime(
 
 std::string BoostLogger::GetFilteredFunctionTrace(
     const std::string& full_function_signature) {
-  boost::regex function_pattern("([^\\s]*)\\((.*)\\)");
-  boost::smatch results;
+  auto start_pos = full_function_signature.find(' ');
+  auto end_pos = full_function_signature.find('(', start_pos);
 
-  if (!boost::regex_search(
-          full_function_signature, results, function_pattern)) {
-    // Invalid pattern
-    return std::string(full_function_signature);
+  if (start_pos == std::string::npos || end_pos == std::string::npos ||
+      start_pos + 1 == full_function_signature.length()) {
+    return full_function_signature;
   }
-
-  // Get the function name(including namespaces) from the function signature
-  return std::string(results[1]);
+  return full_function_signature.substr(start_pos + 1, end_pos - start_pos - 1);
 }
 
 bool BoostLogger::IsEnabledFor(const std::string& component,
