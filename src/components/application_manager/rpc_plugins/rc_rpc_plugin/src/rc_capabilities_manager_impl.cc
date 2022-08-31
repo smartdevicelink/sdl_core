@@ -375,16 +375,15 @@ bool RCCapabilitiesManagerImpl::CheckButtonName(
     return false;
   }
 
-  auto button_incompatible_with =
-      [&button_name, &module_type](const std::string& type,
-                                   const std::vector<std::string>&& buttons) {
-        return (helpers::in_range(buttons, button_name) && type != module_type);
-      };
+  auto module_type_mismatch = [&button_name, &module_type](
+                                  const std::string& type,
+                                  const std::vector<std::string>&& buttons) {
+    return (helpers::in_range(buttons, button_name) && type != module_type);
+  };
 
-  if (button_incompatible_with(enums_value::kRadio,
-                               RCHelpers::buttons_radio()) ||
-      button_incompatible_with(enums_value::kClimate,
-                               RCHelpers::buttons_climate())) {
+  if (module_type_mismatch(enums_value::kRadio, RCHelpers::buttons_radio()) ||
+      module_type_mismatch(enums_value::kClimate,
+                           RCHelpers::buttons_climate())) {
     SDL_LOG_WARN("Trying to access incompatible button: "
                  << button_name << " with module type: " << module_type);
     return false;
