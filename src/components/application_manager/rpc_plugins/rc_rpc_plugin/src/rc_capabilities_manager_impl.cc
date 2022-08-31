@@ -371,23 +371,24 @@ bool RCCapabilitiesManagerImpl::CheckButtonName(
   SDL_LOG_AUTO_TRACE();
   auto rc_capabilities = hmi_capabilities_.rc_capability();
   if (!rc_capabilities) {
-    SDL_LOG_ERROR("No remote controll capabilities available");
+    SDL_LOG_ERROR("No remote control capabilities available");
     return false;
   }
 
-  if (enums_value::kRadio == module_type) {
-    if (!helpers::in_range(RCHelpers::buttons_radio(), button_name)) {
-      SDL_LOG_WARN("Trying to acceess climate button with module type radio");
-      return false;
-    }
+  auto module_type_mismatch = [&button_name, &module_type](
+                                  const std::string& type,
+                                  const std::vector<std::string>&& buttons) {
+    return (helpers::in_range(buttons, button_name) && type != module_type);
+  };
+
+  if (module_type_mismatch(enums_value::kRadio, RCHelpers::buttons_radio()) ||
+      module_type_mismatch(enums_value::kClimate,
+                           RCHelpers::buttons_climate())) {
+    SDL_LOG_WARN("Trying to access incompatible button: "
+                 << button_name << " with module type: " << module_type);
+    return false;
   }
 
-  if (enums_value::kClimate == module_type) {
-    if (!helpers::in_range(RCHelpers::buttons_climate(), button_name)) {
-      SDL_LOG_WARN("Trying to acceess radio button with module type climate");
-      return false;
-    }
-  }
   return true;
 }
 
