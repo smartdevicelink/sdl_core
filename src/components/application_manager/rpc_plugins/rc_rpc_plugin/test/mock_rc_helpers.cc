@@ -99,10 +99,6 @@ const std::vector<std::string> RCHelpers::buttons_radio() {
   return MockRCHelpers::rc_helpers_mock()->buttons_radio();
 }
 
-const std::vector<std::string> RCHelpers::buttons_audio() {
-  return MockRCHelpers::rc_helpers_mock()->buttons_audio();
-}
-
 const rc_rpc_plugin::RCHelpers::ButtonsMap RCHelpers::buttons_map() {
   return MockRCHelpers::rc_helpers_mock()->buttons_map();
 }
