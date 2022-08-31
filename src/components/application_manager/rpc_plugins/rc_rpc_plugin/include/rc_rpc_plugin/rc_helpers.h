@@ -108,6 +108,8 @@ class RCHelpers {
 
   static const std::vector<std::string> buttons_radio();
 
+  static const std::vector<std::string> buttons_audio();
+
   static const ButtonsMap buttons_map();
 
   static std::vector<std::string> GetModuleReadOnlyParams(

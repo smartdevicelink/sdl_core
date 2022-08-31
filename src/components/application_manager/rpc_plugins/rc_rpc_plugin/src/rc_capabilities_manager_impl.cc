@@ -384,7 +384,9 @@ bool RCCapabilitiesManagerImpl::CheckButtonName(
   if (button_incompatible_with(enums_value::kRadio,
                                RCHelpers::buttons_radio()) ||
       button_incompatible_with(enums_value::kClimate,
-                               RCHelpers::buttons_climate())) {
+                               RCHelpers::buttons_climate()) ||
+      button_incompatible_with(enums_value::kAudio,
+                               RCHelpers::buttons_audio())) {
     SDL_LOG_WARN("Trying to access incompatible button: "
                  << button_name << " with module type: " << module_type);
     return false;

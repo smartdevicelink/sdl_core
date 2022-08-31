@@ -30,9 +30,14 @@ const std::vector<std::string> RCHelpers::buttons_radio() {
   data.push_back(enums_value::kVolumeUp);
   data.push_back(enums_value::kVolumeDown);
   data.push_back(enums_value::kEject);
-  data.push_back(enums_value::kSource);
   data.push_back(enums_value::kShuffle);
   data.push_back(enums_value::kRepeat);
+  return data;
+}
+
+const std::vector<std::string> RCHelpers::buttons_audio() {
+  std::vector<std::string> data;
+  data.push_back(enums_value::kSource);
   return data;
 }
 

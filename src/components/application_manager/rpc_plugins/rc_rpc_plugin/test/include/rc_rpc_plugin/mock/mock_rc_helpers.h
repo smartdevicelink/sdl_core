@@ -72,6 +72,7 @@ class MockRCHelpers {
                    application_manager::ApplicationManager&));
   MOCK_METHOD0(buttons_climate, const std::vector<std::string>());
   MOCK_METHOD0(buttons_radio, const std::vector<std::string>());
+  MOCK_METHOD0(buttons_audio, const std::vector<std::string>());
   MOCK_METHOD0(buttons_map, const rc_rpc_plugin::RCHelpers::ButtonsMap());
   MOCK_METHOD1(GetModuleReadOnlyParams,
                std::vector<std::string>(const std::string&));
