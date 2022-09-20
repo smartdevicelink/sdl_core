@@ -66,6 +66,7 @@ using test::components::application_manager_test::MockRequestTimeoutHandler;
 
 using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -211,6 +212,7 @@ TEST_F(RequestControllerTestClass,
 
 TEST_F(RequestControllerTestClass,
        CheckPosibilitytoAdd_ZeroValueLimiters_SUCCESS) {
+  auto waiter_valid = TestAsyncWaiter::createInstance();
   // Test case than pending_requests_amount,
   // app_time_scale_max_requests_ and
   // app_hmi_level_none_time_scale_max_requests_ equals 0
@@ -219,13 +221,16 @@ TEST_F(RequestControllerTestClass,
     RequestPtr request_valid = GetMockRequest(i);
     EXPECT_CALL(*request_valid, GetApplicationManager())
         .WillRepeatedly(ReturnRef(app_mngr_));
-    EXPECT_CALL(app_mngr_, IsStopping()).WillRepeatedly(Return(false));
+    EXPECT_CALL(app_mngr_, IsStopping())
+        .WillRepeatedly(
+            DoAll(NotifyTestAsyncWaiter(waiter_valid), Return(false)));
     EXPECT_EQ(RequestController::TResult::SUCCESS,
               AddRequest(default_settings_,
                          request_valid,
                          RequestInfo::RequestType::MobileRequest,
                          mobile_apis::HMILevel::HMI_FULL));
   }
+  EXPECT_TRUE(waiter_valid->WaitFor(kMaxRequestAmount, 1000));
 }
 
 TEST_F(RequestControllerTestClass, IsLowVoltage_SetOnLowVoltage_TRUE) {
