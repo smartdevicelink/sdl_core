@@ -360,7 +360,7 @@ TEST_F(ResumptionDataJsonTest, GetHashId) {
 }
 
 TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
-  uint32_t last_ign_off_time;
+  int64_t last_ign_off_time;
   PrepareData();
   SetZeroIgnOff();
   EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
@@ -371,11 +371,11 @@ TEST_F(ResumptionDataJsonTest, GetIgnOffTime_AfterSuspendAndAwake) {
 
   res_json.IncrementIgnOffCount();
 
-  uint32_t after_suspend;
+  int64_t after_suspend;
   after_suspend = res_json.GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
-  uint32_t after_awake;
+  int64_t after_awake;
   res_json.DecrementIgnOffCount();
 
   after_awake = res_json.GetIgnOffTime();

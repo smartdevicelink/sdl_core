@@ -78,7 +78,7 @@ class MockResumptionData : public ::resumption::ResumptionData {
   MOCK_METHOD2(RemoveApplicationFromSaved,
                bool(const std::string& policy_app_id,
                     const std::string& device_id));
-  MOCK_CONST_METHOD0(GetIgnOffTime, uint32_t());
+  MOCK_CONST_METHOD0(GetIgnOffTime, int64_t());
   MOCK_CONST_METHOD2(IsApplicationSaved,
                      ssize_t(const std::string& policy_app_id,
                              const std::string& device_id));

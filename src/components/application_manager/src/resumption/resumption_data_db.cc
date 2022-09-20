@@ -356,7 +356,7 @@ bool ResumptionDataDB::RemoveApplicationFromSaved(
   return result;
 }
 
-uint32_t ResumptionDataDB::GetIgnOffTime() const {
+int64_t ResumptionDataDB::GetIgnOffTime() const {
   SDL_LOG_AUTO_TRACE();
   return SelectIgnOffTime();
 }
@@ -533,14 +533,14 @@ bool ResumptionDataDB::SelectHashId(const std::string& policy_app_id,
   return false;
 }
 
-uint32_t ResumptionDataDB::SelectIgnOffTime() const {
+int64_t ResumptionDataDB::SelectIgnOffTime() const {
   SDL_LOG_AUTO_TRACE();
 
-  uint32_t ignOffTime = 0;
+  int64_t ignOffTime = 0;
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(kSelectIgnOffTime)) {
     if (query.Exec()) {
-      ignOffTime = query.GetUInteger(0);
+      ignOffTime = query.GetLongInt(0);
       SDL_LOG_INFO("Last ign off time = " << ignOffTime);
       return ignOffTime;
     }
@@ -612,7 +612,7 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
     SmartObject so_obj(SmartType_Map);
     so_obj[strings::hmi_level] = select_data.GetInteger(0);
     so_obj[strings::ign_off_count] = select_data.GetInteger(1);
-    so_obj[strings::time_stamp] = select_data.GetUInteger(2);
+    so_obj[strings::time_stamp] = select_data.GetLongInt(2);
     so_obj[strings::app_id] = select_data.GetString(3);
     so_obj[strings::device_id] = select_data.GetString(4);
     so_array_data[i++] = so_obj;
@@ -1470,7 +1470,7 @@ bool ResumptionDataDB::SelectDataFromAppTable(
   saved_app[strings::hmi_app_id] = query.GetUInteger(4);
   saved_app[strings::hmi_level] = query.GetInteger(5);
   saved_app[strings::ign_off_count] = query.GetInteger(6);
-  saved_app[strings::time_stamp] = query.GetUInteger(7);
+  saved_app[strings::time_stamp] = query.GetLongInt(7);
   saved_app[strings::device_id] = query.GetString(8);
   saved_app[strings::is_media_application] = query.GetBoolean(9);
   saved_app[strings::subscribed_for_way_points] = query.GetBoolean(10);

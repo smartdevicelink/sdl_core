@@ -167,7 +167,7 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime() const;
+  virtual int64_t GetIgnOffTime() const;
 
   /**
    * @brief Checks if saved data have application
@@ -289,7 +289,7 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Select Ign off time
    * @return Ign off time from saved data
    */
-  uint32_t SelectIgnOffTime() const;
+  int64_t SelectIgnOffTime() const;
 
   /**
    * @brief Checks existence application in DB

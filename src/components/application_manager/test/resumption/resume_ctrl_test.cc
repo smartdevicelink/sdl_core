@@ -766,8 +766,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -822,8 +822,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
   mobile_apis::HMILevel::eType deferred_level = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -862,8 +862,8 @@ TEST_F(ResumeCtrlTest,
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -908,8 +908,8 @@ TEST_F(
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
   uint32_t ign_off_count = 0;
   smart_objects::SmartObject saved_app;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1055,8 +1055,8 @@ TEST_F(ResumeCtrlTest, ApplicationResumptionTimer_AppInFull) {
   mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
   const uint32_t ign_off_count = 0u;
   smart_objects::SmartObject saved_app;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   saved_app[application_manager::strings::ign_off_count] = ign_off_count;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1401,8 +1401,8 @@ TEST_F(
     ResumeCtrlTest,
     ResumptionLowVoltage_AppInFullUnregisteredWithinTimeFrame_HMILevelRestored) {
   const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1448,8 +1448,8 @@ TEST_F(
     ResumeCtrlTest,
     ResumptionLowVoltage_AppInFullUnregisteredBeyondTimeFrame_HMILevelNotRestored) {
   const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_FULL;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ - time_offset;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1487,8 +1487,8 @@ TEST_F(
 
 TEST_F(ResumeCtrlTest, ResumptionLowVoltage_AppInBackground_NotRestored) {
   const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_BACKGROUND;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ - time_offset;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1515,8 +1515,8 @@ TEST_F(
     ResumeCtrlTest,
     ResumptionLowVoltage_AppInLimitedlUnregisteredWithinTimeFrame_HMILevelRestored) {
   const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ + time_offset;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
@@ -1562,8 +1562,8 @@ TEST_F(
     ResumeCtrlTest,
     ResumptionLowVoltage_AppInLimitedlUnregisteredBeyondTimeFrame_HMILevelNotRestored) {
   const mobile_apis::HMILevel::eType restored_test_type = eType::HMI_LIMITED;
-  const uint32_t time_offset = 5;
-  const uint32_t time_stamp =
+  const int64_t time_offset = 5;
+  const int64_t time_stamp =
       time(nullptr) - resumption_delay_before_ign_ - time_offset;
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
