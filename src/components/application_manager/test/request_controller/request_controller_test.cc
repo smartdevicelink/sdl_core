@@ -66,6 +66,7 @@ using test::components::application_manager_test::MockRequestTimeoutHandler;
 
 using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -183,14 +184,17 @@ TEST_F(RequestControllerTestClass,
   EXPECT_CALL(*request_valid, GetApplicationManager())
       .Times(1)
       .WillRepeatedly(ReturnRef(app_mngr_));
-  EXPECT_CALL(app_mngr_, IsStopping()).Times(1).WillRepeatedly(Return(false));
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .Times(1)
+      .WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(waiter_valid), Return(false)));
 
   EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        request_valid,
                        RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_TRUE(waiter_valid->WaitFor(1, 1000));
+  EXPECT_TRUE(waiter_valid->WaitFor(2, 1000));
 
   // The command should not be run if another command with the same
   // correlation_id is waiting for a response
@@ -211,6 +215,7 @@ TEST_F(RequestControllerTestClass,
 
 TEST_F(RequestControllerTestClass,
        CheckPosibilitytoAdd_ZeroValueLimiters_SUCCESS) {
+  auto waiter_valid = TestAsyncWaiter::createInstance();
   // Test case than pending_requests_amount,
   // app_time_scale_max_requests_ and
   // app_hmi_level_none_time_scale_max_requests_ equals 0
@@ -219,13 +224,16 @@ TEST_F(RequestControllerTestClass,
     RequestPtr request_valid = GetMockRequest(i);
     EXPECT_CALL(*request_valid, GetApplicationManager())
         .WillRepeatedly(ReturnRef(app_mngr_));
-    EXPECT_CALL(app_mngr_, IsStopping()).WillRepeatedly(Return(false));
+    EXPECT_CALL(app_mngr_, IsStopping())
+        .WillRepeatedly(
+            DoAll(NotifyTestAsyncWaiter(waiter_valid), Return(false)));
     EXPECT_EQ(RequestController::TResult::SUCCESS,
               AddRequest(default_settings_,
                          request_valid,
                          RequestInfo::RequestType::MobileRequest,
                          mobile_apis::HMILevel::HMI_FULL));
   }
+  EXPECT_TRUE(waiter_valid->WaitFor(kMaxRequestAmount, 1000));
 }
 
 TEST_F(RequestControllerTestClass, IsLowVoltage_SetOnLowVoltage_TRUE) {
@@ -251,13 +259,16 @@ TEST_F(RequestControllerTestClass, AddMobileRequest_SetValidData_SUCCESS) {
   EXPECT_CALL(*request_valid, GetApplicationManager())
       .Times(1)
       .WillRepeatedly(ReturnRef(app_mngr_));
-  EXPECT_CALL(app_mngr_, IsStopping()).Times(1).WillRepeatedly(Return(false));
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .Times(1)
+      .WillRepeatedly(
+          DoAll(NotifyTestAsyncWaiter(waiter_valid), Return(false)));
   EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        request_valid,
                        RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_TRUE(waiter_valid->WaitFor(1, 1000));
+  EXPECT_TRUE(waiter_valid->WaitFor(2, 1000));
 }
 
 TEST_F(RequestControllerTestClass,
@@ -287,22 +298,23 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
   const uint32_t request_timeout = 1u;
   RequestPtr mock_request = GetMockRequest(
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_request, GetApplicationManager())
       .Times(1)
       .WillRepeatedly(ReturnRef(app_mngr_));
-  EXPECT_CALL(app_mngr_, IsStopping()).Times(1).WillRepeatedly(Return(false));
+  EXPECT_CALL(app_mngr_, IsStopping())
+      .Times(1)
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
+  EXPECT_CALL(*mock_request, HandleTimeOut())
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
-  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_EQ(RequestController::TResult::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
-  EXPECT_CALL(*mock_request, HandleTimeOut())
-      .WillOnce(NotifyTestAsyncWaiter(waiter));
-
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds
-  EXPECT_TRUE(waiter->WaitFor(1, kTimeScale));
+  EXPECT_TRUE(waiter->WaitFor(2, kTimeScale));
 }
 
 }  // namespace request_controller_test
