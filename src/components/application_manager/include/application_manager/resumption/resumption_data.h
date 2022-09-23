@@ -157,7 +157,7 @@ class ResumptionData {
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime() const = 0;
+  virtual int64_t GetIgnOffTime() const = 0;
 
   /**
    * @brief Checks if saved data have application

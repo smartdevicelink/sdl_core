@@ -846,7 +846,7 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
-  uint32_t last_ign_off_time;
+  int64_t last_ign_off_time;
 
   EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
@@ -856,11 +856,11 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
 
   res_db()->IncrementIgnOffCount();
 
-  uint32_t after_suspend;
+  int64_t after_suspend;
   after_suspend = res_db()->GetIgnOffTime();
   EXPECT_LE(last_ign_off_time, after_suspend);
 
-  uint32_t after_awake;
+  int64_t after_awake;
   res_db()->DecrementIgnOffCount();
 
   after_awake = res_db()->GetIgnOffTime();
