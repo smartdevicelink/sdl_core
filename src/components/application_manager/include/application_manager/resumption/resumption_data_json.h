@@ -131,7 +131,7 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime() const;
+  virtual int64_t GetIgnOffTime() const;
 
   void IncrementGlobalIgnOnCounter() OVERRIDE;
 

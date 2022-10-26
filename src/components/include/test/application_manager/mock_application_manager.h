@@ -197,7 +197,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       get_request_controller,
       application_manager::request_controller::RequestController&());
-  MOCK_CONST_METHOD0(is_stopping, bool());
+  MOCK_CONST_METHOD0(IsStopping, bool());
   MOCK_CONST_METHOD0(is_audio_pass_thru_active, bool());
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t());
   MOCK_METHOD0(GetNextMobileCorrelationID, uint32_t());
@@ -236,7 +236,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     bool is_greyed_out));
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
-  MOCK_CONST_METHOD0(IsStopping, bool());
   MOCK_METHOD0(WaitForHmiIsReady, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));

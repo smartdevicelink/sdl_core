@@ -89,7 +89,13 @@ void DeleteInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::IN_USE);
     return;
   }
-  SendVrDeleteCommand(app);
+  if (choice_set.keyExists(strings::grammar_id) &&
+      choice_set[strings::grammar_id].asInt() != -1) {
+    SendVrDeleteCommand(app);
+  } else {
+    response_result_codes_.push_back(hmi_apis::Common_Result::SUCCESS);
+    SendDeleteInteractionChoiceSetResponse();
+  }
 }
 
 bool DeleteInteractionChoiceSetRequest::Init() {

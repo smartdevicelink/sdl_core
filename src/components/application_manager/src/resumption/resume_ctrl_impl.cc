@@ -734,7 +734,7 @@ bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
     return true;
   }
 
-  const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
+  const uint64_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
   SDL_LOG_DEBUG(
       "ign_off_time "
       << ign_off_time << "; app_disconnect_time " << time_stamp

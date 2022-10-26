@@ -252,7 +252,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),
-      false);
+      true);
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::result_code].asInt(),
       static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));

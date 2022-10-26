@@ -63,6 +63,8 @@ class MockRequest : public application_manager::commands::Command {
   MOCK_METHOD0(AllowedToTerminate, bool());
   MOCK_METHOD1(SetAllowedToTerminate, void(bool is_allowed));
 
+  MOCK_CONST_METHOD0(GetApplicationManager,
+                     application_manager::ApplicationManager&());
   MOCK_CONST_METHOD0(connection_key, uint32_t());
   MOCK_CONST_METHOD0(correlation_id, uint32_t());
 };

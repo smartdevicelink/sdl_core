@@ -383,13 +383,10 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
           smart_objects::SmartType_Map);
 
   if (reset_result.vr_help_title_items) {
-    smart_objects::SmartObjectSPtr vr_help = CreateAppVrHelp(application);
-    if (!vr_help.get()) {
-      SDL_LOG_WARN("Failed to create vr_help");
-      return smart_objects::SmartObjectSPtr();
-    } else {
-      ui_reset_global_prop_request = vr_help;
-    }
+    (*ui_reset_global_prop_request)[strings::vr_help_title] =
+        *(application->vr_help_title());
+    (*ui_reset_global_prop_request)[strings::vr_help] =
+        *(application->vr_help());
   }
   if (reset_result.menu_name) {
     (*ui_reset_global_prop_request)[hmi_request::menu_title] = "";
@@ -740,11 +737,16 @@ void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
   DCHECK_OR_RETURN_VOID(cmd);
   using namespace smart_objects;
 
-  SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
+  if (!cmd->keyExists(strings::grammar_id) ||
+      (*cmd)[strings::grammar_id].asInt() == -1) {
+    return;
+  }
 
+  SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = application->app_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
   msg_params[strings::grammar_id] = (*cmd)[strings::grammar_id];
+
   cmd = &((*cmd)[strings::choice_set]);
   for (uint32_t i = 0; i < (*cmd).length(); ++i) {
     msg_params[strings::cmd_id] = (*cmd)[i][strings::choice_id];
@@ -769,7 +771,10 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   using namespace smart_objects;
 
   {
-    SmartObject msg_params = *MessageHelper::CreateAppVrHelp(application);
+    auto& help_prompt_manager = application->help_prompt_manager();
+    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+    help_prompt_manager.CreateVRMsg(msg_params);
+
     msg_params[hmi_request::menu_title] = "";
 
     smart_objects::SmartObject keyboard_properties =
@@ -1410,46 +1415,6 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
   }
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
-    ApplicationConstSharedPtr app) {
-  smart_objects::SmartObjectSPtr result =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-
-  smart_objects::SmartObject& vr_help = *result;
-  const smart_objects::SmartObjectSPtr vr_help_title = app->vr_help_title();
-  if (vr_help_title) {
-    vr_help[strings::vr_help_title] = vr_help_title->asString();
-  }
-
-  int32_t index = 0;
-
-  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
-  so_vr_help[strings::position] = index + 1;
-  so_vr_help[strings::text] = app->name();
-  vr_help[strings::vr_help][index++] = so_vr_help;
-
-  if (app->vr_synonyms()) {
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = (*(app->vr_synonyms())).getElement(0);
-    item[strings::position] = index + 1;
-    vr_help[strings::vr_help][index++] = item;
-  }
-
-  // copy all app VR commands
-  const DataAccessor<CommandsMap> cmd_accessor = app->commands_map();
-  const CommandsMap& commands = cmd_accessor.GetData();
-  CommandsMap::const_iterator it = commands.begin();
-
-  for (; commands.end() != it; ++it) {
-    smart_objects::SmartObject item(smart_objects::SmartType_Map);
-    item[strings::text] = (*it->second)[strings::vr_commands][0].asString();
-    item[strings::position] = index + 1;
-    vr_help[strings::vr_help][index++] = item;
-  }
-  return result;
-}
-
 smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
   smart_objects::SmartObjectList requests;
@@ -1567,6 +1532,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 smart_objects::SmartObjectList
 MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectList requests;
   if (!app) {
     SDL_LOG_ERROR("Invalid application");
@@ -1581,6 +1547,11 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
         (*(it->second))[strings::grammar_id].asUInt();
     const size_t size = (*(it->second))[strings::choice_set].length();
     for (size_t j = 0; j < size; ++j) {
+      if (!(*(it->second))[strings::choice_set][j].keyExists(
+              strings::vr_commands)) {
+        continue;
+      }
+
       smart_objects::SmartObjectSPtr vr_command = CreateMessageForHMI(
           hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
       if (!vr_command) {

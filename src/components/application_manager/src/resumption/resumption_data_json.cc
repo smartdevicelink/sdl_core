@@ -62,7 +62,7 @@ void ResumptionDataJson::SaveApplication(
                             << " policy_app_id : " << policy_app_id);
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
-  const uint32_t time_stamp = (uint32_t)time(NULL);
+  const int64_t time_stamp = (int64_t)time(NULL);
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level =
       application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
@@ -288,7 +288,7 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
   return result;
 }
 
-uint32_t ResumptionDataJson::GetIgnOffTime() const {
+int64_t ResumptionDataJson::GetIgnOffTime() const {
   using namespace app_mngr;
   SDL_LOG_AUTO_TRACE();
 
@@ -300,7 +300,7 @@ uint32_t ResumptionDataJson::GetIgnOffTime() const {
     accessor.GetMutableData().set_dictionary(dictionary);
     SDL_LOG_WARN("last_save_time section is missed");
   }
-  return resumption[strings::last_ign_off_time].asUInt();
+  return resumption[strings::last_ign_off_time].asInt64();
 }
 
 uint32_t ResumptionDataJson::GetGlobalIgnOnCounter() const {
@@ -399,7 +399,7 @@ void ResumptionDataJson::GetDataForLoadResumeData(
       smart_objects::SmartObject so(smart_objects::SmartType_Map);
       so[strings::hmi_level] = saved_app[strings::hmi_level].asInt();
       so[strings::ign_off_count] = saved_app[strings::ign_off_count].asInt();
-      so[strings::time_stamp] = saved_app[strings::time_stamp].asUInt();
+      so[strings::time_stamp] = saved_app[strings::time_stamp].asInt64();
       so[strings::app_id] = saved_app[strings::app_id].asString();
       so[strings::device_id] = saved_app[strings::device_id].asString();
       so_array_data[i++] = so;
@@ -532,7 +532,7 @@ void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time,
 
   SDL_LOG_WARN("ign_off_time = " << ign_off_time);
   Json::Value& resumption = GetResumptionData(dictionary);
-  resumption[strings::last_ign_off_time] = static_cast<uint32_t>(ign_off_time);
+  resumption[strings::last_ign_off_time] = static_cast<int64_t>(ign_off_time);
 }
 
 bool ResumptionDataJson::Init() {

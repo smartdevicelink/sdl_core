@@ -1078,6 +1078,13 @@
                             "LIMITED"
                         ]
                     },
+                    "OnTBTClientState": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
                     "UpdateTurnList": {
                         "hmi_levels": [
                             "BACKGROUND",
@@ -1267,13 +1274,6 @@
                             "FULL",
                             "LIMITED",
                             "NONE"
-                        ]
-                    },
-                    "OnTBTClientState": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED"
                         ]
                     },
                     "PerformAudioPassThru": {

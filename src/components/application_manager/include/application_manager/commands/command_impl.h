@@ -182,6 +182,8 @@ class CommandImpl : public Command {
    */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  const ApplicationManager& GetApplicationManager() const OVERRIDE;
+
   void OnUpdateTimeOut() OVERRIDE;
 
   /**

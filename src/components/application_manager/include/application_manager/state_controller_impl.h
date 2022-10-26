@@ -136,9 +136,10 @@ class StateControllerImpl : public event_engine::EventObserver,
   PostponedActivationController& GetPostponedActivationController() OVERRIDE;
 
  private:
-  int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
-                                hmi_apis::Common_HMILevel::eType level,
-                                bool send_policy_priority);
+  void RequestHMIStateChange(ApplicationConstSharedPtr app,
+                             HmiStatePtr resolved_state,
+                             hmi_apis::Common_HMILevel::eType level,
+                             bool send_policy_priority);
 
   /**
    * @brief The HmiLevelConflictResolver struct

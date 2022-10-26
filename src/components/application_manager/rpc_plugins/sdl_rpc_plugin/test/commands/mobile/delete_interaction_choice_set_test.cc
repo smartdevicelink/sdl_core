@@ -205,10 +205,6 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
         .WillOnce(Return(choice_set_id));
     EXPECT_CALL(*app_, is_perform_interaction_active()).WillOnce(Return(false));
     EXPECT_CALL(*app_, performinteraction_choice_set_map()).Times(0);
-
-    EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
-        .WillOnce(Return(invalid_choice_set_id));
-
     EXPECT_CALL(*app_, app_id()).Times(0);
   }
 

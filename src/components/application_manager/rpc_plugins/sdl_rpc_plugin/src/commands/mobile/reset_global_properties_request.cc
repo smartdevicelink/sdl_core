@@ -123,6 +123,9 @@ void ResetGlobalPropertiesRequest::Run() {
     SendHMIRequest(
         hmi_apis::FunctionID::RC_SetGlobalProperties, msg_params.get(), true);
   }
+  auto& help_prompt_manager = app->help_prompt_manager();
+  help_prompt_manager.OnResetGlobalPropertiesReceived(
+      (*message_)[strings::msg_params]);
 }
 
 void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {

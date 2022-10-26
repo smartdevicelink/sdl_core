@@ -81,7 +81,11 @@ class ResetGlobalPropertiesRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  protected:
   ResetGlobalPropertiesRequestTest()
-      : msg_(CreateMessage()), mock_app_(CreateMockApp()) {}
+      : msg_(CreateMessage()), mock_app_(CreateMockApp()) {
+    mock_help_prompt_manager_ =
+        std::shared_ptr<application_manager_test::MockHelpPromptManager>(
+            new application_manager_test::MockHelpPromptManager());
+  }
 
   void SetUp() OVERRIDE {
     (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey;
@@ -99,6 +103,8 @@ class ResetGlobalPropertiesRequestTest
   MessageSharedPtr msg_;
   MockAppPtr mock_app_;
   ResetGlobalPropertiesRequestPtr command_;
+  std::shared_ptr<application_manager_test::MockHelpPromptManager>
+      mock_help_prompt_manager_;
 };
 
 class ResetGlobalPropertiesResponseTest
@@ -142,6 +148,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
       .WillByDefault(Return(std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map)));
 
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
 
   command_->Run();
@@ -169,6 +178,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
       .WillOnce(Return(msg_params));
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -208,6 +220,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -253,6 +268,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       .WillOnce(Return(msg_params));
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   MessageSharedPtr ui_msg = CreateMessage();
   (*ui_msg)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
@@ -295,6 +313,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   EXPECT_CALL(mock_message_helper_, CreateRCResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -349,6 +370,9 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
       .Times(0);
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -400,6 +424,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       .WillOnce(Return(msg_params));
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -467,6 +494,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       .WillOnce(Return(msg_params));
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 
@@ -535,6 +565,9 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       .WillOnce(Return(msg_params));
   EXPECT_CALL(mock_message_helper_, CreateUIResetGlobalPropertiesRequest(_, _))
       .WillOnce(Return(msg_params));
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillRepeatedly(ReturnRef(*mock_help_prompt_manager_.get()));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnResetGlobalPropertiesReceived(_));
 
   EXPECT_CALL(*mock_app_, set_reset_global_properties_active(true));
 

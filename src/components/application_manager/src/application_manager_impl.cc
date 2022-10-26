@@ -256,8 +256,35 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     streaming_timer_pool_.clear();
   }
 
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+    navi_service_status_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+    tts_global_properties_app_list_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    apps_to_register_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+    reregister_wait_list_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(query_apps_devices_lock_);
+    query_apps_devices_.clear();
+  }
   clear_pool_timer_.Stop();
   secondary_transport_devices_cache_.clear();
+  applications_list_lock_ptr_->Acquire();
+  applications_.clear();
+  applications_list_lock_ptr_->Release();
 }
 
 DataAccessor<ApplicationSet> ApplicationManagerImpl::applications() const {
@@ -984,7 +1011,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   return;
 #else
   SDL_LOG_AUTO_TRACE();
-  if (is_stopping()) {
+  if (IsStopping()) {
     return;
   }
   std::vector<std::string> enabled_apps;
@@ -2567,7 +2594,7 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
     application_manager::commands::MessageSharedPtr& message,
     const hmi_apis::FunctionID::eType& function_id) {
   SDL_LOG_AUTO_TRACE();
-  hmi_apis::HMI_API factory;
+
   if (!(*message)[jhs::S_PARAMS].keyExists(jhs::S_FUNCTION_ID)) {
     SDL_LOG_ERROR("RemoveHMIFakeParameters message missing function id");
     return;
@@ -2576,7 +2603,7 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = function_id;
-  factory.attachSchema(*message, true);
+  hmi_so_factory().attachSchema(*message, true);
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
@@ -3504,10 +3531,6 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   return mobile_api::Result::SUCCESS;
 }
 
-bool ApplicationManagerImpl::is_stopping() const {
-  return is_stopping_;
-}
-
 bool ApplicationManagerImpl::is_audio_pass_thru_active() const {
   return audio_pass_thru_active_;
 }
@@ -3984,10 +4007,22 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
 
   const std::string& vr_help_title = get_settings().vr_help_title();
   smart_objects::SmartObject so_vr_help_title(vr_help_title);
-
   app->reset_vr_help_title();
-  app->reset_vr_help();
   app->set_vr_help_title(so_vr_help_title);
+
+  app->reset_vr_help();
+  auto& help_prompt_manager = app->help_prompt_manager();
+
+  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
+  help_prompt_manager.CreateVRMsg(so_vr_help);
+
+  if (!so_vr_help.keyExists(strings::vr_help)) {
+    SDL_LOG_WARN("Failed to create vr_help items. Resetting to empty array");
+    so_vr_help[strings::vr_help] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+  }
+
+  app->set_vr_help(so_vr_help[strings::vr_help]);
 
   return true;
 }
@@ -4542,11 +4577,10 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
         const mobile_apis::HMILevel::eType app_hmi_level =
             (*it)->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
-        if (app_hmi_level == mobile_api::HMILevel::HMI_BACKGROUND) {
-          MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
-        } else if ((app_hmi_level == mobile_api::HMILevel::HMI_FULL) ||
-                   (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
-          MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
+
+        MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
+        if ((app_hmi_level == mobile_api::HMILevel::HMI_FULL) ||
+            (app_hmi_level == mobile_api::HMILevel::HMI_LIMITED)) {
           state_controller().SetRegularState(
               *it,
               mobile_apis::PredefinedWindows::DEFAULT_WINDOW,

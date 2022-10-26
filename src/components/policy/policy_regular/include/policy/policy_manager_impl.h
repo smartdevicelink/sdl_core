@@ -1108,6 +1108,11 @@ class PolicyManagerImpl : public PolicyManager {
   sync_primitives::Lock policy_table_lock_;
 
   /**
+   * @brief lock guard for protecting policy table exchange
+   */
+  sync_primitives::Lock policy_table_exchange_lock_;
+
+  /**
    * @brief lock guard for protecting application permissions access
    */
   sync_primitives::Lock app_permissions_diff_lock_;

@@ -178,7 +178,7 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   }
 }
 
-void ResumptionDataProcessorImpl::EraseProcessedRequest(
+bool ResumptionDataProcessorImpl::EraseProcessedRequest(
     const uint32_t app_id, const ResumptionRequest& found_request) {
   SDL_LOG_AUTO_TRACE();
 
@@ -194,7 +194,11 @@ void ResumptionDataProcessorImpl::EraseProcessedRequest(
                             request.request_id.function_id ==
                                 found_request.request_id.function_id;
                    });
-  list_of_sent_requests.erase(request_iter);
+  if (request_iter != list_of_sent_requests.end()) {
+    list_of_sent_requests.erase(request_iter);
+    return true;
+  }
+  return false;
 }
 
 bool ResumptionDataProcessorImpl::IsResumptionFinished(
@@ -285,6 +289,7 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
   SDL_LOG_DEBUG("app_id is: " << app_id);
 
   auto found_request = GetRequest(app_id, function_id, corr_id);
+
   if (!found_request) {
     SDL_LOG_ERROR("Request with function id " << function_id << " and corr id "
                                               << corr_id << " not found");
@@ -293,7 +298,11 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
   auto request = *found_request;
 
   ProcessResumptionStatus(app_id, response, request);
-  EraseProcessedRequest(app_id, request);
+
+  if (!EraseProcessedRequest(app_id, request)) {
+    SDL_LOG_DEBUG("Request has already been processed");
+    return;
+  }
 
   if (!IsResumptionFinished(app_id)) {
     SDL_LOG_DEBUG("Resumption app "
@@ -890,7 +899,8 @@ void ResumptionDataProcessorImpl::AddPluginsSubscriptions(
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
-  for (auto& extension : application->Extensions()) {
+  auto extensions = application->Extensions();
+  for (auto& extension : extensions.GetData()) {
     extension->ProcessResumption(saved_app);
   }
 }
@@ -995,7 +1005,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
   resumption_status_lock_.Release();
 
   auto extensions = application->Extensions();
-  for (auto& extension : extensions) {
+  for (auto& extension : extensions.GetData()) {
     extension->RevertResumption(resumption_data_to_revert);
   }
 }

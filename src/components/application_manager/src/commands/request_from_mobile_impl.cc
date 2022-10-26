@@ -660,9 +660,16 @@ bool RequestFromMobileImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_second,
     ResponseInfo& out_third) const {
   SDL_LOG_AUTO_TRACE();
-  bool result = (PrepareResultForMobileResponse(out_first, out_second) ||
-                 PrepareResultForMobileResponse(out_second, out_third)) &&
-                PrepareResultForMobileResponse(out_first, out_third);
+  bool result_first_second =
+      PrepareResultForMobileResponse(out_first, out_second);
+  bool result_second_third =
+      PrepareResultForMobileResponse(out_second, out_third);
+  bool result_first_third =
+      PrepareResultForMobileResponse(out_first, out_third);
+
+  bool result = (result_first_second && result_first_third) ||
+                (result_second_third && result_first_second) ||
+                (result_second_third && result_first_third);
   return result;
 }
 

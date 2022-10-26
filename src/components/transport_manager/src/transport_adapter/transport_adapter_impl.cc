@@ -137,6 +137,7 @@ void TransportAdapterImpl::Terminate() {
   connections_lock_.AcquireForWriting();
   std::swap(connections, connections_);
   connections_lock_.Release();
+
   for (const auto& connection : connections) {
     auto& info = connection.second;
     if (info.connection) {

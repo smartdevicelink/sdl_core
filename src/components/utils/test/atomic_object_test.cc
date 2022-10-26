@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Livio
+ * Copyright (c) 2022, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,50 +29,52 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#pragma once
 
-#define BOOST_LOG_DYN_LINK 1
+#include "utils/atomic_object.h"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/log/sources/severity_channel_logger.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/trivial.hpp>
-#include "utils/ilogger.h"
+#include <string>
 
-namespace logger {
+#include "gtest/gtest.h"
 
-namespace logging = boost::log;
-namespace src = boost::log::sources;
-namespace attrs = boost::log::attributes;
+namespace test {
+namespace utils {
 
-class BoostLogger : public ThirdPartyLoggerInterface {
+class AtomicString {
  public:
-  BoostLogger(const std::string& filename);
-  void Init() override;
-  void DeInit() override;
-  bool IsEnabledFor(const std::string& component,
-                    LogLevel log_level) const override;
-  void PushLog(const LogMessage& log_message) override;
+  AtomicString(const std::string& str) : atomic_str_(str) {}
+
+  void SetValue(const std::string& str) {
+    atomic_str_ = str;
+  }
+  std::string GetValue() const {
+    return atomic_str_;
+  }
 
  private:
-  struct LogAttributes {
-    attrs::mutable_constant<boost::posix_time::ptime> timestamp_;
-    attrs::mutable_constant<std::thread::id> thread_id_;
-    attrs::mutable_constant<std::string> component_;
-    attrs::mutable_constant<std::string> file_name_;
-    attrs::mutable_constant<int> line_num_;
-    attrs::mutable_constant<std::string> trace_;
-  };
-
-  boost::posix_time::ptime GetLocalPosixTime(
-      const logger::TimePoint& timestamp);
-
-  std::string GetFilteredFunctionTrace(
-      const std::string& full_function_signature);
-
-  std::string filename_;
-  src::severity_logger<logging::trivial::severity_level> slg_;
-  LogAttributes lg_attr_;
+  sync_primitives::Atomic<std::string> atomic_str_;
 };
 
-}  // namespace logger
+TEST(AtomicObjectTest, Construct) {
+  sync_primitives::atomic_int var(5);
+  EXPECT_EQ(5, static_cast<int>(var));
+
+  var = 8;
+  EXPECT_EQ(8, static_cast<int>(var));
+
+  sync_primitives::atomic_bool flag = true;
+
+  EXPECT_EQ(true, static_cast<bool>(flag));
+
+  flag = false;
+  EXPECT_EQ(false, static_cast<bool>(flag));
+
+  AtomicString atomic_str("string");
+
+  EXPECT_EQ("string", atomic_str.GetValue());
+
+  atomic_str.SetValue("string2");
+  EXPECT_EQ("string2", atomic_str.GetValue());
+}
+
+}  // namespace utils
+}  // namespace test
