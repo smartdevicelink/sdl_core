@@ -162,6 +162,7 @@ int32_t main(int32_t argc, char** argv) {
 #endif  // LOG4CXX_LOGGER
 
     logger_impl->Init(std::move(logger));
+    logger_impl->InitLoggerSettings(&profile_instance);
   }
 #endif
 
