@@ -144,7 +144,8 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     if (!SubscribePendingVehicleData(app, converted_msg_params)) {
       result_code = mobile_apis::Result::GENERIC_ERROR;
       response_info = "Subscription failed for some Vehicle data";
-      SendResponse(false, result_code, response_info.c_str());
+      SendResponse(
+          false, result_code, response_info.c_str(), &converted_msg_params);
       return;
     }
   }
@@ -214,6 +215,7 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
        VD_ResultCode::VDRC_DATA_NOT_SUBSCRIBED,
        VD_ResultCode::VDRC_IGNORED});
 
+  bool overall_success = vi_waiting_for_subscribe_.empty();
   for (auto vi_name = vi_waiting_for_subscribe_.begin();
        vi_name != vi_waiting_for_subscribe_.end();) {
     const bool is_subscription_successful = CheckSubscriptionStatus(
@@ -223,6 +225,7 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
       ext.subscribeToVehicleInfo(*vi_name);
       vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+      overall_success = true;
     } else {
       auto res_code =
           static_cast<hmi_apis::Common_VehicleDataResultCode::eType>(
@@ -238,7 +241,7 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
       }
     }
   }
-  return vi_waiting_for_subscribe_.empty();
+  return vi_waiting_for_subscribe_.empty() && overall_success;
 }
 
 bool SubscribeVehicleDataRequest::Init() {
