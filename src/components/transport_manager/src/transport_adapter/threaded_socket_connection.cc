@@ -257,6 +257,10 @@ void ThreadedSocketConnection::Transmit() {
   poll_fds[1].events = POLLIN | POLLPRI;
 
   SDL_LOG_TRACE("poll " << this);
+  if (-1 == socket_) {
+    SDL_LOG_TRACE("Socket is closed.");
+    return;
+  }
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
     SDL_LOG_ERROR_WITH_ERRNO("poll failed for connection " << this);
     Abort();
